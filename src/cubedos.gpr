@@ -1,0 +1,77 @@
+project CubedOS is
+
+   type Platform_Type is
+      ("Check", "Simulator");
+   Platform : Platform_Type := external ("BUILD", "Check");
+
+   case Platform is
+
+      when "Check" =>
+         for Main use ("cubedos_check.adb", "main_cfdp_rx.adb", "main_cfdp_tx.adb", "main_file.adb", "main_sorters.adb", "main_tick.adb");
+         for Object_Dir use "build/Check";
+         for Source_Dirs use (".", "Check");
+         for Languages use ("Ada");
+
+      when "Simulator" =>
+         for Main use ("main.adb");
+         for Object_Dir use "build/Simulator";
+         for Source_Dirs use (".", "Simulator");
+         for Languages use ("Ada", "C");
+   end case;
+
+   package Ide is
+      for Default_Switches ("adacontrol") use ("-f", "cubedos.aru");
+   end Ide;
+
+   package Compiler is
+
+      case Platform is
+
+         when "Check" =>
+            for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+
+         when "Simulator" =>
+            for Default_Switches ("ada") use ("-gnatwa", "-fstack-check", "-gnata", "-g", "-gnatW8");
+            for Switches ("c") use ("-O");
+      end case;
+   end Compiler;
+
+   package Builder is
+
+      case Platform is
+
+         when "Check" =>
+
+         when "Simulator" =>
+            for Global_Configuration_Pragmas use "gnat.adc";
+      end case;
+   end Builder;
+
+   package Documentation is
+
+      case Platform is
+
+         when "Check" =>
+
+         when "Simulator" =>
+            for Documentation_Dir use "doc";
+      end case;
+   end Documentation;
+
+   package Prove is
+      for Switches use ("-j2", "--level=2");
+   end Prove;
+
+   package Linker is
+
+      case Platform is
+
+         when "Check" =>
+
+         when "Simulator" =>
+            for Switches ("ada") use ("-lGL", "-lX11", "-lglut", "-lm");
+      end case;
+   end Linker;
+
+end CubedOS;
+

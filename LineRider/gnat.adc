@@ -1,0 +1,4 @@
+pragma Profile(Ravenscar);
+pragma Partition_Elaboration_Policy(Sequential);
+pragma Warnings(Off, "pragma Restrictions (No_Exception_Propagation) in effect");
+pragma Warnings(Off, """Constraint_Error"" may call Last_Chance_Handler");

@@ -1,0 +1,83 @@
+
+\chapter{Manual}
+\label{chapt:manual}
+
+This section contains the user's manual for CubedOS. The intended audience of this chapter is
+CubedOS application developers. Contributors to the CubedOS core and runtime library may also
+find the information in this chapter useful.
+
+\section{Module Organization}
+\label{sec:module-organization}
+
+In this section we describe the recommended structure of a basic CubedOS module. Modules are not
+required to follow this structure exactly; special needs often require special handling.
+However, the structure we describe here is appropriate for many modules. The CubedOS source
+distribution includes a template module, with comments, that you can use as a starting point for
+your own modules.
+
+A module consists of a hierarchy of packages formed by a root package and (at least) three child
+packages. The root package can be used to hold module-wide declarations as appropriate. The most
+important such declaration is the module's ID number. However, module-wide type declarations, or
+API elements that are shared with the internals package (described below) would also be
+candidates for inclusion in the root package. In many cases the root package may not require a
+body, although module-wide subprograms might usefully be declared in the root package.
+
+For a module named |My_Module| we recommend the following three child packages:
+
+\begin{itemize}
+\item |My_Module.Messages| is a public child package containing the server task that loops
+  infinitely reading the module mailbox and processing the messages it finds there. This loop
+  drives the activity of the module, processing exactly one message at a time. No other task in
+  the module, or indeed in the entire system, should read from the module mailbox. Furthermore
+  the server task should receive a message in only one place in the program. This highly
+  stylized structure is conceptually simple and easy to analyze.
+
+\item |My_Module.Internals| is a private child package that contains the bulk of the module's
+  processing logic. The message loop is intended to be minimal; it calls into the |Internals|
+  package as soon as it can. The code in this package is not accessible from outside the module
+  and it can assume it is called by only one task (unless additional, internal tasks are created
+  by the module developer).
+
+\item |My_Module.API| is a public child package that contains helper functions for constructing
+  and parsing module-specific messages. These helper functions only manipulate message records.
+  They do no actual message processing. Consequently they can be easily written as pure
+  functions and made task-safe. Other modules will call these functions to build messages sent
+  to and parse messages received from |My_Module|. The |API| package may also include type
+  definitions related to the module's public interface.
+\end{itemize}
+
+Although this structure seems complex it has several advantageous features.
+
+First the bulk of the module's logic is in packages (both |Internals| and |API|) that have no
+tasking structures. At the time of this writing \SPARK\ does not yet support Ada tasking and so
+this allows |SPARK_Mode| to be on for the two packages that do most of the processing while
+remaining off for the relatively trivial package containing the message loop.
+
+Because the |Internals| package is a private child package, its resources cannot be directly
+accessed by the rest of the program. This ensures that no tasks unknown by the module author
+will be calling internal subprograms.
+
+Using the module API is highly stylized and entails calling an API function to build a message
+that is then sent to the module's mailbox. For example:
+
+\begin{lstlisting}
+   Mailboxes(My_Module.ID).Send(My_Module.API.Operation_Message(1, 2, 3));
+\end{lstlisting}
+
+Here |Operation_Message| creates a message causing |My_Module| to perform some operation. The
+name of the function should be reflective of the operation being done. Here ``operation'' is
+used as a place holder for some more descriptive name. We recommend using the convention of
+adding ``Message'' as a suffix to the names of all message constructing functions.
+
+The arguments to the function (1, 2, and 3 in this case) are arguments to the operation and are
+packed into a message using some module-specific means; module authors have total control over
+the formatting of their messages so the message format need not be made public information.
+\pet{Currently the message record type is not private, but it may be possible to use type
+  extension to fix this (each module provides a private extension). That would reduce potential
+  problems by prohibiting module users from editing the contents of messages.} The resulting
+message returned by |Operation_Message| is then sent to |My_Module|'s mailbox.
+
+Finally the architecture of modules is compatible with the Ravenscar restrictions. In
+particular: a module's server task is a single, library level task that runs infinitely, and all
+communication with a module is by way of a protected mailbox object with only one entry for
+receiving messages.

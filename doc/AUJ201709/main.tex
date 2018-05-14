@@ -1,0 +1,91 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE    : main.tex
+% AUTHOR  : (C) Copyright 2017 by Carl Brandon & Peter Chapin
+% SUBJECT : Paper on CubedOS
+%
+% TODO: Write me! Add more specific items here as they become apparent.
+%
+% Send comments or bug reports to:
+%
+%    Carl Brandon
+%    Vermont Technical College
+%    Randolph Center, VT 05061
+%    CBrandon@vtc.vsc.edu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%+++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+%+++++++++++++++++++++++++++++++++
+\documentclass{AUJarticle}
+\usepackage[cmex10]{amsmath}
+\usepackage[utf8x]{inputenc}
+\usepackage[nocompress]{cite}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{balance}
+\usepackage{url}
+\usepackage{hyperref}
+
+%\graphicspath{{figures/}}
+\pagestyle{empty}
+
+\pdfinfo{ /Title (CubedOS: A Verified CubeSat Operating System)
+  /Author (C. Brandon, P. Chapin, C. Farnsworth, S. Klink)
+  /Keywords (Ada) }
+
+\newcommand{\todo}{\textcolor{red}}
+\hyphenation{}
+\setcounter{page}{3}
+
+\input{macros}
+
+%++++++++++++++++++++
+% The document itself
+%++++++++++++++++++++
+\begin{document}
+
+\title{CubedOS: A Verified CubeSat Operating System}
+
+\addauthor{Carl Brandon, Peter Chapin, Chris Farnsworth, Sean Klink}
+{Vermont Technical College, 201 Lawrence Place, Williston VT 05495, PO Box 500, Randolph Center, VT 05061}
+  {\{cbrandon, pchapin\}@vtc.edu}
+
+% Update these...
+\issuev{35}
+\issuen{1}
+\issued{September 2017}
+
+\shortauthor{C. Brandon, P. Chapin, C. Farnsworth, S. Klink}
+\shorttitle{CubedOS: A CubeSat OS}
+
+\thispagestyle{plain}
+
+\maketitle
+
+\begin{abstract}
+  In this paper we present CubedOS, a lightweight application framework for CubeSat flight
+  software. CubedOS is written in \SPARK and proved free of certain classes of runtime errors.
+  It consists of a collection of interacting, concurrent modules that communicate via message
+  passing over a microkernel based on Ada's Ravenscar tasking model. It provides core services
+  such as, for example, communication protocol processing and publish/subscribe message
+  handling. Application-specific modules can be added to provide both high level functions such
+  as navigation and power management, as well as low level device drivers for mission-specific
+  hardware.
+
+  Keywords: SPARK, student project, CubeSat
+\end{abstract}
+
+\input{introduction}
+\input{architecture}
+\input{message-encoding}
+\input{related-work}
+\input{conclusion}
+
+\bibliographystyle{ieeetr}
+\bibliography{../../../LaTeX/references-General,../../../LaTeX/references-SPARK,../../../LaTeX/references-CubeSat}
+\balance
+
+\end{document}

@@ -1,0 +1,43 @@
+
+enum Message_Type {
+    Subscribe_Request,
+    Subscribe_Reply,
+    Publish_Request,
+    Publish_Reply,
+    Publish_Result };
+
+enum Status_Type { Success, Failure };
+
+// Request that 'Sender' is subscribed to channel 'Channel.'
+message struct Subscribe_Request {
+    Module_ID_Type  Sender;
+    Channel_ID_Type Channel;
+};
+
+// Returned in response to Subscribe_Request. Status indicates success/failure of request.
+message struct Subscribe_Reply {
+    Module_ID_Type  Receiver;
+    Channel_ID_Type Channel;
+    Status_Type     Status;
+};
+
+// Publish Message_Data to 'Channel.'
+message struct Publish_Request {
+    Module_ID_Type  Sender;
+    Channel_ID_Type Channel;
+    opaque          Message_Data<>;
+};
+
+// Returned in response to Publish_Request. Status indicates success/failure of request.
+message struct Publish_Reply {
+    Module_ID_Type  Receiver;
+    Channel_ID_Type Channel;
+    Status_Type     Status;
+};
+
+// Received when 'Data' has been published to previously subscribed 'Channel.'
+message struct Publish_Result {
+    Module_ID_Type  Receiver;
+    Channel_ID_Type Channel;
+    opaque          Data<>;
+};

@@ -1,0 +1,41 @@
+-- Unacceptable to Violate
+--------------------------
+check characters(control, trailing_space, wide);  -- Certain characters are to be avoided.
+check comments(pattern, "^FIXME");                -- Use "TODO" instead.
+check comments(pattern, "^BUG");                  -- Use "TODO" instead.
+
+-- Each file has a comment header matching main.hdr.
+check header_comments(model, "cubedos.hdr");
+
+check max_blank_lines(5);
+check max_line_length(128);
+check max_nesting(6);
+check simplifiable_expressions(conversion, logical, range);
+check simplifiable_statements(block, dead, if, if_for_case, loop, loop_for_while, nested_path, null);
+check style(casing_attribute, titlecase);
+check style(casing_identifier, original);  -- Names must be spelled exactly as declared.
+check style(casing_keyword, lowercase);
+check style(compound_statement);           -- Disallow single line control structures.
+
+-- Magic numbers should be avoided. Use named number or constant declarations.
+-- These checks are too onerous for now. TODO: Revisit this issue!
+--check style(exposed_literal, integer, max 2, number, constant, type);
+--check style(exposed_literal, real, 0.0, 1.0, 2.0);
+
+check style(multiple_elements);  -- Disallow putting multiple entities on the same line.
+check style(no_closing_name);    -- All 'end's should be decorated with a name if appropriate.
+check unnecessary_use_clause;    -- No 'use' clauses that aren't actually used.
+check with_clauses(multiple_names, reduceable, inherited);
+
+
+-- Acceptable to Violate
+------------------------
+search max_blank_lines(3);
+search max_line_length(96);
+search max_nesting(4);
+
+
+-- Metrics
+----------
+count comments(pattern, "^TODO");  -- Places that need work.
+count comments(pattern, "^#");     -- SPARK 2005 annotations (doesn't appear to work).

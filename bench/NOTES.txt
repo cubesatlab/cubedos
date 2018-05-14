@@ -1,0 +1,26 @@
+
+CubedOS Benchmarks
+==================
+
+All measurements below were taking on a STM32F4DISCOVERY board using GNAT GPL 2014 as the Ada
+compiler. Compilations were done without debugging and with -O2.
+
+Message Passing
+---------------
+
+Measured time to pass 1,000,000 messages from a trivial sender to a trivial receiver.
+
+    Size (bytes)   Time (us)  Diff (us)
+    ----------------------------------
+     16             9.0       -
+     32             9.5       0.5
+     48            10.3       0.8
+     64            14.9       4.6
+     80            16.4       1.5
+     96            17.8       1.4
+    112            19.2       1.4
+    128            20.6       1.4
+    ...            ...
+    256            31.8       11.2 = 8*1.4
+      (The behavior is now linear in the size of the message)
+

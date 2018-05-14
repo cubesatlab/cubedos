@@ -1,0 +1,202 @@
+
+\section{CubedOS Architecture}
+\label{section-architecture}
+
+To understand the context of the CubedOS architecture, it is useful to compare the architecture
+of a CubedOS application with that of a more traditional application. Since CubedOS is written
+in \SPARK\ and must abide by the restrictions of Ravenscar, we compare CubedOS with other
+Ravenscar-based approaches.
+
+Figure~\ref{fig:traditional-architecture} shows an example application using Ravenscar tasking.
+Tasks, which must all be library level infinite loops, are shown as open circles and labeled as
+$T_1$ through $T_4$. Tasks communicate with each other via protected objects, shown as solid
+circles and labeled as $PO_1$ through $PO_4$.
+
+\begin{figure}[tbhp]
+  \center
+  \scalebox{0.40}{\includegraphics*{Figure-Traditional.pdf}}
+  \caption{Traditional Ravenscar-based Architecture}
+  \label{fig:traditional-architecture}
+\end{figure}
+
+Arrows from a sending task to a protected object indicate calls to a protected procedure to
+install information in the protected object. Arrows from a protected object to a receiving task
+indicate calls to an entry in the protected object used to pick up information previously stored
+in the object. Entry calls will block if no information is yet available but protected procedure
+calls do not block.
+
+Ravenscar requires that protected objects have at most one entry and that at most one task can
+be queued on that entry. In CubedOS applications each protected object is serviced by exactly
+one task. This ensures that two tasks will never accidentally be queued on the protected
+object's entry. In the figure this means only one arrow can emanate from a protected object.
+However, multiple arrows can lead to a protected object, since it is permitted for many tasks to
+call the same protected procedure or for there to be multiple protected procedures in a given
+protected object.
+
+In the example application of Figure~\ref{fig:traditional-architecture}, tasks $T_1$ and $T_3$
+call protected procedures in two different protected objects. This presents no problems since
+protected procedures never block, allowing a task to call both procedures in a timely manner.
+However, task $T_3$ calls two entries, one in $PO_1$ and another in $PO_2$. Since entry calls
+can block, this means the task might get suspended on one of the calls leaving the other
+protected object without service for an extended time. The application needs to either be
+written so that will never happen or be such that it doesn't matter if it does.
+
+There are several advantages over the traditional organization:
+
+\begin{itemize}
+\item The protected objects can be tuned to transmit only the information needed so the overhead
+  can be kept minimal.
+\item The parameters of the protected procedures and entries specify the precise types of the
+  data transfered so compile-time type safety is provided.
+\item The communication patterns of the application are known statically, facilitating analysis.
+\end{itemize}
+
+However the traditional architecture also includes some disadvantages:
+
+\begin{itemize}
+\item The protected objects must all be custom designed and individually implemented, creating a
+  burden for the application developer.
+\item The communication patterns are relatively inflexible. Changing them requires overhauling
+  the application.
+\end{itemize}
+
+A CubedOS application has an architecture as shown in Figure~\ref{fig:cubedos-architecture}. In
+this case CubedOS provides the communication infrastructure as an array of general purpose,
+protected mailbox objects. CubedOS modules communicate by sending messages to the receiver
+module's mailbox. The messages are unstructured octet streams, and thus completely generic. Each
+active module has exactly one mailbox associated with it and contains a task dedicated to
+servicing that mailbox. That task extracts messages from the mailbox, and then decodes and acts
+on each message. Active CubedOS modules can also contain internal tasks as part of their
+implementation, but those tasks do not participate in message processing (although they can send
+messages) and are not important here.
+
+\begin{figure}[tbhp]
+  \center
+  \scalebox{0.40}{\includegraphics*{Figure-CubedOS.pdf}}
+  \caption{CubedOS-based Architecture}
+  \label{fig:cubedos-architecture}
+\end{figure}
+
+The communication connections shown in Figure~\ref{fig:cubedos-architecture} are the same as
+those shown in Figure~\ref{fig:traditional-architecture} except that the two communication paths
+from $T_1$ to $T_3$ are combined into a single path going through one mailbox.
+
+CubedOS relieves the application developer of the problem of creating the communications
+infrastructure manually. Adding new message types is simplified with the help of a tool,
+XDR2OS3, that we describe in Section~\ref{section-message-encoding}. In addition to providing
+basic, bounded mailboxes, CubedOS also provides other services such as message priorities and
+multiple sending modalities (for example, best effort versus guaranteed delivery). Many of these
+additional services would be tedious to provide on a case-by-case basis following the
+traditional architecture. CubedOS also allows any module to potentially send a message to any
+other module. Thus the communication paths in the running application are very flexible and
+dynamic.
+
+Although the CubedOS architecture supports only point-to-point message passing, the CubedOS
+system provides an active module supporting a publish/subscribe discipline. The module allows
+multiple channels to be created to which other modules can subscribe. Publisher modules can then
+send messages to one or more channels, allowing for message broadcast and multicast. Since the
+messages themselves are unstructured octet streams, the publish/subscribe module can handle them
+generically without being modified to account for new message types.
+
+Every CubedOS module has a statically assigned ID number. Messages sent from a module include
+the ID number of the sender. This allows a server module to return reply messages without
+statically knowing its clients. Thus server modules can be written as part of a general purpose
+``module library'' and used without modification in a variety of applications. We have started
+compiling a registry of ``well known'' module IDs for common services, such as file handling and
+timer services. This allows CubedOS module libraries to make use of well known services and
+remain reusable. Here active CubedOS modules resemble network clients and servers where the
+module IDs play the role of a network address. Extending the architecture across different
+physical machines, or between different operating system processes on the same machine, is an
+interesting area for future work.
+
+We are also defining standard message interfaces to certain services, such as file handling,
+that third party modules could implement. This allows modules to use a service without knowing
+which specific implementation backs that service.
+
+However, CubedOS's architecture also carries some significant disadvantages as well:
+
+\begin{itemize}
+\item All mailboxes must have the same size since they are stored in an array. Some mailboxes
+  will be larger than necessary, wasting space.
+
+\item All messages must have the same type and thus the same size. Some messages will be larger
+  than necessary and slower to copy than necessary.
+
+  The common message type also requires that typed information sent from one module to another
+  be encoded into a raw octet format when sent, and decoded back into specifically typed data
+  when received. This encoding and decoding increases the runtime overhead of message passing
+  and reduces static type safety. Modules must defend themselves, at runtime, from malformed or
+  inappropriate messages, causing certain errors that were compile-time errors in the
+  traditional architecture to now be runtime errors. This is exactly counter to the general
+  goals of high integrity system development.
+
+\item In order to return reply messages, the mailboxes must be addressable at runtime using
+  module ID numbers. Accessing a statically named mailbox isn't general enough. As a result, the
+  precise communication paths used by the system cannot easily be determined statically.
+
+  In particular, since \SPARK\ does not attempt to track information flow through individual
+  array elements, it is necessary for us to manually justify certain \SPARK\ flow messages. The
+  architecture of CubedOS ensures that there is a one-to-one correspondence between a module and
+  its mailbox. The tools don't know this, and the spurious flow messages they produce must be
+  suppressed.
+\end{itemize}
+
+The details of CubedOS mitigate, to some degree, the problems above. For example, the mailbox
+array is actually instantiated from a generic unit by the application developer. This allows the
+developer to tune the sizes of the mailboxes, and the messages they contain, to the
+application's needs. CubedOS does not attempt to provide a one-size-fits-all mailbox array that
+will be satisfactory to all applications.
+
+Also every well behaved CubedOS module should contain an |API| package with subprograms for
+encoding and decoding messages. This package is generated by the XDR2OS3 tool that we describe
+in Section~\ref{section-message-encoding}. The parameters to these subprograms correspond to the
+parameters of the protected procedures and entries in the traditional architecture, and provide
+much of the same type safety. However, using the API subprograms is not enforced by the
+compiler. It is also possible to accidentally send a message to the wrong mailbox. Thus modules
+still need to include runtime error checking to detect and handle these problems.
+
+So far we have described two extremes: a traditional approach that does not use CubedOS at all,
+and an approach that entirely relies on CubedOS. However, hybrid approaches are also possible.
+Figure~\ref{fig:hybrid-architecture} shows a combination of several CubedOS mailboxes and a
+hand-made, optimized protected object to mediate communication from $T_3$ to $T_4$.
+
+\begin{figure}[tbhp]
+  \center
+  \scalebox{0.40}{\includegraphics*{Figure-Hybrid.pdf}}
+  \caption{Hybrid Architecture}
+  \label{fig:hybrid-architecture}
+\end{figure}
+
+This provides the best of both worlds. The simplicity and flexibility of CubedOS can be used
+where it makes sense to do so, and yet critical communications can still be optimized if the
+results of profiling indicate a need. In Figure~\ref{fig:hybrid-architecture} task $T_4$ can't
+be reached by CubedOS messages. The hand-made protected object creates a degree of isolation
+that can also simplify analysis as compared to a pure CubedOS system.
+
+It is also possible to instantiate the CubedOS message manager multiple times in the same
+application, effectively creating multiple communication domains using separate mailbox arrays.
+Figure~\ref{fig:multi-domain} shows an example of where $T_4$ is in a separate domain from the
+other modules (because it receives from a mailbox that is separate from the others).
+
+\begin{figure}[tbhp]
+  \center
+  \scalebox{0.40}{\includegraphics*{Figure-MultiDomain.pdf}}
+  \caption{Multiple Communication Domains}
+  \label{fig:multi-domain}
+\end{figure}
+
+This approach allows the CubedOS infrastructure to be used for easy development while still
+partitioning the system into semi-independent sections. For example, the sizes of the mailboxes
+and of the messages used in each communication domain need not be the same. The parts of the
+application that require large messages could be grouped into a domain separate from the parts
+that only require small messages.
+
+Notice in Figure~\ref{fig:multi-domain} tasks (modules) $T_3$ and $T_4$ send messages into
+multiple domains. This is, of course, sometimes necessary if the domains are going to interact.
+Modules that do this will need multiple module ID values scoped to different domains. At the
+moment the handling of this is largely a matter of manual configuration, which is reasonable for
+the relatively small programs typical of CubeSat missions. Creating a more comprehensive
+solution for module and domain addresses would be necessary as part of extending the
+architecture to multiple processes or machines as mentioned earlier. It is also likely that a
+naming service of some kind would need to be added to the module library provided by CubedOS.
+This is also an area for future work.

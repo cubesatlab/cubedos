@@ -1,0 +1,32 @@
+project IceCube is
+   
+   for Languages use ("Ada");
+   for Runtime ("Ada") use "ravenscar-sfp-stm32f4";
+
+   for Main use ("main.adb");
+   for Source_Dirs use (".", "../../CubedOS/src");
+   for Object_Dir use "build";
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-g", "-gnatwa");
+   end Compiler;
+
+   package Builder is
+      for Global_Configuration_Pragmas use "gnat.adc";
+   end Builder;
+   
+   package Prove is
+      for Switches use ("-j2", "--timeout=10", "--prover=alt-ergo,cvc4");
+   end Prove;
+   
+   package Ide is
+      for Default_Switches ("adacontrol") use ("-f", "icecube.aru");
+      for Gnat use "arm-eabi-gnat";
+      for Gnatlist use "arm-eabi-gnatls";
+      for Debugger_Command use "arm-eabi-gdb";
+      for Program_Host use "localhost:4242";
+      for Communication_Protocol use "remote";
+   end Ide;
+
+end IceCube;
+

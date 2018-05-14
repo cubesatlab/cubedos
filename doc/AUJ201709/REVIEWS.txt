@@ -1,0 +1,153 @@
+From: Ada-Europe 2017 <adaeurope2017@easychair.org>
+Date: 2017-02-28
+
+Dear Carl & Peter,
+
+We regret to inform you that your submission to the 22nd International Conference on Reliable
+Software Technologies – Ada-Europe 2017 entitled
+
+CubedOS: A Verified CubeSat Operating System
+
+has not been selected for publication in Ada-Europe 2017.
+
+We received many good submissions that we could not fit into the program.
+
+However, we liked the topic of your paper very much. We are willing to provide time and space
+for your project to be presented (5 min talk) before/at the Welcome Cocktail on Tuesday. Please
+let us (blieb@auto.tuwien.ac.at) know whether you are interested. In addition your paper could
+then be submitted to "Ada User Journal" http://www.ada-europe.org/auj/home .
+
+I hope the comments from the reviewers are useful for you to prepare your presentation / new
+version.
+
+Best regards,
+
+-- The Program co-chairs of Ada-Europe 2017
+
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 48
+TITLE: CubedOS: A Veried CubeSat Operating System
+AUTHORS: Carl Brandon and Peter Chapin
+
+
+----------- Overall evaluation -----------
+The paper describes an application framework based on message passing, CubedOS, that is written
+in SPARK.
+
+The architecture seems interesting, but I miss some more details about its design and
+implementation (such as, for example, the Ada interface of the mailboxes). I would also like to
+see a performance comparison between the use of the mailboxes and the traditional approach of
+using protected objects. I believe it is also a pity to lose many compile-time checks in the
+mailboxes.
+
+It seems to me that using the name operating system for CubedOS is missleading, and using
+middleware would be much more appropriate.
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 48
+TITLE: CubedOS: A Veried CubeSat Operating System
+AUTHORS: Carl Brandon and Peter Chapin
+
+
+----------- Overall evaluation -----------
+The paper presents CubedOS, an operating system for the CubeSat written in Ada/SPARK.
+
+CubedOS has already been used in a CubeSat student's project: the "Vermont Lunar CubeSat". This
+satellite is a good example of project where the use of Ada is the key for the success (in
+comparison with to the rest of satellites in the same launch, written in other languages, which
+failed).
+
+My main concern on the paper is that, since authors are waiting for the ITAR permission in order
+to release the code, the paper does not provides enough details about the architecture and
+implementation of CubedOS.
+
+I think the work could make a nice paper for a future Ada-Europe Conference once the code is
+released and the authors can provide more details about the architecture and implementation of
+CubedOS.
+
+
+Section 1
+
+The sentence "For example, CubedOS makes use of Ada tasking without directly invoking the
+underlying system’s support for threads" requires further explanation.
+
+A figure with the CubedOS architecture would help to understand the contents of this section. 
+
+
+Section 2
+
+"In CubedOS applications each protected object is serviced by exactly one task". How is it
+ensured? In the subsequent paragraphs you say that CubedOS use mailboxes instead of protected
+objects, which sounds contradictory to me. I think these aspects deserve further explanation.
+
+It could be interesting to provide some details about how the "standard message interfaces" look
+like, maybe using as example the file handling module.
+
+It think the paper should provide more information about the way the mailboxes are implemented
+since they are the core part of the CubedOS architecture. That information would help to
+understand the strong disadvantages of your mailboxes implementation: they all have the same
+size and all the messages must have the same size. It is hard to believe that such serious
+disadvantages can not be alleviated anyway.
+
+
+Section 3
+
+It would be worthy a reference about Scala and the reason for choosing that language. 
+
+
+Section 4
+
+The system view of the Lunar IceCube is interesting, but it would be much more interesting for
+the audience of this paper some data about the software architecture.
+
+The IceCube runs VxWorks so, what is the role of CubedOS in the system? Again, a figure with the
+software architecture will be very illustrating.
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 48
+TITLE: CubedOS: A Veried CubeSat Operating System
+AUTHORS: Carl Brandon and Peter Chapin
+
+
+----------- Overall evaluation -----------
+
+In this paper the authors present the outline of a small microkernel-type executive for building
+flight software for CubeSat. Although the executive (CubedOS) is being developed for a specific
+CubeSat (also described in the paper) the authors intend it to be sufficiently generic to be
+used for other purposes.
+
+The paper also provides a second, related, contribution, which is a tool that can generate Spark
+code to handle messages (encode/decode) from a XDR-based message specification. This is used to
+address a shortcoming of the CubedOS (use of raw data for message passing), but can by itself be
+generic enough for other uses.
+
+The approach used to address the independence of modules is through structuring all interactions
+via messages. This is a common approach (also used by cFE but also others - OpenComRTOS for
+instance), and in CubedOS it is still point-to-point. The authors note the relevance of
+publish-subscribe, but it is not yet implemented, which is a downside.
+
+One design aspect which is not clear is the need for all mailboxes to be of the same size. Isn't
+it possible to make this a per-object configurable size (even if compile-time constant). The
+same for messages - communication networks have solved this issue for a long time with a fixed
+size header and a variable payload part.
+
+It is a very interesting work, which could be presented at the conference, but it is still a
+work-in-progress. That is why my ranking.
+
+The paper is well-written and easy to follow. I could only detect two minor typos:
+
+- In page 5, the first two sentences of the first paragraph should be separated by a comma and
+  not a period.
+- The same happens in the last two sentences of the 3rd paragraph in page 9
+
+
+I also have a couple of final notes, orthogonal to the contents of the paper: 
+
+- I find strange that this seems to be (at least partly) student work, but there are no student
+  authors or acknowledgements.
+- I hope the recent changes to ITAR do not cause a heavy impact in the release of open software,
+  either in this case or others.
+

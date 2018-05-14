@@ -1,0 +1,277 @@
+
+\section{SPARK 2014}
+\label{sec:spark2014}
+
+%\lstMakeShortInline[basicstyle=\ttfamily]|
+\lstMakeShortInline|
+
+The current version of the \SPARK\ toolset and language definition is \SPARK\ 2014. It is a
+major enhancment over the earlier \SPARK\ 2005 toolset and language definition we briefly
+described in Section~\ref{sec:vtlunar-software}. The \SPARK\ 2014 language supports a much
+larger subset of Ada, allowing more natural designs. The \SPARK\ 2014 toolset uses more modern
+theorem provers, and is more easily extensible to use additional provers as they become
+available. The net effect of these enhancements is that \SPARK\ 2014 is much easier to use,
+allowing the developer to focus more on the problem being solved and less on working around the
+idiosyncrasies of the programming environment.
+
+In this section we give an overview of the \SPARK\ 2014 toolset and language so the reader can
+better understand the nature of \SPARK\ programming and the advantages it offers. For a more
+complete description of \SPARK\ 2014 see, for example, \cite{McCormick-Chapin-2015}.
+
+All current and future software development done by the CubeSat Laboratory at Vermont Technical
+College, including the work described in Section~\ref{sec:new}, is being done using \SPARK\
+2014. Unless otherwise stated all following uses of \SPARK\ in this paper refer to \SPARK\ 2014.
+
+\subsection{Toolset}
+\label{sec:spark2014-toolset}
+
+The \SPARK\ tools consist of a modified Ada compiler together with a verification condition
+generator and one or more back-end theorem provers.
+
+AdaCore's GNAT Ada compiler has been modified to understand the additional \SPARK\ aspects,
+described in the next section, and to verify, upon request, conformance to the restrictions of
+the \SPARK\ language. Certain diagnostic messages produced by ``the \SPARK\ tools'' are actually
+produced by the modified Ada compiler before the specialized tools are run. These are typically
+messages related to the structure of the program (i.e., syntax errors in the \SPARK\ specific
+constructs).
+
+An additional tool, GNATprove, performs detailed data and information flow analysis, described
+in the next section, and generates verification conditions for the provers. Conceptually
+GNATprove produces a verification condition, or ``check,'' for every place where the Ada
+language mandates a runtime check. If these verfication conditions are proved, or
+``discharged,'' it means the runtime check will never fail. Examples of such runtime checks
+include: out of bounds array access, arithmetic overflow, division by zero, and some other
+things.
+
+In addition the Ada language allows the programmer to express range constraints on values to
+ensure the results of computations are always in an appropriate range (e.g., never negative,
+always in the range 1 to 100, etc.) Ada normally includes runtime checks to verify these
+constraints; GNATprove generates verification conditions that, if discharged, will statically
+show they never fail.
+
+Furthermore Ada 2012 allows the programmer to include pre- and postconditions on subprograms, as
+well as other assertions, that encode higher level correctness properties (e.g., a sort
+procedure produces a sorted permutation of its input). Again, GNATprove generates verification
+conditions that, if discharged, will statically show those properties will always hold.
+
+At the time of this writing the \SPARK\ tools ship with two back-end theorem provers, Alt-Ergo
+\cite{alt-ergo} and CVC4 \cite{barrett2011}. Two provers are used to take advantage of their
+complementary strengths; verification conditions unprovable by one prover might be handled by
+the other. It is possible to configure the \SPARK\ tools to use only one prover or additional
+provers obtained separately, such as Microsoft's Z3 \cite{Moura2008}.
+
+The GPS integrated development environment developed by AdaCore provides a convenient front-end
+to the \SPARK\ tools. Using the tools can be as easy as selecting ``Prove File'' from the GPS
+menus. The result is a list of locations where unproved verification conditions exist, if any.
+The programmer can then view and edit those locations as necessary.
+
+Proofs fail for three reasons:
+\begin{itemize}
+\item The code is incorrect. The check being analyzed might actually fail.
+\item The theorem prover(s) are not powerful enough to complete the proofs.
+\item There is insufficient information in the program to complete the proofs.
+\end{itemize}
+
+Most of the skill in using the \SPARK\ tools is in determining which of these cases is the
+problem, and in modifying the program to deal with that situation.
+
+It is important to understand that the GNAT Ada compiler can insert runtime checks for all the
+\SPARK\ assertions as well as the Ada language mandated checks. During testing it would be
+typical to build the program with these runtime checks enabled. Thus checks that can't be
+completely proved can still be tested. Once all checks are proved, the runtime checking can be
+disabled, saving both space and time in the final program without compromising safety.
+
+\subsection{Language}
+\label{sec:spark2014-language}
+
+The \SPARK\ language is a subset of Ada in that certain Ada features that are difficult to
+analyze using current technology have been removed from the language. Specifically \SPARK\
+supports neither exception handling nor access types (pointers). In \SPARK\ it is necessary to
+report errors using returned status values. However, \SPARK's flow analysis ensures that all
+such values are checked. It is not possible to ignore error codes in a \SPARK\ program that
+passes examination without warning.
+
+The lack of access types may seem more limiting but Ada, in general, requires less use of
+explicit indirection than is typical in C programs. In Ada, and in \SPARK, arrays are first
+class citizens of the language and can be passed into and returned from subprograms directly.
+Also arrays can be dynamically sized on the stack without the use of an explicit memory
+allocator.
+
+The \SPARK\ language also extends Ada with additional aspects that enrich declarations and
+additional assertions that describe conditions that must hold true in every execution of the
+program. The additional aspects include data dependency and information dependency declarations.
+The additional assertions include pre- and postconditions, loop invariants, subtype predicates,
+and other related things.
+
+As an example consider the following specification of a \SPARK\ package containing a single
+global datebook object along with subprograms for manipulating it:
+
+\begin{lstlisting}
+with Dates;
+use type Dates.Datetime;
+
+package Datebook
+  with
+    SPARK_Mode => On,
+    Abstract_State => State
+is
+   Maximum_Number_Of_Events : constant := 64;
+   subtype Event_Count_Type is Natural range 0 .. Maximum_Number_Of_Events;
+
+   type Status_Type is (Success, Description_Too_Long, Insufficient_Space, No_Event);
+
+   -- Initializes the datebook.
+   procedure Initialize
+   with
+     Global => (Output => State),
+     Depends => (State => null);
+
+   -- Adds an event to the datebook.
+   procedure Add_Event
+     (Description : in  String;
+      Date        : in  Dates.Datetime;
+      Status      : out Status_Type)
+   with
+     Global => (In_Out => State),
+     Depends => (State =>+ (Description, Date), Status => (Description, State));
+
+   -- Other subprograms as required...
+
+end Datebook;
+\end{lstlisting}
+
+The package is decorated with a |SPARK_Mode| aspect set to |On| indicating that this compilation
+unit is intended to abide by the restrictions of the \SPARK\ language. The fact that the package
+contains internal global state is declared explicitly using the |Abstract_State| aspect. How
+that internal state is manipulated by the subprograms is also declared explicitly using the
+|Global| and |Depends| aspects. For example, the |Add_Event| procedure both reads and writes the
+global state. Specifically the new state depends on itself (the meaning of the plus sign in the
+=>+ notation) and on the |Description| and |Data| parameters.
+
+The \SPARK\ tools use this information to verify that all values are initialized before use and
+that all computed results are used in some way. For example, calling |Add_Event| before calling
+|Initialize| is detected because |Add_Event| reads the package state and thus requires it to be
+initialized first. Similarly since |Status| is an out parameter of the procedure the \SPARK\
+tools will verify that its value is used in some way; ignoring status codes is not allowed.
+
+The \SPARK\ tools will further verify that the dependency declarations are supported by the
+implementation in the package body (not shown here for the sake of brevity).
+
+As another example consider the following specification of a \SPARK\ package containing a search
+procedure:
+
+\begin{lstlisting}
+package Searchers
+  with SPARK_Mode => On
+is
+   subtype Index_Type is Positive range 1 .. 100;
+   type Array_Type is array(Index_Type) of Integer;
+
+   procedure Binary_Search (Search_Item : in  Integer;
+                            Items       : in  Array_Type;
+                            Found       : out Boolean;
+                            Result      : out Index_Type)
+      with
+         Pre =>
+            (for all J in Items'Range =>
+               (for all K in J + 1 .. Items'Last => Items(J) <= Items(K))),
+         Post =>
+           (if Found then Search_Item = Items(Result)
+                     else (for all J in Items'Range => Search_Item /= Items(J)));
+
+end Searchers3;
+\end{lstlisting}
+
+Following normal Ada style, an array type is defined that is indexed over a subrange of the
+range of positive integers. The |Binary_Search| procedure takes an item to search for, an array
+to search, and outputs a Boolean flag to indicate if the item is found along with the item's
+location in the array if it is.
+
+The procedure declaration is enhanced with additional semantic information in the form of pre-
+and postconditions. The precondition states that the input array is sorted. The postcondition
+states that if the item is found the returned index is, in fact, the location of the item. On
+the other hand if the item is not found, it does not exist in the array.
+
+The body of this package showing the implementation of the procedure is:
+
+\begin{lstlisting}
+package body Searchers
+  with SPARK_Mode => On
+is
+   procedure Binary_Search (Search_Item : in  Integer;
+                            Items       : in  Array_Type;
+                            Found       : out Boolean;
+                            Result      : out Index_Type) is
+      Low_Index  : Index_Type := Items'First;
+      Mid_Index  : Index_Type;
+      High_Index : Index_Type := Items'Last;
+   begin
+      Found  := False;
+      Result := Items'First;  -- Initialize Result to "not found" case.
+
+      -- If the item is out of range, it is not found.
+      if Search_Item < Items(Low_Index) or Items(High_Index) < Search_Item then
+         return;
+      end if;
+
+      loop
+         Mid_Index := (Low_Index + High_Index) / 2;
+         if Search_Item = Items(Mid_Index) then
+            Found  := True;
+            Result := Mid_Index;
+            return;
+         end if;
+
+         exit when Low_Index = High_Index;
+
+         pragma Loop_Invariant (not Found);
+         pragma Loop_Invariant (Mid_Index in Low_Index .. High_Index - 1);
+         pragma Loop_Invariant (Items(Low_Index) <= Search_Item);
+         pragma Loop_Invariant (Search_Item <= Items(High_Index));
+         pragma Loop_Variant (Decreases => High_Index - Low_Index);
+
+         if Items(Mid_Index) < Search_Item then
+            if Search_Item < Items(Mid_Index + 1) then
+               return;
+            end if;
+            Low_Index := Mid_Index + 1;
+         else
+            High_Index := Mid_Index;
+         end if;
+
+      end loop;
+   end Binary_Search;
+
+end Searchers;
+\end{lstlisting}
+
+The \SPARK\ tools will first generate verification conditions at each place in the body where an
+Ada check is required. For example every place where the |Items| array is accessed must be
+checked to ensure the index used is in range. Using the precondition as an initial hypotheses,
+and adding information based on the actions taken in the procedure, the \SPARK\ tools will
+generate a verification condition to show that the postcondition is always true. Furthermore at
+every call site a verification condition will be generated to show that the precondition must be
+true at that call site.
+
+In this example all of these verification conditions are proved automatically showing that the
+procedure is free of unexpected runtime errors \emph{and} that it always honors its strong
+postcondition (given the precondition).
+
+The |Loop_Invariant| pragmas in the procedure where written to assist the proving process. They
+represent conditions that must be true at that point for every iteration of the enclosing loop.
+The \SPARK\ tools prove that the invariants are true on the first iteration and that they remain
+true on all following iterations. The tools can then use the conditions in the invariants to
+complete following proofs, such as the postcondition in this case.
+
+The |Loop_Variant| pragma is used to prove that the loop will eventually terminate. It gives an
+expression that, in this case, always decreases with each loop iteration. Because the types
+involved are bounded and because the \SPARK\ tools have already proved that overflow errors are
+impossible, even in the assertion expressions themselves, it follows that the loop must end
+since the value of a bounded expression can't decrease forever.
+
+Although this example can only search arrays of 100 integers, it is possible, although
+admittedly more difficult, to write general purpose code that is similarly proved free of
+errors. Overall these examples only give a flavor of \SPARK\ and many features and details have
+been left out for the sake of brevity.
+
+\lstDeleteShortInline|

@@ -1,0 +1,30 @@
+enum Failure_Code { OK, Failed };
+enum Telem_Failure_Code { OK, Failed };
+
+typedef float X_Degrees_Type range 0 .. 10;
+typedef float Y_Degrees_Type range 0 .. 10;
+typedef float Thrust_Force_Type range 0 .. 150;
+typedef unsigned int Telemetry_Address_Type range 0 .. Natural'Last;
+typedef float Telemetry_Value_Type;
+
+message struct -> Thrust_Command_Request {
+        X_Degrees_Type X_Degrees;
+        Y_Degrees_Type Y_Degrees;
+        Thrust_Force_Type Thrust_Force; };
+
+message struct <- Thrust_Command_Reply {
+        Failure_Code Fail_Code; };
+
+message struct -> Telemetry_Value_Request {
+        Telemetry_Address_Type Telem_Addr; };
+
+message struct <- Telemetry_Value_Reply {
+        Telemetry_Value_Type Response_Val; };
+
+message struct -> Telemetry_Update_Request {
+        Telemetry_Address_Type Telem_Addr;
+        Telemetry_Value_Type Telem_Val; };
+
+message struct <- Telemetry_Update_Reply {
+        Telem_Failure_Code Fail_Code; };
+        

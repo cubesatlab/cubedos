@@ -1,0 +1,53 @@
+
+enum Mode_Type { Read, Write };
+
+typedef unsigned int File_Handle_Type range 0 .. 64;
+typedef File_Handle_Type Valid_File_Handle_Type range 1 .. File_Handle_Type'Last;
+const File_Handle_Type Invalid_Handle = 0;
+
+const unsigned int Maximum_Read_Size = 256;
+const unsigned int Maximum_Write_Size = 256;
+typedef unsigned int Read_Result_Size_Type range 0 .. Maximum_Read_Size;
+typedef unsigned int Read_Size_Type range 1 .. Read_Result_Size_Type'Last;
+typedef unsigned int Write_Result_Size_Type range 0 .. Maximum_Write_Size;
+typedef unsigned int Write_Size_Type range 1 .. Write_Result_Size_Type'Last;
+
+typedef unsigned int Request_ID_Type range 1 .. 64;
+
+// There needs to be a precondition on the encoding function related to the name's length.
+message struct -> Open_Request {
+    Mode_Type        Mode;
+    string           Name<>;
+    Request_ID_Type  Request_ID;
+};
+
+message struct <- Open_Reply {
+    File_Handle_Type Handle;
+    Request_ID_Type  Request_ID;
+};
+
+message struct -> Read_Request {
+    Valid_File_Handle_Type Handle;
+    Read_Size_Type   Amount;
+};
+
+message struct <- Read_Reply {
+    Valid_File_Handle_Type Handle;
+    Read_Result_Size_TYpe  Amount;
+    opaque           Data<>;
+};
+
+message struct -> Write_Request {
+    Valid_File_Handle_Type Handle;
+    Write_Size_Type  Amount;
+    opaque           Data<>;
+};
+
+message struct <- Write_Reply {
+    Valid_File_Handle_Type Handle;
+    Write_Result_Size_Type Amount;
+};
+
+message struct -> Close_Request {
+    Valid_File_Handle_Type Handle;
+};

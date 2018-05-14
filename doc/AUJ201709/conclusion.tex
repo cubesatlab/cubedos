@@ -1,0 +1,22 @@
+
+\section{Conclusion}
+
+CubedOS is an application framework based on message passing that is intended to support the
+flight software of space missions, particularly CubeSat missions. Our early experience with
+CubedOS is favorable. The architecture seems to provide an effective way to organize
+flight software.
+
+Unlike similar projects such as cFE and Kubos, CubedOS is written entirely in \SPARK\ and proved
+free of runtime errors in the sense meant by \SPARK. It is necessary to manully suppress certain
+\SPARK\ messages related to information flow through the CubedOS mailbox array. However, we feel
+the danger of doing this is minimal since the easy to understand architecture of the system
+ensures no flow problems will actually arise in practice.
+
+CubedOS provides a great deal of concurrency and runtime flexibility, but sacrifices some static
+type safety to achieve this. We mitigate the danger using a tool, XDR2OS3, that generates
+message encoding and decoding subprograms based on strongly typed message descriptions. The
+output of the tool is verified by \SPARK.
+
+We intend to release CubedOS to the open source CubeSat community once we have completed an ITAR
+review of our code base  and possibly release both  ITAR compliant and U.S non ITAR compliant versions.
+ We anticipate that release to be some time in mid-2018.

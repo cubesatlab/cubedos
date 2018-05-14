@@ -1,0 +1,139 @@
+
+<project name="CubedOS Documentation" default="compile-system" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="system.dir" value="."/>
+  <property name="iac2015.dir" value="IAC2015"/>
+  <property name="iac2017.dir" value="IAC2017"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+  </target>
+
+  <target name="compile-system" depends="init">
+    <exec dir="${system.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${system.dir}/build.log">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${system.dir}"
+          executable="bibtex"
+          failonerror="true"
+          output="${system.dir}/build.log"
+          append="true">
+      <arg line="main"/>
+    </exec>
+    
+    <exec dir="${system.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${system.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${system.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${system.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+  </target>
+
+  
+  <target name="compile-iac2015" depends="init">
+    <exec dir="${iac2015.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2015.dir}/build.log">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${iac2015.dir}"
+          executable="bibtex"
+          failonerror="true"
+          output="${iac2015.dir}/build.log"
+          append="true">
+      <arg line="main"/>
+    </exec>
+    
+    <exec dir="${iac2015.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2015.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${iac2015.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2015.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+  </target>
+
+  
+  <target name="compile-iac2017" depends="init">
+    <exec dir="${iac2017.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2017.dir}/build.log">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${iac2017.dir}"
+          executable="bibtex"
+          failonerror="true"
+          output="${iac2017.dir}/build.log"
+          append="true">
+      <arg line="main"/>
+    </exec>
+    
+    <exec dir="${iac2017.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2017.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+    
+    <exec dir="${iac2017.dir}"
+          executable="pdflatex"
+          failonerror="true"
+          output="${iac2017.dir}/build.log"
+          append="true">
+      <arg line="-halt-on-error main.tex"/>
+    </exec>
+  </target>
+
+  <target name="clean">
+    <delete file="${system.dir}/build.log"/>
+    <delete file="${system.dir}/main.aux"/>
+    <delete file="${system.dir}/main.bbl"/>
+    <delete file="${system.dir}/main.blg"/>
+    <delete file="${system.dir}/main.log"/>
+    <delete file="${system.dir}/main.out"/>
+    <delete file="${system.dir}/main.pdf"/>
+    <delete file="${system.dir}/main.toc"/>
+
+    <delete file="${iac2015.dir}/build.log"/>
+    <delete file="${iac2015.dir}/main.aux"/>
+    <delete file="${iac2015.dir}/main.bbl"/>
+    <delete file="${iac2015.dir}/main.blg"/>
+    <delete file="${iac2015.dir}/main.log"/>
+    <delete file="${iac2015.dir}/main.pdf"/>
+
+    <delete file="${iac2017.dir}/build.log"/>
+    <delete file="${iac2017.dir}/main.aux"/>
+    <delete file="${iac2017.dir}/main.bbl"/>
+    <delete file="${iac2017.dir}/main.blg"/>
+    <delete file="${iac2017.dir}/main.log"/>
+    <delete file="${iac2017.dir}/main.pdf"/>
+</target>
+</project>

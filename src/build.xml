@@ -1,0 +1,62 @@
+
+<project name="CubedOS" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src.dir" value="."/>
+  <property name="check.dir" value="build/Check"/>
+  <property name="build.dir" value="build/Mock"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+  </target>
+
+  <!-- Compile the Check build by default for now. -->
+  <target name="compile" depends="init">
+    <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Check cubedos_check.adb"/>
+    </exec>
+    <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Check main_cfdp_rx.adb"/>
+    </exec>
+    <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Check main_cfdp_tx.adb"/>
+    </exec>
+    <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Check main_file.adb"/>
+    </exec>
+    <!-- The Tick_Generator test program is not ready (violates Ravenscar) 2017-11-13.  -->
+    <!-- <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Check main_tick.adb"/>
+    </exec> -->
+  </target>
+
+  <target name="mock" depends="init">
+    <exec dir="${src.dir}" executable="gprbuild" failonerror="true">
+      <arg line="-Pcubedos.gpr -XRUNTIME=full -XBUILD=Mock main.adb"/>
+    </exec>
+  </target>
+
+  <target name="check" depends="compile">
+    <exec dir="${src.dir}" executable="${check.dir}/cubedos_check.exe" failonerror="true"/>
+  </target>
+
+  <!-- Do SPARK analysis of the CubeSat build. -->
+  <target name="examine">
+    <exec dir="${src.dir}" executable="gnatprove" failonerror="true">
+      <arg line="-Pcubedos.gpr -XBUILD=Mock --mode=flow -U"/>
+    </exec>
+  </target>
+
+  <!-- Do SPARK analysis of the CubeSat build. -->
+  <target name="prove">
+    <exec dir="${src.dir}" executable="gnatprove" failonerror="true">
+      <arg line="-Pcubedos.gpr -XBUILD=Mock --warnings=continue -U --level=2"/>
+    </exec>
+  </target>
+
+  <target name="clean">
+    <!-- Should clean up all the build artifacts, but we can't just delete build/CubeSat. -->
+    <delete dir="${build.dir}/gnatprove"/>
+  </target>
+</project>

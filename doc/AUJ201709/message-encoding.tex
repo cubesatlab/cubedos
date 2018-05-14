@@ -1,0 +1,91 @@
+
+\section{Message Encoding}
+\label{section-message-encoding}
+
+\lstMakeShortInline|
+
+CubedOS mailboxes store messages as unstructured octet arrays. This allows a general purpose
+mailbox package to store and manipulate messages of any type. Unfortunately this also requires
+that well structured, well typed message information be encoded to raw octets before being
+placed in a mailbox and then decoded after being retrieved from a mailbox.
+
+The CubedOS convention is to use External Data Representation (XDR) encoded messages. XDR is a
+well known standard \cite{rfc-4506} that is also simple and has low overhead. We have defined an
+extension to XDR that allows \SPARK's constrained scalar subtypes to be represented. We are
+currently working on a tool, XDR2OS3, that will compile a high level description of a message
+into message encoding and decoding subprograms. Our tool is written in Scala and is not
+verified, but its output is subject to the same \SPARK\ analysis as the rest of the application.
+It is easier to prove the output of XDR2OS3 than it is to prove the correctness of XDR2OS3
+itself.
+
+The use of XDR2OS3 mitigates some of CubedOS's disadvantages. The developer need not manually
+write the tedious and repetitive encoding and decoding subprograms. Furthermore, those
+subprograms have well-typed parameters thus shielding the application programer from the
+inherent lack of type safety in the mailboxes themselves.
+
+The use of XDR encoding may seem like an odd choice since XDR was originally defined for use in
+networking applications where data must be sent between potentially heterogenous systems. Since
+we envision current CubedOS applications being written entirely in \SPARK\ and executing in a
+single process, XDR seems like a needless complication. However, as described in
+Section~\ref{section-architecture}, we anticipate extending CubedOS to work in exactly the kind
+of potentially heterogenous environment XDR was developed to support. Thus we aim to provide a
+single standard for message encoding that will work in both the near and long term.
+
+To illustrate CubedOS message handling, consider the following short example of a message
+definition file that is acceptable to XDR2OS3.
+
+\begin{verbatim}
+enum Series_Type { One_Shot, Periodic };
+
+typedef unsigned int Module_ID range 1 .. 16;
+typedef unsigned int Series_ID_Type range 1 .. 10000;
+
+message struct {
+    Module_ID      Sender;
+    Time_Span      Tick_Interval;
+    Series_Type    Request_Type;
+    Series_ID_Type Series_ID;
+} Relative_Request_Message;
+\end{verbatim}
+
+This file introduces several types following the usual syntax of XDR interface definitions. The
+syntax is extended, however, to allow the programmer to include constrained ranges on the scalar
+type definitions in a style that is normal for Ada. The message itself is described as a
+structure containing various components in the usual way. The reserved word |message| prefixed
+to the structure definition, another XDR extension, alerts XDR2OS3 that it needs to generate
+encoding and decoding subprograms for that structure. Other structures serving only as message
+components (parameters) can also be defined.
+
+XDR2OS3 has built-in knowledge of certain Ada private types such as |Time_Span| (from the
+|Ada.Real_Time| package). Private types need special handling since their internal structure
+can't be accessed directly from the encoding and decoding subprograms. There is currently no
+mechanism in XDR2OS3 to solve this problem in the general case.
+
+Each message type has an ID number that is scoped by the module that defines the message. Upon
+receiving a message, the first step in message handling is to verify that the module ID of the
+receiver in the message header agrees with the ID of the module that is processing that message.
+This ensures that the message was actually sent to the intended module. Once that is done, the
+module is free to interpret the message ID value locally. Message ID values are never directly
+visible to module clients since the client calls a named encoding procedure to build each
+message. Thus the value and meaning of the message IDs defined by a module is entirely an
+implementation matter for the module. XDR2OS3 defines an enumeration type that specifies a
+module's messages as easy to read enumerators. It then uses the position value of a message
+enumerator as the message ID value.
+
+XDR2OS3 is a work in progress. We intend to ultimately support as much of the XDR standard as we
+can including, for example, variable length arrays and discriminated unions. The development of
+XDR2OS3 is guided by our immediate needs with our currently envisioned missions, but we intend to extend and
+generalize the functionality of XDR2OS3 as the tool matures.
+
+There are other possible encoding and decoding schemes that could have been used. For example,
+ASN.1 \cite{asn.1} is another standard with approximately similar goals as XDR. However, ASN.1
+is much more complicated and entails more overhead both in space and time. ASN.1 includes type
+information in the encoded message itself, however, which may have advantages for error
+detection and handling. Since the application developer invokes tool-generated encoding and
+decoding procedures, and does not directly deal with message encoding, it would be possible to
+switch the message encoding method without significantly impacting applications. A future
+version of XDR2OS3 could potentially provide an ASN.1 mode (as one possiblity), perhaps for
+reasons of error handling or interoperability with legacy systems. This is also an area for
+future work.
+
+\lstDeleteShortInline|

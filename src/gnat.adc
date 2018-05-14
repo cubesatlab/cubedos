@@ -1,0 +1,5 @@
+-- This file is used to ensure that the CubedOS core is Ravenscar and SPARKable.
+--
+--pragma Profile(Ravenscar);
+--pragma Partition_Elaboration_Policy(Sequential);
+--pragma SPARK_Mode(On);

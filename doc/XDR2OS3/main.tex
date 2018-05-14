@@ -1,0 +1,86 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE    : main.tex
+% AUTHOR  : (C) Copyright 2017 by Sean Klink & Carl Brandon & Peter Chapin
+% SUBJECT : Paper on CubedOS
+%
+% TODO: Write me! Add more specific items here as they become apparent.
+%
+% Send comments or bug reports to:
+%
+%    Carl Brandon
+%    Vermont Technical College
+%    Randolph Center, VT 05061
+%    CBrandon@vtc.vsc.edu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%+++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+%+++++++++++++++++++++++++++++++++
+\documentclass{llncs}
+\usepackage{listings}
+\usepackage{gensymb}
+\usepackage{graphicx}
+%\usepackage{unicode-math}
+\usepackage{url}
+\usepackage{hyperref}
+
+\input{macros}
+
+%++++++++++++++++++++
+% The document itself
+%++++++++++++++++++++
+\begin{document}
+
+\title{Message Encoding for CubedOS Using the XDR2OS3 Code Generator}
+\author{Sean Klink\inst{1} \and Peter Chapin\inst{3} \and Carl Brandon\inst{2} }
+
+\institute{Vermont Technical College, Randolph Center VT 05061, USA,\\
+  \email{sean.klink@vtc.edu} %,\\
+      % WWW home page: \texttt{http://web.vtc.edu/users/xyzzy}
+  \and
+  \email{carl.brandon@vtc.edu} %,\\
+      % WWW home page: \texttt{http://web.vtc.edu/users/xyzzy}
+  \and
+  Vermont Technical College, Williston VT 05495, USA,\\
+  \email{pchapin@vtc.vsc.edu} %,\\
+      % WWW home page: \texttt{http://web.vtc.edu/users/pcc09070}
+}
+
+\maketitle
+
+\begin{abstract}
+  % Summarize the contents of the paper using no more than 400 words.
+
+  We are developing the flight software the Lunar IceCube mission, scheduled to be launched in
+  2018. Lunar IceCube will be a 6-U CubeSat orbiting the moon in search of water, ice, and other
+  volatiles near the lunar surface. Lunar IceCube will be the first spacecraft to use CubedOS, a
+  general purpose, open source application framework for CubeSat flight software written by us.
+  CubedOS is written in \SPARK\ 2014 and proved free of certain classes of runtime error. It
+  uses a message passing architecture where each concurrently executing module processes
+  messages from an associated mail box and sends messages to other mail boxes. CubedOS
+  encourages a client/server software architecture where server modules process request messages
+  and return reply messages to clients. Message data is encoded using the external data
+  representation (XDR) standard. Each module thus provides encoding and decoding subprograms so
+  the clients of a module are not required to manage message encodings themselves. These
+  subprograms are tedious for module authors to produce manually. In this paper we present
+  XDR2OS3, a tool that enables CubedOS module authors to specify message structures using an
+  interface language that follows the XDR standard, extended to account for the special
+  properties of \SPARK\ (such as constrained subtypes). XDR2OS3 uses the message structures and
+  generates a \SPARK\ package containing suitable encoding and decoding subprograms. The output
+  of XDR2OS3 can be analyzed by the \SPARK\ tools and proved free of runtime error. While the
+  development of XDR2OS3 is a work in progress, our preliminary experience with the tool is
+  encouraging. It allows module authors to focus on message types and how they will be used and
+  supported rather than on the low level details of message formatting. We also discuss the
+  potential for XDR2OS3 to be used in other \SPARK\ applications with an interest in XDR encoded
+  data.
+  
+  \keywords{SPARK, student project, CubeSat}
+\end{abstract}
+
+\input{introduction}
+\input{conclusion}
+
+\bibliographystyle{splncs03}
+\bibliography{../../../LaTeX/references-General,../../../LaTeX/references-SPARK,../../../LaTeX/references-CubeSat}
+
+\end{document}

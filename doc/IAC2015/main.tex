@@ -1,0 +1,160 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE    : main.tex
+% AUTHOR  : (C) Copyright 2015 by Vermont Technical College
+% SUBJECT : Potential paper on CubedOS
+%
+% TODO:
+%
+% Send comments or bug reports to:
+%
+%    Carl Brandon
+%    Vermont Technical College
+%    Randolph Center, VT 05061
+%    carl.brandon@vtc.edu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%+++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+%+++++++++++++++++++++++++++++++++
+\documentclass[twocolumn]{article}
+\usepackage{authblk}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{url}
+
+\lstdefinelanguage{Ada2012}    %Define listing parameters for Ada 2012
+   [2005]{Ada}                 %... base it on Ada 2005
+   {morekeywords={some},
+    sensitive=false,
+    breaklines=false,
+    showstringspaces=false,
+    basicstyle=\small\sffamily,
+    columns=flexible,
+    }
+\lstset{language=Ada2012, showlines=true}
+
+\newcommand{\SPARK}{\textsc{Spark}}   % for ease of small capping SPARK
+
+% Stock article class title page formatting...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{HIGH INTEGRITY SOFTWARE FOR CUBESATS AND OTHER SPACE MISSIONS}
+\author[*]{Carl Brandon}
+\author[**]{Peter Chapin}
+\affil[*]{Vermont Technical College, Science Department}
+\affil[**]{Vermont Technical College, Computer Information Systems Department}
+\renewcommand\Authands{ and }
+\date{}
+
+%++++++++++++++++++++
+% The document itself
+%++++++++++++++++++++
+\begin{document}
+
+\twocolumn[
+  \begin{@twocolumnfalse}
+    \maketitle
+\begin{abstract}
+  % Summarize the contents of the paper using at least 70 and at most 400 words.
+
+  We currently have an operating single CubeSat launched as part of NASA's ELaNa IV program on
+  November 19, 2013, the first satellite of any kind launched by a college or university in New
+  England. Many CubeSat failures have been attributed to software failures. Of the twelve
+  university CubeSats that were launched with ours, we are the only one that is fully
+  functional. One damaged their batteries the first day due to a software error and worked
+  partially for a short time only in sunlight, one had partial contact for a week, one lasted
+  four months, and eight were never heard from. These other CubeSats primarily used the C
+  language. We are using the most reliable software technology ever sent into space. We used the
+  \SPARK\ 2005 Toolset and Ada language in the construction of our software. Ada is used in
+  almost all European Space Agency and many NASA rockets and spacecraft, and in most European
+  rail systems and nuclear power plants. \SPARK\ is used in commercial aviation (Rolls-Royce
+  Trent jet engines, ARINC ACAMS system, Lockheed Martin C130J), military aviation (EuroFighter
+  Typhoon, Harrier GR9, AerMacchi M346), air-traffic management (UK NATS iFACTS system), rail
+  (numerous signaling applications), and medical (LifeFlow ventricular assist device)
+  applications.
+
+  We are using \SPARK/Ada, with its reduction of errors by a factor of about 100 compared with
+  C. \SPARK\ is a formally defined programming language and a set of verification tools
+  specifically designed to support the development of high integrity software, and can formally
+  verify information flow, freedom from runtime errors, functional correctness, and security and
+  safety policies.
+
+  Ours is the first spacecraft to use \SPARK. We are currently upgrading our CubeSat software to
+  \SPARK\ 2014, and will then work on improving some of the algorithms in that software. We
+  would then have a very reliable software platform, CubedOS, that other projects could use a a
+  base for their CubeSat or other spacecraft projects. We have also been converting NASA
+  Goddard's GPS Enhanced Onboard Navigation System (GEONS) to \SPARK, and have discovered and
+  fixed errors by this process. Our next CubeSat, Lunar IceCube with Morehead State University
+  (PI), Goddard Space Flight Center (BIRCHES \& Lunar transfer trajectory)and the Jet Propulsion
+  Lab (Iris 2) is self propelled with a Busek iodine ion drive which will go to the Moon on the
+  Space Launch System EM-1 flight in 2018. This software will be much more complex, dealing with
+  power management, the ADACS, the infrared spectrometer (BIRCHES), the data and navigation
+  radio (Iris 2), the electrical power system, and aim the photo voltaic panels and ion
+  thruster. The software will carry out the navigation plan and deal with ground based commands
+  and upgrades. \SPARK’s reliability will be necessary for this.
+
+  %\keywords{\SPARK, student project, CubeSat}
+\end{abstract}
+  \end{@twocolumnfalse}
+]
+
+%\begin{enumerate}
+%\item Vermont Lunar CubeSat Description
+%  \begin{enumerate}
+%  \item Hardware
+%  \item Software
+%    \begin{enumerate}
+%      \item Software Metrics
+%    \end{enumerate}
+%  \item Mission
+%  \item ELaNa IV Results
+%  \end{enumerate}
+%
+%\item \SPARK\ 2014 Description and Characteristics
+%\begin{enumerate}
+%  \item Toolset
+%  \item Language
+%  \item Where \SPARK\ would have helped
+%    \begin{enumerate}
+%    \item Ariane V
+%    \item Boeing 787
+%    \end{enumerate}
+%  \end{enumerate}
+%
+%\item New Work
+%\begin{enumerate}
+%  \item CubedOS
+%  \item GEONS translation
+%  \item Lunar IceCube
+%    \begin{enumerate}
+%    \item Collaborators
+%    \item Spacecraft description
+%      \begin{enumerate}
+%      \item Iodine ion drive
+%      \item Computer
+%      \item BIRCHES
+%      \item Iris 2
+%      \item ADAC
+%      \item PV panels
+%      \end{enumerate}
+%    \item Mission
+%      \begin{enumerate}
+%      \item Transfer to lunar orbit
+%      \item Collecting data
+%      \item Data download
+%      \item End - Moon or Mars?
+%      \end{enumerate}
+%    \end{enumerate}
+%  \end{enumerate}
+%\end{enumerate}
+
+\input{introduction}
+\input{vtlunar}
+\input{spark2014}
+\input{new}
+\input{conclusion}
+
+\bibliographystyle{plain}
+\bibliography{../../../LaTeX/references-CubeSat,../../../LaTeX/references-SPARK}
+
+\end{document}

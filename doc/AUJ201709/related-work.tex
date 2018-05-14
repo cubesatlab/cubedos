@@ -1,0 +1,35 @@
+
+\section{Related Work}
+\label{section-related-work}
+
+The most closely related work to CubedOS is NASA's Core Flight Executive \cite{cFE}. Like
+CubedOS, cFE endeavors to be a general purpose framework for building flight software. Also like
+CubedOS, cFE is associated with a collection of modules, called the Core Flight System (CFS),
+that support common functionality needed by many missions. In addition, cFE makes use of a
+message passing discipline using a publish/subscribe model of message handling. CubedOS can
+provide support for publish/subscribe message handling by way of a library module.
+
+The main difference between the systems, aside from maturity level (cFE is a long established
+project with a history of actual use), is that CubedOS is written in \SPARK\ and verified free
+of runtime error. In contrast, cFE is written in C with no particular static verification goals.
+
+The cFE architecture is layered, whereas CubedOS modules operate as peers of each other. The cFE
+architecture makes use of a separate Operating System Abstraction Layer (OSAL) that presents a
+common interface across all the platforms supported by cFE. In contrast, CubedOS relies on the
+Ada runtime system for this purpose, and is thus Ada specific. CubedOS also uses a module
+library, the CubedOS LLAL, to provide hardware and OS independence in areas not covered by the
+Ada runtime system and standard library, but the interface to these modules is not yet
+standardized.
+
+Kubos \cite{kubos} is a project with roughly similar goals as cFE and CubedOS. It is not as
+mature as cFE. Like cFE, Kubos is written in C without static verification goals in the sense
+that we mean here.
+
+Some CubeSat flight software is written directly on top of conventional embedded operating
+systems such as Linux, VxWorks \cite{vxworks}, or RTEMS \cite{rtems}. These systems allow
+application software to potentially be written with a variety of tools and methods, although C
+is most often used in practice. They provide flexibility by imposing few restrictions, but they
+also don't, by themselves, provide support for common flight software needs. Also they are
+themselves not statically verified as CubedOS is, although the Wind River VxWorks Cert platform
+\cite{vxworks-cert} does provide a means by which VxWorks can be used in safety critical
+avionics applications conforming to the DO-178B standard.

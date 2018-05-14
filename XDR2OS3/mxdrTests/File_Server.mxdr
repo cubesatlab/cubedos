@@ -1,0 +1,51 @@
+//File_Server
+enum Mode_Type { Read, Write };
+
+
+typedef unsigned int File_Handle_Type range 0 .. 64;
+typedef unsigned int Valid_File_Handle_Type is File_Handle_Type range 1 .. File_Handle_Type'Last;
+const Invalid_Handle is File_Handle_Type = 0;
+const Maximum_Read_Size = 256;
+const Maximum_Write_Size = 256;
+typedef unsigned int Read_Result_Size_Type is Natural range 0 .. Maximum_Read_Size;
+typedef unsigned int Read_Size_Type is Natural range 1 .. Read_Result_Size_Type'Last;
+typedef unsigned int Write_Result_Size_Type is Natural range 0 .. Maximum_Write_Size;
+typedef unsigned int Write_Size_Type is Natural range 1 .. Write_Result_Size_Type'Last;
+typedef unsigned int Request_ID_Type range 1 .. 64;
+
+message struct -> Open_Request {
+    Mode_Type              Mode;
+	string					Name;
+	Request_ID_Type 		Request_ID;
+};
+
+message struct <- Open_Reply {
+    File_Handle_Type       Handle;
+	Request_ID_Type 		Request_ID;
+};
+
+message struct -> Read_Request{
+    File_Handle_Type       Handle;
+    Read_Size_Type         Amount;
+};
+
+message struct <- Read_Reply {
+    Valid_File_Handle_Type Handle;
+    Read_Result_Size_Type  Amount;
+	CubedOS.Lib.Octet_Array                   Message_Data<>;
+} with message_invariant => Amount <= Message_Data'Length;
+
+message struct -> Write_Request {
+    Valid_File_Handle_Type Handle;
+    Write_Size_Type        Amount;
+	CubedOS.Lib.Octet_Array                  Message_Data<>;
+} with message_invariant => Amount <= Message_Data'Length;
+
+message struct <- Write_Reply {
+    Valid_File_Handle_Type Handle;
+    Write_Result_Size_Type Amount;
+};
+
+message struct -> Close_Request {
+    Valid_File_Handle_Type Handle;
+};

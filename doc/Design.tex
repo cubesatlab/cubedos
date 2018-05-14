@@ -1,0 +1,185 @@
+<
+\chapter{Design}
+\label{chapt:design}
+
+In this section we describe the design of CubedOS, including various design trade-offs made.
+This information is primarily of interest to developers looking to enhance the CubedOS
+infrastructure itself. Developers interested in only using CubedOS do not need to read this
+section unless they are interested in the rationale behind some of CubedOS's design decisions.
+
+\section{Message Manager}
+\label{sec:design-message-manager}
+
+One of the central problems facing the message manager is the handling of message mailboxes.
+Since \SPARK\ does not allow dynamically allocated memory, any method that involves dynamically
+allocating space for messages is not an option. Instead mailbox space must be allocated
+statically. This forces users of CubedOS to anticipate the maximum sizes of the mailboxes they
+require.
+
+We considered three strategies for managing mailboxes.
+
+\begin{itemize}
+\item \emph{Define a Mailbox type that can hold a fixed number of pending messages. Create a
+    separate mailbox for each module.} This approach has the advantage of being simple. It also
+  separates the total mailbox space by module. The value of the separation is that should one
+  mailbox fill due to a dead or slow module, that won't impact the communication between other
+  modules using different mailboxes.
+
+  The main problem with this approach is that it tends to waste space. We assume most modules
+  won't require a large number of pending messages (a large mailbox size). Yet if even one
+  module does require a large size, the |Mailbox| type must be adjusted to accommodate it,
+  causing unnecessarily large mailboxes in most cases.
+
+\item \emph{Define a single Mailbox object that holds pending messages for all modules
+    together.} This approach addresses the disadvantage of the previous approach by
+  consolidating the free space into a single mailbox object. Modules requiring a large number of
+  pending messages can in effect ``borrow'' free mailbox space from modules with few pending
+  messages.
+
+  Implementing this design is more complicated, but a bigger disadvantage is that modules can
+  interfere with each other. If one module is slow and gets backlogged, the (one and only)
+  mailbox could fill up with messages for that module, thus preventing communication between
+  other, unrelated modules. We feel this is a serious enough problem to rule out this design
+  choice.
+
+\item \emph{Define a Mailbox type that is discriminated on its size. Create a separate mailbox
+    for each module, tuned for that module's needs.} This is a variation of the first approach
+  except here the mailbox instances can each have a different size. The author of a module
+  defines the size of the mailbox needed for that module; large mailboxes are only used where
+  necessary and space is conserved. This approach also maintains the freedom from interference
+  provided by the first approach.
+\end{itemize}
+
+The third approach is appealing but unfortunately does not allow replies to arbitrary modules in
+an environment where pointers are prohibited. Although a target mailbox can be mentioned by name
+when sending a message, the destination of any reply must be computed at runtime. Without
+pointers there is no way to create a map from module ID number to the mailbox for that module.
+The first approach can work around this problem by putting all mailboxes in a common array and
+using the module ID number as an array index. However, that also requires all mailboxes to be
+the same size.
+
+A more subtle problem with the third approach is that, in general, the author of a module can't
+know the maximum number of pending messages that are appropriate to specify for the module. The
+correct number is a system-wide artifact that depends in large measure on the number and rate of
+message send operations done by other modules. Setting the mailbox sizes is something best done
+during system integration, and that is more easily accomplished if all mailboxes are in their
+own package.
+
+For these reasons CubedOS follows the first approach, using a generic package to supply the
+mailboxes. The package can be instantiated differently for each CubedOS application with mailbox
+sizes set appropriately for that application.
+
+Selecting the most appropriate size for a the mailboxes is the one major issue remaining. If a
+mailbox fills during operation, sending further messages to that mailbox will fail. Senders do
+not block because doing so would require two entries on the |Mailbox| protected type, a
+violation of \textbf{Core.Ravenscar} (and an invitation to deadlock). Thus failure to send a
+message due to a full mailbox creates awkwardness for senders who must manually retry the send
+operation. Furthermore senders will not likely want to retry sending indefinitely and risk being
+tied up doing a send operation that will never succeed. This leaves open the question of how the
+failed send should ultimately be handled.
+
+It would be better if mailbox sizes were tuned so that sending could never fail. However doing
+this requires high level reasoning about the flow of messages in the system. We propose
+constructing a formal model of module communication that includes finite sized mailboxes, and
+then use a model checker (such as \texttt{spin}?), or some other tool, to find a configuration
+of mailbox sizes where no send operation can ever fail.
+
+In lieu of such an analysis, human reasoning could be used to estimate appropriate mailbox sizes
+followed by rigorous testing. Of course, such an approach is likely to be more error prone than
+the formal approach.
+
+If it can be formally shown that no send operation can ever fail, all calls to the |Send|
+procedure could be replaced with calls to |Unchecked_Send| which does not return an error
+indication. Then all error handling in the modules related to failed sending could be removed.
+This would be a great simplification. However, we do \emph{not} recommend this approach. Despite
+any formal modeling we might do in CubedOS's initial design, we foresee several possible ways
+mailboxes might overflow anyway:
+
+\begin{enumerate}
+\item Our formal model is incorrect.
+\item We never get around to creating a formal model that works.
+\item Users of CubedOS might not be in a position to augment the formal model to account for
+  their own, application-specific modules.
+\item A module thread dies for reasons outside the software's control (such as hardware
+  failure). Although it might be possible to incorporate this scenario into the formal model,
+  forcing freedom from mailbox overflow in this situation might impose unreasonable requirements
+  on mailbox size or application architecture (or both).
+\end{enumerate}
+
+For these reasons we advocate continued checking for failed send operations even if none are
+expected in normal operation.
+
+\pet{We should also say a few words about selecting the maximum size of messages, and about the
+  handling of module ID numbers. For example, we originally considered allowing ID numbers to be
+  dynamically assigned and then using a name resolver module to map module names to their
+  (dynamic) ID numbers. However, that design was overly complicated.}
+
+\section{Message Encoding}
+\label{design-message-encoding}
+
+To remain generic the messages sent between modules are essentially nothing more than arrays of
+raw octets. Any structure on the information in a message is imposed by agreement between the
+sender and receiver of that message. This creates a degree of type unsafety and requires modules
+to defend against malformed messages at runtime. To mitigate this problem, each module contains
+an API package that provides convenience subprograms that encode and decode messages. The
+parameters of these subprograms are strongly typed, of course, so as long as they are used
+consistently compile-time type checking is retained.
+
+Since the problem of encoding and decoding typed data has been solved before we leverage an
+existing standard, name External Data Representation (XDR) \cite{rfc-4506}. This standard
+defines a ``wire format'' (in our case a message data format) for various types and simple data
+structures. The advantage of using XDR is that it is well specified and understood. Using it
+simplifies our specification needs and invites the use of third party tools to manage message
+data.
+
+We also considered using Abstract Syntax Notation One (ASN.1) \cite{asn.1} as a message data
+format. Unlike XDR, ASN.1 includes type information in the data stream allowing for more
+flexible message structures. However, ASN.1 also has more overhead, both in terms of space used
+in the message and time used to encode and decode the messages. For this reason we elected to
+use the simpler XDR approach.
+
+The encoding/decoding subprograms in the API packages must contend with the richness of Ada's
+type system. In particular they should be able to handle multiple parameters of various types,
+called \newterm{messageable types}, where a messageable type is defined inductively as follows:
+
+\begin{itemize}
+\item An integer type, an enumeration type, or a floating point type.
+\item An array of messageable types.
+\item A record containing only messageable type components.
+\end{itemize}
+
+Roughly a messageable type is any type allowed by the XDR standard (although we do not aim to
+provide support for XDR discriminated union types at this time).
+
+The encoding and decoding of messageable types is tedious and repetative. Supporting subprograms
+to handle basic scalars and simple arrays are provided by way of a library package
+|CubedOS.Lib.XDR|. The handling of XDR arrays and records can be done using the lower level
+subprograms provided by the library.
+
+Since the creation of the API packages is largely mechanical, CubedOS comes with a tool,
+\texttt{xdr2os3}, that converts an textual representation of the message types into a
+corresponding API package written in provable \SPARK. In effect, \texttt{xdr2os3} plays a role
+similar to that played by \texttt{rpcgen} in many ONC RPC \cite{rfc-5531} implementations. In
+particular, it converts a high level interface description into code that encodes/decodes
+messages to/from the implementer of that interface. However \texttt{xdr2os3} differs from other
+similar tools in several important respects:
+
+\begin{itemize}
+\item It targets CubedOS; the generated code makes use of CubedOS's XDR library for handling
+  primitive types.
+\item It generates provable \SPARK\ 2014 code.
+\item It contains extensions to the language in \cite{rfc-4506} that support Ada's ability to
+  define range constrained scalar subtypes.
+\end{itemize}
+
+A CubedOS application developer defines the messages she needs for a module in an XDR file and
+then uses \texttt{xdr2os3} to generate the API package and related materials. The developer can
+then the subprograms in that package to encode messages for that module or decode messages from
+that module. In addition, \texttt{xdr2os3} provides subprograms the module author can use to
+decode incoming messages and encode replies.
+
+Currently it is still possible for a develper to directly access message data but doing this is
+strongly not recommended. \pet{This could possibly be enforced by making the message a private
+  type. However, that would require all the generated API packages to be children of the generic
+  message manager package (and hence generic themselves). This might be an overly complicated
+  design.}

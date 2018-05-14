@@ -1,0 +1,31 @@
+
+enum { One_Shot, Periodic } Series_Type ;
+
+// The Module_ID type is actually introduced in a different package.
+typedef unsigned int Module_ID_Type range 1 .. 16;
+typedef unsigned int Series_ID_Type range 1 .. Natural'Last;
+typedef unsigned int Series_Count_Type range 0 .. Natural'Last;
+
+message struct -> Relative_Request {
+    Module_ID_Type Sender;
+    Time_Span      Tick_Interval;
+    Series_Type    Request_Type;
+    Series_ID_Type Series_ID;
+};
+
+message struct -> Absolute_Request {
+    Module_ID_Type Sender;
+    Time           Tick_Time;
+    Series_ID_Type Series_ID;
+};
+
+message struct <- Tick_Reply {
+    Module_ID_Type Receiver;
+    Series_ID_Type Series_ID;
+    Series_Count_Type Count;
+};
+
+message struct -> Cancel_Request {
+    Module_ID_Type Sender;
+    Series_ID_Type Series_ID;
+};

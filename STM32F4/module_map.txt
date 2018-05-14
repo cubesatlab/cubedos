@@ -1,0 +1,14 @@
+
+Module Map
+==========
+
+The following are "well known" module ID numbers for the various CubedOS core modules.
+
+1. Tick Generator.
+2. File Server.
+3. CFDP Implementation.
+4. Datagram Service.
+
+The following are "application specific" module ID numbers for the IceCube application.
+
+5. SPI Driver.
