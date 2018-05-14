@@ -16,7 +16,7 @@ project CubedOS is
          for Main use ("main.adb");
          for Object_Dir use "build/Simulator";
          for Source_Dirs use (".", "Simulator");
-         for Languages use ("Ada", "C");
+         for Languages use ("Ada");
    end case;
 
    package Ide is
@@ -69,9 +69,7 @@ project CubedOS is
          when "Check" =>
 
          when "Simulator" =>
-            for Switches ("ada") use ("-lGL", "-lX11", "-lglut", "-lm");
       end case;
    end Linker;
 
 end CubedOS;
-
