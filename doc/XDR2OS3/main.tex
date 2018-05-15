@@ -51,12 +51,9 @@
 \begin{abstract}
   % Summarize the contents of the paper using no more than 400 words.
 
-  We are developing the flight software the Lunar IceCube mission, scheduled to be launched in
-  2018. Lunar IceCube will be a 6-U CubeSat orbiting the moon in search of water, ice, and other
-  volatiles near the lunar surface. Lunar IceCube will be the first spacecraft to use CubedOS, a
-  general purpose, open source application framework for CubeSat flight software written by us.
-  CubedOS is written in \SPARK\ 2014 and proved free of certain classes of runtime error. It
-  uses a message passing architecture where each concurrently executing module processes
+  We are developing an open source application framework, called CubedOS, for flight software on
+  CubeSat nano-satellites. CubedOS is written in \SPARK\ 2014 and proved free of runtime error.
+  It uses a message passing architecture where each concurrently executing module processes
   messages from an associated mail box and sends messages to other mail boxes. CubedOS
   encourages a client/server software architecture where server modules process request messages
   and return reply messages to clients. Message data is encoded using the external data
@@ -65,15 +62,10 @@
   subprograms are tedious for module authors to produce manually. In this paper we present
   XDR2OS3, a tool that enables CubedOS module authors to specify message structures using an
   interface language that follows the XDR standard, extended to account for the special
-  properties of \SPARK\ (such as constrained subtypes). XDR2OS3 uses the message structures and
-  generates a \SPARK\ package containing suitable encoding and decoding subprograms. The output
-  of XDR2OS3 can be analyzed by the \SPARK\ tools and proved free of runtime error. While the
-  development of XDR2OS3 is a work in progress, our preliminary experience with the tool is
-  encouraging. It allows module authors to focus on message types and how they will be used and
-  supported rather than on the low level details of message formatting. We also discuss the
-  potential for XDR2OS3 to be used in other \SPARK\ applications with an interest in XDR encoded
-  data.
-  
+  properties of \SPARK\ (such as constrained subtypes and message invariants). XDR2OS3 generates
+  a \SPARK\ package containing suitable encoding and decoding subprograms for each module. The
+  output of XDR2OS3 can be analyzed by the \SPARK\ tools and proved free of runtime error.
+
   \keywords{SPARK, student project, CubeSat}
 \end{abstract}
 
