@@ -1,0 +1,73 @@
+% $Header: /users/rtfm/pllab/cvsroot/FJSEC/Draft/PPDP05/fp-frame.sty,v 1.3 2005/02/12 22:42:00 ces Exp $
+% Macros to put a frame around an arbitrary amount of vertical material.
+% The frame width is the current page width, even when in two-column mode.
+% Author: François Pottier (re-using code by Xavier Leroy and Didier Rémy)
+% Creation: August 29th, 1997
+
+% ---------------------------------------------------------------------------------------------------------------------
+% Usage: \begin{fpframe} ... \end{fpframe}
+
+\def\fpframe{%
+  \setbox0=\vbox\bgroup
+  \advance\hsize by -2\fboxsep
+  \advance\hsize by -2\fboxrule
+  \linewidth\hsize
+}
+
+\def\endfpframe{%
+\egroup\noindent\framebox[\columnwidth]{\box0}}
+
+\def\fppframe{%
+  \setbox0=\vbox\bgroup
+  \advance\hsize by -2\fboxsep
+  \advance\hsize by -2\fboxrule
+  \linewidth\hsize
+}
+
+\def\endfppframe{%
+\egroup\noindent\framebox[\textwidth]{\box0}}
+
+% ---------------------------------------------------------------------------------------------------------------------
+% Usage: \begin{fpfig}[htbp]{Caption}{label} ... \end{fpfig}
+% where
+%   + [htbp]  is the (optional) placement argument;
+%   + Caption is the figure's caption, possibly empty if no caption is desired.
+%   + label is the figure's label.
+
+\newenvironment{fpfig}[3][htbp]
+  {%
+    \begin{figure}[#1]% The first argument is the placement parameter.
+    \fpframe
+    \gdef\fpcaption{#2}% Save the second argument (the caption) for later.
+    \gdef\fplabel{#3}%   Save the third argument (the label) as well.
+  }
+  {%
+    \endfpframe
+    \ifx\fpcaption\empty
+    \else
+      \caption{\fpcaption}
+    \fi
+    \label{\fplabel}
+    \end{figure}%
+    \aftergroup\ignorespaces
+  }
+
+\newenvironment{fpfig*}[3][htbp]
+  {%
+    \begin{figure*}[#1]% The first argument is the placement parameter.
+    \fppframe
+    \gdef\fpcaption{#2}% Save the second argument (the caption) for later.
+    \gdef\fplabel{#3}%   Save the third argument (the label) as well.
+  }
+  {%
+    \endfppframe
+    \ifx\fpcaption\empty
+    \else
+      \caption{\fpcaption}
+    \fi
+    \label{\fplabel}
+    \end{figure*}%
+    \aftergroup\ignorespaces
+  }
+
+

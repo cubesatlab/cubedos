@@ -1,0 +1,237 @@
+\documentclass{AUJarticle}
+\usepackage[cmex10]{amsmath}
+\usepackage[utf8x]{inputenc}
+\usepackage[nocompress]{cite}
+\usepackage{graphicx, multirow, booktabs, color, listings}
+\usepackage{balance}
+
+\graphicspath{{figures/}}
+
+\pagestyle{empty}
+
+\pdfinfo{ /Title (Template for Ada User Journal)
+  /Author (An Author, B. Another, Y. Other)
+  /Keywords (Ada) }
+
+\newcommand{\todo}{\textcolor{red}}
+
+\hyphenation{}
+
+\setcounter{page}{3}
+
+\begin{document}
+
+\title{Template for Ada User Journal}
+
+\addauthor{A. N. Author, B. Another}
+{The Ada Research Institute, Lovelace Road, 
+  Oxbridge OB5 1AZ.; Tel: +44 123 987 6543} 
+  {\{ana, ban\}@ada.org}
+
+\addauthor{Y. Other}
+{Ada Rules, All Languages Road, 
+  The World} 
+  {yother@adarules.org}
+
+\issuev{35}
+\issuen{1}
+\issued{March 2014}
+
+\shortauthor{A. N. Author, B. Another, Y. Other}
+\shorttitle{Template for Ada User Journal}
+
+\thispagestyle{plain}
+
+\maketitle
+
+\begin{abstract}
+
+This template gives guidance to authors on the preparation of papers for Ada User Journal. It is
+written in the style of such a paper. Thus an abstract can be written here. The style is
+Abstract and is Times 11/12 italic and justified. The abstract is optional and if present can
+optionally be followed by a keyword list using the same style.
+
+Keywords: template, journal, Ada.
+
+\end{abstract}
+
+\section{Introduction}
+
+Measurements are expressed using the traditional units of points and picas for typesetting.
+There are 12 points to a pica and 6 picas to an inch.
+
+The general style for text is that all paragraphs are justified but not indented and are
+followed by a 6pt blank. Normal text is set in Times 10/12. That is with a 10 point font and two
+points of leading giving a line spacing of 12 points. The style for this paragraph is TP Text
+para.
+
+The two letter mnemonic starting the style name gives the shortcut keys which can be used to
+apply it. Thus to apply Text para, place the cursor within the paragraph, hold down control and
+shift and then type TP. Widow/orphan control is on although this does mean that 3-line
+paragraphs cannot be split and may cause unusual pagination.
+
+
+\section{Page layout}
+The printed page width is 42 picas. Papers are set in two justified columns with a 2 pica gutter
+giving 20p per column.
+
+Left and right margins on A4 are thus 3.8 picas each. The top and bottom margins are 5 picas.
+Headers and footers will be set as in this sample but may be omitted on submitted material. The
+first page just has the page number. Subsequent even (left) pages (verso pages to use
+typesetter's jargon) have the paper title truncated to fit on one line if necessary and odd
+(right) pages have the author's name.
+
+The last page must be set with equal columns.
+
+\section{Headings and subheadings}
+
+Headings are set in 13 pt Times bold with 6pt before and 6pt after; the style is MH Main
+heading. The heading of the abstract (if any) is the same. Note that since the last paragraph of
+the preceding section will be followed by a 6pt blank this means that the effective space before
+is 12pt.
+
+Only the first word of a heading should be capitalized unless it is a proper noun or some other
+word which is normally capitalized.
+
+\subsection{Subheadings}
+
+Subheadings are set in 11pt Times bold with 3pt before and 3pt after; the style is SH Sub
+heading. Further levels of heading are left to the author. It is suggested that they use the
+subheading style but with italic rather than bold.
+
+\subsection{Numbering of headings}
+
+Headings and subheadings need not be numbered. But if they are then main headings should have
+their number without any trailing point and with three spaces before the heading text. Similarly
+for subheadings as illustrated here. It is recommended that further levels of headings not be
+numbered. The abstract (if any) is never numbered. The remaining sections and subsections of
+this template are not numbered by way of illustration.
+
+\section{Title and authors}
+
+Title information is set across the whole page but unjustified. 
+
+The title is in Times 24/30; major words have their initial letter capitalized. The title is
+followed by the author's name and affiliation. The name is in Times 12pt bold italic and the
+affiliation is in Times 11pt italic but not bold. The title is followed by 12pt, the author by
+3pt and the affiliation by 6pt.
+
+The affiliation should include postal address; it can also include email and telephone number if
+the author doesn't mind lots of junk mail and calls.
+
+In the case of multiple authors with the same affiliation information, put the several authors
+in the one paragraph.
+
+If, however, multiple authors have different affiliation information then repeat author and
+affiliation paragraphs as necessary.
+
+The last affiliation paragraph should be followed by a blank paragraph (as in this template) in
+order to create the appropriate amount of white space before the text proper.
+
+\section{Initials and punctuation}
+Author's names can be given with first name in full (preferred) or with initials. If using
+initials then please follow initials with a point . For example Fred Scringe; F. L. Scringe;
+Fred L. Scringe; are all acceptable. Academic titles are omitted.
+
+\section{Program text}
+Program text should be displayed in the running text if possible. Arial 9/12 should be used.
+
+\begin{lstlisting}%
+
+with Text_IO;
+procedure Main is
+begin  -- this is a comment
+  Text_IO.Put("Hello World");
+end;
+
+\end{lstlisting}
+
+\subsection{Blank lines in programs}
+
+Long sections of program benefit from judicious use of blank lines. Thus we might have
+
+\begin{lstlisting}%
+
+package Stacks is
+  type Stack is private;
+
+  procedure Push(S: Stack; X: Integer);
+
+  function Pop(S: Stack) return Integer;
+
+private
+  ...  -- the private part
+end Stacks;
+\end{lstlisting}
+
+However, the full blank lines look crude and accordingly a sequence of such text should be set
+using distinct paragraphs with style PP Program para which then gives a 6pt blank thus
+
+\begin{lstlisting}%
+
+package Stacks is
+  type Stack is private;
+  procedure Push(S: Stack; X: Integer);
+  function Pop(S: Stack) return Integer;
+private
+  ...  -- the private part
+end Stacks;
+\end{lstlisting}
+
+
+If a program sample is long or demands very long lines then it can be set across both columns
+and treated as a figure (see the guidelines in the next section). In such a case it might be
+considered desirable to use Courier for such program samples in order to match the appearance of
+a genuine program even though program text in the discussion is set in Arial. If this is done
+then perhaps reserved words should not be bold and comments should not be in italic and blank
+lines should be in full (so just treat the whole sample as one paragraph).
+
+\section{Figures and captions}
+
+The positioning of figures (and tables, pictures etc) is left to the discretion of the author
+but the following guidelines should be considered. They should be on the same page as the point
+of reference wherever possible. They should either fit within one column or extend right across
+both columns. If they extend across both columns then they should be at the top of the page. If
+they fit within one column then they should be at the top of the column containing the reference
+if possible but it is permissible to place them embedded within the text if that seems more
+natural.
+
+Captions should be in Times 9pt bold and numbered Figure 1, Table 6 and so on. They should be
+centred under the item concerned as in the following example.
+
+\section{Punctuation and spelling}
+
+Use logical punctuation. Place stops in the logical position with respect to parentheses and
+quotations. Thus write: The following string has six characters "Rabbit". Do not write: The
+following string has six characters "Rabbit." (Some readers will be amazed that one might even
+consider the latter style but it was prevalent in Britain in the early part of the 20th century
+and still lingers in the US.) Also go easy on stops, write US rather than U.S.
+
+It is simpler to use feet and inch marks (' and ") rather than printers quotes and apostrophes
+which are not in the Latin-1 character set.
+
+Spelling is left to the author but when in doubt use the form preferred by the Oxford English
+dictionary (thus optimize rather than optimise).
+
+Apply hyphenation with care. This template has been set without hyphenation. The trouble with
+automatic hyphenation is that the algorithms in most word processors are naive and can hyphenate
+words at inappropriate points unrelated to the logical division of the word. Nevertheless, 20p
+columns such as these may benefit from hyphenation.
+
+\section{Citations and references}
+
+References should be collected at the end and numbered in alphabetical order, eg:
+\cite{Higgon1994, Dirac1930, Dijkstra1968,Keller2000}. Citations within text should take the
+form: Smith [3] states that programming is boring. Multiple references may be grouped thus: but
+recent research [7, 9, 10] shows that many find it exciting.
+
+A sentence should never start with just a citation number (or indeed with any other number).
+
+This template concludes with a sample reference section. The heading is a normal main heading.
+Individual references have the style References.
+
+\bibliographystyle{ieeetr}
+\bibliography{bibliography}
+\balance
+
+\end{document}

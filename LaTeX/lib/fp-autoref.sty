@@ -1,0 +1,103 @@
+% $Header: /users/rtfm/pllab/cvsroot/FJSEC/Draft/PPDP05/fp-autoref.sty,v 1.1 2004/12/21 21:25:50 ces Exp $
+%
+% This is a simple LaTeX2e package, whose job is to automatically prefix each reference with the appropriate
+% word (proposition, theorem, etc.) according to the form of the label name.
+%
+% This package knows about its companion fp-activeref and also extends its commands.
+%
+% In this version, names are capitalized and (sometimes) abbreviated for compliance with Springer's LNCS style.
+% However, names should not be abbreviated when they appear at the beginning of a sentence. Also, other versions
+% of these macros may not capitalize names. As a result, these macros should not be used at the beginning of a
+% sentence.
+%
+% Author: François Pottier
+% Creation: October 9th, 1997
+
+\NeedsTeXFormat{LaTeX2e}[1996/12/01]
+\ProvidesPackage{fp-autoref}[1997/10/09]
+
+% ---------------------------------------------------------------------------------------------------------------------
+% Requirements.
+
+\RequirePackage{ifthen}
+
+% ---------------------------------------------------------------------------------------------------------------------
+% Declare language options.
+% Known options are: english (which is the default), francais, french, frenchb.
+
+\DeclareOption{english}{%
+\def\proptext{Proposition}%
+\def\deftext{Definition}%
+\def\theoremtext{Theorem}%
+\def\lemmatext{Lemma}%
+\def\sectiontext{Sect.}%
+\def\figuretext{Fig.}%
+\def\notetext{Note}%
+\def\chaptertext{Chapter}%
+\def\statementtext{Statement}%
+\def\conditiontext{Condition}%
+\def\apptext{Appendix}%
+\def\extext{Example}%
+\def\cortext{Corollary}
+}
+
+\DeclareOption{francais}{%
+\def\proptext{proposition}%
+\def\deftext{d\'efinition}%
+\def\theoremtext{th\'eor\`eme}%
+\def\lemmatext{lemme}%
+\def\sectiontext{section}%
+\def\figuretext{figure}%
+\def\notetext{note}%
+\def\chaptertext{chapitre}%
+\def\statementtext{affirmation}%
+\def\conditiontext{condition}%
+\def\apptext{appendice}%
+\def\extext{exemple}%
+}
+
+\DeclareOption{french}{%
+\ExecuteOptions{francais}%
+}
+
+\DeclareOption{frenchb}{%
+\ExecuteOptions{francais}%
+}
+
+% ---------------------------------------------------------------------------------------------------------------------
+% Process user-supplied options.
+% The default language is read from Babel, if available; otherwise, english is assumed.
+
+\ifx\languagename\@undefined
+  \ExecuteOptions{english}
+\else
+  \ExecuteOptions{\languagename}
+\fi
+\ProcessOptions
+
+% ---------------------------------------------------------------------------------------------------------------------
+% The main command.
+% Usage: \autoref{label}
+% where `label` must start with prop-, def-, theorem-, lemma- or section-.
+
+\def\internalautoref #1-#2\internalautorefend{%
+\ifthenelse{\equal{#1}{prop}}{\proptext}{%
+\ifthenelse{\equal{#1}{def}}{\deftext}{%
+\ifthenelse{\equal{#1}{theorem}}{\theoremtext}{%
+\ifthenelse{\equal{#1}{lemma}}{\lemmatext}{%
+\ifthenelse{\equal{#1}{section}}{\sectiontext}{%
+\ifthenelse{\equal{#1}{figure}}{\figuretext}{%
+\ifthenelse{\equal{#1}{note}}{\notetext}{%
+\ifthenelse{\equal{#1}{chapter}}{\chaptertext}{%
+\ifthenelse{\equal{#1}{statement}}{\statementtext}{%
+\ifthenelse{\equal{#1}{cond}}{\conditiontext}{%
+\ifthenelse{\equal{#1}{appendix}}{\apptext}{%
+\ifthenelse{\equal{#1}{example}}{\extext}{%
+\ifthenelse{\equal{#1}{cor}}{\cortext}{%
+\PackageWarning{fp-autoref}{Unrecognized label prefix: '#1'}%
+}}}}}}}}}}}}}%
+}
+
+\newcommand{\autoref}[1]{\internalautoref #1\internalautorefend~\ref{#1}}
+\newcommand{\autopastref}[1]{\internalautoref #1\internalautorefend~\pastref{#1}}
+\newcommand{\autofutureref}[1]{\internalautoref #1\internalautorefend~\futureref{#1}}

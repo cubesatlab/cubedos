@@ -1,0 +1,56 @@
+%
+% This is a template for creating slides with LaTeX.
+%
+
+\documentclass[landscape]{slides}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{times}
+\usepackage{url}
+
+\input{slide-macros}
+
+% Default settings for code listings.
+\lstset{
+  language=C,
+  basicstyle=\ttfamily,
+  stringstyle=\ttfamily,
+  commentstyle=\ttfamily,
+  xleftmargin=0.25in,
+  showstringspaces=false}
+
+\lstMakeShortInline[basicstyle=\ttfamily]!
+
+\title{\color{titlecolor}THE TITLE}
+\author{
+  \begin{tabular}{c}
+  \\[3mm]
+  \Large{Peter C. Chapin} \\[2mm]
+  \normalsize{Computer Information Systems}\\[5mm]
+  \includegraphics[scale=0.80]{Vermont-Tech-Stack.jpg}\\[16mm]
+  \end{tabular}
+}
+\date{October 31, 2013}
+
+\begin{document}
+
+\color{Black}
+\pagecolor{Background}
+
+\maketitle
+
+\startslide{SLIDE 1}
+\begin{citemize}
+\item Life is good!
+\item Life is very good!!
+\item Life is very very good!!!
+\end{citemize}
+How good is it?
+\stopslide
+
+\end{document}
