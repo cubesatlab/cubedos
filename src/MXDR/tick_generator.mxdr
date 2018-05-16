@@ -1,31 +1,48 @@
+// FILE: tick_generator.mxdr
+//
+// The interface definition of the core CubedOS tick generator module.
 
+// Ticks are sent in a series. There are two kinds of series:
+//   One_Shot : A single tick is sent and the series is automatically canceled.
+//   Periodic : A tick is sent periodically. The series is only canceled when requested.
+//
 enum { One_Shot, Periodic } Series_Type ;
 
-// The Module_ID type is actually introduced in a different package.
-typedef unsigned int Module_ID_Type range 1 .. 16;
+// The client defines the series ID in some way that is meaningful to that client. The server
+// does not use the series ID information. Series ID values are scoped by the client module. Two
+// different client modules can use the same series ID without ambiguity. If a request is made
+// to start a series that is already in use, the old series is canceled.
+//
+// Every tick in a series is numbered using a value of Series_Count_Type, starting at 1. Ticks
+// in a One_Shot series are always number 1. The type admits the value 0 so it can be used for
+// tick counters as needed.
+//
 typedef unsigned int Series_ID_Type range 1 .. Natural'Last;
 typedef unsigned int Series_Count_Type range 0 .. Natural'Last;
 
+// Request a tick series. The series is scheduled relative to the current time. One_Shot ticks
+// are automatically canceled after the one tick is sent.
 message struct -> Relative_Request {
-    Module_ID_Type Sender;
-    Time_Span      Tick_Interval;
-    Series_Type    Request_Type;
-    Series_ID_Type Series_ID;
+    Ada.Real_Time.Time_Span Tick_Interval;    // The interval between ticks.
+    Series_Type    Request_Type;     // Which kind of series is requested.
+    Series_ID_Type Series_ID;        // The series ID as provided by the client.
 };
 
+// Request a one shot tick at the specified time. If the time has already passed, there is no
+// effect. The tick is automatically canceled after it is sent.
 message struct -> Absolute_Request {
-    Module_ID_Type Sender;
-    Time           Tick_Time;
-    Series_ID_Type Series_ID;
+    Ada.Real_Time.Time Tick_Time;    // When the tick should be sent.
+    Series_ID_Type Series_ID;        // The series ID as provided by the client.
 };
 
+// The actual tick itself. This is sent to the client when and as requested.
 message struct <- Tick_Reply {
-    Module_ID_Type Receiver;
-    Series_ID_Type Series_ID;
-    Series_Count_Type Count;
+    Series_ID_Type    Series_ID;     // The series ID provided by the client earlier.
+    Series_Count_Type Count;         // The tick number (starting at one).
 };
+// TODO: Add a message invariant that says Count >= 1.
 
+// Cancel a pending request. Period tick series must be explicitly canceled.
 message struct -> Cancel_Request {
-    Module_ID_Type Sender;
-    Series_ID_Type Series_ID;
+    Series_ID_Type Series_ID;        // The ID to cancel.
 };

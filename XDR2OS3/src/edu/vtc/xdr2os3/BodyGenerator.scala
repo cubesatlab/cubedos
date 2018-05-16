@@ -3982,7 +3982,7 @@ class BodyGenerator(
       doIndentation()
       out.println("Receiver   => Receiver,")
       doIndentation()
-      out.println("Request_ID   => 0,")
+      out.println("Request_ID   => Request_ID,")
       doIndentation()
       out.println("Message_ID => Message_Type'Pos(" + id + "),")
       doIndentation()
@@ -4551,13 +4551,13 @@ class BodyGenerator(
       var s = symbolTable.getStructuredTypeParent(id, i)
       if (symbolTable.getST(id, i).contains("StructRep")) {
         var l = List[String]()
-        l = l.:+(i)
+        l = l :+ i
         processStructV(s, l, 0)
       }
       else if (symbolTable.getST(id, i).contains("ArrayRep")) {
         if (symbolTable.getArraySType(id, i) == "StructRep") {
           var l = List[String]()
-          l = l.:+(i)
+          l = l :+ i
           val structNum = symbolTable.getArraySSize(id, i).toInt
           doIndentation()
           out.println("for Y in Integer range 0 .. " + symbolTable.getArraySSize(id, i) + " loop")
@@ -4721,6 +4721,11 @@ class BodyGenerator(
       else if (symbolTable.getST(id, i).contains("StringRep")) {
         doIndentation()
         out.println(i + " := (others => ' ');")
+      }
+      else if (s != "null" && symbolTable.getST(id, i).contains("EnumRep")) {
+        // The EnumRep case was added by pchapin... Do we need a case for s == "null"?
+        doIndentation()
+        out.println(i + " := " + s + "'First;")
       }
       else if (s == "null" && symbolTable.getST(id, i).contains("BoolRep")) {
         doIndentation()
