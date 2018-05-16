@@ -1,4 +1,5 @@
 src/build
+XDR2OS3/build
 
 # LaTeX build artifacts
 main.aux
@@ -8,3 +9,15 @@ main.log
 main.out
 main.pdf
 main.toc
+
+# Related to XDR2OS3
+XDR2OS3/.idea/workspace.xml
+XDR2OS3/lib/*.jar
+XDR2OS3/src/edu/vtc/xdr2os3/XDR.tokens
+XDR2OS3/src/edu/vtc/xdr2os3/XDRBaseListener.java
+XDR2OS3/src/edu/vtc/xdr2os3/XDRBaseVisitor.java
+XDR2OS3/src/edu/vtc/xdr2os3/XDRLexer.java
+XDR2OS3/src/edu/vtc/xdr2os3/XDRLexer.tokens
+XDR2OS3/src/edu/vtc/xdr2os3/XDRListener.java
+XDR2OS3/src/edu/vtc/xdr2os3/XDRParser.java
+XDR2OS3/src/edu/vtc/xdr2os3/XDRVisitor.java
