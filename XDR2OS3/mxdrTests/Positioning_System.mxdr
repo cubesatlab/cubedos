@@ -1,9 +1,0 @@
-typedef float X_Rotation range 0 .. 359;
-typedef float Y_Rotation range 0 .. 359;
-typedef float Z_Rotation range 0 .. 359;
-
-message struct -> Rotation_Request {void;};
-
-message struct <- Rotation_Reply { X_Rotation X_Rot;
-                                   Y_Rotation Y_Rot;
-                                   Z_Rotation Z_Rot; };

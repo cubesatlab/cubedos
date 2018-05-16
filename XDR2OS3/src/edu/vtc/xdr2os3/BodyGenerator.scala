@@ -1,14 +1,16 @@
 package edu.vtc.xdr2os3
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
+
 import edu.vtc.xdr2os3.XDRParser._
 import org.antlr.v4.runtime.tree._
 
 class BodyGenerator(
-                     nameOfFile: String,
-                     symbolTable: BasicSymbolTable,
-                     out        : java.io.PrintStream,
-                     reporter   : Reporter) extends XDRBaseVisitor[Void] {
+  templateFolder : String,
+  nameOfFile     : String,
+  symbolTable    : BasicSymbolTable,
+  out            : java.io.PrintStream,
+  reporter       : Reporter) extends XDRBaseVisitor[Void] {
 
   // The number of indentations where output lines start.
   private var indentationLevel = 0
@@ -55,7 +57,7 @@ class BodyGenerator(
   }
 
   def processTemplate(): List[String] = {
-    val source = scala.io.Source.fromFile("/home/CubeSat/Projects/CubeSat/trunk/CubedOS/XDR2OS3/mxdrTests/template2.adb")
+    val source = scala.io.Source.fromFile(templateFolder + File.separator + "template.adb")
     val lines = source.getLines().toList
     val newLines = addedLines(lines)
     source.close()
