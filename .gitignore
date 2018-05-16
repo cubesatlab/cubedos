@@ -21,3 +21,8 @@ XDR2OS3/src/edu/vtc/xdr2os3/XDRLexer.tokens
 XDR2OS3/src/edu/vtc/xdr2os3/XDRListener.java
 XDR2OS3/src/edu/vtc/xdr2os3/XDRParser.java
 XDR2OS3/src/edu/vtc/xdr2os3/XDRVisitor.java
+XDR2OS3/doc/scaladoc
+
+# Generated API packages
+src/MXDR/*.ads
+src/MXDR/*.adb

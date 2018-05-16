@@ -16,7 +16,7 @@
   <target name="init">
     <property name="scala-library.jar"  location="${scala.home}/lib/scala-library.jar"/>
     <property name="scala-reflect.jar"  location="${scala.home}/lib/scala-reflect.jar"/>
-    <property name="scala-parsers.jar"  location="${scala.home}/lib/scala-parser-combinators_2.12-1.0.6.jar"/>
+    <property name="scala-parsers.jar"  location="${scala.home}/lib/scala-parser-combinators_2.12-1.0.7.jar"/>
     <property name="scala-xml.jar"      location="${scala.home}/lib/scala-xml_2.12-1.0.6.jar"/>
     <property name="scala-compiler.jar" location="${scala.home}/lib/scala-compiler.jar"/>
     <property name="antlr.jar"          location="lib/antlr4-4.5.3.jar"/>
