@@ -77,22 +77,6 @@ package body CubedOS.Tick_Generator.Messages
 
    protected body Series_Database is
 
-      -- TODO: Find a way to handle reply messages, then implement this procedure.
-      --procedure Add_Series_Record(Series : in Series_Record; Status : out Status_Type) is
-      --begin
-      --   for I in Series_Array'Range loop
-      --      if not Series_Array(I).Is_Used then
-      --         Series_Array(I) := Series;
-      --         Status := Accepted;
-      --         exit;
-      --      end if;
-      --      if I = Series_Array'Last and then Series_Array(I).Is_Used then
-      --         Status := Series_Full;
-      --      end if;
-      --   end loop;
-      --end Add_Series_Record;
-
-
       procedure Unchecked_Add_Series_Record(Series : in Series_Record) is
       begin
          -- If there is insufficient space, there is no effect.

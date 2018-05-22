@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-sorters.adb
 -- SUBJECT: Body of a package containing utility sorting procedures.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2018 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ package body CubedOS.Lib.Sorters is
        Post =>
          (for all J in Values'First .. Place - 1 => Values(J) <= Values(J + 1))
    is
-      N      : Positive;
+      N : Positive;
       Holder : Element_Type;
    begin
       Holder := Values(Place);
