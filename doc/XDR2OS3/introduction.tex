@@ -1,13 +1,14 @@
 
 \section{Introduction}
+\label{sec:introduction}
 
 CubeSats are small (10\,cm x 10\,cm x 10\,cm) spacecraft that are in a size class often referred
 to as nano-satellites. Typical CubeSat missions are executed in low Earth orbit. They are placed
 there with the help of much larger launch vehicles that are launching full sized satellites for
 some unrelated purpose (e.g., satellite television). In recent years interest is rising in using
-CubeSats on more ambitious missions such as accompanying deep space spacecraft on missions to the
-moon and planets. Deep space CubeSat-only missions are also being contemplated. \pnote{We need
-  some citations here!}
+CubeSats on more ambitious missions such as accompanying deep space spacecraft to the moon and
+planets. Deep space CubeSat-only missions are also being contemplated. \pnote{We need some
+  citations here!}
 
 As with all spacecraft, software plays a critical role in the success of CubeSat missions.
 Unfortunately many CubeSat missions have been plagued with catastrophic software problems
@@ -28,20 +29,20 @@ developing a general purpose, open source application framework for CubeSat flig
 we call \newterm{CubedOS}. While not precisely an operating system (it is intended to run on top
 of an existing operating system or runtime environment), CubedOS does provide some basic
 infrastructure and supporting services of interest to flight software developers. A well
-documented reusable system such as CubedOS will simplify the construction of flight software and
-improve its reliability by cutting down on the amount of supporting code that must be developed
-by each mission.
+documented, reusable system such as CubedOS will simplify the construction of flight software
+and improve its reliability by cutting down on the amount of supporting code that must be
+developed by each mission.
 
 NASA's Goddard Spacecraft Flight Center has, in fact, developed a very similar framework called
-the Core Flight System (CFS) \pnote{Citation needed}. Unlike current CubedOS, CFS is well
+the Core Flight System (CFS) \pnote{Citation needed}. Unlike CubedOS at this time, CFS is well
 established with a large community of users and several active and planned missions
 \pnote{Citation needed}. In fact, it is our goal to eventually provide a CubedOS/CFS bridge that
 would allow a current CFS-based mission to migrate to CubedOS incrementally if desired.
 
 However, unlike CFS, which is written in unverified C, CubedOS is entirely written in \SPARK\
-2014 and verified free of runtime error in the sense meant by \SPARK. We also intend to use
-\SPARK, as time and resources allow, to prove that CubedOS satisfies certain functional
-correctness properties as well.
+2014 and verified free of runtime error in the sense meant by \SPARK. \pnote{Citation?} We also
+intend to use \SPARK, as time and resources allow, to prove that CubedOS satisfies certain
+functional correctness properties as well.
 
 CubedOS applications are organized as a collection of \newterm{modules}. Each module is usually
 implemented as a hierarchy of Ada packages with a single root. Every module has an ID number
@@ -86,9 +87,9 @@ Following the tradition of many RPC systems \pnote{Citation needed}, CubedOS all
 developer to describe the interface of a module in specialized interface definition language. A
 tool is then provided, the main subject of this paper, that compiles the interface definition
 into packages to perform the necessary encoding and decoding of message parameters. Since we
-selected the External Data Representation (XDR) standard for the binary format, we call our tool
-XDR2OS3. The interface definition language we use is an extension of that described in \pnote{add
-  citation to the RFC} which we call \newterm{modified XDR} (MXDR).
+selected the External Data Representation (XDR) standard \cite{rfc-4506} for the binary format,
+we call our tool XDR2OS3. The interface definition language we use is an extension of that
+described in \pnote{add citation to the RFC} which we call \newterm{modified XDR} (MXDR).
 
 XDR2OS3 outputs \SPARK\ packages that can be proved free of runtime error. The modifications in
 the MXDR language account for the special needs of the \SPARK\ target language. In particular:

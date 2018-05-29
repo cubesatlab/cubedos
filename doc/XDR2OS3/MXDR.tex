@@ -1,0 +1,106 @@
+
+\section{Modified XDR}
+\label{sec:mxdr}
+
+Modified eXternal Data Representation (MXDR) is based on the well-known eXternal Data
+Representation (XDR) standard \cite{rfc-4506}. Essentially, all syntactic forms in the standard
+XDR grammar, except unions, can be found in the MXDR grammar. The main differences between the
+MXDR grammar and the XDR grammar are the inclusion of an optional range specifications on types,
+the introduction of the message struct as described below, and message invariants.
+
+% Do we want to make these subsections? They might be too short, but it's nice to organize the
+% presentation to focus on the additions in MXDR that we outlined in the introduction.
+
+\subsection{Range Constraints}
+
+To specify a range constraint on a type an Ada-like syntax is used as shown below.
+
+\begin{Verbatim}
+typedef unsigned int First_Example_Type
+    range 1 .. 100;
+
+typedef double Second_Example_Type
+    range -3.14159 .. 3.14159;
+\end{Verbatim}
+
+It is also permitted to use the following Ada-like syntax for referencing previously declared
+bounds:
+
+\begin{Verbatim}
+typedef unsigned int Third_Example_Type
+    range 2 .. First_Example_Type’Last;
+\end{Verbatim}
+
+Standard XDR, which targets a C-like environment, does not support any syntax for specifying
+such ranges. However, Ada, and SPARK especially, relies on the generous use of appropriate range
+constraints to facilitate the analyses and proofs done by the compiler and tools.
+
+\subsection{Message Structs}
+
+MXDR supports XDR's structure types, which are mapped into Ada records in an obvious way. Such
+types can be used just as the primitive types can be used when defining messages. The messages
+themselves, however, are defined using a special ``message struct'' that signals to the XDR2OS3
+tool that appropriate encoding/decoding subprograms need to be generated.
+
+The contents of a message struct are the parameters of the message. They are mapped to the
+parameters of encoding and decoding subprograms as described in
+Section~\ref{sec:code-generation}. 
+
+Message structs are sensitive to the direction of message flow. Messages that are intended to be
+sent by a module are treated differently than messages that are intended to be received by a
+module. This is because the encoding of a message must include the module ID of the sending
+module. However, the sending module is different for messages that a given module sends versus
+the messages that module receives.
+
+The syntax of message structs therefor include a \texttt{->} symbol for messages that are
+inbound to the module defining the message and a \texttt{<-} symbol for messages that are
+outbound from that module.
+
+\begin{Verbatim}
+message struct -> Example_Request {
+    unsigned int        param_1;  // MXDR built-in type
+    string              param_2;  // MXDR built-in type
+    First_Example_Type  param_3;  // Previously defined
+    Second_Example_Type param_4;  // Previously defined
+    Third_Example_Type  param_5;  // Previously defined
+};
+
+message struct <- Example_Reply {
+  int param_1[10];  // XDR arrays fully supported
+};
+\end{Verbatim}
+
+\subsection{Message Invariants}
+
+In many cases the parameters of a message are required to always have some well defined
+interrelationship between their values. For example, a string parameter might always need to be
+of some limited size, or a count parameter might always need to be smaller than a bound
+parameter. This information needs to be added to the generated code so that SPARK can verify
+these constraints are honored by the users of the generated code, and use the constraints when
+completing proofs in the generated code. Accordingly MXDR allows \newterm{message invariants} to
+be added to message structs as shown in the example below.s:
+
+\begin{Verbatim}
+typedef unsigned int Result_Count_Type range 0 .. 512;
+typedef unsigned int Result_Bound_Type range 1 .. 512;
+
+message struct <- Example_Reply {
+    Result_Count_Type count;
+    Result_Bound_Type bound;
+} with message_invariant => (count <= bound);
+\end{Verbatim}
+
+Currently, only simple relational expressions are supported in message invariants. Support for
+additional expression forms, such as quantified expressions for use with arrays, is planned for
+the future.
+
+As described in more detail in Section~\ref{sec:code-generation}, message invariants are mapped
+to preconditions on encoding functions and post conditions on decoding procedures. This ensures
+that the condition expressed by the invariant is try when a message is encoded, and signals the
+invariant to the receiving code after the message is decoded. SPARK shows that the generated
+code can only produce messages that meet the invariant.
+
+% XDR2OS3 does not necessarily initialize the decided values in accordance with the invariant so
+% if a decoding fails, SPARK may not be able to prove the generated code. Solving this problem
+% will be difficult.
+
