@@ -26,3 +26,5 @@ XDR2OS3/doc/scaladoc
 # Generated API packages
 src/MXDR/*.ads
 src/MXDR/*.adb
+doc/XDR2OS3/*.ads
+doc/XDR2OS3/*.adb
