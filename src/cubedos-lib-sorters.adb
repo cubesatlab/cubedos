@@ -7,26 +7,6 @@
 
 package body CubedOS.Lib.Sorters is
 
-   -- This placeholder implementation allows the test program to build when the assertion
-   -- policy is set to 'Check'. Otherwise the uses of Perm in assertions cause an undefined
-   -- external reference error.
-   --
-   function Perm(A : in Array_Type; B : in Array_Type) return Boolean is
-      pragma Unreferenced(A, B);
-   begin
-      -- TODO: Write a real version of Perm (without sorting?)
-      return True;
-   end Perm;
-
-
-   --function Perm_Transitive(A, B, C : Array_Type) return Boolean
-   --  with
-   --    Global => null,
-   --    Post   => (if Perm_Transitive'Result and Perm(A, B) and Perm(B, C) then Perm (A, C)),
-   --    Ghost  => True,
-   --    Import => True;
-
-
    -- Is this procedure needed? It seems too useful to just delete!
    procedure Swap(Values : in out Array_Type; X : in Positive; Y : in Positive)
      with
@@ -36,22 +16,18 @@ package body CubedOS.Lib.Sorters is
           Y in Values'Range and
           X /= Y),
        Post =>
-         Perm(Values'Old, Values) and
-         (Values(X) = Values'Old(Y) and
-          Values(Y) = Values'Old(X) and
-          (for all J in Values'Range =>
-            (if J /= X and J /= Y then Values(J) = Values'Old(J))))
+         Values(X) = Values'Old(Y) and
+         Values(Y) = Values'Old(X) and
+         (for all J in Values'Range =>
+            (if J /= X and J /= Y then Values(J) = Values'Old(J)))
    is
-      Values_Old : constant Array_Type := Values
-        with Ghost => True;
-
       Temp : Element_Type;
    begin
       Temp      := Values(X);
       Values(X) := Values(Y);
       Values(Y) := Temp;
-      pragma Assume(Perm(Values_Old, Values));
    end Swap;
+   pragma Unreferenced(Swap);
 
 
    procedure Insert_Single(Values : in out Array_Type; Place : in Positive)
@@ -59,9 +35,9 @@ package body CubedOS.Lib.Sorters is
        Global => null,
        Depends => (Values => (Values, Place)),
        Pre =>
-         Values'Length >= 1   and
-         Values'First < Place and
-         Place <= Values'Last and
+         (Values'Length >= 1   and
+          Values'First < Place and
+          Place <= Values'Last) and then
          (for all J in Values'First .. Place - 2 => Values(J) <= Values(J + 1)),
        Post =>
          (for all J in Values'First .. Place - 1 => Values(J) <= Values(J + 1))
@@ -72,8 +48,8 @@ package body CubedOS.Lib.Sorters is
       Holder := Values(Place);
       N := Place;
       while N > Values'First and then Holder < Values(N - 1)  loop
-
          pragma Loop_Invariant(N - 1 >= Values'First and N <= Values'Last);
+
          Values(N) := Values(N - 1);
          N := N - 1;
       end loop;
@@ -96,5 +72,22 @@ package body CubedOS.Lib.Sorters is
       end loop;
    end Insertion_Sort;
 
+
+   procedure Make_Heap(Values : in out Array_Type; Last : in Positive) is
+   begin
+      null;
+   end Make_Heap;
+
+
+   procedure Push_Heap(Values : in out Array_Type; Last : in Positive) is
+   begin
+      null;
+   end Push_Heap;
+
+
+   procedure Sort_Heap(Values : in out Array_Type; Last : in Positive) is
+   begin
+      null;
+   end Sort_Heap;
 
 end CubedOS.Lib.Sorters;
