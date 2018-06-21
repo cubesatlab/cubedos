@@ -6,9 +6,6 @@ A flight software framework for CubeSat spacecraft written in SPARK/Ada.
 
 This folder contains the CubedOS system and associated files. The subfolders are as follows:
 
-+ LaTeX: A folder with various resources related to the LaTeX typesetting system. We use LaTeX
-  for writing documentation and papers.
-
 + LineRider: A sample application using the STMF4DISCOVERY platform demonstrate some of
   CubedOS's abilities.
 
