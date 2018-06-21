@@ -1,17 +1,16 @@
 package edu.vtc.xdr2os3
 
-import java.io.PrintWriter
+import java.io.File
 
-import edu.vtc.xdr2os3.TypeRep.{IntRep, MStructRep}
-import org.antlr.v4.runtime.tree._
+import edu.vtc.xdr2os3.TypeRep.IntRep
 import edu.vtc.xdr2os3.XDRParser._
 
 class SpecificationGenerator(
-                              templateFolder : String,
-                              nameOfFile : String,
-                              symbolTable: BasicSymbolTable,
-                              out        : java.io.PrintStream,
-                              reporter   : Reporter) extends XDRBaseVisitor[Void] {
+  templateFolder : String,
+  nameOfFile     : String,
+  symbolTable    : BasicSymbolTable,
+  out            : java.io.PrintStream,
+  reporter       : Reporter) extends XDRBaseVisitor[Void] {
 
   // The number of indentations where output lines start.
   private var indentationLevel = 0
@@ -58,7 +57,7 @@ class SpecificationGenerator(
   }
 
   def processTemplate(): List[String] = {
-    val source = scala.io.Source.fromFile("/home/CubeSat/Projects/CubedOS/XDR2OS3/mxdrTests/template.ads")
+    val source = scala.io.Source.fromFile(templateFolder + File.separator + "template.ads")
     val lines = source.getLines().toList
     val newLines = addedLines(lines)
     source.close()
@@ -160,7 +159,7 @@ class SpecificationGenerator(
             out.println(";")
             out.println("")
             doIndentation()
-            out.print("type " + id + " is array (0 .. " + symbolTable.getArraySize(id) + ") of " + id + "_Intermediary")
+            out.print("type " + id + " is array (0 .. " + ctx.value().CONSTANT().toString + ") of " + id + "_Intermediary")
           }
           else {
             out.println("")
@@ -179,7 +178,7 @@ class SpecificationGenerator(
             out.println("")
             indentationLevel -= 1
             doIndentation()
-            out.print("type " + id + " is array (0 .. " + symbolTable.getArraySize(id) + ") of " + id + "_Intermediary")
+            out.print("type " + id + " is array (0 .. " + ctx.value().CONSTANT().toString + ") of " + id + "_Intermediary")
           }
           else {
             val id = ctx.IDENTIFIER().getText

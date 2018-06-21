@@ -57,7 +57,7 @@ class BodyGenerator(
   }
 
   def processTemplate(): List[String] = {
-    val source = scala.io.Source.fromFile("/home/CubeSat/Projects/CubedOS/XDR2OS3/mxdrTests/template2.adb")
+    val source = scala.io.Source.fromFile(templateFolder + File.separator + "template.adb")
     val lines = source.getLines().toList
     val newLines = addedLines(lines)
     source.close()

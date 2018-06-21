@@ -165,8 +165,7 @@ class BasicSymbolTable extends SymbolTable {
     val c2 = typeMap(name).toString().indexOf(",", 0) - 1
 
     val s1 = typeMap(name)._1.toString.substring(c1, c2)
-    val s2 = (s1.toInt - 1).toString
-    s2
+    s1
   }
 
   //Returns Array size (upper value).
@@ -184,7 +183,6 @@ class BasicSymbolTable extends SymbolTable {
         v = v.substring(v.lastIndexOf('(') + 1)
       }
     }
-    v = (v.toInt - 1).toString
     v
   }
 
