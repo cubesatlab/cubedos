@@ -1,7 +1,0 @@
-<ivy-module version="2.0">
-  <info organisation="edu.vtc" module="xdr2os3"/>
-  <dependencies>
-    <dependency org="org.antlr" name="antlr4" rev="4.5.3"/>
-    <dependency org="org.scalatest" name="scalatest_2.12" rev="3.0.1"/>
-  </dependencies>
-</ivy-module>
