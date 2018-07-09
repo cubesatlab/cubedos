@@ -24,7 +24,4 @@ package CubedOS.Publish_Subscribe is
 
    ID : constant Message_Manager.Module_ID_Type := 2;
 
-   Maximum_Channel_Count : constant := 8;
-   type Channel_ID_Type is range 1 .. Maximum_Channel_Count;
-
 end CubedOS.Publish_Subscribe;

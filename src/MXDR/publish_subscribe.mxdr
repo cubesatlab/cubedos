@@ -1,0 +1,48 @@
+// FILE: publish_subscribe.mxdr
+//
+// The interface definition of the core CubedOS publish/subscribe server module.
+//
+// The publish/subscribe server maintains a statically specified number of "channels" to which
+// modules can subscribe. Whenever data is published to a channel, every subscriber of that
+// channel receives that data. This interface currently provides no mechanism for unsubscribing
+// from a channel. This isn't expected to be a major problem since, in many applications,
+// subscriptions are done once during system initialization and then never modified afterward.
+
+
+// Used to indicate the status of a server operation.
+enum Status_Type { Success, Failure };
+
+const Maximum_Channel_Count = 8;
+typedef unsigned int Channel_ID_Type range 1 .. Maximum_Channel_Count;
+
+// Request that the message sender be subscribed to the specified channel.
+message struct -> Subscribe_Request {
+    Channel_ID_Type Channel;
+};
+
+// Returned in response to Subscribe_Request. The returned channel echos that in the original
+// request. Status indicates success/failure of request.
+message struct <- Subscribe_Reply {
+    Channel_ID_Type Channel;
+    Status_Type     Status;
+};
+
+// Publish Message_Data to the indicated channel.
+message struct -> Publish_Request {
+    Channel_ID_Type Channel;
+    opaque          Message_Data<>;
+};
+
+// Returned in response to Publish_Request. The returned channel echos that in the original
+// request. Status indicates success/failure of request.
+message struct <- Publish_Reply {
+    Channel_ID_Type Channel;
+    Status_Type     Status;
+};
+
+// When data is published to a channel, each subscribing module receives one of these messages
+// containing that data.
+message struct <- Publish_Result {
+    Channel_ID_Type Channel;
+    opaque          Data<>;
+};
