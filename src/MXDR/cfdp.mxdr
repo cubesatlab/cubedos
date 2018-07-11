@@ -1,0 +1,26 @@
+// FILE: cfdp.mxdr
+//
+// The interface definition of the core CubedOS CFDP module.
+
+// This interface is unfinished. All of the messages mentioned below should be added.
+//enum Message_Type {
+//    Put_Request,
+//    Cancel_Request,
+//    Suspect_Request,
+//    Resume_Request,
+//    Report_Request,
+//    Report_Reply
+//};
+
+
+const Maximum_Name_Length = 16;
+
+typedef unsigned int Entity_ID_Type range 0 .. 65535;
+typedef unsigned int Transaction_ID_Type range 0 .. 65535;
+
+message struct -> Put_Request {
+    Entity_ID_Type Destination;
+    string         Source_File<>;
+};
+
+// FINISH ME!!
