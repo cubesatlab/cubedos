@@ -50,7 +50,6 @@ package body CubedOS.File_Server.Messages is
       Mode       : API.Mode_Type;
       Status     : Message_Status_Type;
       Name       : String(1 .. 256);  -- Somewhat arbitrary restriction on file name size.
-      --Request_ID : Request_ID_Type;
       Name_Size  : Natural;
       Underlying_Mode : Octet_IO.File_Mode;
       Handle     : constant API.File_Handle_Type := Find_Free_Handle;
@@ -76,8 +75,16 @@ package body CubedOS.File_Server.Messages is
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
       else
-         Underlying_Mode := (if Mode = API.Read then Octet_IO.In_File else Octet_IO.Out_File);
-         Octet_IO.Open(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
+         case Mode is
+            when API.Read =>
+               Underlying_Mode := Octet_IO.In_File;
+               Octet_IO.Open(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
+
+            when API.Write =>
+               Underlying_Mode := Octet_IO.Out_File;
+               Octet_IO.Create(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
+         end case;
+
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
               (Receiver_Domain => Incoming_Message.Sender_Domain,

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-file_server-api.adb
 -- SUBJECT: Body of a package that simplifies use of the file server.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2018 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -247,7 +247,7 @@ package body CubedOS.File_Server.API is
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Mode, Last);
       Position := Last + 1;
-      if Raw_Mode in Mode_Type'Pos(Mode_Type'First) .. Mode_Type'Pos(Mode_Type'Last) then
+      if Raw_Mode <= Mode_Type'Pos(Mode_Type'Last) then
          Mode := Mode_Type'Val(Raw_Mode);
       else
          Decode_Status := Malformed;
@@ -255,14 +255,12 @@ package body CubedOS.File_Server.API is
       end if;
       XDR.Decode(Message.Payload, Position, Raw_Name_Size, Last);
       Position := Last + 1;
-      if Raw_Name_Size in XDR.XDR_Unsigned(Natural'First) .. XDR.XDR_Unsigned(Natural'Last) then
+      if Raw_Name_Size <= XDR.XDR_Unsigned(Natural'Last) then
          Name_Size := Natural(Raw_Name_Size);
       else
          Name_Size := 0;
       end if;
-      if Name_Size < 1 then
-         XDR.Decode(Message.Payload, Position, Name(Name'First .. Name'First + (Name_Size - 1)), Last);
-      end if;
+      XDR.Decode(Message.Payload, Position, Name(Name'First .. Name'First + (Name_Size - 1)), Last);
    end Open_Request_Decode;
 
 

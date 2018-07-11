@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-file_server-api.ads
 -- SUBJECT: Specification of a package that simplifies use of the file server.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2018 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -36,7 +36,7 @@ package CubedOS.File_Server.API is
 
    -- Attempted reads and writes must be for at least one octet. The reply messages contain the
    -- number of octets successfully read or written and must allow for zero to handle the error
-   -- case.
+   -- or end-of-file case.
    --
    subtype Read_Result_Size_Type is Natural range 0 .. Maximum_Read_Size;
    subtype Read_Size_Type is Natural range 1 .. Read_Result_Size_Type'Last;
