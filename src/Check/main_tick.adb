@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- FILE   : main_tick.adb
 -- SUBJECT: The main file to test the tick generator package.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2018 by Vermont Technical College
 --
--- In order to test the tick generator module, you must run the produced executable
--- in the command prompt, and ^C out of it when a suitable time has passed. Then,
--- observe the behavior to ensure the desired effects are happening.
+-- In order to test the tick generator module, you must run the produced executable in a console
+-- window, and ^C out of it when a suitable time has passed. Then observe the behavior to ensure
+-- the desired effects are happening.
 --------------------------------------------------------------------------------
 with Ada.Integer_Text_IO;
 with Ada.Real_Time;
@@ -18,126 +18,63 @@ with Message_Manager;
 
 use Ada.Integer_Text_IO;
 use Ada.Text_IO;
---use CubedOS.Lib;
 use CubedOS.Tick_Generator;
 use CubedOS.Tick_Generator.API;
 use Message_Manager;
 
 procedure Main_Tick is
+   use type Ada.Real_Time.Time;
 
-   task Test_Tick_Generator_1; -- Normal periodic tick test
-   task Test_Tick_Generator_2; -- Normal periodic tick test
-   task Test_Tick_Generator_3; -- One shot tick test
-   task Test_Tick_Generator_4; -- Cancel tick request test
+   package Duration_IO is new Fixed_IO(Duration);
+   use Duration_IO;
 
+   -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
+   My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
 
-   -- Basic test.
-   task body Test_Tick_Generator_1 is
-      Tick_Request     : Message_Record;
-      Incoming_Message : Message_Record;
-      Series_ID        : Series_ID_Type;
-      Count            : Natural;
-      Status           : Message_Status_Type;
-      ID   : constant Message_Manager.Module_ID_Type := 16;
-   begin
-      -- Make and then request a tick message from the generator module.
-      Tick_Request := Relative_Request_Encode(ID, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Tick_Request);
-      loop
-         -- Receives each tick message, and prints the count number.
-         Message_Manager.Mailboxes(ID).Receive(Incoming_Message);
-         if Is_Tick_Reply(Incoming_Message) then
-            Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
-            if Status = Success then
-               Put("Task 1 --"); Put(Count); New_Line;
-            end if;
-         end if;
-      end loop;
-   end Test_Tick_Generator_1;
-
-
-   -- The interval in this test is the same as above in case that causes a problem.
-   task body Test_Tick_Generator_2 is
-      Tick_Request     : Message_Record;
-      Incoming_Message : Message_Record;
-      Series_ID        : Series_ID_Type;
-      Count            : Natural;
-      Status           : Message_Status_Type;
-      ID   : constant Message_Manager.Module_ID_Type := 15;
-   begin
-      -- Make and then request a tick message from the generator module.
-      Tick_Request := Relative_Request_Encode(ID, Ada.Real_Time.Milliseconds(3000), Periodic, 2);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Tick_Request);
-      loop
-         -- Receives each tick message, and prints the count number.
-         Message_Manager.Mailboxes(ID).Receive(Incoming_Message);
-         if Is_Tick_Reply(Incoming_Message) then
-            Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
-            if Status = Success then
-               Put("Task 2 --"); Put(Count); New_Line;
-            end if;
-         end if;
-      end loop;
-   end Test_Tick_Generator_2;
-
-
-   -- One shot test.
-   task body Test_Tick_Generator_3 is
-      Tick_Request     : Message_Record;
-      Incoming_Message : Message_Record;
-      Series_ID        : Series_ID_Type;
-      Count            : Natural;
-      Status           : Message_Status_Type;
-      ID   : constant Message_Manager.Module_ID_Type := 14;
-   begin
-      -- Make a request for ONE tick message from the generator module.
-      Tick_Request := Relative_Request_Encode(ID, Ada.Real_Time.Milliseconds(200), One_Shot, 3);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Tick_Request);
-      loop
-         -- Receives the tick message, and prints out the count number.
-         Message_Manager.Mailboxes(ID).Receive(Incoming_Message);
-         if Is_Tick_Reply(Incoming_Message) then
-            Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
-            if Status = Success then
-               Put("Task 3 --"); Put(Count); New_Line;
-            end if;
-         end if;
-      end loop;
-   end Test_Tick_Generator_3;
-
-
-   -- Add and remove a series, then create a different series.
-   task body Test_Tick_Generator_4 is
-      Tick_Request        : Message_Record;
-      Incoming_Message    : Message_Record;
-      Cancel_Tick_Request : Message_Record;
-      Series_ID           : Series_ID_Type;
-      Count               : Natural;
-      Status              : Message_Status_Type;
-      ID   : constant Message_Manager.Module_ID_Type := 13;
-   begin
-      -- Make and request a tick message from the generator module.
-      Tick_Request := Relative_Request_Encode(ID, Ada.Real_Time.Milliseconds(2000), Periodic, 44);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Tick_Request);
-
-      -- Remove series and ask for a new periodic tick.
-      Cancel_Tick_Request := Cancel_Request_Encode(ID, 44);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Cancel_Tick_Request);
-      Tick_Request := Relative_Request_Encode(ID, Ada.Real_Time.Milliseconds(1000), Periodic, 4);
-      Message_Manager.Mailboxes(1).Unchecked_Send(Tick_Request);
-      loop
-         -- Receives each tick message, and prints the count number.
-         Message_Manager.Mailboxes(ID).Receive(Incoming_Message);
-         if Is_Tick_Reply(Incoming_Message) then
-            Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
-            if Status = Success then
-               Put("Task 4 --"); Put(Count); New_Line;
-            end if;
-         end if;
-      end loop;
-   end Test_Tick_Generator_4;
-
+   Incoming_Message : Message_Manager.Message_Record;
+   Series_ID  : Series_ID_Type;
+   Count      : Natural;
+   Status     : Message_Status_Type;
+   Start_Time : Ada.Real_Time.Time;
+   Relative_Time : Ada.Real_Time.Time_Span;
+   Relative_Duration : Duration;
 
 begin
-   null;
+   Start_Time := Ada.Real_Time.Clock;
+
+   -- Do some setup...
+   Message_Manager.Route_Message
+     (Relative_Request_Encode(Domain_ID, My_Module_ID, 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
+   Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
+
+   Message_Manager.Route_Message
+     (Relative_Request_Encode(Domain_ID, My_Module_ID, 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
+   Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
+
+   loop
+      Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
+      --Put_Line("+++ Fetch returned!");
+      --Put("+++    Sender    : "); Put(Incoming_Message.Sender); New_Line;
+      --Put("+++    Receiver  : "); Put(Incoming_Message.Receiver); New_Line;
+      --Put("+++    Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
+
+      Relative_Time := Ada.Real_Time.Clock - Start_Time;
+      Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+      if Is_Tick_Reply(Incoming_Message) then
+         Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
+         if Status = Success then
+            Put(Relative_Duration); Put(": ");
+            Put("Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
+
+            -- Cancel series #1 after 10 ticks.
+            if Series_ID = 1 and then Count = 10 then
+               Message_Manager.Route_Message
+                 (Cancel_Request_Encode(Domain_ID, My_Module_ID, 1, Series_ID => 1));
+               Put_Line("TX : Cancel_Request message sent for Series_ID = 1");
+            end if;
+
+         end if;
+      end if;
+   end loop;
+
 end Main_Tick;

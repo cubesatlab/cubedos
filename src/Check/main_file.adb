@@ -28,7 +28,6 @@ procedure Main_File is
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
 
    Incoming_Message : Message_Manager.Message_Record;
-   -- Outgoing_Message : Message_Manager.Message_Record;
    Handle       : File_Handle_Type;
    Read_Handle  : File_Handle_Type;
    Write_Handle : File_Handle_Type;
