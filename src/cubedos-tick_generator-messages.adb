@@ -32,7 +32,7 @@ package body CubedOS.Tick_Generator.Messages
          Kind      : Series_Type := One_Shot;
          Next      : Ada.Real_Time.Time := Ada.Real_Time.Time_First;
          Interval  : Ada.Real_Time.Time_Span := Ada.Real_Time.Time_Span_First;
-         Count     : Series_Count_Type := 0;
+         Count     : Series_Count_Type := 1;
          Is_Used   : Boolean := False;
       end record;
 
@@ -206,7 +206,7 @@ package body CubedOS.Tick_Generator.Messages
             Series.Kind      := Request_Type;
             Series.Interval  := Tick_Interval;
             Series.Next      := Current_Time + Tick_Interval;
-            Series.Count     := 0;
+            Series.Count     := 1;
             Series.Is_Used   := True;
             Series_Database.Unchecked_Add_Series_Record(Series);
          end if;
@@ -236,7 +236,7 @@ package body CubedOS.Tick_Generator.Messages
             Series.Kind      := One_Shot;
             Series.Interval  := Ada.Real_Time.Time_Span_Zero;
             Series.Next      := Tick_Time;
-            Series.Count     := 0;
+            Series.Count     := 1;
             Series.Is_Used   := True;
             Series_Database.Unchecked_Add_Series_Record(Series);
          end if;
