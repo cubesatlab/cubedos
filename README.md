@@ -4,7 +4,12 @@ CubedOS
 
 A flight software framework for CubeSat spacecraft written in SPARK/Ada.
 
-This folder contains the CubedOS system and associated files. The subfolders are as follows:
+This folder contains the core CubedOS system. The sibling Merc repository contains the Merc tool
+used for generating CubedOS API encoder/decoder subprograms. The subfolders are as follows:
+
++ bench: Benchmark programs for measuring the performance of CubedOS.
+
++ doc: The documentation of CubedOS.
 
 + LineRider: A sample application using the STMF4DISCOVERY platform demonstrate some of
   CubedOS's abilities.
@@ -13,18 +18,9 @@ This folder contains the CubedOS system and associated files. The subfolders are
   It is the "Hello, World" application of message passing! We use to to evaluate performance and
   as a base for other, more interesting programs.
 
-+ STM32F4: This folder is old. I'm not sure what is in it!
-
-+ XDR2OS3: The CubedOS interface definition language (IDL) compiler. This tool converts a
-  description of CubedOS messages into appropriate, provable SPARK packages. The IDL is an
-  extended version of the eXternal Data Representation (XDR) standard described in RFC-4506. We
-  call our extended XDR "modified" XDR, or MXDR.
-
-+ bench: Benchmark programs for measuring the performance of CubedOS.
-
-+ doc: The documentation of CubedOS.
-
 + src: The CubedOS source code repository.
+
++ STM32F4: This folder is old. I'm not even sure what is in it!
 
 + templates: Various templates to facilitate the construction of CubedOS applications. The
   developer can use these templates to simplify the programming of new applications, however
@@ -65,38 +61,42 @@ Once inside the VM I recommend immediately updating the CubedOS clone. Open a te
     $ cd Projects/CubedOS
     $ git pull
 
-I recommend doing this regularly to ensure you have the latest stuff.
+I recommend doing this regularly to ensure you have the latest version of the system.
 
-Building our current code base is complicated by the fact that we are using a custom tool,
-XDR2OS3, to generate the module API code. So it is necessary to first build XDR2OS3. Proceed as
-follows:
+Building our current code base is complicated by the fact that we are using a custom tool, Merc,
+to generate the module API code. Merc is stored in a separate repository. Thus it is necessary
+to first update Merc using commands such as:
+
+    $ cd Projects/Merc
+    $ git pull
+
+To build Merc proceed as follows:
 
 1. Start IntelliJ IDEA by executing the command: `idea &`
 
-2. If it doesn't load automatically, load the project XDR2OS3 in `~/Projects/CubedOS/XDR2OS3`
-   (select the name of the folder).
+2. If it doesn't load automatically, load the project Merc in `~/Projects/Merc` (select the name
+   of the folder).
 
 3. From the menus do "Build -> Build Project." This will fail, but that is expected.
 
-4. In the terminal change to the `CubedOS/XDR2OS3` folder and the run the command
-   `bin/build-parser.sh`.
+4. In the terminal change to the `Merc` folder and the run the command `bin/build-parser.sh`.
 
 5. Back in IntelliJ again do "Build -> Build Project" and it should succeed. It is necessary to
    attempt a build first to stimulate IntelliJ to download the ANTLR library needed by the
    project. Only then will the build-parser script actually work. Yes, this is a horrible hack
    and, yes, it could be better. We just haven't gotten around to fixing it.
 
-6. In IntelliJ do "Build -> Build Artifacts -> XDR2OS3:jar -> Build" to build the executable jar
+6. In IntelliJ do "Build -> Build Artifacts -> Merc:jar -> Build" to build the executable jar
    file.
 
-7. Close IntelliJ. You only need to do this once each time the XDR2OS3 code base is updated (and
+7. Close IntelliJ. You only need to do this once each time the Merc code base is updated (and
    you'll most likely be able to skip step #3 except for the rare case when we change which
    version of ANTLR we're using). Ultimately this process can be simplified by using an Ant
    build script (under construction).
 
-Now you need to use the XDR2OS3 tool to build the API packages for the CubedOS core modules.
+Now you need to use the Merc tool to build the API packages for the CubedOS core modules.
 Actually, at the moment, there is only one module to worry about. In the terminal change to the
-`CubedOS/src/MXDR` folder and run the command: `XDR2OS3 tick_generator.mxdr`. This should use
+`CubedOS/src/MXDR` folder and run the command: `Merc tick_generator.mxdr`. This should use
 the jar file you previously created to generate the files `cubedos-tick_generator-api.ads` and
 `cubedos-tick_generator-api.adb` in the same folder.
 
