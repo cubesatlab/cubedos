@@ -18,15 +18,16 @@ package body CubedOS.Logger.API is
    procedure Log_Message
      (Sender_Domain : Domain_ID_Type; Sender : in Module_ID_Type; Text : in String) is
    begin
-      Message_Manager.Route_Message(Log_Text_Encode(Sender_Domain, Sender, Text));
+      Message_Manager.Route_Message(Log_Text_Encode(Sender_Domain, Sender, 0, Text));
    end Log_Message;
 
 
    function Log_Text_Encode
      (Sender_Domain : Domain_ID_Type;
-      Sender   : Module_ID_Type;
-      Text     : String;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Sender     : Module_ID_Type;
+      Request_ID : Request_ID_Type;
+      Text       : String;
+      Priority   : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -34,6 +35,7 @@ package body CubedOS.Logger.API is
            Receiver_Domain => Domain_ID,
            Sender     => Sender,
            Receiver   => ID,
+           Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Log_Text),
            Priority   => Priority);
       Position : XDR_Index_Type;

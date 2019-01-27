@@ -16,6 +16,7 @@ with System;
 package CubedOS.Publish_Subscribe.API is
 
    type Status_Type is (Success, Failure);
+   type Channel_ID_Type is range 1 .. 16;
 
    type Message_Type is
      (Subscribe_Request,  -- Ask to subscribe to a channel.

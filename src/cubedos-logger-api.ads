@@ -35,9 +35,10 @@ package CubedOS.Logger.API is
 
    function Log_Text_Encode
      (Sender_Domain : Domain_ID_Type;
-      Sender   : Module_ID_Type;
-      Text     : String;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Sender     : Module_ID_Type;
+      Request_ID : Request_ID_Type;
+      Text       : String;
+      Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => Text'Length <= Maximum_Log_Message_Size;

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-publish_subscribe-messages.ads
 -- SUBJECT: Specification of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2019 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -9,6 +9,7 @@ pragma Profile(Ravenscar);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with System;
+with Message_Manager;
 
 package CubedOS.Publish_Subscribe.Messages
   with
@@ -17,7 +18,7 @@ package CubedOS.Publish_Subscribe.Messages
 is
 
    task Message_Loop
-     with Global => (In_Out => Database)
+     with Global => (In_Out => (Database, Message_Manager.Mailboxes))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
