@@ -39,29 +39,40 @@ package Sample_Module.API is
       C_Reply);
 
    -- The encoding functions should be given names that reflect the operation but, by
-   -- convention, should have a suffix of "Encode." Messages that are sent to the module take a
-   -- sender module ID, a message priority, and whatever other parameters are appropriate for
-   -- the message (not shown below). Messages sent from the module take a receiver module ID, a
-   -- message priority, and whatever other parameters are appropriate for the message (not shown
-   -- below). Clients of a module do not need to be concerned with exactly how messages to the
-   -- module or from the module are encoded.
+   -- convention, should have a suffix of "Encode." Messages that are sent to the module,
+   -- called "requests," take a sender domain and module ID, a request ID selected by the
+   -- sender, a message priority, and whatever other parameters are appropriate for the message
+   -- (not shown below). Messages sent from the module, called "replies," take a receiver
+   -- module ID, a request ID that was provided by the sender (or zero), a message priority,
+   -- and whatever other parameters are appropriate for the message (not shown below). Clients
+   -- of a module do not need to be concerned with exactly how messages to the module or from
+   -- the module are encoded.
    --
    -- Note that these functions do *not* send the messages, they only construct them. The caller
    -- must explicity send. This design reduces coupling and also gives the caller flexibilty to
    -- pre-construct messages and send them later or de-construct received messages at a latter
    -- time.
    --
+   -- The request ID asssociated with a request is an arbitrary value assigned by the sender of
+   -- a request. Modules are encouraged (although not compelled---this should be documented by
+   -- the module author) to echo the request ID in the corresponding reply or replies. Sending
+   -- modules can use the request ID in the replies to corrolate replies to requests in an
+   -- environment where multiple outstanding requests are possible. The request ID of zero is
+   -- reserved as a placeholder and can be used when this feature is not meaningful or useful.
+   --
    function A_Request_Encode
      (Sender_Domain : Domain_ID_Type;
-      Sender   : Module_ID_Type;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Sender     : Module_ID_Type;
+      Request_ID : Request_ID_Type;
+      Priority   : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
    
    function A_Reply_Encode
      (Receiver_Domain : Domain_ID_Type;
-      Receiver : Module_ID_Type;
-      Status   : Status_Type;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Receiver   : Module_ID_Type;
+      Request_ID : Request_ID_Type;
+      Status     : Status_Type;
+      Priority   : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
    
    
