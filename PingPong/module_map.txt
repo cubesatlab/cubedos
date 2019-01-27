@@ -7,7 +7,6 @@ The "well known" module ID numbers for the various CubedOS core modules.
  1. Tick Generator.
  2. Publish/Subscribe Service.
  3. File Server.
- 4. CFDP Implementation.
 
 Module ID numbers for the application specific modules.
 

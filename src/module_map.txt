@@ -7,10 +7,5 @@ This file contains the "well known" module ID numbers for the various CubedOS co
 1. Tick Generator.
 2. Publish/Subscribe Service.
 3. File Server Interface.
-4. CFDP Implementation.
-5. Spiral Thruster Implementation.
-6. Thruster Interface.
-7. Logger Service.
-8. Positioning System Interface.
 
 

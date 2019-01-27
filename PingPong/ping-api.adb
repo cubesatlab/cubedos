@@ -14,7 +14,14 @@ package body Ping.API is
       Priority : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : constant Message_Record :=
-        Make_Empty_Message(Sender_Domain, Domain_ID, Sender, ID, Message_Type'Pos(Ball), Priority);
+        Make_Empty_Message
+          (Sender_Domain   => Sender_Domain,
+           Receiver_Domain => Domain_ID,
+           Sender     => Sender,
+           Receiver   => ID,
+           Request_ID => 0,
+           Message_ID => Message_Type'Pos(Ball),
+           Priority   => Priority);
    begin
       return Message;
    end Pinged_Encode;
@@ -22,7 +29,9 @@ package body Ping.API is
 
    procedure Pinged_Decode(Message : in  Message_Record) is
    begin
-      -- Decode the given message and return via out parameters (not shown) the fields.
+      -- In this case the entire message is in the header of the message record. The caller
+      -- already has that information, so no additional decoding is needed (and there is
+      -- nothing to decode anyway!)
       null;
    end Pinged_Decode;
 
