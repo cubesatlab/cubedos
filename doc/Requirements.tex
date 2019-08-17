@@ -11,47 +11,52 @@ requirements are used to drive the architecture and design of the system. \pet{T
 \label{sec:core-requirements}
 
 At its heart CubedOS is a message passing microkernel. Conceptually each component of the system
-is stored in a \newterm{module} consisting of one or more Ada packages arranged in a hierarchy.
-Each module has a \newterm{module root package} that is the parent of the module's package
-hierarchy. Modules in CubedOS are conceptually similar to processes in a conventional operating
-system.
+is stored in a \newterm{module} consisting of one or more Ada packages arranged in a package
+hierarchy. Each module has a \newterm{module root package} that is the parent of the module's
+package hierarchy. Modules in CubedOS are conceptually similar to processes in a conventional
+operating system.
 
 CubedOS uses modules for application code, operating system components, and device drivers.
 Applications can be constructed from multiple application level modules. The system does not
 distinguish between different types of modules (for example, between application modules and
-device drivers). There is no specific ``kernel mode'' of execution. Any structuring beyond that
-expressible using normal Ada visibility rules is entirely up to the system programmer.
+device drivers). There is no specific ``kernel mode'' of execution. The architecture we describe
+here is thus enforced primarily by convention. In theory, any structuring expressible using
+normal Ada visibility rules would be acceptable, but there are advantages to following the
+conventions of CubedOS, as we describe throughout this document.
 
-For example it is possible, even if maybe not desirable, for an application module to directly
-invoke functionality in a device driver. In contrast, conventional operating systems typically
-do not allow this, or only allow it under very controlled circumstances.\footnote{However, such
-  direct invocations may be more efficient; an important consideration for a constrained
-  embedded system.}
+For example it is possible, even if not normally desirable, for an application module to
+directly invoke functionality in a device driver. In contrast, conventional operating systems
+typically do not allow this, or only allow it under very controlled circumstances. However, such
+direct invocations may be more efficient; an important consideration for a constrained embedded
+system. This example shows that while we recommend certain design approaches when using CubedOS,
+we also do not want to be overly constraining. CubedOS users with special needs, should be able
+to work with the system rather than outside of it.
 
 CubedOS does distinguish between active modules and passive modules. A module is considered
 active if and only if it either contains the system's main procedure or contains at least one
 task. All other modules, for example containing library code, are said to be passive. CubedOS
-does permit passive modules to be shared among multiple active modules, but it is not permitted
-for any module, active or passive, to directly call subprograms or entries in another active
-module. \pet{Ada has some pragmas in the distributed systems annex that we can perhaps use
-  here.} The only way functionality in another active module can be invoked is by sending that
-module a message. Passive modules play a role in CubedOS similar to that of shared libraries in
-a conventional operating system.
+conventions do permit passive modules to be shared among multiple active modules, but it is not
+permitted for any module, active or passive, to directly call subprograms or entries in another
+active module. \pet{Ada has some pragmas in the distributed systems annex that we can perhaps
+  use here to provide compiler enforcement of this restriction.} The only way functionality in
+another active module can be invoked is by sending that module a message. Passive modules play a
+role in CubedOS similar to that of shared libraries in a conventional operating system.
 
 In each module one task selected by the programmer, called the module's \newterm{server task},
-is distinguished. The server task is the only task in a module that is allowed to receive
+is distinguished. The server task is the \emph{only} task in a module that is allowed to receive
 messages for that module. However, messages can be sent by any task. The following requirements
 apply:
 
 \begin{itemize}
 \item \textbf{Core.SPARK}. The core system, including the core modules described in this
-  document, shall be written in SPARK 2014 and proved free of the possibility of runtime error.
+  document, shall be written in SPARK 2014 and proved free information flow errors and execution
+  runtime errors.
 \item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
-  document, shall be written to conform with the restrictions of the Ravenscar
-  profile.\footnote{This is likely implied by \textbf{Core.SPARK} anyway}.
+  document, shall be written to conform with the restrictions of the Ravenscar profile.
 \item \textbf{Core.Static}. Modules shall be statically allocated. All modules the system will
   ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
-    about on-the-fly software updates?}
+    about on-the-fly software updates? Are we ruling that out, or is that outside the scope of
+    these requirements?}
 \item \textbf{Core.UniqueID}. Each active module shall have a unique, constant ID number
   statically assigned by the application developer. CubedOS core modules (described below) shall
   have fixed, ``well known'' module ID numbers.
@@ -65,13 +70,13 @@ apply:
 
 The CubedOS runtime library is a passive module containing general purpose components of
 interest to many CubedOS applications. Unlike the Ada standard library and many third party
-libraries, the CubedOS runtime library is written in \SPARK\ and verified free of runtime error.
-The following requirements apply:
+libraries, the CubedOS runtime library is written in \SPARK. The following requirements apply:
 
 \begin{itemize}
 \item \textbf{Lib.SPARK}. The runtime library shall be written in SPARK 2014 and proved free of
-  the possibility of runtime error.
-\item \textbf{Lib.Tests}. Unit tests shall be provided for all library components.
+  information flow and execution runtime errors.
+\item \textbf{Lib.Tests}. Unit tests shall be provided for all library components with an
+  emphaisis on sections that may not yet be proving fully.
 \item \textbf{Lib.TaskSafety}. All library components shall be task safe in the sense that they
   can be called simultaneously from multiple tasks without error.
 \item \textbf{Lib.PackageDeployment}. Only the packages actually used by an application shall
@@ -91,6 +96,8 @@ include, but are not limited to:
 \item Error checking/correction
 \item Communication protocol processing
 \item Lightweight database support
+\item Security processing such as encryption/decryption
+\item Data compression
 \end{itemize}
 
 What distinguishes runtime library material from active CubedOS modules is that none of the
@@ -98,16 +105,16 @@ runtime library components contain tasks or perform blocking operations (such as
 Notice, however, that some library components may wish to send messages to other active
 components, such as the file server. In that case the library cannot directly receive the reply
 (only an active module can receive from a mailbox), but instead must rely on the active module
-using the library to forward replies into the library. This unusual organization also
-distinguishes the CubedOS runtime library from most other libraries.
+using the library to forward replies into the library as appropriate. This unusual organization
+also distinguishes the CubedOS runtime library from most other libraries.
 
 \section{Core Modules}
 \label{sec:core-modules}
 
 Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. They always
-exist and have fixed module ID numbers. Note that it is possible that some core modules will not
-be required by all applications. However, their module ID numbers remain reserved. In this
-section we describe these core modules.
+exist and have fixed, well-known module ID numbers. Note that it is possible that some core
+modules will not be required by all applications. However, their module ID numbers remain
+reserved. In this section we describe these core modules.
 
 \subsection{Message Manager}
 \label{sec:message-manager}
@@ -129,6 +136,7 @@ communication between the other active modules in the system. The following requ
 \item \textbf{MessageManager.Unstructured}. Messages shall be unstructured octet arrays. This
   allows all modules to use a common message type. However, to simplify the task of creating and
   decoding messages, CubedOS shall provide a standard data encoding/decoding facility.
+  \footnote{This facility is implemented in the Merc tool}
 \item \textbf{MessageManager.Sizes}. It shall be possible for the application developer to tune
   the size of the mailboxes (number of pending messages) and the size of the messages
   themselves.
@@ -145,10 +153,10 @@ communication between the other active modules in the system. The following requ
   the same or lower priority shall be purged from the mailbox. If no such message exists in the
   last case (because they all have higher priority), the message shall be lost.
 \item \textbf{MessageManager.Inheritance}. If the priority of a received message is higher than
-  the execution priority of the module that receives it, the module's priority shall be
-  elevated to match that of the message until |Receive| is called. At that point the module's
-  priority is returned to its original value. \pet{This probably requires dynamic priorities and
-    thus is in conflict with \textbf{Core.Ravenscar}.}
+  the execution priority of the module that receives it, the module's priority shall be elevated
+  to match that of the message until |Receive| is called. At that point the module's priority is
+  returned to its original value. \pet{This requires dynamic priorities and thus is in conflict
+    with \textbf{Core.SPARK}.}
 \end{itemize}
 
 The message manager only provides support for asynchronous messages. No support for synchronous

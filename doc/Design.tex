@@ -16,6 +16,12 @@ allocating space for messages is not an option. Instead mailbox space must be al
 statically. This forces users of CubedOS to anticipate the maximum sizes of the mailboxes they
 require.
 
+We note that an upcoming version of \SPARK\ \emph{will} allow the use of dynamically allocated
+memory, although in a restricted way. This opens the possibility of revisiting the design
+described here and perhaps working around some of the issues we identify below. We have not yet
+investigated this in detail; \SPARK's support for dynamically allocated memory is still
+immature.
+
 We considered three strategies for managing mailboxes.
 
 \begin{itemize}
@@ -39,8 +45,8 @@ We considered three strategies for managing mailboxes.
   Implementing this design is more complicated, but a bigger disadvantage is that modules can
   interfere with each other. If one module is slow and gets backlogged, the (one and only)
   mailbox could fill up with messages for that module, thus preventing communication between
-  other, unrelated modules. We feel this is a serious enough problem to rule out this design
-  choice.
+  other, unrelated modules. While some workaround to this problem could probably be implemented,
+  we feel this is a serious enough problem to rule out this design choice.
 
 \item \emph{Define a Mailbox type that is discriminated on its size. Create a separate mailbox
     for each module, tuned for that module's needs.} This is a variation of the first approach
@@ -59,7 +65,7 @@ using the module ID number as an array index. However, that also requires all ma
 the same size.
 
 A more subtle problem with the third approach is that, in general, the author of a module can't
-know the maximum number of pending messages that are appropriate to specify for the module. The
+know the maximum number of pending messages that are appropriate to specify for that module. The
 correct number is a system-wide artifact that depends in large measure on the number and rate of
 message send operations done by other modules. Setting the mailbox sizes is something best done
 during system integration, and that is more easily accomplished if all mailboxes are in their
@@ -71,18 +77,17 @@ sizes set appropriately for that application.
 
 Selecting the most appropriate size for a the mailboxes is the one major issue remaining. If a
 mailbox fills during operation, sending further messages to that mailbox will fail. Senders do
-not block because doing so would require two entries on the |Mailbox| protected type, a
-violation of \textbf{Core.Ravenscar} (and an invitation to deadlock). Thus failure to send a
-message due to a full mailbox creates awkwardness for senders who must manually retry the send
-operation. Furthermore senders will not likely want to retry sending indefinitely and risk being
-tied up doing a send operation that will never succeed. This leaves open the question of how the
-failed send should ultimately be handled.
+not block because doing so would introduce the risk of deadlock. Thus failure to send a message
+due to a full mailbox creates awkwardness for senders who must manually retry the send
+operation, if desired. Furthermore senders will not likely want to retry sending indefinitely
+and risk being tied up doing a send operation that will never succeed. This leaves open the
+question of how the failed send should ultimately be handled.
 
 It would be better if mailbox sizes were tuned so that sending could never fail. However doing
 this requires high level reasoning about the flow of messages in the system. We propose
 constructing a formal model of module communication that includes finite sized mailboxes, and
 then use a model checker (such as \texttt{spin}?), or some other tool, to find a configuration
-of mailbox sizes where no send operation can ever fail.
+of mailbox sizes where no send operation can ever fail. Doing this is an avenue for future work.
 
 In lieu of such an analysis, human reasoning could be used to estimate appropriate mailbox sizes
 followed by rigorous testing. Of course, such an approach is likely to be more error prone than
@@ -157,12 +162,12 @@ to handle basic scalars and simple arrays are provided by way of a library packa
 subprograms provided by the library.
 
 Since the creation of the API packages is largely mechanical, CubedOS comes with a tool,
-\texttt{xdr2os3}, that converts an textual representation of the message types into a
-corresponding API package written in provable \SPARK. In effect, \texttt{xdr2os3} plays a role
-similar to that played by \texttt{rpcgen} in many ONC RPC \cite{rfc-5531} implementations. In
-particular, it converts a high level interface description into code that encodes/decodes
-messages to/from the implementer of that interface. However \texttt{xdr2os3} differs from other
-similar tools in several important respects:
+\texttt{Merc}, that converts an textual representation of the message types into a corresponding
+API package written in provable \SPARK. In effect, \texttt{Merc} plays a role similar to that
+played by \texttt{rpcgen} in many ONC RPC \cite{rfc-5531} implementations. In particular, it
+converts a high level interface description into code that encodes/decodes messages to/from the
+implementer of that interface. However \texttt{Merc} differs from other similar tools in several
+important respects:
 
 \begin{itemize}
 \item It targets CubedOS; the generated code makes use of CubedOS's XDR library for handling
@@ -173,10 +178,10 @@ similar tools in several important respects:
 \end{itemize}
 
 A CubedOS application developer defines the messages she needs for a module in an XDR file and
-then uses \texttt{xdr2os3} to generate the API package and related materials. The developer can
+then uses \texttt{Merc} to generate the API package and related materials. The developer can
 then the subprograms in that package to encode messages for that module or decode messages from
-that module. In addition, \texttt{xdr2os3} provides subprograms the module author can use to
-decode incoming messages and encode replies.
+that module. In addition, \texttt{Merc} provides subprograms the module author can use to decode
+incoming messages and encode replies.
 
 Currently it is still possible for a develper to directly access message data but doing this is
 strongly not recommended. \pet{This could possibly be enforced by making the message a private

@@ -2,41 +2,40 @@
 \label{chapt:introduction}
 
 This document describes the design, implementation, and usage of the CubedOS operating system.
-CubedOS (OS3) was developed at Vermont Technical College's CubeSat Laboratory with the purpose
-of providing a robust software platform for CubeSat missions and of easing the development of
+CubedOS was developed at Vermont Technical College's CubeSat Laboratory with the purpose of
+providing a robust software platform for CubeSat missions and of easing the development of
 CubeSat flight software. In many respects the goals of CubedOS are similar to those of the Core
 Flight Executive (cFE) written by NASA Goddard Space Flight Center \cite{cFE}. However, unlike
 cFE, CubedOS is written in \SPARK\ with critical sections verified to be free of the possibility
 of runtime error. \SPARK\ has also been used to provide some other correctness properties in
 certain cases. We compare CubedOS and cFE in more detail in Section~\ref{section-other-work}.
 
-CubedOS has been used at Vermont Technical College in the Lunar IceCube mission, a collaborative
-effort between Morehead State University, NASA, Busek Inc., and Vermont Technical College.
-\pet{Provide citation} However, the intent is for CubedOS to be general enough and modular
-enough for other groups to profitably employ the system. Since every mission uses different
-hardware and has different software requirements, CubedOS is designed as a framework into which
-\newterm{modules} can be plugged to implement whatever mission functionality is required.
-CubedOS provides inter-module communication and other common services required by many missions.
-CubedOS thus serves both as a kind of operating environment and as a library of useful tools and
-functions.
+Although CubedOS was developed to support the CubeSat missions at Vermont Technical College, the
+intent is for CubedOS to be general enough and modular enough for other groups to profitably
+employ the system. Since every mission uses different hardware and has different software
+requirements, CubedOS is designed as a framework into which \newterm{modules} can be plugged to
+implement whatever mission functionality is required. CubedOS provides inter-module
+communication and other common services required by many missions. CubedOS thus serves both as a
+kind of operating environment and as a library of useful tools and functions.
 
 It is our intention that all CubedOS modules also be written in \SPARK\ and at least proved free
 of runtime error. However, CubedOS also allows modules, or parts of modules, to be written in
 full Ada or C if appropriate. This allows CubedOS to take advantage of third party C libraries
-or to integrate with an existing C code base.
+or to integrate with an existing C code base. It is a work in progress to create a bridge
+between CubedOS and cFE so that current cFE/CFS users can migriate mission critical components
+to CubedOS incrementally.
 
 CubedOS can run directly on top of the hardware, or on top of an operating system such as Linux
-or VxWorks, with the assistance of the Ada runtime system. For example, CubedOS makes use of Ada
-tasking without directly invoking the underlying system's support for threads. This simplifies
-the implementation of CubedOS while improving its portability. However, it does require that an
-Ada runtime system be available for all envisioned targets.
+or VxWorks, with the assistance of the Ada runtime system. In particular, CubedOS makes use of
+Ada tasking without directly invoking the underlying system's support for threads. This
+simplifies the implementation of CubedOS while improving its portability. However, it does
+require that an Ada runtime system be available for all envisioned targets.
 
 For resources that are not accessible through the Ada runtime system, CubedOS driver modules can
 be written that interact with the underlying operating system or hardware more directly.
 Although these modules would not be widely portable, they could, in some cases, be written to
-provide a kind of low level abstraction layer (LLAL) with a portable interface. Because our
-current work is focused on one specific mission and its needs, we have not yet attempted to
-standardize the LLAL interface. However, we see that as an area for future work.
+provide a kind of low level abstraction layer (LLAL) with a portable interface. We have not yet
+attempted to standardize the LLAL interface, although this would be an area for future work.
 
 The architecture of CubedOS is a collection of active and passive modules, where each active
 module contains one or more Ada tasks. Although CubedOS is written in \SPARK\ there need not be
@@ -60,6 +59,11 @@ device drivers, and high level facilities, such as communication protocol handle
 algorithms, are all implemented as CubedOS modules. All modules are treated equally by CubedOS;
 any layered structuring of the modules is imposed by programmer convention.
 
+We are working on extending the architecture to allow module communication to occur between
+modules in different operating system processes or even on different hosts. This extension will
+allow CubedOS applications to be distributed across multiple spacecraft while still operating as
+a single, integrated application. \pet{Provide a forward reference.}
+
 % TODO: Some of this discussion, along with some diagrams, should perhaps be moved to the
 % section describing the architecture of CubedOS. Some orientation to the system is appropriate
 % in the introduction... but how much?
@@ -71,12 +75,11 @@ programmed against that interface without concern about the underlying implement
 
 \begin{itemize}
 \item An asynchronous message passing system with mailboxes. This, together with the underlying
-  Ada runtime system constitutes the ``kernel'' of CubedOS.
+  Ada runtime system constitutes the kernel of CubedOS.
 \item A runtime library of useful packages, all verified with \SPARK.
 \item A real time clock module.
 \item A file system interface.
 \item A radio communications interface.
-\item Modules providing support for CCSDS protocols.
 \end{itemize}
 
 A CubedOS system also requires drivers for the various hardware components in the system.
@@ -84,13 +87,8 @@ Although the specific drivers required will vary from mission to mission, CubedO
 general \newterm{driver model} that allows components to communicate with drivers fairly
 generically. In a typical system there will be low level drivers for accessing hardware busses
 as well as higher level drivers for sending/receiving commands from subsystems such as the
-radio, the power system, the camera, etc. The low level drivers constitute the CubedOS LLAL.
+radio, the power system, the camera, etc. The low level drivers constitute the bulk of the
+CubedOS LLAL.
 
-CubedOS is currently a work in progress and is being developed in parallel with the Lunar
-IceCube flight software. The CubedOS architecture is evolving in response to the requirements of
-Lunar IceCube. However, we have been careful to factor IceCube-specific work into a separate
-code base from CubedOS. Thus Lunar IceCube can be regarded as the first (and currently only)
-CubedOS application. It is our intention to release CubedOS as open source once it has been
-further matured and refined. Specifically, we intend to release CubedOS after the code base has
-been reviewed to verify that it is free from International Traffic in Arms Regulations (ITAR)
-restrictions. We anticipate this to happen in late 2017.
+CubedOS is currently a work in progress. It is our intention to release CubedOS as open source
+once it has been further refined. We anticipate this to happen in late 2020.
