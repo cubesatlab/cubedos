@@ -59,7 +59,7 @@ project CubedOS is
    end Documentation;
 
    package Prove is
-      for Switches use ("-j2", "--level=2");
+      for Prove_Switches ("Ada") use ("-j2", "--level=2");
    end Prove;
 
    package Linker is
