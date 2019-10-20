@@ -52,6 +52,7 @@ project CubedOS is
       case Platform is
 
          when "Check" =>
+            for Documentation_Dir use "doc";
 
          when "Simulator" =>
             for Documentation_Dir use "doc";
@@ -59,17 +60,10 @@ project CubedOS is
    end Documentation;
 
    package Prove is
-      for Prove_Switches ("Ada") use ("-j2", "--level=2");
    end Prove;
 
    package Linker is
-
-      case Platform is
-
-         when "Check" =>
-
-         when "Simulator" =>
-      end case;
    end Linker;
 
 end CubedOS;
+
