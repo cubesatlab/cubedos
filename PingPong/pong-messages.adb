@@ -27,13 +27,16 @@ package body Pong.Messages is
       Ada.Integer_Text_IO.Put(Item  => I,
                               Width => 0,
                               Base  => 10);
+
+      Put(" Request ID: " & Request_ID_Type'Image (Message.Request_ID));
+
       Ada.Text_IO.Put_Line(" : Received PONGED");
 
       -- Wait a bit.
       -- delay(2.5);
 
       -- Send a Grabbed message to Ping.
-      Outgoing_Message := Ping.API.Pinged_Encode(Sender_Domain => Domain_ID, Sender => ID);
+      Outgoing_Message := Ping.API.Pinged_Encode(Sender_Domain => Domain_ID, Sender => ID, Priority => System.Default_Priority, Request_ID => R_ID);
       Message_Manager.Route_Message(Outgoing_Message);
    end Handle_Ponged;
 

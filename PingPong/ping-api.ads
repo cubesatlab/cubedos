@@ -20,7 +20,8 @@ package Ping.API is
    function Pinged_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender   : Module_ID_Type;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Priority : System.Priority := System.Default_Priority;
+      Request_ID : Request_ID_Type) return Message_Record
    with Global => null;
 
    function Is_Pinged(Message : Message_Record) return Boolean is

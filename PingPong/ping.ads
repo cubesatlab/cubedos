@@ -10,4 +10,6 @@ package Ping is
 
    ID : constant Message_Manager.Module_ID_Type := 15;
 
+   R_ID : constant Message_Manager.Request_ID_Type := 1;
+
 end Ping;

@@ -11,7 +11,8 @@ package body Ping.API is
    function Pinged_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender   : Module_ID_Type;
-      Priority : System.Priority := System.Default_Priority) return Message_Record
+      Priority : System.Priority := System.Default_Priority;
+      Request_ID : Request_ID_Type) return Message_Record
    is
       Message : constant Message_Record :=
         Make_Empty_Message
@@ -19,7 +20,7 @@ package body Ping.API is
            Receiver_Domain => Domain_ID,
            Sender     => Sender,
            Receiver   => ID,
-           Request_ID => 0,
+           Request_ID => R_ID,
            Message_ID => Message_Type'Pos(Ball),
            Priority   => Priority);
    begin
@@ -34,5 +35,13 @@ package body Ping.API is
       -- nothing to decode anyway!)
       null;
    end Pinged_Decode;
+
+  -- function Return_Request_ID(Message : in Message_Record) return Request_ID_Type
+  -- is
+   --begin
+     --       Get_Next_Request_ID(Message.Request_ID);
+       --  return Message.Request_ID;
+   -- end Return_Request_ID;
+
 
 end Ping.API;

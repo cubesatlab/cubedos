@@ -10,38 +10,56 @@ with Pong.API;
 with Pong;
 with Ada.Integer_Text_IO;
 
+
+
 package body Ping.Messages is
    use Message_Manager;
 
    -- The initialization of the Ping module, starts the ball bouncing!
    procedure Initialize is
       Outgoing_Message : Message_Record;
+
    begin
-      Outgoing_Message := Pong.API.Ponged_Encode(Sender_Domain => Domain_ID, Sender => ID);
+      Outgoing_Message := Pong.API.Ponged_Encode
+        (Sender_Domain => Domain_ID,
+         Sender => ID,
+         Priority => System.Default_Priority,
+         Request_ID => R_ID);
       Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
+
+
+
 
    -------------------
    -- Message Handling
    -------------------
 
    procedure Handle_Pinged(I : in Integer; Message : in Message_Record)
-     with Pre => Ping.API.Is_Pinged(Message)
+    with Pre => Ping.API.Is_Pinged(Message)
+
    is
+
       Outgoing_Message : Message_Record;
+
+     -- m: Message.Request_ID;
    begin
       Ping.API.Pinged_Decode(Message);
       Ada.Text_IO.Put("+++ Ping ");
       Ada.Integer_Text_IO.Put(Item  => I,
                               Width => 0,
                               Base  => 10);
+
+      Put(" Request ID: " & Request_ID_Type'Image (Message.Request_ID));
+
       Ada.Text_IO.Put_Line(" : Received PINGED");
 
       -- Wait a bit.
       -- delay(2.5);
 
       -- Send a Grabbed message to Pong.
-      Outgoing_Message := Pong.API.Ponged_Encode(Sender_Domain => Domain_ID, Sender => ID);
+      Outgoing_Message := Pong.API.Ponged_Encode
+        (Sender_Domain => Domain_ID, Sender => ID, Request_ID => R_ID);
       Message_Manager.Route_Message(Outgoing_Message);
    end Handle_Pinged;
 
@@ -67,12 +85,15 @@ package body Ping.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
       I : Integer := 0;   -- Do we want to keep track only when entering a dependent function
+
+
    begin                  -- such as Handle_Pinged, or from the main task loop??
       Initialize;
       loop
          I := I + 1;
          Message_Manager.Fetch_Message(ID, Incoming_Message);
          Process(I, Incoming_Message);
+        -- Ada.Text_IO.Modular_IO.Put(Incoming_Message.Request_ID);
       end loop;
    end Message_Loop;
 

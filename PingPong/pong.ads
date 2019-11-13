@@ -11,4 +11,7 @@ package Pong is
 
    ID : constant Message_Manager.Module_ID_Type := 16;
 
+   R_ID : constant Message_Manager.Request_ID_Type := 2;
+
+
 end Pong;
