@@ -4,7 +4,7 @@ with Message_Manager;
 use Ada.Text_IO;
 use Message_Manager;
 
-procedure Main_Message_Manager_Tests is
+procedure Main_Message_Manager is
 
    Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Message_Record;
    Message_ID : constant Message_Manager.Message_ID_Type:= 1;
@@ -196,4 +196,4 @@ begin
    Fetch;
    Fetch_2;
 
-end Main_Message_Manager_Tests;
+end Main_Message_Manager;
