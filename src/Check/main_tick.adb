@@ -15,6 +15,7 @@ with CubedOS.Tick_Generator.API;
 with CubedOS.Tick_Generator.Messages;
 pragma Unreferenced(CubedOS.Tick_Generator.Messages);
 with Message_Manager;
+with GNAT.Time_Stamp;
 
 use Ada.Integer_Text_IO;
 use Ada.Text_IO;
@@ -38,6 +39,9 @@ procedure Main_Tick is
    Start_Time : Ada.Real_Time.Time;
    Relative_Time : Ada.Real_Time.Time_Span;
    Relative_Duration : Duration;
+   Absolute_Time : String := GNAT.Time_Stamp.Current_Time;
+
+
 
 begin
    Start_Time := Ada.Real_Time.Clock;
@@ -60,11 +64,12 @@ begin
 
       Relative_Time := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+      Absolute_Time := GNAT.Time_Stamp.Current_Time;
       if Is_Tick_Reply(Incoming_Message) then
          Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
          if Status = Success then
-            Put(Relative_Duration); Put(": ");
-            Put("Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
+            Put("Time Duration: "); Put(Relative_Duration); Put("     Time Stamp:      "); Put(Absolute_Time);
+            Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
 
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then
