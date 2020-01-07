@@ -8,7 +8,7 @@ with Message_Manager;
 with SPI.Internals;
 
 package body SPI.Messages is
-   
+
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
    begin
@@ -21,7 +21,7 @@ package body SPI.Messages is
 
       -- Process messages as they arrive. This simple loop may be all that is needed.
       loop
-         Message_Manager.Mailboxes(ID).Receive(Incoming_Message);
+         Message_Manager.Fetch_Message(ID, Incoming_Message);
          Internals.Process_Message(Incoming_Message);
       end loop;
    end Message_Loop;

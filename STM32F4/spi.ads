@@ -9,7 +9,7 @@ pragma SPARK_Mode(On);
 with Message_Manager;
 
 package SPI is
-   
-   ID : constant Message_Manager.Module_ID := 5;
+
+   ID : constant Message_Manager.Module_ID_Type := 5;
 
 end SPI;
