@@ -11,8 +11,10 @@ used for generating CubedOS API encoder/decoder subprograms. The subfolders are 
 
 + `doc`: The documentation of CubedOS.
 
-+ `LineRider`: A sample application using the STMF4DISCOVERY platform demonstrate some of
-  CubedOS's abilities.
++ `LineRider`: A sample application using the STMF4-discovery platform to demonstrate some of
+  CubedOS's abilities. Specifically the program controls a simple robot that uses optical
+  sensors to follow a black line drawn on a light, concrete floor. This is an adaptation of a
+  lab assignment used in the electro-mechanical program at Vermont Technical College.
 
 + `PingPong`: A sample application that where two modules send messages back and forth
   indefinitely. It is the "Hello, World" application of message passing! We use this to evaluate
@@ -20,7 +22,8 @@ used for generating CubedOS API encoder/decoder subprograms. The subfolders are 
 
 + `src`: The CubedOS source code repository.
 
-+ `STM32F4`: This folder is old. I'm not even sure what is in it!
++ `STM32F4`: This folder contains a demonstration of CubedOS running on the STM32F4-discovery
+  board.
 
 + `templates`: Various templates to facilitate the construction of CubedOS applications. The
   developer can use these templates to simplify the programming of new applications, however
@@ -36,7 +39,7 @@ of the test, sample, and benchmark programs can be compiled and run on the devel
 Some programs that target other platforms are also included. Final testing and performance
 evaluations should be done on your specific target platform, of course.
 
-The [GNAT Community](http://www.adacore.com/community/) Ada compiler and toolset (v2018) is
+The [GNAT Community](http://www.adacore.com/community/) Ada compiler and toolset (v2019) is
 sufficient for development at this time. Some non-x86 targets are provided by GNAT Community,
 but other targets are available from AdaCore via their professional subscription.
 
@@ -65,8 +68,8 @@ In addition there is a "Simulator" scenario that builds a CubeSat simulator runn
 *This build is skeletal only at this time!* The simulator program is written to the
 `src/build/Simulator` folder.
 
-The PingPong and LineRider programs have their own project files. At this time there is no
-master project file defined for all CubedOS components.
+The PingPong, LineRider, and STM32F4 programs have their own project files. At this time there
+is no master project file defined for all CubedOS components.
 
 The program Merc, in a separate repository, is a Scala program for generated CubedOS API
 packages. It is possible to write these packages manually following, for example, the templates
