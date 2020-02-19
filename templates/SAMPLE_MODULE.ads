@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE.ads
 -- SUBJECT: Top level package of a CubedOS SAMPLE MODULE.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
 -- This module is a skeleton, with comments, showing how to set up a standard CubedOS module.
 -- CubedOS modules do not need to follow this structure exactly, but it is recommended to at

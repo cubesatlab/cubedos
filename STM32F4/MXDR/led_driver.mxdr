@@ -1,0 +1,29 @@
+// FILE: led_driver.mxdr
+//
+// The interface definition of the LED driver module.
+
+enum { Green, Orange, Red, Blue } LED_Type;
+
+// Request to turn an LED on.
+message struct -> On_Request {
+    LED_Type LED;  // The LED to turn on.
+};
+
+
+// Request to turn an LED off.
+message struct -> Off_Request {
+    LED_Type LED;  // The LED to turn off.
+};
+
+
+// Request to turn all LEDs on.
+message struct -> All_On_Request {
+    void;
+};
+
+
+// Request to turn all LEDs of.
+message struct -> All_Off_Request {
+    void;
+};
+

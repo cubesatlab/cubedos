@@ -171,8 +171,7 @@ package body CubedOS.Tick_Generator.API is
          XDR.Decode(Message.Payload, Position, Raw_Request_Type, Last);
          Position := Last + 1;
 
-         if Raw_Request_Type not in
-           Series_Type'Pos(Series_Type'First) .. Series_Type'Pos(Series_Type'Last) then
+         if Raw_Request_Type > Series_Type'Pos(Series_Type'Last) then
             Decode_Status := Malformed;
          else
             Request_Type := Series_Type'Val(Raw_Request_Type);
@@ -253,8 +252,7 @@ package body CubedOS.Tick_Generator.API is
          Series_ID := Series_ID_Type(Raw_Series_ID);
 
          XDR.Decode(Message.Payload, Position, Raw_Count, Last);
-         if Raw_Count not in
-           XDR.XDR_Unsigned(Natural'First) .. XDR.XDR_Unsigned(Natural'Last) then
+         if Raw_Count > XDR.XDR_Unsigned(Natural'Last) then
             Decode_Status := Malformed;
          else
             Count := Natural(Raw_Count);

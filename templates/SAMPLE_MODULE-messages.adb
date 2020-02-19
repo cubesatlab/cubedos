@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -79,7 +79,7 @@ package body Sample_Module.Messages is
       -- Process_Message.
       --
       loop
-         Message_Manager.Fetch_Message(Id, Incoming_Message);
+         Message_Manager.Fetch_Message(ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

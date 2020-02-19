@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE-api.ads
 -- SUBJECT: Specification of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.

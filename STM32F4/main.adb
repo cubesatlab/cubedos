@@ -9,9 +9,11 @@ with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
 
-with SPI.Messages;
+with CubedOS.Tick_Generator.Messages;
+with LED_Driver.Messages;
 
-pragma Unreferenced(SPI.Messages);
+pragma Unreferenced(CubedOS.Tick_Generator.Messages);
+pragma Unreferenced(LED_Driver.Messages);
 
 procedure Main is
 
