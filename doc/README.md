@@ -13,7 +13,7 @@ checked out the Papers project from the CubeSat Laboratory GitHub. See:
     
 This repository must be checked out as a sibling in your file system of the CubedOS repository.
 This allows BibTeX to locate the references mentioned in this documentation. If you don't have
-the Papers repository availalbe, the documentation will still build, but the citations will be
+the Papers repository available, the documentation will still build, but the citations will be
 broken and there will not be a reference list at the end of the document.
 
 Finally, issue the following commands:

@@ -4,10 +4,13 @@ Module Map
 
 The following are "well known" module ID numbers for the various CubedOS core modules.
 
-1. Tick Generator.
-2. File Server.
+1. Tick Generator. [USED]
+2. Publish/Subscribe Service. [USED]
+3. File Server Interface. [AVAILABLE (not used by this application)]
 
-The following are "application specific" module ID numbers for the IceCube application.
+The following are "application specific" module ID numbers for the STM32F4 demo application. All
+of these module IDs are used by this application. The modules labeled as "LIBRARY MODULES" could
+potentially be used by other applications for the STM32F4 platform.
 
-4. LED Driver.
+4. LED Driver. [LIBRARY MODULE]
 5. Controller.
