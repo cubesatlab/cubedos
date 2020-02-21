@@ -10,9 +10,11 @@ with System;
 -- Bring in the necessary modules, both from CubedOS and from this application.
 
 with CubedOS.Tick_Generator.Messages;
+with Control.Messages;
 with LED_Driver.Messages;
 
 pragma Unreferenced(CubedOS.Tick_Generator.Messages);
+pragma Unreferenced(Control.Messages);
 pragma Unreferenced(LED_Driver.Messages);
 
 procedure Main is

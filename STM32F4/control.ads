@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
--- FILE   : led_driver.ads
--- SUBJECT: Top level package of a CubedOS LED driver for the STM32F4
+-- FILE   : control.ads
+-- SUBJECT: Top level package of the STM demo controller module.
 -- AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
@@ -8,10 +8,8 @@ pragma SPARK_Mode(On);
 
 with Message_Manager;
 
-package LED_Driver is
+package Control is
 
-   ID : constant Message_Manager.Module_ID_Type := 4;
+   ID : constant Message_Manager.Module_ID_Type := 5;
 
-   type LED_Type is (Green, Orange, Red, Blue);
-
-end LED_Driver;
+end Control;

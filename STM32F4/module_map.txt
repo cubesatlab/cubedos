@@ -9,4 +9,5 @@ The following are "well known" module ID numbers for the various CubedOS core mo
 
 The following are "application specific" module ID numbers for the IceCube application.
 
-5. LED Driver.
+4. LED Driver.
+5. Controller.
