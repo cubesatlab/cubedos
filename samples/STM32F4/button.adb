@@ -32,31 +32,34 @@ with STM32F4;       use STM32F4;
 with STM32F4.GPIO;  use STM32F4.GPIO;
 
 package body Button is
-
+   
    protected Button is
       pragma Interrupt_Priority;
-
-      function Current_Direction return Directions;
+      
+      entry Is_Button_Pressed;
 
    private
       procedure Interrupt_Handler;
       pragma Attach_Handler
          (Interrupt_Handler,
           Ada.Interrupts.Names.EXTI0_Interrupt);
-
-      Direction : Directions := Clockwise;  -- arbitrary
+      
       Last_Time : Time := Clock;
+      Button_State : Boolean := False;
+   
    end Button;
 
    Debounce_Time : constant Time_Span := Milliseconds (500);
-
+   
    protected body Button is
-
-      function Current_Direction return Directions is
+      
+      -- Entry waits for the button to be pressed, sets the state back to false
+      entry Is_Button_Pressed when Button_State is
       begin
-         return Direction;
-      end Current_Direction;
-
+         -- Sets the button state back to false
+         Button_State := False;         
+      end Is_Button_Pressed;
+        
       procedure Interrupt_Handler is
          Now : constant Time := Clock;
       begin
@@ -65,22 +68,26 @@ package body Button is
 
          --  Debouncing
          if Now - Last_Time >= Debounce_Time then
-            if Direction = Counterclockwise then
-               Direction := Clockwise;
-            else
-               Direction := Counterclockwise;
-            end if;
-
+            
+            Button_State := True;
+            
             Last_Time := Now;
+            
          end if;
+   
       end Interrupt_Handler;
-
+      
    end Button;
+   
+   -- Function to inform other packages that the button has been pressec
+   function Button_Pressed return Button_State_Type is
+   begin 
+      -- Executes on button press
+      Button.Is_Button_Pressed;
+      -- Return the button has been pressed
+      return Pressed;      
+   end Button_Pressed;
 
-   function Current_Direction return Directions is
-   begin
-      return Button.Current_Direction;
-   end Current_Direction;
 
    procedure Initialize is
       RCC_AHB1ENR_GPIOA : constant Word := 16#01#;
@@ -103,4 +110,6 @@ package body Button is
 
 begin
    Initialize;
-end Button;     
+end Button;   
+
+

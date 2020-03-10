@@ -30,9 +30,9 @@
 
 package Button is
    pragma Elaborate_Body;
-
-   type Directions is (Clockwise, Counterclockwise);
-
-   function Current_Direction return Directions;
-
+  
+   type Button_State_Type is (Pressed, Released);
+      
+   function Button_Pressed return Button_State_Type;
+   
 end Button; 

@@ -12,10 +12,17 @@ with System;
 with CubedOS.Tick_Generator.Messages;
 with Control.Messages;
 with LED_Driver.Messages;
+with Button_Driver.Messages;
+with Button;
+with CubedOS.Publish_Subscribe.Messages;
 
 pragma Unreferenced(CubedOS.Tick_Generator.Messages);
 pragma Unreferenced(Control.Messages);
 pragma Unreferenced(LED_Driver.Messages);
+pragma Unreferenced(Button_Driver.Messages);
+pragma Unreferenced(Button);
+pragma Unreferenced(CubedOS.Publish_Subscribe.Messages);
+
 
 procedure Main is
 
