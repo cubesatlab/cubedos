@@ -10,6 +10,8 @@ CubedOS Samples
 + `PingPong`: A sample application that where two modules send messages back and forth
   indefinitely. It is the "Hello, World" application of message passing! We use this to evaluate
   rough performance and as a base for other, more interesting programs.
+  
++ `PubSub`: A sample application that demonstrates the Publish/Subscribe server.
 
 + `STM32F4`: This folder contains a demonstration of CubedOS running on the STM32F4-discovery
   board.
