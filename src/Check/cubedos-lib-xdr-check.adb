@@ -256,7 +256,6 @@ package body CubedOS.Lib.XDR.Check is
       Assert(Decoded_Value_2 = Value_2, "Decoded incorrectly");
    end Test_Encode_Decode_8;
 
-
     -- Test encoding/decoding of fixed length string.
    procedure Test_Encode_Decode_9 is
       Data : XDR_Array;
@@ -278,6 +277,72 @@ package body CubedOS.Lib.XDR.Check is
       Assert(Decoded_Value = Value, "Decoded incorrectly, expected: " & Value & " Received: " & Decoded_Value);
    end Test_Encode_Decode_9;
 
+   -- Test encoding/decoding of XDR 32 bit signed integer.
+   procedure Test_Encode_Decode_10 is
+      Data_1 : XDR_Array;
+      Data_2 : XDR_Array;
+      Data_3 : XDR_Array;
+      Position : constant XDR_Index_Type := 0;
+      Last : XDR_Index_Type;
+      Value_1 : constant XDR_Integer := -12345678;
+      Value_2 : constant XDR_Integer := -1234;
+      Value_3 : constant XDR_Integer := -2 ** 31;
+      Decoded_Value_1, Decoded_Value_2, Decoded_Value_3: XDR_Integer;
+
+   begin
+      Data_1 := (others => 0);
+      Data_2 := (others => 0);
+      Data_3 := (others => 0);
+
+      Encode(Value_1, Data_1, Position, Last);
+      Encode(Value_2, Data_2, Position, Last);
+      Encode(Value_3, Data_3, Position, Last);
+
+      Decode(Data_1, Position, Decoded_Value_1, Last);
+      Assert(Decoded_Value_1 = Value_1, "Decoded incorrectly, expected:" &
+               XDR_Integer'Image(Value_1) & " Received:" & XDR_Integer'Image(Decoded_Value_1));
+
+      Decode(Data_2, Position, Decoded_Value_2, Last);
+      Assert(Decoded_Value_2 = Value_2, "Decoded incorrectly, expected:" &
+               XDR_Integer'Image(Value_2) & " Recieved:" & XDR_Integer'Image(Decoded_Value_2));
+
+      Decode(Data_3, Position, Decoded_Value_3, Last);
+      Assert(Decoded_Value_3 = Value_3, "Decoded incorrectly, expected;" &
+               XDR_Integer'Image(Value_3) & " Recieved:" & XDR_Integer'Image(Decoded_Value_3));
+   end Test_Encode_Decode_10;
+
+   -- Test encoding/decoding of XDR 64 bit signed integer.
+   procedure Test_Encode_Decode_11 is
+      Data_1, Data_2, Data_3 : XDR_Array;
+      Position : constant XDR_Index_Type := 0;
+      Value_1 : constant XDR_Hyper := (-2**63);
+      Value_2 : constant XDR_Hyper := -123456789123456;
+      Value_3 : constant XDR_Hyper := (-2**1);
+      Decoded_Value_1, Decoded_Value_2, Decoded_Value_3 : XDR_Hyper;
+      Last : XDR_Index_Type;
+   begin
+
+      Data_1 := (others => 0);
+      Data_2 := (others => 0);
+      Data_3 := (others => 0);
+
+      Encode(Value_1, Data_1, Position, Last);
+      Encode(Value_2, Data_2, Position, Last);
+      Encode(Value_3, Data_3, Position, Last);
+
+      Decode(Data_1, Position, Decoded_Value_1, Last);
+      Assert(Decoded_Value_1 = Value_1, "Decoded incorrectly, expected: " &
+               XDR_Hyper'Image(Value_1) & " Recieved: " & XDR_Hyper'Image(Decoded_Value_1));
+
+      Decode(Data_2, Position, Decoded_Value_2, Last);
+      Assert(Decoded_Value_2 = Value_2, "Decoded incorrectly, expected: " &
+               XDR_Hyper'Image(Value_2) & " Recieved: " & XDR_Hyper'Image(Decoded_Value_2));
+
+
+      Decode(Data_3, Position, Decoded_Value_3, Last);
+      Assert(Decoded_Value_3 = Value_3, "Decoded incorrectly, expected: " &
+               XDR_Hyper'Image(Value_3) & " Recieved: " & XDR_Hyper'Image(Decoded_Value_3));
+   end Test_Encode_Decode_11;
 
    procedure Run_Tests is
    begin
@@ -290,6 +355,8 @@ package body CubedOS.Lib.XDR.Check is
       Put("XDR: Encode/Decode Double"); Test_Encode_Decode_7; Put_Line(" (Ok)");
       Put("XDR: Encode/Decode Fixed Opaque Data"); Test_Encode_Decode_8; Put_Line(" (Ok)");
       Put("XDR: Encode/Decode String"); Test_Encode_Decode_9; Put_Line(" (Ok)");
+      Put("XDR: Encode/Decode Signed Integer"); Test_Encode_Decode_10; Put_Line(" (Ok)");
+      Put("XDR: Encode/Decode Signed Hyper"); Test_Encode_Decode_11; Put_Line(" (Ok)");
    end Run_Tests;
 
 
