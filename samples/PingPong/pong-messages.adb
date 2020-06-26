@@ -9,6 +9,7 @@ with Ping.API;
 with Ping;
 with Pong.API;
 with Ada.Integer_Text_IO;
+with Ada.Real_Time;
 
 package body Pong.Messages is
    use Message_Manager;
@@ -28,9 +29,9 @@ package body Pong.Messages is
                               Width => 0,
                               Base  => 10);
 
-      Put(" Request ID: " & Request_ID_Type'Image (Message.Request_ID));
+      Put(" | Request ID: " & Request_ID_Type'Image (Message.Request_ID));
 
-      Ada.Text_IO.Put_Line(" : Received PONGED");
+      Ada.Text_IO.Put_Line(" | Received PONGED");
 
       -- Wait a bit.
       -- delay(2.5);
@@ -62,11 +63,28 @@ package body Pong.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
       I : Integer := 0; -- Do we want to keep track only when entering a dependent function
+      
+      Start_Time : Ada.Real_Time.Time;
+      Relative_Time : Ada.Real_Time.Time_Span;
+      Relative_Duration : Duration;
+      
+      use type Ada.Real_Time.Time;
+      package Duration_IO is new Fixed_IO(Duration);
+      use Duration_IO;
+      
    begin                -- such as Handle_Ponged, or from the main task loop??
       loop
          I := I + 1;
+         Start_Time := Ada.Real_Time.Clock;
+         
+         -- Fetch and Route
          Message_Manager.Fetch_Message(ID, Incoming_Message);
          Process(I, Incoming_Message);
+         
+         Relative_Time := Ada.Real_Time.Clock - Start_Time;
+         Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+         Put("Pong"); Put(I'Image); Put(" Time Duration:   "); Put(Relative_Duration); New_Line;
+         
       end loop;
    end Message_Loop;
 

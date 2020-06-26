@@ -20,7 +20,7 @@ package body Ping.API is
            Receiver_Domain => Domain_ID,
            Sender     => Sender,
            Receiver   => ID,
-           Request_ID => R_ID,
+           Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Ball),
            Priority   => Priority);
    begin

@@ -1,4 +1,3 @@
---------------------------------------------------------------------------------
 -- FILE   : ping-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
 -- AUTHOR : (C) Copyright 2017 by Vermont Technical College
@@ -9,6 +8,7 @@ with Ping.API;
 with Pong.API;
 with Pong;
 with Ada.Integer_Text_IO;
+with Ada.Real_Time;
 
 
 
@@ -27,7 +27,6 @@ package body Ping.Messages is
          Request_ID => R_ID);
       Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
-
 
 
 
@@ -50,9 +49,9 @@ package body Ping.Messages is
                               Width => 0,
                               Base  => 10);
 
-      Put(" Request ID: " & Request_ID_Type'Image (Message.Request_ID));
+      Put(" | Request ID: " & Request_ID_Type'Image (Message.Request_ID));
 
-      Ada.Text_IO.Put_Line(" : Received PINGED");
+      Ada.Text_IO.Put_Line(" | Received PINGED");
 
       -- Wait a bit.
       -- delay(2.5);
@@ -85,16 +84,34 @@ package body Ping.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
       I : Integer := 0;   -- Do we want to keep track only when entering a dependent function
-
+      
+      Start_Time : Ada.Real_Time.Time;
+      Relative_Time : Ada.Real_Time.Time_Span;
+      Relative_Duration : Duration;
+      
+      use type Ada.Real_Time.Time;
+      
+      package Duration_IO is new Fixed_IO(Duration);
+      use Duration_IO;
+      
 
    begin                  -- such as Handle_Pinged, or from the main task loop??
       Initialize;
       loop
          I := I + 1;
+         New_Line(2);
+         Start_Time := Ada.Real_Time.Clock;
+         
+         -- Fetch and Route
          Message_Manager.Fetch_Message(ID, Incoming_Message);
          Process(I, Incoming_Message);
-        -- Ada.Text_IO.Modular_IO.Put(Incoming_Message.Request_ID);
+         
+         Relative_Time := Ada.Real_Time.Clock - Start_Time;
+         Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+         Put("Ping"); Put(I'Image); Put(" Time Duration:   ");Put(Relative_Duration); New_Line;
+                  
       end loop;
    end Message_Loop;
 
 end Ping.Messages;
+
