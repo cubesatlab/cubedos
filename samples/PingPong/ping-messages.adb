@@ -88,6 +88,7 @@ package body Ping.Messages is
       Start_Time : Ada.Real_Time.Time;
       Relative_Time : Ada.Real_Time.Time_Span;
       Relative_Duration : Duration;
+      Total_Time : Duration := 0.000000000;
       
       use type Ada.Real_Time.Time;
       
@@ -97,9 +98,10 @@ package body Ping.Messages is
 
    begin                  -- such as Handle_Pinged, or from the main task loop??
       Initialize;
-      loop
-         I := I + 1;
+      I := 1;
+      while I /= 100000 loop
          New_Line(2);
+         I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
          -- Fetch and Route
@@ -108,10 +110,17 @@ package body Ping.Messages is
          
          Relative_Time := Ada.Real_Time.Clock - Start_Time;
          Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+         Total_Time := Total_Time + Ada.Real_Time.To_Duration(Relative_Time);
          Put("Ping"); Put(I'Image); Put(" Time Duration:   ");Put(Relative_Duration); New_Line;
-                  
+         
       end loop;
+      delay 1.0;
+      New_Line(2);
+      Put("---");New_Line;
+      Put("Total Ping Time : "); Put(Total_Time); New_Line;
+      Put("---");
+      New_Line(2);
    end Message_Loop;
-
+   
 end Ping.Messages;
 

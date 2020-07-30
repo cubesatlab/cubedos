@@ -67,13 +67,16 @@ package body Pong.Messages is
       Start_Time : Ada.Real_Time.Time;
       Relative_Time : Ada.Real_Time.Time_Span;
       Relative_Duration : Duration;
+      Total_Time : Duration := 0.000000000;
+
       
       use type Ada.Real_Time.Time;
       package Duration_IO is new Fixed_IO(Duration);
       use Duration_IO;
       
    begin                -- such as Handle_Ponged, or from the main task loop??
-      loop
+      I := 1;
+      while I /= 100000 loop
          I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
@@ -83,9 +86,16 @@ package body Pong.Messages is
          
          Relative_Time := Ada.Real_Time.Clock - Start_Time;
          Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
+         Total_Time := Total_Time + Ada.Real_Time.To_Duration(Relative_Time);
          Put("Pong"); Put(I'Image); Put(" Time Duration:   "); Put(Relative_Duration); New_Line;
          
       end loop;
+      delay 1.0;
+      New_Line(2);
+      Put("---");New_Line;
+      Put("Total Pong Time : "); Put(Total_Time); New_Line;
+      Put("---");
+      New_Line(2);
    end Message_Loop;
 
 end Pong.Messages;

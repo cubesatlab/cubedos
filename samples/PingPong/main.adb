@@ -25,5 +25,6 @@ begin
    loop
       delay until Next_Release;
       Next_Release := Next_Release + Ada.Real_Time.Milliseconds(1000);
+      return;
    end loop;
 end Main;
