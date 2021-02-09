@@ -1,0 +1,44 @@
+
+\section{Code Organization}
+\label{sec:code-organization}
+
+In this section we describe the layout and organization of the source code of CubedOS. If you
+intend to work on the development of the software you should read this section carefully.
+
+\begin{itemize}
+
+\item \filename{src}. The main source folder. The code in this folder is hardware independent;
+  it calls into various packages to interact with low level devices. All the code in this folder
+  will fly in space and must be SPARK.
+
+  Note that this folder is taken as the root folder for all relative paths used in this document
+  from now on. This folder will now be referenced as the ``root folder'' or as ``.'' depending
+  on the context.
+
+\item \filename{Check}. This folder contains the main file and all supporting code for the AUnit
+  based unit test program. Hardware specific packages, if they are implemented at all, contain
+  stubs that receive data from the higher level packages and present that data to the test
+  program for evaluation. The file \filename{check.adb} is the test program's main file. None of
+  the code in this folder needs to be SPARK since it will not fly in space.
+
+\item \filename{Mock}. This folder contains software simulations of the low level hardware
+  devices. Using these simulations it is possible to build CubedOS as an executable file on a
+  conventional operating system such as Windows. The simulated hardware logs activity for
+  subsequent analysis. Unlike the unit test program, the Mock program is a complete version of
+  the system as it will fly in space. None of the code in this folder needs to be SPARK.
+
+\item \filename{CubeSat}. This folder contains the actual code needed on the CubeSat. All the
+  code in this folder will fly in space and must be SPARK.
+
+\end{itemize}
+
+In addition to the source folders, there is a \filename{build} folder as well. This folder
+contains subfolders for the various build configurations that are defined. The object files and
+executable files are placed in these subfolders.
+
+The \filename{build} folder also contains some test programs used to exercise the physical
+hardware in various ways. See the \filename{README.txt} files in those subfolders for more
+information.
+
+At the time of this writing all SPARK artifacts are put into the \filename{CubeSat} build
+folders. The project files thus use the CubeSat build as their default build.

@@ -1,0 +1,75 @@
+
+\section{Message Priorities}
+\label{section-message-priorities}
+
+In this section we describe the architecture of message priorities in CubedOS. Priorities are
+built on top of the task priority system provided by the Ada runtime environment. CubedOS does
+not directly interact with the underlying operating system's notion of priorities. This provides
+portability to any system with a suitably capable Ada runtime environment. Specifically, message
+priorities are supported on selected bare board systems without an operating system.
+
+\subsection{Justification}
+
+\pet{Why do we need this? Fill out this section when we know!}
+
+\subsection{Architecture}
+
+All modules are assigned a ``base priority'' statically using suitable Ada language pragmas
+applied to the module's main task. We define the main task of a module as the task that reads
+the module's mailbox and processes the module's messages. We speak of a module's priority as a
+shorthand for the ``priority of a module's main task.'' Note that modules are allowed to have
+internal tasks in addition to the main task. The priority of those tasks is an internal matter
+that does not concern us here.
+
+CubedOS also allows messages to be given priorities that can be distinct from the priorities of
+the modules that send and receive them. Message priorities are not a concept known to the Ada
+runtime environment; they are purely a construct of CubedOS.
+
+When a module sends a message that message is, by default, given a priority equal to that of the
+sending module. However, a module can optionally lower the priority of a message below its own
+priority. If a module attempts to raise the priority of a message above its own priority, it is
+not an error, either statically or dynamically, but the priority is simply set to the module's
+priority instead. \pet{It might be better if this was a statically detected error.}
+
+Messages are removed from a module's mailbox in priority order in $O(\log\,n)$ time (where $n$
+is the number of pending messages in the mailbox). \pet{I'm assuming the mailboxes are priority
+  heaps} When a module with priority $m$ is processing a message at priority $p > m$, the
+module's priority is dynamically increased to $p$ and any messages it sends, including replies
+to the original message, are sent by default at priority $p$ (although the module can downgrade
+the priority of sent messages, as usual). When a module completes the processing of the high
+priority message, just before it fetches the next message from the mailbox, its priority is
+returned to its original base priority level.
+
+When a module with priority $m$ is processing a message at priority $p < m$, the module's
+priority remains unchanged at its base priority. \pet{Is this the right semantic? Or should the
+  priority always match that of the message?} Thus a high priority module services low priority
+messages at its usual (high) priority. In contrast a low priority module services high priority
+messages at a temporarily elevated priority. This \newterm{priority inheritance} is needed so a
+high priority client isn't slowed down when it requests service from a low priority module. When
+executing on behalf of a high priority client, a low priority server inherits the priority of
+the client temporarily.
+
+\subsection{Static Analysis}
+
+Unfortunately \SPARK\ does not currently support the dynamic modification of task priorities.
+Thus use of that feature in a CubedOS application must be specifically justified so as to avoid
+spurious \SPARK\ diagnostics. However, doing this means that \SPARK\ can no longer be relied
+upon to find all potential deadlocks or livelocks. It is therefor necessary to employ an
+additional form of analysis that can supplement \SPARK\ and statically show freedom from those
+issues in any case. This additional analysis has yet to be defined. It can, however, take
+advantage of certain restrictions that still remain in CubedOS tasking despite the addition of
+dynamic priorities.
+
+\begin{itemize}
+\item Modules only interact via message passing.
+\item Messages carry priorities and module priorities are dynamically adjusted as described above.
+\item No other dynamic priority adjustments are allowed. \pet{It might be necessary to forbid a
+    module from lowering the priority of its outgoing messages\ldots\ perhaps in a first
+    implementation anyway} This is statically checked with a supplementary tool. \pet{Using
+    libadalang, perhaps?}
+\end{itemize}
+
+\pet{I wonder if spin can be used to do what we need. Perhaps a spin module can be automatically
+  extracted from the Ada source using a supplementary tool. That same tool could perhaps do the
+  additional static checking mentioned above}
+

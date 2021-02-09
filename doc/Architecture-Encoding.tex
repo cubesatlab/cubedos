@@ -1,0 +1,65 @@
+
+\section{Message Encoding}
+\label{section-message-encoding}
+
+CubedOS mailboxes store messages as unstructured octet arrays. This allows a general purpose
+mailbox package to store and manipulate messages of any type. Unfortunately this also requires
+that well structured, well typed message information be encoded to raw octets before being
+placed in a mailbox and then decoded after being retrieved from a mailbox.
+
+The CubedOS convention is to use External Data Representation (XDR) encoded messages. XDR is a
+well known standard \cite{rfc-4506} that is also simple and has low overhead. We have defined an
+extension to XDR that allows \SPARK's constrained scalar subtypes to be represented and that
+allows limited contracts to be expressed. The tool \texttt{Merc} compiles a high level
+description of a message into message encoding and decoding subprograms. Our tool is written in
+Scala and is not verified, but its output is subject to the same \SPARK\ analysis as the rest of
+the system. In our case it is easier to prove the output of \texttt{Merc} than it is to prove
+the correctness of \texttt{Merc} itself.
+
+The use of \texttt{Merc} mitigates some of CubedOS's disadvantages. The developer need not
+manually write the tedious and repetitive encoding and decoding subprograms. Furthermore, those
+subprograms have well-typed parameters thus shielding the programer from the inherent lack of
+type safety in the mailboxes themselves.
+
+To illustrate CubedOS message handling, consider the following short example of a message
+definition file that is acceptable to \texttt{Merc}.
+
+\begin{verbatim}
+enum Series_Type { One_Shot, Periodic };
+
+typedef unsigned int Module_ID range 1 .. 16;
+typedef unsigned int Series_ID_Type range 1 .. 10000;
+
+message struct {
+    Module_ID      Sender;
+    Time_Span      Tick_Interval;
+    Series_Type    Request_Type;
+    Series_ID_Type Series_ID;
+} Relative_Request_Message;
+\end{verbatim}
+
+This file introduces several types following the usual syntax of XDR interface definitions. The
+syntax is extended, however, to allow the programmer to include constrained ranges on the scalar
+type definitions in a style that is normal for Ada. The message itself is described as a
+structure containing various components in the usual way. The reserved word |message| prefixed
+to the structure definition, an extension to XDR, alerts \texttt{Merc} that it needs to generate
+encoding and decoding subprograms for that structure. Other structures serving only as message
+components can also be defined.
+
+\texttt{Merc} has built-in knowledge of certain Ada private types such as |Time_Span| (from the
+|Ada.Real_Time| package). Private types need special handling since their internal structure
+can't be accessed directly from the encoding and decoding subprograms. There is currently no
+mechanism in \texttt{Merc} to solve this problem in the general case.
+
+Each message type has an ID number that is unique across the application. This is required to
+distinguish valid messages from invalid ones. \texttt{Merc} assigns these message type ID
+numbers automatically. The encoding subprogram installs the ID number into the message as a
+hidden component. The decoding subprogram checks the message type ID number and returns a
+failure status if it is invalid. A CubedOS module extracts a message from its mailbox and then
+applies the relevant decoder subprograms to that message until one succeeds. If all decoder
+subprograms fail the message either has an unexpected type (for example it was accidentally sent
+to the wrong mailbox) or the message is malformed in some way. The module must then make a
+runtime decision about how to handle that situation.
+
+\texttt{Merc} is a work in progress. We intend to ultimately support as much of the XDR standard
+as we can including, for example, variable length arrays and discriminated unions.
