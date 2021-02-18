@@ -37,9 +37,8 @@ package body Control.Messages is
       Outgoing_Message: Message_Record;
    begin
 
-     -- Cancel the tick request, set tick timer to 1.0 seconds
+     -- Cancel the tick request, set tick timer to 10.0 seconds
      if (Counter mod 3 = 0) then
-      -- Request a periodic tick every 1.0 seconds.
       Outgoing_Message := Tick_Generator.API.Cancel_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
@@ -52,7 +51,7 @@ package body Control.Messages is
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
+         Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
          Request_Type  => Tick_Generator.API.Periodic,
          Series_ID     => 1);
       Route_Message(Outgoing_Message);
@@ -78,7 +77,7 @@ package body Control.Messages is
       Route_Message(Outgoing_Message);
          Counter := Counter + 1;
 
-     -- Cancel the tick request, set tick timer to 10.0 seconds
+     -- Cancel the tick request, set tick timer to 1.0 seconds
      elsif (Counter mod 3 = 2) then
       Outgoing_Message := Tick_Generator.API.Cancel_Request_Encode
         (Sender_Domain => 1,
@@ -92,7 +91,7 @@ package body Control.Messages is
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
+         Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
          Request_Type  => Tick_Generator.API.Periodic,
          Series_ID     => 1);
       Route_Message(Outgoing_Message);
@@ -166,12 +165,12 @@ package body Control.Messages is
          Request_ID    => 0);
       Route_Message(Outgoing_Message);
 
-      -- Request a periodic tick every 1.0 seconds.
+      -- Request a periodic tick every 10.0 seconds.
       Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
+         Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
          Request_Type  => Tick_Generator.API.Periodic,
          Series_ID     => 1);
          Route_Message(Outgoing_Message);
