@@ -165,6 +165,14 @@ package body Control.Messages is
          Request_ID    => 0);
       Route_Message(Outgoing_Message);
 
+      -- Turn blue LED on for init state
+      Outgoing_Message := LED_Driver.API.On_Request_Encode
+        (Sender_Domain => 1,
+         Sender        => Control.ID,
+         Request_ID    => 0,
+         LED           => LED_Driver.Blue);
+      Route_Message(Outgoing_Message);
+
       -- Request a periodic tick every 10.0 seconds.
       Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
         (Sender_Domain => 1,
