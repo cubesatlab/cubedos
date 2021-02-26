@@ -8,7 +8,7 @@ pragma SPARK_Mode(On);
 
 package body CubedOS.Lib.CRC is
 
-   CRC_Table : constant array(0 .. 255) of Double_Octet :=
+   CRC_Table : constant array(Double_Octet range 0 .. 255) of Double_Octet :=
      (16#0000#, 16#1021#, 16#2042#, 16#3063#, 16#4084#, 16#50a5#, 16#60c6#, 16#70e7#,
       16#8108#, 16#9129#, 16#a14a#, 16#b16b#, 16#c18c#, 16#d1ad#, 16#e1ce#, 16#f1ef#,
       16#1231#, 16#0120#, 16#3273#, 16#2252#, 16#52b5#, 16#4294#, 16#72f7#, 16#62d6#,
@@ -51,8 +51,8 @@ package body CubedOS.Lib.CRC is
    begin
       for I in Buffer'Range loop
          Buffer_Holder := Double_Octet(Buffer(I));
-         CRC:= CRC_Table(Integer(((Shift_Right(CRC, 8)) xor Buffer_Holder)
-                         and 16#ff#)) xor (Shift_Left(CRC, 8));
+         CRC:= CRC_Table(((Shift_Right(CRC, 8)) xor Buffer_Holder) and 16#ff#) xor
+           (Shift_Left(CRC, 8));
       end loop;
       return CRC;
    end CRC_Calculation;
@@ -69,8 +69,8 @@ package body CubedOS.Lib.CRC is
       CRC := Seed;
       for I in Buffer'Range loop
          Buffer_Holder := Double_Octet(Buffer(I));
-         CRC:= CRC_Table(Integer(((Shift_Right(CRC, 8)) xor Buffer_Holder)
-                         and 16#ff#)) xor (Shift_Left(CRC, 8));
+         CRC:= CRC_Table(((Shift_Right(CRC, 8)) xor Buffer_Holder) and 16#ff#) xor
+           (Shift_Left(CRC, 8));
       end loop;
       return CRC;
    end Continuation_CRC_Calculation;
