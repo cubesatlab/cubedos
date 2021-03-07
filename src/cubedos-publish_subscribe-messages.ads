@@ -9,12 +9,11 @@ pragma Profile(Ravenscar);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with System;
-with Message_Manager;
 
 package CubedOS.Publish_Subscribe.Messages
   with
     Abstract_State => Database,
-    Initializes => Database
+    Initializes => (Database, Message_Loop)
 is
 
    task Message_Loop
@@ -23,11 +22,5 @@ is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
-
-   pragma Annotate
-     (GNATprove,
-      Intentional,
-      "multiple tasks might queue on protected entry",
-      "Every module has a unique ID");
 
 end CubedOS.Publish_Subscribe.Messages;

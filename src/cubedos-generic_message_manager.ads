@@ -108,8 +108,8 @@ is
      with Global => (In_Out => Request_ID_Generator);
 
    -- Error codes.
-   type Status_Type is (Accepted, Mailbox_Full);
-   type Message_Status_Type is (Success, Malformed);  -- Used for message encoding/decoding.
+   type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
+   type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
    -- returns at once with a status of Accepted if the message was definitely delivered. A status

@@ -8,6 +8,8 @@ pragma SPARK_Mode(On);
 
 with CubedOS.Lib;
 with CubedOS.Publish_Subscribe.API;
+with Message_Manager;
+
 use  CubedOS.Publish_Subscribe.API;
 
 package body CubedOS.Publish_Subscribe.Messages
@@ -15,6 +17,7 @@ package body CubedOS.Publish_Subscribe.Messages
 is
    use Message_Manager;
 
+   -- If this is really packed, the memory cost is minimal.
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean
      with Pack;
 
@@ -44,11 +47,34 @@ is
    end Handle_Subscribe_Request;
 
 
+   procedure Handle_Unsubscribe_Request(Message : in Message_Record)
+     with Pre => Is_Unsubscribe_Request(Message)
+   is
+      Channel : Channel_ID_Type;
+      Status  : Message_Status_Type;
+   begin
+      Unsubscribe_Request_Decode(Message, Channel, Status);
+      if Status = Malformed then
+         Route_Message
+           (API.Unsubscribe_Reply_Encode
+              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Failure));
+      else
+         -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
+         -- The operation returns Success without comment.
+         -- TODO: Is this appropriate?
+         Subscription_Map(Message.Sender, Channel) := False;
+         Route_Message
+           (API.Unsubscribe_Reply_Encode
+              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Success));
+      end if;
+   end Handle_Unsubscribe_Request;
+
+
    procedure Handle_Publish_Request(Message : in Message_Record)
      with Pre => Is_Publish_Request(Message)
    is
       Channel : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array(1 .. 2048);  -- TODO: What size would be best?
+      Message_Data : CubedOS.Lib.Octet_Array(1 .. XDR_Size_Type'Last - 8);
       Size    : CubedOS.Lib.Octet_Array_Count;
       Status  : Message_Status_Type;
    begin
@@ -58,6 +84,11 @@ is
            (API.Publish_Reply_Encode
               (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Failure));
       else
+         Route_Message
+           (API.Publish_Reply_Encode
+              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Success));
+
+         -- Do the actual publishing.
          for I in Module_ID_Type loop
             if Subscription_Map(I, Channel) then
                Route_Message
@@ -76,6 +107,8 @@ is
    begin
       if Is_Subscribe_Request(Message) then
          Handle_Subscribe_Request(Message);
+      elsif Is_Unsubscribe_Request(Message) then
+         Handle_Unsubscribe_Request(Message);
       elsif Is_Publish_Request(Message) then
          Handle_Publish_Request(Message);
       else
