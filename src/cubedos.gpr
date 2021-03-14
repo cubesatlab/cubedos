@@ -7,9 +7,7 @@ project CubedOS is
    case Platform is
 
       when "Check" =>
-         for Main use ("cubedos_check.adb", "main_file.adb",
-                       "main_sorters.adb", "main_tick.adb",
-                       "main_message_manager.adb");
+         for Main use ("cubedos_check.adb", "main_file.adb", "main_sorters.adb", "main_tick.adb", "main_message_manager.adb");
          for Object_Dir use "build/Check";
          for Source_Dirs use (".", "Check");
          for Languages use ("Ada");
@@ -67,4 +65,9 @@ project CubedOS is
    package Linker is
    end Linker;
 
+   package Check is
+      for Default_Switches ("ada") use ("-rules", "-from=cubedos-rules.txt");
+   end Check;
+
 end CubedOS;
+
