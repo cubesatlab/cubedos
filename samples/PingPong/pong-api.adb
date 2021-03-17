@@ -24,6 +24,9 @@ package body Pong.API is
            Message_ID => Message_Type'Pos(Ball),
            Priority   => Priority);
    begin
+      -- Create an empty message to be recieved. Pong requires no additional information so
+      -- there is no need to add anything to the message, the way the message is instantiated
+      -- above is enough information for Pong to have a proper message recieved
       return Message;
    end Ponged_Encode;
 

@@ -20,6 +20,7 @@ package body Ping.Messages is
       Outgoing_Message : Message_Record;
 
    begin
+      -- send an empty message to pong to begin the ball rolling. 
       Outgoing_Message := Pong.API.Ponged_Encode
         (Sender_Domain => Domain_ID,
          Sender => ID,
@@ -43,7 +44,9 @@ package body Ping.Messages is
 
      -- m: Message.Request_ID;
    begin
+      -- Begin by decoding the message to see if there is any information in it
       Ping.API.Pinged_Decode(Message);
+      -- Print information about the ping
       Ada.Text_IO.Put("+++ Ping ");
       Ada.Integer_Text_IO.Put(Item  => I,
                               Width => 0,
@@ -56,7 +59,7 @@ package body Ping.Messages is
       -- Wait a bit.
       -- delay(2.5);
 
-      -- Send a Grabbed message to Pong.
+      -- Send a Grabbed message to Pong
       Outgoing_Message := Pong.API.Ponged_Encode
         (Sender_Domain => Domain_ID, Sender => ID, Request_ID => R_ID);
       Message_Manager.Route_Message(Outgoing_Message);
@@ -99,12 +102,12 @@ package body Ping.Messages is
    begin                  -- such as Handle_Pinged, or from the main task loop??
       Initialize;
       I := 1;
-      while I /= 100000 loop
+      while I /= 10 loop
          New_Line(2);
          I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
-         -- Fetch and Route
+         -- Halt until message available, then route the message to where it needs to go
          Message_Manager.Fetch_Message(ID, Incoming_Message);
          Process(I, Incoming_Message);
          

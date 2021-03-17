@@ -76,7 +76,7 @@ package body Pong.Messages is
       
    begin                -- such as Handle_Ponged, or from the main task loop??
       I := 1;
-      while I /= 100000 loop
+      while I /= 10 loop
          I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
