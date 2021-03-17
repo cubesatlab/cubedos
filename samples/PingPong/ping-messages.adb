@@ -104,7 +104,6 @@ package body Ping.Messages is
       I := 1;
       while I /= 10 loop
          New_Line(2);
-         I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
          -- Halt until message available, then route the message to where it needs to go
@@ -116,6 +115,7 @@ package body Ping.Messages is
          Total_Time := Total_Time + Ada.Real_Time.To_Duration(Relative_Time);
          Put("Ping"); Put(I'Image); Put(" Time Duration:   ");Put(Relative_Duration); New_Line;
          
+         I := I + 1;
       end loop;
       delay 1.0;
       New_Line(2);

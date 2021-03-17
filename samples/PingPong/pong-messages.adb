@@ -77,7 +77,6 @@ package body Pong.Messages is
    begin                -- such as Handle_Ponged, or from the main task loop??
       I := 1;
       while I /= 10 loop
-         I := I + 1;
          Start_Time := Ada.Real_Time.Clock;
          
          -- Fetch and Route
@@ -89,6 +88,7 @@ package body Pong.Messages is
          Total_Time := Total_Time + Ada.Real_Time.To_Duration(Relative_Time);
          Put("Pong"); Put(I'Image); Put(" Time Duration:   "); Put(Relative_Duration); New_Line;
          
+         I := I + 1;
       end loop;
       delay 1.0;
       New_Line(2);
