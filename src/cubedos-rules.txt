@@ -2,19 +2,16 @@
 +RWarnings:a
 +RNumeric_Literals:2
 +RToo_Many_Dependencies:8
-+RParameters_Out_Of_Order
 +RRenamings
 +RImplicit_IN_Mode_Parameters
 +RMetrics_Cyclomatic_Complexity:8
 +RMetrics_Cyclomatic_Complexity:Exempt_Case_Statements
-+RNon_SPARK_Attributes
 +RLocal_Packages
 +RVolatile_Objects_Without_Address_Clauses
-+RMultiple_Entries_In_Protected_Definitions
 +REXIT_Statements_With_No_Loop_Name
 +RImproper_Returns
 +RLocal_USE_Clauses
-+RMaximum_Parameters:5
++RMaximum_Parameters:6
 +ROverly_Nested_Control_Structures:4
 +RStyle_Checks:a
 +RStyle_Checks:A
@@ -45,7 +42,6 @@
 +RIdentifier_Casing:Enum=mixed
 +RIdentifier_Casing:Exclude=cubedos-casing-exceptions.txt
 +ROne_Construct_Per_Line
-+RMax_Identifier_Length:24
 +RObject_Declarations_Out_Of_Order
 +RUncommented_BEGIN_In_Package_Bodies
 +RStyle_Checks:f
@@ -55,3 +51,5 @@
 +RStyle_Checks:p
 +RStyle_Checks:S
 +RStyle_Checks:u
++RStyle_Checks:C
++RStyle_Checks:t
