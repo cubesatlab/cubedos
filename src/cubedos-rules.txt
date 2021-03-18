@@ -53,3 +53,4 @@
 +RStyle_Checks:u
 +RStyle_Checks:C
 +RStyle_Checks:t
++RStyle_Checks:M112
