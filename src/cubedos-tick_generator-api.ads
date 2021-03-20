@@ -102,16 +102,16 @@ package CubedOS.Tick_Generator.API is
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
-   function Is_Relative_Request (Message : in Message_Record) return Boolean is
+   function Is_Relative_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Relative_Request));
 
-   function Is_Absolute_Request (Message : in Message_Record) return Boolean is
+   function Is_Absolute_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Absolute_Request));
 
-   function Is_Tick_Reply (Message : in Message_Record) return Boolean is
+   function Is_Tick_Reply(Message : in Message_Record) return Boolean is
       (Message.Sender = ID and Message.Message_ID = Message_Type'Pos (Tick_Reply));
 
-   function Is_Cancel_Request (Message : in Message_Record) return Boolean is
+   function Is_Cancel_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Cancel_Request));
 
    -- Decode Relative_Request messages. See Relative_Request_Encode for information about the
@@ -124,7 +124,7 @@ package CubedOS.Tick_Generator.API is
       Decode_Status : out Message_Status_Type)
      with
        Global => null,
-       Pre => Is_Relative_Request (Message),
+       Pre => Is_Relative_Request(Message),
        Depends => ((Tick_Interval, Request_Type, Series_ID, Decode_Status) => Message);
 
    -- Decode Absolute_Request messages. See Absolute_Request_Encode for information about the
@@ -136,7 +136,7 @@ package CubedOS.Tick_Generator.API is
       Decode_Status : out Message_Status_Type)
      with
        Global => null,
-       Pre => Is_Absolute_Request (Message),
+       Pre => Is_Absolute_Request(Message),
        Depends => ((Tick_Time, Series_ID, Decode_Status) => Message);
 
    -- Decode Tick_Reply messages. See Tick_Reply_Encode for information about the parameters.
@@ -147,7 +147,7 @@ package CubedOS.Tick_Generator.API is
       Decode_Status : out Message_Status_Type)
      with
        Global => null,
-       Pre => Is_Tick_Reply (Message),
+       Pre => Is_Tick_Reply(Message),
        Depends => ((Series_ID, Count, Decode_Status) => Message);
 
    -- Decode Cancel_Request messages. See Cancel_Request_Encode for information about the
@@ -158,7 +158,7 @@ package CubedOS.Tick_Generator.API is
       Decode_Status : out Message_Status_Type)
      with
        Global => null,
-       Pre => Is_Cancel_Request (Message),
+       Pre => Is_Cancel_Request(Message),
        Depends => ((Series_ID, Decode_Status) => Message);
 
 end CubedOS.Tick_Generator.API;

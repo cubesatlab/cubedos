@@ -9,7 +9,6 @@
 +RVolatile_Objects_Without_Address_Clauses
 +REXIT_Statements_With_No_Loop_Name
 +RImproper_Returns
-+RLocal_USE_Clauses
 +RMaximum_Parameters:6
 +ROverly_Nested_Control_Structures:4
 +RStyle_Checks:a
@@ -28,16 +27,14 @@
 +ROuter_Loop_Exits
 +RImplicit_SMALL_For_Fixed_Point_Types
 +RAnonymous_Arrays
-+RBinary_Case_Statements
 +REnumeration_Ranges_In_CASE_Statements
 +RGOTO_Statements
 +RMisplaced_Representation_Items
 +RNull_Paths
-+RRecursive_Subprograms
 +RSingle_Value_Enumeration_Types
 +RIdentifier_Casing:Type=mixed
 +RIdentifier_Casing:Others=mixed
-+RIdentifier_Casing:Constant=upper
++RIdentifier_Casing:Constant=mixed
 +RIdentifier_Casing:Enum=mixed
 +RIdentifier_Casing:Exclude=cubedos-casing-exceptions.txt
 +ROne_Construct_Per_Line
@@ -49,6 +46,5 @@
 +RStyle_Checks:n
 +RStyle_Checks:p
 +RStyle_Checks:S
-+RStyle_Checks:u
-+RStyle_Checks:t
 +RStyle_Checks:M112
++RStyle_Checks:C

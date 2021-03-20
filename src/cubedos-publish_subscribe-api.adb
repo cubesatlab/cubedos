@@ -18,11 +18,11 @@ package body CubedOS.Publish_Subscribe.API is
       Reason  => "The last value of Last is not needed");
 
    function Subscribe_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender     : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -44,12 +44,12 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Subscribe_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Domain : in Domain_ID_Type;
+      Receiver   : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Status     : in Status_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -73,11 +73,11 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Unsubscribe_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender     : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -99,12 +99,12 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Unsubscribe_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Domain : in Domain_ID_Type;
+      Receiver   : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Status     : in Status_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -128,12 +128,12 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Publish_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender       : in Module_ID_Type;
+      Request_ID   : in Request_ID_Type;
+      Channel      : in Channel_ID_Type;
+      Message_Data : in CubedOS.Lib.Octet_Array;
+      Priority     : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -159,12 +159,12 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Publish_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Domain : in Domain_ID_Type;
+      Receiver   : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Status     : in Status_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -188,12 +188,12 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    function Publish_Result_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Channel    : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Domain : in Domain_ID_Type;
+      Receiver   : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Channel    : in Channel_ID_Type;
+      Message_Data : in CubedOS.Lib.Octet_Array;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -232,7 +232,9 @@ package body CubedOS.Publish_Subscribe.API is
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Channel, Last);
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -260,7 +262,9 @@ package body CubedOS.Publish_Subscribe.API is
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Status, Last);
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -288,7 +292,9 @@ package body CubedOS.Publish_Subscribe.API is
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Channel, Last);
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -316,7 +322,9 @@ package body CubedOS.Publish_Subscribe.API is
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Status, Last);
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -331,10 +339,10 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    procedure Publish_Request_Decode
-     (Message : in  Message_Record;
-      Channel : out Channel_ID_Type;
-      Message_Data : out CubedOS.Lib.Octet_Array;
-      Size    : out CubedOS.Lib.Octet_Array_Count;
+     (Message       : in  Message_Record;
+      Channel       : out Channel_ID_Type;
+      Message_Data  : out CubedOS.Lib.Octet_Array;
+      Size          : out CubedOS.Lib.Octet_Array_Count;
       Decode_Status : out Message_Status_Type)
    is
       Position    : XDR_Index_Type;
@@ -352,7 +360,9 @@ package body CubedOS.Publish_Subscribe.API is
       XDR.Decode(Message.Payload, Position, Raw_Size, Last);
       Position := Last + 1;
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -364,7 +374,11 @@ package body CubedOS.Publish_Subscribe.API is
                Decode_Status := Insufficient_Space;   -- Provided Message_Data is too small.
                Size := 0;
             else
-               XDR.Decode(Message.Payload, Position, Message_Data(Message_Data'First .. Message_Data'First + Size - 1), Last);
+               XDR.Decode
+                 (Message.Payload,
+                  Position,
+                  Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
+                  Last);
                Decode_Status := Success;
             end if;
          end if;
@@ -391,7 +405,9 @@ package body CubedOS.Publish_Subscribe.API is
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Status, Last);
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -406,10 +422,10 @@ package body CubedOS.Publish_Subscribe.API is
 
 
    procedure Publish_Result_Decode
-     (Message : in  Message_Record;
-      Channel : out Channel_ID_Type;
-      Message_Data : out CubedOS.Lib.Octet_Array;
-      Size    : out CubedOS.Lib.Octet_Array_Count;
+     (Message       : in  Message_Record;
+      Channel       : out Channel_ID_Type;
+      Message_Data  : out CubedOS.Lib.Octet_Array;
+      Size          : out CubedOS.Lib.Octet_Array_Count;
       Decode_Status : out Message_Status_Type)
    is
       Position    : XDR_Index_Type;
@@ -427,7 +443,9 @@ package body CubedOS.Publish_Subscribe.API is
       XDR.Decode(Message.Payload, Position, Raw_Size, Last);
       Position := Last + 1;
 
-      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last) then
+      if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
+         Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Channel := Channel_ID_Type(Raw_Channel);
@@ -436,10 +454,14 @@ package body CubedOS.Publish_Subscribe.API is
          else
             Size := CubedOS.Lib.Octet_Array_Count(Raw_Size);
             if Size > Message_Data'Length then
-               Decode_Status := Insufficient_Space;   -- Provided Message_Data is too small.
+               Decode_Status := Insufficient_Space;   -- The given Message_Data is too small.
                Size := 0;
             else
-               XDR.Decode(Message.Payload, Position, Message_Data(Message_Data'First .. Message_Data'First + Size - 1), Last);
+               XDR.Decode
+                 (Message.Payload,
+                  Position,
+                  Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
+                  Last);
                Decode_Status := Success;
             end if;
          end if;

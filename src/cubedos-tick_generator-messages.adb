@@ -4,12 +4,10 @@
 -- AUTHOR : (C) Copyright 2017 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode (On);
+pragma SPARK_Mode(On);
 
 with CubedOS.Tick_Generator.API;
-
--- use CubedOS.Lib;
-use CubedOS.Tick_Generator.API;
+use  CubedOS.Tick_Generator.API;
 
 package body CubedOS.Tick_Generator.Messages
   with Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages)) is
@@ -42,7 +40,7 @@ package body CubedOS.Tick_Generator.Messages
    type Series_Array_Type is array (Series_Array_Index_Type) of Series_Record;
 
    -- Number of milliseconds to wait for the next poll (see task Send_Tick_Messages)
-   Release_Interval : constant Ada.Real_Time.Time_Span := Ada.Real_Time.Milliseconds (5);
+   Release_Interval : constant Ada.Real_Time.Time_Span := Ada.Real_Time.Milliseconds(5);
 
    -------------------
    -- Message Handling
@@ -51,7 +49,7 @@ package body CubedOS.Tick_Generator.Messages
    protected Series_Database is
 
       -- Add a series record to the database.
-      procedure Unchecked_Add_Series_Record (Series : in Series_Record)
+      procedure Unchecked_Add_Series_Record(Series : in Series_Record)
         with Global => null;
 
       -- Remove a series record from the database.
@@ -74,7 +72,7 @@ package body CubedOS.Tick_Generator.Messages
 
    protected body Series_Database is
 
-      procedure Unchecked_Add_Series_Record (Series : in Series_Record) is
+      procedure Unchecked_Add_Series_Record(Series : in Series_Record) is
       begin
          -- If there is insufficient space, there is no effect.
          if Count < Series_Maximum then
@@ -88,17 +86,19 @@ package body CubedOS.Tick_Generator.Messages
                end if;
             end loop;
 
+            Install_Loop:
             for I in Series_Array'Range loop
-               pragma Loop_Invariant (Count < Series_Maximum);
+               pragma Loop_Invariant(Count < Series_Maximum);
 
-               if not Series_Array (I).Is_Used then
-                  Series_Array (I) := Series;
-                  exit;
+               if not Series_Array(I).Is_Used then
+                  Series_Array(I) := Series;
+                  exit Install_Loop;
                end if;
-            end loop;
+            end loop Install_Loop;
             Count := Count + 1;
          end if;
       end Unchecked_Add_Series_Record;
+
 
       procedure Remove_Series_Record
         (Sender_ID : in Restricted_Module_ID; Series_ID : in Series_ID_Type)
@@ -106,19 +106,22 @@ package body CubedOS.Tick_Generator.Messages
       begin
          -- If there is nothing in the database, there is no effect.
          if Count > 0 then
-            for I in Series_Array'Range loop
-               pragma Loop_Invariant (Count > 0);
 
-               if Series_Array (I).Is_Used and then
-                 (Series_Array (I).Module_ID = Sender_ID and Series_Array (I).ID = Series_ID)
+            Search_Loop:
+            for I in Series_Array'Range loop
+               pragma Loop_Invariant(Count > 0);
+
+               if Series_Array(I).Is_Used and then
+                 (Series_Array(I).Module_ID = Sender_ID and Series_Array(I).ID = Series_ID)
                then
-                  Series_Array (I).Is_Used := False;
+                  Series_Array(I).Is_Used := False;
                   Count := Count - 1;
-                  exit;
+                  exit Search_Loop;
                end if;
-            end loop;
+            end loop Search_Loop;
          end if;
       end Remove_Series_Record;
+
 
       procedure Next_Ticks is
          Current_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
@@ -126,7 +129,7 @@ package body CubedOS.Tick_Generator.Messages
          -- Iterate through the array to see who needs a tick message.
          for I in Series_Array'Range loop
             declare
-               Current_Series : Series_Record renames Series_Array (I);
+               Current_Series : Series_Record renames Series_Array(I);
             begin
                -- If we need to send a tick from this series...
                if Current_Series.Is_Used and then Current_Series.Next <= Current_Time then
@@ -162,6 +165,7 @@ package body CubedOS.Tick_Generator.Messages
 
    end Series_Database;
 
+
    task body Send_Tick_Messages is
       Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock;
    begin
@@ -176,7 +180,7 @@ package body CubedOS.Tick_Generator.Messages
    -- Message Decoding and Dispatching
    -----------------------------------
 
-   procedure Process_Relative_Request (Incoming_Message : in Message_Record)
+   procedure Process_Relative_Request(Incoming_Message : in Message_Record)
      with Pre => API.Is_Relative_Request (Incoming_Message)
    is
       Tick_Interval : Ada.Real_Time.Time_Span;
@@ -186,7 +190,7 @@ package body CubedOS.Tick_Generator.Messages
       Series        : Series_Record;
       Current_Time  : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
    begin
-      API.Relative_Request_Decode (Incoming_Message, Tick_Interval, Request_Type, Series_ID, Status);
+      API.Relative_Request_Decode(Incoming_Message, Tick_Interval, Request_Type, Series_ID, Status);
       if Status = Success then
 
          -- The tick generator should never try to send a tick request to itself so the check
@@ -202,20 +206,21 @@ package body CubedOS.Tick_Generator.Messages
             Series.Next      := Current_Time + Tick_Interval;
             Series.Count     := 1;
             Series.Is_Used   := True;
-            Series_Database.Unchecked_Add_Series_Record (Series);
+            Series_Database.Unchecked_Add_Series_Record(Series);
          end if;
       end if;
    end Process_Relative_Request;
 
-   procedure Process_Absolute_Request (Incoming_Message : in Message_Record)
-     with Pre => API.Is_Absolute_Request (Incoming_Message)
+
+   procedure Process_Absolute_Request(Incoming_Message : in Message_Record)
+     with Pre => API.Is_Absolute_Request(Incoming_Message)
    is
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
       Series    : Series_Record;
    begin
-      API.Absolute_Request_Decode (Incoming_Message, Tick_Time, Series_ID, Status);
+      API.Absolute_Request_Decode(Incoming_Message, Tick_Time, Series_ID, Status);
       if Status = Success then
 
          -- The tick generator should never try to send a tick request to itself so the check
@@ -231,18 +236,19 @@ package body CubedOS.Tick_Generator.Messages
             Series.Next      := Tick_Time;
             Series.Count     := 1;
             Series.Is_Used   := True;
-            Series_Database.Unchecked_Add_Series_Record (Series);
+            Series_Database.Unchecked_Add_Series_Record(Series);
          end if;
       end if;
    end Process_Absolute_Request;
 
-   procedure Process_Cancel_Request (Incoming_Message : in Message_Record)
+
+   procedure Process_Cancel_Request(Incoming_Message : in Message_Record)
      with Pre => API.Is_Cancel_Request (Incoming_Message)
    is
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
    begin
-      API.Cancel_Request_Decode (Incoming_Message, Series_ID, Status);
+      API.Cancel_Request_Decode(Incoming_Message, Series_ID, Status);
 
       -- The tick generator should never try to send a cancel request to itself so the check
       -- below should always be True. If, by chance, the tick generator does try to send
@@ -250,11 +256,12 @@ package body CubedOS.Tick_Generator.Messages
       -- would be nice to statically show that situation can never happen.
       --
       if Status = Success and Incoming_Message.Sender in Restricted_Module_ID then
-         Series_Database.Remove_Series_Record (Incoming_Message.Sender, Series_ID);
+         Series_Database.Remove_Series_Record(Incoming_Message.Sender, Series_ID);
       end if;
    end Process_Cancel_Request;
 
-   procedure Process (Incoming_Message : in Message_Record)
+
+   procedure Process(Incoming_Message : in Message_Record)
      with
        Global =>
          (Input => Ada.Real_Time.Clock_Time, In_Out => Series_Database),
@@ -262,14 +269,14 @@ package body CubedOS.Tick_Generator.Messages
          (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message))
    is
    begin
-      if API.Is_Relative_Request (Incoming_Message) then
-         Process_Relative_Request (Incoming_Message);
-      elsif API.Is_Absolute_Request (Incoming_Message) then
-         Process_Absolute_Request (Incoming_Message);
-      elsif API.Is_Cancel_Request (Incoming_Message) then
-         Process_Cancel_Request (Incoming_Message);
+      if API.Is_Relative_Request(Incoming_Message) then
+         Process_Relative_Request(Incoming_Message);
+      elsif API.Is_Absolute_Request(Incoming_Message) then
+         Process_Absolute_Request(Incoming_Message);
+      elsif API.Is_Cancel_Request(Incoming_Message) then
+         Process_Cancel_Request(Incoming_Message);
       else
-         -- TODO: What should be done about malformed/unrecognized messages?
+         --$ TODO: What should be done about malformed/unrecognized messages?
          null;
       end if;
    end Process;
@@ -285,8 +292,8 @@ package body CubedOS.Tick_Generator.Messages
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message (ID, Incoming_Message);
-         Process (Incoming_Message);
+         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Process(Incoming_Message);
       end loop;
    end Message_Loop;
 
