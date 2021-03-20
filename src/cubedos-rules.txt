@@ -2,7 +2,6 @@
 +RWarnings:a
 +RNumeric_Literals:2
 +RToo_Many_Dependencies:8
-+RRenamings
 +RImplicit_IN_Mode_Parameters
 +RMetrics_Cyclomatic_Complexity:8
 +RMetrics_Cyclomatic_Complexity:Exempt_Case_Statements
@@ -51,6 +50,5 @@
 +RStyle_Checks:p
 +RStyle_Checks:S
 +RStyle_Checks:u
-+RStyle_Checks:C
 +RStyle_Checks:t
 +RStyle_Checks:M112
