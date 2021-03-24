@@ -7,9 +7,7 @@
 pragma SPARK_Mode(On);
 
 with CubedOS.Tick_Generator.API;
-
---use CubedOS.Lib;
-use CubedOS.Tick_Generator.API;
+use  CubedOS.Tick_Generator.API;
 
 package body CubedOS.Tick_Generator.Messages
   with Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages)) is
@@ -17,7 +15,6 @@ package body CubedOS.Tick_Generator.Messages
    use Message_Manager;
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
-
 
    -- Use these types to keep track of information shared between the task that processes
    -- messages to the tick generator and the task that sends tick messages to other modules.
@@ -40,7 +37,7 @@ package body CubedOS.Tick_Generator.Messages
    Series_Maximum : constant := 16;
    subtype Series_Array_Index_Type is Positive range 1 .. Series_Maximum;
    subtype Series_Array_Count_Type is Natural range 0 .. Series_Maximum;
-   type Series_Array_Type is array(Series_Array_Index_Type) of Series_Record;
+   type Series_Array_Type is array (Series_Array_Index_Type) of Series_Record;
 
    -- Number of milliseconds to wait for the next poll (see task Send_Tick_Messages)
    Release_Interval : constant Ada.Real_Time.Time_Span := Ada.Real_Time.Milliseconds(5);
@@ -57,7 +54,7 @@ package body CubedOS.Tick_Generator.Messages
 
       -- Remove a series record from the database.
       procedure Remove_Series_Record
-        (Sender_ID : Restricted_Module_ID; Series_ID : in Series_ID_Type)
+        (Sender_ID : in Restricted_Module_ID; Series_ID : in Series_ID_Type)
         with Global => null;
 
       -- Send tick message(s) to the core logic as required.
@@ -70,10 +67,8 @@ package body CubedOS.Tick_Generator.Messages
       Count        : Series_Array_Count_Type := 0;
    end Series_Database;
 
-
    -- This must be declared before the body of Series_Database.
    task Send_Tick_Messages;
-
 
    protected body Series_Database is
 
@@ -84,21 +79,22 @@ package body CubedOS.Tick_Generator.Messages
 
             -- If the caller is attempting to add two identical series IDs, there is no effect.
             for I in Series_Array'Range loop
-               if Series_Array(I).Is_Used and then
-                 Series_Array(I).ID = Series.ID
+               if Series_Array (I).Is_Used and then
+                 Series_Array (I).ID = Series.ID
                then
                   return;
                end if;
             end loop;
 
+            Install_Loop:
             for I in Series_Array'Range loop
                pragma Loop_Invariant(Count < Series_Maximum);
 
                if not Series_Array(I).Is_Used then
                   Series_Array(I) := Series;
-                  exit;
+                  exit Install_Loop;
                end if;
-            end loop;
+            end loop Install_Loop;
             Count := Count + 1;
          end if;
       end Unchecked_Add_Series_Record;
@@ -110,6 +106,8 @@ package body CubedOS.Tick_Generator.Messages
       begin
          -- If there is nothing in the database, there is no effect.
          if Count > 0 then
+
+            Search_Loop:
             for I in Series_Array'Range loop
                pragma Loop_Invariant(Count > 0);
 
@@ -118,9 +116,9 @@ package body CubedOS.Tick_Generator.Messages
                then
                   Series_Array(I).Is_Used := False;
                   Count := Count - 1;
-                  exit;
+                  exit Search_Loop;
                end if;
-            end loop;
+            end loop Search_Loop;
          end if;
       end Remove_Series_Record;
 
@@ -183,7 +181,7 @@ package body CubedOS.Tick_Generator.Messages
    -----------------------------------
 
    procedure Process_Relative_Request(Incoming_Message : in Message_Record)
-     with Pre => API.Is_Relative_Request(Incoming_Message)
+     with Pre => API.Is_Relative_Request (Incoming_Message)
    is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type  : Series_Type;
@@ -245,7 +243,7 @@ package body CubedOS.Tick_Generator.Messages
 
 
    procedure Process_Cancel_Request(Incoming_Message : in Message_Record)
-     with Pre => API.Is_Cancel_Request(Incoming_Message)
+     with Pre => API.Is_Cancel_Request (Incoming_Message)
    is
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
@@ -278,7 +276,7 @@ package body CubedOS.Tick_Generator.Messages
       elsif API.Is_Cancel_Request(Incoming_Message) then
          Process_Cancel_Request(Incoming_Message);
       else
-         -- TODO: What should be done about malformed/unrecognized messages?
+         --$ TODO: What should be done about malformed/unrecognized messages?
          null;
       end if;
    end Process;
@@ -298,6 +296,5 @@ package body CubedOS.Tick_Generator.Messages
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
-
 
 end CubedOS.Tick_Generator.Messages;

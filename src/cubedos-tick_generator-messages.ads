@@ -15,21 +15,15 @@ with Message_Manager;
 package CubedOS.Tick_Generator.Messages
   with
     Abstract_State => (Tick_Database with External),
-    Initializes => Tick_Database
+    Initializes => (Message_Loop, Tick_Database)
 is
 
    task Message_Loop
-     with Global =>
-       (Input => Ada.Real_Time.Clock_Time, In_Out => (Tick_Database, Message_Manager.Mailboxes))
+     with
+       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => (Tick_Database, Message_Manager.Mailboxes))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
-
-   pragma Annotate
-     (GNATprove,
-      Intentional,
-      "multiple tasks might queue on protected entry",
-      "Every module has a unique ID");
 
 end CubedOS.Tick_Generator.Messages;

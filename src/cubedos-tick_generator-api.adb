@@ -13,14 +13,18 @@ use CubedOS.Lib;
 package body CubedOS.Tick_Generator.API is
    use type XDR.XDR_Unsigned;
 
+   pragma Warnings
+     (GNATprove, Off, """Last"" is set by ""Decode"" but not used",
+      Reason  => "The last value of Last is not needed");
+
    function Relative_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender        : Module_ID_Type;
-      Request_ID    : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type  : Series_Type;
-      Series_ID     : Series_ID_Type;
-      Priority      : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender        : in Module_ID_Type;
+      Request_ID    : in Request_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type  : in Series_Type;
+      Series_ID     : in Series_ID_Type;
+      Priority      : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : XDR_Index_Type;
@@ -48,12 +52,12 @@ package body CubedOS.Tick_Generator.API is
 
 
    function Absolute_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Tick_Time  : Ada.Real_Time.Time;
-      Series_ID  : Series_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender     : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Tick_Time  : in Ada.Real_Time.Time;
+      Series_ID  : in Series_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : XDR_Index_Type;
@@ -82,12 +86,12 @@ package body CubedOS.Tick_Generator.API is
 
 
    function Tick_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Series_ID  : Series_ID_Type;
-      Count      : Series_Count_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Domain : in Domain_ID_Type;
+      Receiver   : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Series_ID  : in Series_ID_Type;
+      Count      : in Series_Count_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Result : Message_Record := Make_Empty_Message
         (Sender_Domain   => Domain_ID,
@@ -113,11 +117,11 @@ package body CubedOS.Tick_Generator.API is
 
 
    function Cancel_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Series_ID  : Series_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Domain : in Domain_ID_Type;
+      Sender     : in Module_ID_Type;
+      Request_ID : in Request_ID_Type;
+      Series_ID  : in Series_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : XDR_Index_Type;
@@ -152,9 +156,6 @@ package body CubedOS.Tick_Generator.API is
       Raw_Series_ID    : XDR.XDR_Unsigned;
       Last             : XDR_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "The last value of Last is not needed");
-
       Tick_Interval := Ada.Real_Time.Time_Span_First;
       Request_Type := Series_Type'First;
       Series_ID := Series_ID_Type'First;
@@ -179,7 +180,8 @@ package body CubedOS.Tick_Generator.API is
             XDR.Decode(Message.Payload, Position, Raw_Series_ID, Last);
 
             if Raw_Series_ID not in
-              XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+              XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
+            then
                Decode_Status := Malformed;
             else
                Series_ID := Series_ID_Type(Raw_Series_ID);
@@ -202,9 +204,6 @@ package body CubedOS.Tick_Generator.API is
       Raw_Series_ID : XDR.XDR_Unsigned;
       Last          : XDR_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "The last value of Last is not needed");
-
       Series_ID := Series_ID_Type'First;
 
       Position := 0;
@@ -216,7 +215,8 @@ package body CubedOS.Tick_Generator.API is
 
       XDR.Decode(Message.Payload, Position, Raw_Series_ID, Last);
       if Raw_Series_ID not in
-        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Series_ID := Series_ID_Type(Raw_Series_ID);
@@ -236,9 +236,6 @@ package body CubedOS.Tick_Generator.API is
       Raw_Count     : XDR.XDR_Unsigned;
       Last          : XDR_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "The last value of Last is not needed");
-
       Series_ID := Series_ID_Type'First;
       Count := 0;
 
@@ -246,7 +243,8 @@ package body CubedOS.Tick_Generator.API is
       XDR.Decode(Message.Payload, Position, Raw_Series_ID, Last);
       Position := Last + 1;
       if Raw_Series_ID not in
-        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Series_ID := Series_ID_Type(Raw_Series_ID);
@@ -271,21 +269,18 @@ package body CubedOS.Tick_Generator.API is
       Raw_Series_ID : XDR.XDR_Unsigned;
       Last          : XDR_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "The last value of Last is not needed");
-
       Series_ID := Series_ID_Type'First;
 
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Series_ID, Last);
       if Raw_Series_ID not in
-        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+        XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
+      then
          Decode_Status := Malformed;
       else
          Series_ID := Series_ID_Type(Raw_Series_ID);
          Decode_Status := Success;
       end if;
    end Cancel_Request_Decode;
-
 
 end CubedOS.Tick_Generator.API;
