@@ -3,9 +3,28 @@ Module Map
 ==========
 
 This file contains the "well known" module ID numbers for the various CubedOS core modules.
+Application-specific modules should be numbered by application developers starting at the
+"far" end of the mailbox array. For example, if the mailbox array is configured with a size of
+16, the first application-specific module should use a module ID of 16, then 15, etc. The "gap"
+between the application-specific IDs and the well-known IDs can later be closed by configuring
+the mailbox size to what is precisely required.
 
-1. Tick Generator.
-2. Publish/Subscribe Service.
-3. File Server Interface.
-4. CFDP Service (from the DTN project).
+Every application is encouraged to copy this file into their source repository and edit it to
+include application-specific module ID assignments.
 
+Core Modules
+------------
+
+1. Name resolver (NOT IMPLEMENTED. Used for dynamic module ID assignments)
+2. Log Server (telemetry gathering, general purpose logging)
+3. Publish/Subscribe Server (publish/subscribe message passing)
+4. Time Server (timing services)
+5. Event Server (NOT IMPLEMENTED. Like CFS?)
+6. File Server (non-volatile file storage)
+7. Table Server (NOT IMPLEMENTED. Like CFS?)
+
+
+Application-Specific Modules
+----------------------------
+
+[Filled in by the application's development team]
