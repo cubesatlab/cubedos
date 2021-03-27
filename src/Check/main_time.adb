@@ -1,29 +1,29 @@
 --------------------------------------------------------------------------------
--- FILE   : main_tick.adb
--- SUBJECT: The main file to test the tick generator package.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- FILE   : main_time.adb
+-- SUBJECT: The main file to test the time server package.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
--- In order to test the tick generator module, you must run the produced executable in a console
+-- In order to test the time server module, you must run the produced executable in a console
 -- window, and ^C out of it when a suitable time has passed. Then observe the behavior to ensure
 -- the desired effects are happening.
 --------------------------------------------------------------------------------
 with Ada.Integer_Text_IO;
 with Ada.Real_Time;
 with Ada.Text_IO;
-with CubedOS.Tick_Generator;
-with CubedOS.Tick_Generator.API;
-with CubedOS.Tick_Generator.Messages;
-pragma Unreferenced(CubedOS.Tick_Generator.Messages);
+with CubedOS.Time_Server;
+with CubedOS.Time_Server.API;
+with CubedOS.Time_Server.Messages;
+pragma Unreferenced(CubedOS.Time_Server.Messages);
 with Message_Manager;
 with GNAT.Time_Stamp;
 
 use Ada.Integer_Text_IO;
 use Ada.Text_IO;
-use CubedOS.Tick_Generator;
-use CubedOS.Tick_Generator.API;
+use CubedOS.Time_Server;
+use CubedOS.Time_Server.API;
 use Message_Manager;
 
-procedure Main_Tick is
+procedure Main_Time is
    use type Ada.Real_Time.Time;
 
    package Duration_IO is new Fixed_IO(Duration);
@@ -82,4 +82,4 @@ begin
       end if;
    end loop;
 
-end Main_Tick;
+end Main_Time;

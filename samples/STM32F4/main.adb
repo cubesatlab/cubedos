@@ -9,14 +9,14 @@ with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
 
-with CubedOS.Tick_Generator.Messages;
+with CubedOS.Time_Server.Messages;
 with Control.Messages;
 with LED_Driver.Messages;
 with Button_Driver.Messages;
 with Button;
 with CubedOS.Publish_Subscribe_Server.Messages;
 
-pragma Unreferenced(CubedOS.Tick_Generator.Messages);
+pragma Unreferenced(CubedOS.Time_Server.Messages);
 pragma Unreferenced(Control.Messages);
 pragma Unreferenced(LED_Driver.Messages);
 pragma Unreferenced(Button_Driver.Messages);

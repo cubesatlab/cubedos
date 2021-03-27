@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-tick_generator-api.adb
--- SUBJECT: Body of a package that simplifies use of the tick generator.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- FILE   : cubedos-time_server-api.adb
+-- SUBJECT: Body of a package that simplifies use of the time_server.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -10,7 +10,7 @@ with CubedOS.Lib.XDR;
 
 use CubedOS.Lib;
 
-package body CubedOS.Tick_Generator.API is
+package body CubedOS.Time_Server.API is
    use type XDR.XDR_Unsigned;
 
    pragma Warnings
@@ -283,4 +283,4 @@ package body CubedOS.Tick_Generator.API is
       end if;
    end Cancel_Request_Decode;
 
-end CubedOS.Tick_Generator.API;
+end CubedOS.Time_Server.API;

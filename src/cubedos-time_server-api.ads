@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-tick_generator-api.ads
--- SUBJECT: Specification of a package that simplifies use of the tick generator.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- FILE   : cubedos-time_server-api.ads
+-- SUBJECT: Specification of a package that simplifies use of the time server.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -15,7 +15,7 @@ with System;
 
 use Message_Manager;
 
-package CubedOS.Tick_Generator.API is
+package CubedOS.Time_Server.API is
 
    -- Specifies the kinds of messages that can be sent to or received from the tick generator.
    -- @value Relative_Request A request for a tick using a time relative to when the request
@@ -161,4 +161,4 @@ package CubedOS.Tick_Generator.API is
        Pre => Is_Cancel_Request(Message),
        Depends => ((Series_ID, Decode_Status) => Message);
 
-end CubedOS.Tick_Generator.API;
+end CubedOS.Time_Server.API;

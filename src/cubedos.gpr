@@ -7,7 +7,7 @@ project CubedOS is
    case Platform is
 
       when "Check" =>
-         for Main use ("cubedos_check.adb", "main_file.adb", "main_sorters.adb", "main_tick.adb", "main_message_manager.adb");
+         for Main use ("cubedos_check.adb", "main_file.adb", "main_sorters.adb", "main_time.adb", "main_message_manager.adb");
          for Object_Dir use "build/Check";
          for Source_Dirs use (".", "Check");
          for Languages use ("Ada");

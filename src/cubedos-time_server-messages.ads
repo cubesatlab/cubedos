@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-tick_generator.ads
--- SUBJECT: Specification of a package for a tick generator module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- FILE   : cubedos-time_server-messages.ads
+-- SUBJECT: Specification of a package for a time server module.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -12,7 +12,7 @@ with Ada.Real_Time;
 with System;
 with Message_Manager;
 
-package CubedOS.Tick_Generator.Messages
+package CubedOS.Time_Server.Messages
   with
     Abstract_State => (Tick_Database with External),
     Initializes => (Message_Loop, Tick_Database)
@@ -26,4 +26,4 @@ is
       pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-end CubedOS.Tick_Generator.Messages;
+end CubedOS.Time_Server.Messages;

@@ -1,15 +1,15 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-tick_generator.adb
--- SUBJECT: Body of a package that implements the main part of the tick generator.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- FILE   : cubedos-tick_server-messages.adb
+-- SUBJECT: Body of a package that implements the main part of the time server.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with CubedOS.Tick_Generator.API;
-use  CubedOS.Tick_Generator.API;
+with CubedOS.Time_Server.API;
+use  CubedOS.Time_Server.API;
 
-package body CubedOS.Tick_Generator.Messages
+package body CubedOS.Time_Server.Messages
   with Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages)) is
 
    use Message_Manager;
@@ -297,4 +297,4 @@ package body CubedOS.Tick_Generator.Messages
       end loop;
    end Message_Loop;
 
-end CubedOS.Tick_Generator.Messages;
+end CubedOS.Time_Server.Messages;

@@ -7,7 +7,7 @@
 pragma SPARK_Mode(On);
 
 with Ada.Real_Time;
-with CubedOS.Tick_Generator.API;
+with CubedOS.Time_Server.API;
 use  CubedOS;
 with LED_Driver.API;
 with LED_Driver; use LED_Driver;
@@ -39,7 +39,7 @@ package body Control.Messages is
 
      -- Cancel the tick request, set tick timer to 10.0 seconds
      if (Counter mod 3 = 0) then
-      Outgoing_Message := Tick_Generator.API.Cancel_Request_Encode
+      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
@@ -47,19 +47,19 @@ package body Control.Messages is
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
+      Outgoing_Message := Time_Server.API.Relative_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
-         Request_Type  => Tick_Generator.API.Periodic,
+         Request_Type  => Time_Server.API.Periodic,
          Series_ID     => 1);
       Route_Message(Outgoing_Message);
          Counter := Counter + 1;
 
    -- Cancel the tick request, set tick timer to 3.0 seconds
      elsif (Counter mod 3 = 1) then
-      Outgoing_Message := Tick_Generator.API.Cancel_Request_Encode
+      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
@@ -67,19 +67,19 @@ package body Control.Messages is
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
+      Outgoing_Message := Time_Server.API.Relative_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(3.0),
-         Request_Type  => Tick_Generator.API.Periodic,
+         Request_Type  => Time_Server.API.Periodic,
          Series_ID     => 1);
       Route_Message(Outgoing_Message);
          Counter := Counter + 1;
 
      -- Cancel the tick request, set tick timer to 1.0 seconds
      elsif (Counter mod 3 = 2) then
-      Outgoing_Message := Tick_Generator.API.Cancel_Request_Encode
+      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
@@ -87,12 +87,12 @@ package body Control.Messages is
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
+      Outgoing_Message := Time_Server.API.Relative_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
-         Request_Type  => Tick_Generator.API.Periodic,
+         Request_Type  => Time_Server.API.Periodic,
          Series_ID     => 1);
       Route_Message(Outgoing_Message);
          Counter := Counter + 1;
@@ -103,7 +103,7 @@ package body Control.Messages is
 
 
    procedure Handle_Tick_Reply(Message : in Message_Record)
-     with Pre => Tick_Generator.API.Is_Tick_Reply(Message)
+     with Pre => Time_Server.API.Is_Tick_Reply(Message)
    is
       Outgoing_Message : Message_Record;
    begin
@@ -132,7 +132,7 @@ package body Control.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if Tick_Generator.API.Is_Tick_Reply(Message) then
+      if Time_Server.API.Is_Tick_Reply(Message) then
          Handle_Tick_Reply(Message);
 
       elsif Publish_Subscribe_Server.API.Is_Publish_Result(Message) then
@@ -174,12 +174,12 @@ package body Control.Messages is
       Route_Message(Outgoing_Message);
 
       -- Request a periodic tick every 10.0 seconds.
-      Outgoing_Message := Tick_Generator.API.Relative_Request_Encode
+      Outgoing_Message := Time_Server.API.Relative_Request_Encode
         (Sender_Domain => 1,
          Sender        => Control.ID,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
-         Request_Type  => Tick_Generator.API.Periodic,
+         Request_Type  => Time_Server.API.Periodic,
          Series_ID     => 1);
          Route_Message(Outgoing_Message);
 

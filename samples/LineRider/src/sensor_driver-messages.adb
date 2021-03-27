@@ -4,8 +4,8 @@
 -- AUTHOR : (C) Copyright 2015 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with CubedOS.Tick_Generator;
-with CubedOS.Tick_Generator.API;
+with CubedOS.Time_Server;
+with CubedOS.Time_Server.API;
 with Message_Manager;
 with Sensor_Driver.Internals;
 
@@ -18,8 +18,8 @@ package body Sensor_Driver.Messages is
       Internals.Initialize;
 
       -- Request a tick message every 100 ms.
-      Message_Manager.Mailboxes(CubedOS.Tick_Generator.ID).Unchecked_Send
-        (CubedOS.Tick_Generator.API.Periodic_Ticks_Message(ID, 100));
+      Message_Manager.Mailboxes(CubedOS.Time_Server.ID).Unchecked_Send
+        (CubedOS.Time_Server.API.Periodic_Ticks_Message(ID, 100));
 
       -- Process the tick messages as they arrive.
       loop
