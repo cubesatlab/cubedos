@@ -10,6 +10,6 @@ with Message_Manager;
 
 package Sensor_Driver is
 
-   ID : constant Message_Manager.Module_ID := 3;
+   ID : constant Message_Manager.Module_ID := 6;
 
 end Sensor_Driver;

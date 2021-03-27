@@ -10,6 +10,6 @@ with Message_Manager;
 
 package CubedOS.Tick_Generator is
 
-   ID : constant Message_Manager.Module_ID_Type := 1;
+   ID : constant Message_Manager.Module_ID_Type := 4;
 
 end CubedOS.Tick_Generator;

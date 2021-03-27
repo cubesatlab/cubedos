@@ -10,6 +10,6 @@ with Message_Manager;
 
 package LED_Driver is
 
-   ID : constant Message_Manager.Module_ID := 2;
+   ID : constant Message_Manager.Module_ID := 5;
 
 end LED_Driver;

@@ -10,6 +10,6 @@ with Message_Manager;
 
 package CubedOS.Logger is
 
-   ID : constant Message_Manager.Module_ID_Type := 7;
+   ID : constant Message_Manager.Module_ID_Type := 2;
 
 end CubedOS.Logger;

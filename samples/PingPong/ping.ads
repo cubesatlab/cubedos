@@ -8,7 +8,7 @@ with Message_Manager;
 
 package Ping is
 
-   ID : constant Message_Manager.Module_ID_Type := 15;
+   ID : constant Message_Manager.Module_ID_Type := 5;
 
    R_ID : constant Message_Manager.Request_ID_Type := 2;
 

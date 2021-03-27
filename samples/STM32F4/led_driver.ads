@@ -10,7 +10,7 @@ with Message_Manager;
 
 package LED_Driver is
 
-   ID : constant Message_Manager.Module_ID_Type := 4;
+   ID : constant Message_Manager.Module_ID_Type := 5;
 
    type LED_Type is (Green, Orange, Red, Blue);
 

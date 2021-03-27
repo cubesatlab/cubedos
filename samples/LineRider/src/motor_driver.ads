@@ -10,6 +10,6 @@ with Message_Manager;
 
 package Motor_Driver is
 
-   ID : constant Message_Manager.Module_ID := 4;
+   ID : constant Message_Manager.Module_ID := 7;
 
 end Motor_Driver;

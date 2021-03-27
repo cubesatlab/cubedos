@@ -10,7 +10,7 @@ with Message_Manager;
 
 package Line_Rider is
 
-   ID : constant Message_Manager.Module_ID := 5;
+   ID : constant Message_Manager.Module_ID := 8;
 
 end Line_Rider;
 
