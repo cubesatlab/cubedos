@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-logger-api.ads
+-- FILE   : cubedos-log_server-api.ads
 -- SUBJECT: Specification of the logger's API package
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -12,7 +12,7 @@ pragma SPARK_Mode(On);
 with Message_Manager;  use Message_Manager;
 with System;
 
-package CubedOS.Logger.API is
+package CubedOS.Log_Server.API is
 
    -- Define data types here that are only needed in this API (such as status codes). Data
    -- types that might also be used in the implementation should be in the top level package.
@@ -58,4 +58,4 @@ package CubedOS.Logger.API is
      Pre => Is_A_Log_Text(Message) and Text'Length >= Maximum_Log_Message_Size,
      Depends => (Text =>+ Message, (Size, Decode_Status) => Message);
 
-end CubedOS.Logger.API;
+end CubedOS.Log_Server.API;

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-logger-api.adb
+-- FILE   : cubedos-log_server-api.adb
 -- SUBJECT: Body of the logger's API package
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -12,7 +12,7 @@ with CubedOS.Lib.XDR;
 
 use CubedOS.Lib;
 
-package body CubedOS.Logger.API is
+package body CubedOS.Log_Server.API is
    use type XDR.XDR_Unsigned;
 
    procedure Log_Message
@@ -79,4 +79,4 @@ package body CubedOS.Logger.API is
       end if;
    end Log_Text_Decode;
 
-end CubedOS.Logger.API;
+end CubedOS.Log_Server.API;

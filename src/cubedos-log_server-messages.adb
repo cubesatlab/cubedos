@@ -1,20 +1,20 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-logger-messages.adb
+-- FILE   : cubedos-log_server-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(Off);
 
 with Ada.Text_IO;
 with CubedOS.Lib.Bounded_Strings;
-with CubedOS.Logger.API;
+with CubedOS.Log_Server.API;
 
 use CubedOS.Lib.Bounded_Strings;
 
-package body CubedOS.Logger.Messages is
+package body CubedOS.Log_Server.Messages is
    use Message_Manager;
-   use type Logger.API.Status_Type;
+   use type Log_Server.API.Status_Type;
 
    type Module_Name_Array is array(Module_ID_Type) of Bounded_String(17);
    Module_Names : constant Module_Name_Array :=
@@ -40,13 +40,13 @@ package body CubedOS.Logger.Messages is
    -------------------
 
    procedure Handle_Log_Text(Message : in Message_Record)
-     with Pre => Logger.API.Is_A_Log_Text(Message)
+     with Pre => Log_Server.API.Is_A_Log_Text(Message)
    is
-      Text : String(Logger.API.Log_Message_Index_Type);
-      Size : Logger.API.Log_Message_Size_Type;
+      Text : String(Log_Server.API.Log_Message_Index_Type);
+      Size : Log_Server.API.Log_Message_Size_Type;
       Status : Message_Status_Type;
    begin
-      Logger.API.Log_Text_Decode(Message, Text, Size, Status);
+      Log_Server.API.Log_Text_Decode(Message, Text, Size, Status);
 
       -- Ignore log messages that don't decode properly.
       -- TODO: We should also time stamp the messages.
@@ -64,7 +64,7 @@ package body CubedOS.Logger.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if Logger.API.Is_A_Log_Text(Message) then
+      if Log_Server.API.Is_A_Log_Text(Message) then
          Handle_Log_Text(Message);
       else
          -- An unknown message type has been received. What should be done about that?
@@ -87,4 +87,4 @@ package body CubedOS.Logger.Messages is
       end loop;
    end Message_Loop;
 
-end CubedOS.Logger.Messages;
+end CubedOS.Log_Server.Messages;
