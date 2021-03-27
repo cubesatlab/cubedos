@@ -1,6 +1,6 @@
-project CubedOS is
+project CubedLib is
 
-   for Library_Name use "cubedos";
+   for Library_Name use "cubedlib";
    type Build_Type is ("Release", "Debug");
    Build : Build_Type := external ("BUILD", "Debug");
          
@@ -14,8 +14,8 @@ project CubedOS is
          for Library_Dir use "lib/Debug";
          for Object_Dir use "obj/Debug";
    end case;
-   for Source_Dirs use (".");   
-   for Languages use ("Ada");
+   for Source_Dirs use (".", "library");
+   for Languages use ("ada");
    
    package Ide is
       for Default_Switches ("adacontrol") use ("-f", "cubedos.aru");
@@ -47,5 +47,5 @@ project CubedOS is
       for Default_Switches ("ada") use ("-rules", "-from=cubedos-rules.txt");
    end Check;
 
-end CubedOS;
+end CubedLib;
 

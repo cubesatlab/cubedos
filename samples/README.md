@@ -13,6 +13,8 @@ CubedOS Samples
   
 + `PubSub`: A sample application that demonstrates the Publish/Subscribe server.
 
++ `Tests`: This folder contains old test programs that are in the process of being reworked.
+
 + `STM32F4`: This folder contains a demonstration of CubedOS running on the STM32F4-discovery
   board.
 

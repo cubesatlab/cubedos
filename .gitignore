@@ -1,4 +1,6 @@
 build
+obj
+lib
 src/doc
 
 # LaTeX build artifacts

@@ -42,13 +42,7 @@ is
    -- or sensible.
    type Request_ID_Type is mod 2**32;
 
-   -- A fully qualified message address is the triple (Domain_ID, Module_ID, Message_ID).
-
-   -- The primitive unit of data stored in an XDR message. This type and the XDR types below are
-   -- defined here rather than in CubedOS.Lib.XDR because these types are needed for the mail-
-   -- box definition.
-   --
-   type XDR_Octet is mod 2**8;
+   -- Note: A fully qualified message address is the triple (Domain_ID, Module_ID, Message_ID).
 
    -- Definition of a CubedOS message. Messages are stored in XDR_Arrays.
 
@@ -58,10 +52,10 @@ is
    -- given zero length values to encode. Support for encoding zero length arrays and strings is
    -- useful.
    --
-   subtype XDR_Index_Type is Natural range 0 .. Maximum_Message_Size - 1;
-   subtype XDR_Extended_Index_Type is Integer range -1 .. Maximum_Message_Size - 1;
-   subtype XDR_Size_Type is Natural range 0 .. Maximum_Message_Size;
-   type XDR_Array is array(XDR_Index_Type) of XDR_Octet;
+   subtype Message_Index_Type is XDR_Index_Type range 0 .. Maximum_Message_Size - 1;
+   subtype Message_Extended_Index_Type is XDR_Extended_Index_Type range -1 .. Maximum_Message_Size - 1;
+   subtype Message_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
+   subtype Message_Array is XDR_Array(Message_Index_Type);
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support

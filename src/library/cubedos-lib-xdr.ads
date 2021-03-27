@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-xdr.ads
 -- SUBJECT: Specification of an XDR encoding/decoding package.
--- AUTHOR : (C) Copyright 2016 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- XDR is a standard for converting typed data into an octet stream suitable for exchange
 -- between communicating partners. Unlike ASN.1, the data is not self describing so the
@@ -11,15 +11,19 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with Message_Manager;
-
-use Message_Manager;
-
 package CubedOS.Lib.XDR is
 
    -------------------
    -- Type Definitions
    -------------------
+
+   -- The primitive unit of data stored in an XDR message.
+   type XDR_Octet is mod 2**8;
+
+   subtype XDR_Index_Type is Natural;
+   subtype XDR_Extended_Index_Type is Integer range -1 .. XDR_Index_Type'Last;
+   subtype XDR_Size_Type is Natural range 0 .. XDR_Index_Type'Last;
+   type XDR_Array is array(XDR_Index_Type range <>) of XDR_Octet;
 
    -- TODO: Should we remove the XDR prefix?
    -- The names would be nicer, but they might be confused with those in package Standard.

@@ -7,6 +7,7 @@
 pragma SPARK_Mode(On);
 
 package CubedOS.Lib.Compressors is
+   pragma Elaborate_Body;
 
    type Compressor is interface;
 
