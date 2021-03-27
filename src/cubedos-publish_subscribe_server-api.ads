@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-publish_subscribe-api.ads
+-- FILE   : cubedos-publish_subscribe_server-api.ads
 -- SUBJECT: Specification of a package that defines the publish/subscribe API
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -13,7 +13,7 @@ with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with System;
 
-package CubedOS.Publish_Subscribe.API is
+package CubedOS.Publish_Subscribe_Server.API is
 
    type Status_Type is (Success, Failure);
    type Channel_ID_Type is range 1 .. 16;
@@ -187,4 +187,4 @@ package CubedOS.Publish_Subscribe.API is
      Pre => Is_Publish_Result(Message),
      Post => Size <= Message_Data'Length;
 
-end CubedOS.Publish_Subscribe.API;
+end CubedOS.Publish_Subscribe_Server.API;

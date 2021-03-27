@@ -11,7 +11,7 @@ pragma SPARK_Mode(On);
 with Button; use Button;
 --with LEDs; -- Used for testing
 with CubedOS.Lib; use CubedOS.Lib;
-with CubedOS.Publish_Subscribe.API; use CubedOS.Publish_Subscribe.API;
+with CubedOS.Publish_Subscribe_Server.API; use CubedOS.Publish_Subscribe_Server.API;
 
 package body Button_Driver.Messages is
    use Message_Manager;

@@ -14,14 +14,14 @@ with Control.Messages;
 with LED_Driver.Messages;
 with Button_Driver.Messages;
 with Button;
-with CubedOS.Publish_Subscribe.Messages;
+with CubedOS.Publish_Subscribe_Server.Messages;
 
 pragma Unreferenced(CubedOS.Tick_Generator.Messages);
 pragma Unreferenced(Control.Messages);
 pragma Unreferenced(LED_Driver.Messages);
 pragma Unreferenced(Button_Driver.Messages);
 pragma Unreferenced(Button);
-pragma Unreferenced(CubedOS.Publish_Subscribe.Messages);
+pragma Unreferenced(CubedOS.Publish_Subscribe_Server.Messages);
 
 
 procedure Main is

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-publish_subscribe.ads
+-- FILE   : cubedos-publish_subscribe_server.ads
 -- SUBJECT: Top level package of a CubedOS Publish/Subscribe server.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- This module supports a publish/subscribe message passing paradigm on top of the base CubedOS
 -- point-to-point message system. Publish/subscribe is often a useful way to broadcast or
@@ -20,8 +20,8 @@ pragma SPARK_Mode(On);
 
 with Message_Manager;
 
-package CubedOS.Publish_Subscribe is
+package CubedOS.Publish_Subscribe_Server is
 
    ID : constant Message_Manager.Module_ID_Type := 3;
 
-end CubedOS.Publish_Subscribe;
+end CubedOS.Publish_Subscribe_Server;

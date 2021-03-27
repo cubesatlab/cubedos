@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : SAMPLE_MODULE-api.adb
+-- FILE   : cubedos-publish_subscribe_server-api.adb
 -- SUBJECT: Body of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -11,7 +11,7 @@ with CubedOS.Lib;
 use  CubedOS.Lib;
 use  CubedOS.Lib.XDR;
 
-package body CubedOS.Publish_Subscribe.API is
+package body CubedOS.Publish_Subscribe_Server.API is
 
    pragma Warnings
      (GNATprove, Off, """Last"" is set by ""Decode"" but not used",
@@ -468,4 +468,4 @@ package body CubedOS.Publish_Subscribe.API is
       end if;
    end Publish_Result_Decode;
 
-end CubedOS.Publish_Subscribe.API;
+end CubedOS.Publish_Subscribe_Server.API;

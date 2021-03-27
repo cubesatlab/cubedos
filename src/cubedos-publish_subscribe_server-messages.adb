@@ -1,18 +1,18 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-publish_subscribe-messages.adb
+-- FILE   : cubedos-publish_subscribe_server-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
 with CubedOS.Lib;
-with CubedOS.Publish_Subscribe.API;
+with CubedOS.Publish_Subscribe_Server.API;
 with Message_Manager;
 
-use  CubedOS.Publish_Subscribe.API;
+use  CubedOS.Publish_Subscribe_Server.API;
 
-package body CubedOS.Publish_Subscribe.Messages
+package body CubedOS.Publish_Subscribe_Server.Messages
   with Refined_State => (Database => Subscription_Map)
 is
    use Message_Manager;
@@ -130,4 +130,4 @@ is
       end loop;
    end Message_Loop;
 
-end CubedOS.Publish_Subscribe.Messages;
+end CubedOS.Publish_Subscribe_Server.Messages;

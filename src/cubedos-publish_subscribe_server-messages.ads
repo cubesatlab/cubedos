@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-publish_subscribe-messages.ads
+-- FILE   : cubedos-publish_subscribe_server-messages.ads
 -- SUBJECT: Specification of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2019 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -10,7 +10,7 @@ pragma Partition_Elaboration_Policy(Sequential);
 
 with System;
 
-package CubedOS.Publish_Subscribe.Messages
+package CubedOS.Publish_Subscribe_Server.Messages
   with
     Abstract_State => Database,
     Initializes => (Database, Message_Loop)
@@ -23,4 +23,4 @@ is
       pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-end CubedOS.Publish_Subscribe.Messages;
+end CubedOS.Publish_Subscribe_Server.Messages;
