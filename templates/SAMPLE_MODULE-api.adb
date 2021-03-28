@@ -43,8 +43,8 @@ package body Sample_Module.API is
         Make_Empty_Message
           (Domain_ID, Receiver_Domain, ID, Receiver, Request_ID, Message_Type'Pos(A_Reply), Priority); 
       
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
    begin
       -- Set a starting position.
       Position := 0;
@@ -74,8 +74,8 @@ package body Sample_Module.API is
      (Message : in  Message_Record;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
       Value : Positive; -- Commonly, this would be an out parameter.
    begin

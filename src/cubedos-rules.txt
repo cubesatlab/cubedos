@@ -1,6 +1,5 @@
 +RStyle_Checks:3
 +RWarnings:a
-+RNumeric_Literals:2
 +RToo_Many_Dependencies:8
 +RImplicit_IN_Mode_Parameters
 +RMetrics_Cyclomatic_Complexity:8
@@ -21,7 +20,6 @@
 +RFunction_Style_Procedures
 +RImproperly_Located_Instantiations
 +RLibrary_Level_Subprograms
-+RNon_Qualified_Aggregates
 +RAnnotated_Comments:$TODO
 +RBoolean_Relational_Operators
 +ROuter_Loop_Exits
