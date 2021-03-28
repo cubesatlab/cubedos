@@ -27,8 +27,8 @@ package body CubedOS.Time_Server.API is
       Priority      : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
-      Position   : XDR_Index_Type;
-      Last       : XDR_Index_Type;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
       Interval   : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
    begin
       Message := Make_Empty_Message
@@ -60,8 +60,8 @@ package body CubedOS.Time_Server.API is
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
-      Position   : XDR_Index_Type;
-      Last       : XDR_Index_Type;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
       Seconds    : Ada.Real_Time.Seconds_Count;
       Fraction   : Ada.Real_Time.Time_Span;
    begin
@@ -102,8 +102,8 @@ package body CubedOS.Time_Server.API is
          Message_ID => Message_Type'Pos(Tick_Reply),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
    begin
       Position := 0;
 
@@ -124,8 +124,8 @@ package body CubedOS.Time_Server.API is
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
-      Position   : XDR_Index_Type;
-      Last       : XDR_Index_Type;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
    begin
       Message := Make_Empty_Message
         (Sender_Domain   => Sender_Domain,
@@ -150,11 +150,11 @@ package body CubedOS.Time_Server.API is
       Series_ID     : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position         : XDR_Index_Type;
+      Position         : Data_Index_Type;
       Raw_Interval     : XDR.XDR_Unsigned;
       Raw_Request_Type : XDR.XDR_Unsigned;
       Raw_Series_ID    : XDR.XDR_Unsigned;
-      Last             : XDR_Index_Type;
+      Last             : Data_Index_Type;
    begin
       Tick_Interval := Ada.Real_Time.Time_Span_First;
       Request_Type := Series_Type'First;
@@ -198,11 +198,11 @@ package body CubedOS.Time_Server.API is
       Series_ID     : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position      : XDR_Index_Type;
+      Position      : Data_Index_Type;
       Raw_Seconds   : XDR.XDR_Unsigned;
       Seconds       : Ada.Real_Time.Seconds_Count;
       Raw_Series_ID : XDR.XDR_Unsigned;
-      Last          : XDR_Index_Type;
+      Last          : Data_Index_Type;
    begin
       Series_ID := Series_ID_Type'First;
 
@@ -231,10 +231,10 @@ package body CubedOS.Time_Server.API is
       Count     : out Natural;
       Decode_Status : out Message_Status_Type)
    is
-      Position      : XDR_Index_Type;
+      Position      : Data_Index_Type;
       Raw_Series_ID : XDR.XDR_Unsigned;
       Raw_Count     : XDR.XDR_Unsigned;
-      Last          : XDR_Index_Type;
+      Last          : Data_Index_Type;
    begin
       Series_ID := Series_ID_Type'First;
       Count := 0;
@@ -265,9 +265,9 @@ package body CubedOS.Time_Server.API is
       Series_ID     : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position      : XDR_Index_Type;
+      Position      : Data_Index_Type;
       Raw_Series_ID : XDR.XDR_Unsigned;
-      Last          : XDR_Index_Type;
+      Last          : Data_Index_Type;
    begin
       Series_ID := Series_ID_Type'First;
 

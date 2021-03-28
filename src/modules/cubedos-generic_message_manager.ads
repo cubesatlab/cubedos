@@ -10,6 +10,8 @@
 pragma SPARK_Mode(On);
 
 with System;
+with CubedOS.Lib.XDR;
+use  CubedOS.Lib.XDR;
 
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
@@ -52,10 +54,10 @@ is
    -- given zero length values to encode. Support for encoding zero length arrays and strings is
    -- useful.
    --
-   subtype Message_Index_Type is XDR_Index_Type range 0 .. Maximum_Message_Size - 1;
-   subtype Message_Extended_Index_Type is XDR_Extended_Index_Type range -1 .. Maximum_Message_Size - 1;
-   subtype Message_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
-   subtype Message_Array is XDR_Array(Message_Index_Type);
+   subtype Data_Index_Type is XDR_Index_Type range 0 .. Maximum_Message_Size - 1;
+   subtype Data_Extended_Index_Type is XDR_Extended_Index_Type range -1 .. Maximum_Message_Size - 1;
+   subtype Data_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
+   subtype Data_Array is XDR_Array(Data_Index_Type);
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -71,8 +73,8 @@ is
          Request_ID : Request_ID_Type := 0;
          Message_ID : Message_ID_Type := 0;
          Priority   : System.Priority := System.Default_Priority;
-         Size       : XDR_Size_Type   := 0;
-         Payload    : XDR_Array       := (others => 0);
+         Size       : Data_Size_Type  := 0;
+         Payload    : Data_Array      := (others => 0);
       end record;
 
    -- Convenience constructor function for messages. This is used by encoding functions.

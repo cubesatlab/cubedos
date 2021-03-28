@@ -52,7 +52,7 @@ package CubedOS.File_Server.API is
       Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
-       Pre => (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12);
+       Pre => (0 < Name'Length and Name'Length <= Data_Size_Type'Last - 12);
 
    function Open_Reply_Encode
      (Receiver_Domain : Domain_ID_Type;

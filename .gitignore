@@ -1,7 +1,7 @@
 build
-obj
-lib
-src/doc
+src/library/obj
+src/library/lib
+src/library/doc
 
 # LaTeX build artifacts
 CubedOS.aux
@@ -13,5 +13,5 @@ CubedOS.pdf
 CubedOS.toc
 
 # Generated API packages
-src/MXDR/*.ads
-src/MXDR/*.adb
+src/modules/MXDR/*.ads
+src/modules/MXDR/*.adb

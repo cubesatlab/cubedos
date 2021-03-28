@@ -33,8 +33,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(Open_Request),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Mode_Type'Pos(Mode)), Message.Payload, Position, Last);
@@ -64,8 +64,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(API.Open_Reply),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -91,8 +91,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(Read_Request),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -122,8 +122,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(API.Read_Reply),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Extended_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Extended_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -154,8 +154,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(Write_Request),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -186,8 +186,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(API.Write_Reply),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -214,8 +214,8 @@ package body CubedOS.File_Server.API is
          Message_ID => Message_Type'Pos(Close_Request),
          Priority   => Priority);
 
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload, Position, Last);
@@ -233,10 +233,10 @@ package body CubedOS.File_Server.API is
       Name_Size  : out Natural;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
+      Position : Data_Index_Type;
       Raw_Mode : XDR.XDR_Unsigned;
       Raw_Name_Size : XDR.XDR_Unsigned;
-      Last : XDR_Index_Type;
+      Last : Data_Index_Type;
    begin
        pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -270,9 +270,9 @@ package body CubedOS.File_Server.API is
       Handle     : out File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
+      Position : Data_Index_Type;
       Raw_Handle : XDR.XDR_Unsigned;
-      Last : XDR_Index_Type;
+      Last : Data_Index_Type;
    begin
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -297,10 +297,10 @@ package body CubedOS.File_Server.API is
       Amount  : out Read_Size_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
+      Position : Data_Index_Type;
       Raw_Handle : XDR.XDR_Unsigned;
       Raw_Amount : XDR.XDR_Unsigned;
-      Last : XDR_Index_Type;
+      Last : Data_Index_Type;
    begin
        pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -337,8 +337,8 @@ package body CubedOS.File_Server.API is
    is
       Raw_Handle : XDR.XDR_Unsigned;
       Raw_Amount : XDR.XDR_Unsigned;
-      Position   : XDR_Index_Type;
-      Last       : XDR_Index_Type;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
    begin
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -372,10 +372,10 @@ package body CubedOS.File_Server.API is
       Data    : out CubedOS.Lib.Octet_Array;
       Decode_Status  : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
+      Position : Data_Index_Type;
       Raw_Handle : XDR.XDR_Unsigned;
       Raw_Amount : XDR.XDR_Unsigned;
-      Last : XDR_Index_Type;
+      Last : Data_Index_Type;
    begin
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -411,10 +411,10 @@ package body CubedOS.File_Server.API is
       Amount  : out Write_Result_Size_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
+      Position : Data_Index_Type;
       Raw_Handle : XDR.XDR_Unsigned;
       Raw_Amount : XDR.XDR_Unsigned;
-      Last : XDR_Index_Type;
+      Last : Data_Index_Type;
    begin
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
@@ -443,9 +443,9 @@ package body CubedOS.File_Server.API is
       Handle  : out Valid_File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position   : XDR_Index_Type;
+      Position   : Data_Index_Type;
       Raw_Handle : XDR.XDR_Unsigned;
-      Last       : XDR_Index_Type;
+      Last       : Data_Index_Type;
    begin
        pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
