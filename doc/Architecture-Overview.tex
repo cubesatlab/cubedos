@@ -30,11 +30,11 @@ be queued on that entry. In CubedOS applications each protected object is servic
 one task. This ensures that two tasks will never accidentally be queued on the protected
 object's entry \emph{provided the mapping from task (actually module, see below) to protected
   object is truly bijective}. In the figure this means only one arrow can emanate from a
-protected object. Furthermore, in CubedOS applications each task (actually module) can have only
-one arrow incident upon it. Note that Ravenscar applications do not suffer from this limitation.
-However, in any case, multiple arrows can lead to a protected object, since it is permitted for
-many tasks to call the same protected procedure or for there to be multiple protected procedures
-in a given protected object.
+protected object, and each task can have only one arrow incident upon it. Note that this
+architecture is actually more restrictive than what Ravenscar allows. However, in any case,
+multiple arrows can lead to a protected object, since it is permitted in CubedOS for many tasks
+to call the same protected procedure or for there to be multiple protected procedures in a given
+protected object.
 
 In the example application of Figure~\ref{fig:traditional-architecture}, tasks $T_1$ and $T_3$
 call protected procedures in two different protected objects. This presents no problems since
@@ -62,6 +62,14 @@ However the traditional architecture also includes some disadvantages:
   burden for the application developer.
 \item The communication patterns are relatively inflexible. Changing them requires overhauling
   the application.
+\item Third-party library components are awkward to write since they would have to know about
+  the protected objects that are available in the application in order to communicate with other
+  application-specific components. This is a particular problem for client/server oriented
+  systems where a general purpose, reusable server component needs some way to send replies to
+  clients for which it has no prior knowledge. \footnote{With access types, the client could
+    potentially send a ``return address'' consisting of an access value that points at a
+    client-owned protected object implementing an agreed upon synchronized interface. This design
+    is ruled out by \SPARK.}
 \end{itemize}
 
 The CubedOS version of the sample application has an architecture as shown in
@@ -69,13 +77,14 @@ Figure~\ref{fig:cubedos-architecture}. In this case CubedOS provides the communi
 infrastructure as an array of general purpose, protected mailbox objects. CubedOS
 \textit{modules} communicate by sending messages to the receiver module's mailbox. The messages
 are unstructured octet streams, and thus completely generic. Each module has exactly one mailbox
-associated with it and contains a single task dedicated to servicing that mailbox, creating a
-one-to-one relationship between modules and mailboxes. A module's mailbox servicing task
-extracts messages from the mailbox, decodes the messages, and then acts on the messages.
+associated with it and contains a single task (the \newterm{server task}) dedicated to servicing
+that mailbox alone, creating a one-to-one relationship between modules and mailboxes. A module's
+mailbox servicing task extracts messages from the mailbox, decodes the messages, and then acts
+on the messages, perhaps sending messages to other modules in the process.
 
 Note that CubedOS modules are allowed to have additional internal tasks, if required, as long as
-the usual Ravenscar rules are obeyed. These internal tasks do not communicate directly with
-other modules.
+the usual Ravenscar rules are obeyed. These internal tasks can send messages to other modules,
+but they do not attempt to receive messages; that work is reserved for the server task alone.
 
 The communication connections shown in Figure~\ref{fig:cubedos-architecture} are the same as
 those shown in Figure~\ref{fig:traditional-architecture} except that the two communication paths
@@ -93,10 +102,16 @@ infrastructure manually. Adding new message types is simplified with the help of
 \texttt{Merc}, stored in a different repository of the CubeSat Laboratory GitHub. In addition to
 providing basic, bounded mailboxes, CubedOS also provides other services such as message
 priorities and multiple sending modalities (for example, best effort versus guaranteed
-delivery). Many of these additional services would be tedious to provide on a case-by-case basis
-following the traditional architecture. CubedOS also allows any module to potentially send a
-message to any other module. Thus the communication paths in the running application are very
-flexible.
+delivery). \pet{These quality of service features are currently completely unimplemented.} Many
+of these additional services would be tedious to provide on a case-by-case basis following the
+traditional architecture.
+
+CubedOS also allows any module to potentially send a message to any other module. Thus the
+communication paths in the running application are very flexible. In particular, implementing
+reusable server modules becomes very straightforward. Each request message contains the module
+ID of the sending module, which is simply an index into the mailbox array. The server that
+receives the message uses that ID to send the reply to the correct mailbox. There is need for
+the server to have prior knowledge of its clients.
 
 Although the CubedOS architecture supports only point-to-point message passing, CubedOS comes
 with a library module that supports a publish/subscribe discipline. The module allows multiple
@@ -105,12 +120,15 @@ messages to one or more channels. Since the messages themselves are unstructured
 the publish/subscribe module can handle them generically without being modified to account for
 new message types.
 
-Every CubedOS module has a statically assigned ID number. Messages sent from a module include
-the ID number of the sender. This allows a server module to return reply messages without
-statically knowing its clients. Thus server modules can be written as part of a general purpose
-library and used without modification in a variety of applications. We have started compiling a
-registry of ``well known'' module IDs for common services, such as file handling. This allows
-CubedOS module libraries to make use of well known services and remain reusable.
+Every CubedOS module has an ID number. These numbers are currently statically assigned by the
+application developer with the exception of the CubedOS core modules which have ``well known''
+module ID numbers. It is our intention to implement a name service that can map module names to
+ID numbers dynamically. Roughly, at system initialization time a module registers itself with
+the name service and received a dynamically assigned ID number. Other modules can resolve the
+name to that ID number by making a query to the name service. This allows third party library
+modules the ability to adapt to their environment in a way that would be impossible if they
+needed statically assigned addresses. Applications using multiple third party library modules
+would have no way to assure conflict free ID assignments using a static method.
 
 We are also defining standard message interfaces to certain services, such as file handling,
 that third party modules could implement. This allows modules to use a service without knowing
@@ -121,12 +139,14 @@ However, CubedOS's architecture also carries some significant disadvantages as w
 \begin{itemize}
 \item All mailboxes must have the same size since they are stored in an array. This arises
   because the \textbf{Core.SPARK} requirement forbids the use of pointers. Consequently some
-  mailboxes will be larger than necessary, wasting space.
+  mailboxes will be larger than necessary, wasting space. \pet{\SPARK\ no longer forbids
+    pointers outright. Can this requirement be relaxed?}
 
 \item All messages have the same type.\footnote{\textbf{Core.SPARK}'s prohibition on pointers
-    prevents more flexibile designs.} This means the size of a message must be large enough to
-  satisfy the needs of every module. As a result, in many cases messages will be larger and
-  slower to copy than necessary.
+    prevents more flexibile designs. However, a more flexible design might be possible with
+    modern \SPARK} This means the size of a message must be large enough to satisfy the needs of
+  every module. As a result, in many cases messages will be larger and slower to copy than
+  necessary.
 
   The common message type also requires that typed information sent from one module to another
   be encoded into a raw octet format when sent, and decoded back into specifically typed data
@@ -137,16 +157,14 @@ However, CubedOS's architecture also carries some significant disadvantages as w
   goals of high integrity system development.
 
 \item In order to return reply messages, the mailboxes must be addressable at runtime using
-  module ID numbers. \pet{More should be said about the issue of replies. How does the
-    traditional model handle them?} Accessing a statically named mailbox isn't general enough.
-  As a result, the precise communication paths used by the system cannot easily be determined
-  statically.
+  module ID numbers. Accessing a statically named mailbox isn't general enough. As a result, the
+  precise communication paths used by the system cannot easily be determined statically.
 
   In particular, since \SPARK\ does not attempt to track information flow through individual
-  array elements, it is necessary to manually justify certain \SPARK\ flow messages. Although
-  the architecture of CubedOS ensures that there is a one-to-one correspondence between a module
-  and its mailbox. The tools don't know this and the spurious flow messages they produce must be
-  suppressed.
+  array elements, it is necessary to manually justify certain \SPARK\ flow messages. \pet{This
+    doesn't seem to be true any longer.} Although the architecture of CubedOS ensures that there
+  is a one-to-one correspondence between a module and its mailbox. The tools don't know this and
+  the spurious flow messages they produce must be suppressed.
 \end{itemize}
 
 The details of CubedOS mitigate, to some degree, the problems above. For example, the mailbox
@@ -156,7 +174,7 @@ application's needs. CubedOS does not attempt to provide a one-size-fits-all mai
 will be satisfactory to all applications.
 
 Also every well behaved CubedOS module should contain an |API| package with subprograms for
-encoding and decoding messages. This package is generated by the \texttt{Merc} tool. The
+encoding and decoding messages. This package can be generated by the \texttt{Merc} tool. The
 parameters to these subprograms correspond to the parameters of the protected procedures and
 entries in the traditional architecture, and provide much of the same type safety. However,
 using the API subprograms is not enforced by the compiler. It is also possible to accidentally
@@ -205,5 +223,4 @@ Notice in Figure~\ref{fig:multi-domain} tasks $T_3$ and $T_4$ send messages into
 domains. This is, of course, sometimes necessary if the domains are going to interact. In such a
 scenario each communication domain would regard the other domain as a collection of internal
 tasks that is part of the module(s) that send messages into the other domain. We currently have
-very little experience with systems designed in this way.
-
+very little experience with systems designed in this way, but this is an area for future work.

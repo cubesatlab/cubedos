@@ -2,7 +2,7 @@
 \chapter{Requirements}
 \label{chapt:requirements}
 
-In this chapter we detail the requirements of the various CubedOS standard modules. These
+In this chapter we detail the requirements of the various CubedOS core modules. These
 requirements are used to drive the architecture and design of the system. \pet{There are quite a
   few design-ish aspects to the description here. It might be valuable to create a better
   separation between requirements and design.}
@@ -14,15 +14,16 @@ At its heart CubedOS is a message passing microkernel. Conceptually each compone
 is stored in a \newterm{module} consisting of one or more Ada packages arranged in a package
 hierarchy. Each module has a \newterm{module root package} that is the parent of the module's
 package hierarchy. Modules in CubedOS are conceptually similar to processes in a conventional
-operating system.
+operating system or ``applications'' in CFS.
 
-CubedOS uses modules for application code, operating system components, and device drivers.
-Applications can be constructed from multiple application level modules. The system does not
-distinguish between different types of modules (for example, between application modules and
-device drivers). There is no specific ``kernel mode'' of execution. The architecture we describe
-here is thus enforced primarily by convention. In theory, any structuring expressible using
-normal Ada visibility rules would be acceptable, but there are advantages to following the
-conventions of CubedOS, as we describe throughout this document.
+CubedOS uses modules for application code, high level, operating system-like components, and
+device drivers. Applications can be constructed from multiple application level modules. The
+system does not distinguish between different types of modules (for example, between application
+modules and device drivers). There is no specific ``kernel mode'' of execution. The architecture
+we describe here is thus enforced primarily by convention. In theory, any structuring
+expressible using normal Ada visibility rules would be acceptable, but there are advantages to
+following the conventions of CubedOS, as we describe throughout this document. \pet{We should
+  consider building a tool that enforces the aspects of our convention that are most important.}
 
 For example it is possible, even if not normally desirable, for an application module to
 directly invoke functionality in a device driver. In contrast, conventional operating systems
@@ -32,34 +33,36 @@ system. This example shows that while we recommend certain design approaches whe
 we also do not want to be overly constraining. CubedOS users with special needs, should be able
 to work with the system rather than outside of it.
 
-CubedOS does distinguish between active modules and passive modules. A module is considered
-active if and only if it either contains the system's main procedure or contains at least one
-task. All other modules, for example containing library code, are said to be passive. CubedOS
-conventions do permit passive modules to be shared among multiple active modules, but it is not
-permitted for any module, active or passive, to directly call subprograms or entries in another
-active module. \pet{Ada has some pragmas in the distributed systems annex that we can perhaps
-  use here to provide compiler enforcement of this restriction.} The only way functionality in
-another active module can be invoked is by sending that module a message. Passive modules play a
-role in CubedOS similar to that of shared libraries in a conventional operating system.
+CubedOS does distinguish between active modules and packages of shared library code. A module is
+distinguished from library code in that a module contains at least one task, whereas library
+packages are entirely passive. CubedOS conventions do permit library packages to be shared among
+multiple modules, but it is not permitted for any module to directly call subprograms or entries
+in another module. \pet{Ada has some pragmas in the distributed systems annex that we can
+  perhaps use here to provide compiler enforcement of this restriction.} The only way
+functionality in another module can be invoked is by sending that module a message.
 
 In each module one task selected by the programmer, called the module's \newterm{server task},
 is distinguished. The server task is the \emph{only} task in a module that is allowed to receive
-messages for that module. However, messages can be sent by any task. The following requirements
-apply:
+messages for that module. However, messages can be sent by any task. In many modules the server
+task is the only task. The following requirements apply:
 
 \begin{itemize}
 \item \textbf{Core.SPARK}. The core system, including the core modules described in this
-  document, shall be written in SPARK 2014 and proved free information flow errors and execution
+  document, shall be written in \SPARK\ and proved free information flow errors and execution
   runtime errors.
 \item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
-  document, shall be written to conform with the restrictions of the Ravenscar profile.
+  document, shall be written to conform with the restrictions of the Ravenscar profile. \pet{We
+    might want to ``upgrade'' to the Jorvik profile. This gives us: relative delays, ``pure''
+    barrier expressions, and access to Ada.Calendar. It gives us other things that I think we
+    are less likely to need.}
 \item \textbf{Core.Static}. Modules shall be statically allocated. All modules the system will
   ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
     about on-the-fly software updates? Are we ruling that out, or is that outside the scope of
     these requirements?}
-\item \textbf{Core.UniqueID}. Each active module shall have a unique, constant ID number
-  statically assigned by the application developer. CubedOS core modules (described below) shall
-  have fixed, ``well known'' module ID numbers.
+\item \textbf{Core.UniqueID}. Each active module shall have a unique ID number that is either
+  statically assigned by the application developer or dynamically assigned at system
+  initialization time by the Name Service. CubedOS core modules (described below) shall have
+  fixed, ``well known'' module ID numbers.
 \item \textbf{Core.IDNumbers}. Module ID numbers shall be small integers beginning at $1$ and
   ranging up to the number of modules in the system. However, if a particular core module is not
   used, it's ID number is skipped (not reassigned).
@@ -68,12 +71,12 @@ apply:
 \section{Runtime Library}
 \label{sec:runtime-library}
 
-The CubedOS runtime library is a passive module containing general purpose components of
+The CubedOS runtime library is a collection of packages containing general purpose components of
 interest to many CubedOS applications. Unlike the Ada standard library and many third party
 libraries, the CubedOS runtime library is written in \SPARK. The following requirements apply:
 
 \begin{itemize}
-\item \textbf{Lib.SPARK}. The runtime library shall be written in SPARK 2014 and proved free of
+\item \textbf{Lib.SPARK}. The runtime library shall be written in \SPARK\ and proved free of
   information flow and execution runtime errors.
 \item \textbf{Lib.Tests}. Unit tests shall be provided for all library components with an
   emphaisis on sections that may not yet be proving fully.
@@ -93,7 +96,7 @@ include, but are not limited to:
 \item Statistical processing
 \item Linear algebra
 \item Image processing
-\item Error checking/correction
+\item Error checking and error correction
 \item Communication protocol processing
 \item Lightweight database support
 \item Security processing such as encryption/decryption
@@ -104,9 +107,9 @@ What distinguishes runtime library material from active CubedOS modules is that 
 runtime library components contain tasks or perform blocking operations (such as delays).
 Notice, however, that some library components may wish to send messages to other active
 components, such as the file server. In that case the library cannot directly receive the reply
-(only an active module can receive from a mailbox), but instead must rely on the active module
-using the library to forward replies into the library as appropriate. This unusual organization
-also distinguishes the CubedOS runtime library from most other libraries.
+(only a module can receive from a mailbox), but instead must rely on the module using the
+library to forward replies into the library as appropriate. This unusual organization also
+distinguishes the CubedOS runtime library from most other libraries.
 
 \section{Core Modules}
 \label{sec:core-modules}
@@ -125,97 +128,94 @@ communication between the other active modules in the system. The following requ
 
 \begin{itemize}
 \item \textbf{MessageManager.Mailbox}. The message manager shall provide exactly one mailbox for
-  each active module in the system.
+  each module in the system.
 \item \textbf{MessageManager.Access}. Mailboxes shall be accessed using the module ID number of
-  the recipient. These ID numbers shall be globally available to all modules as statically
-  initialized constants.
+  the recipient. These ID numbers shall be globally available to all modules either as statically
+  initialized constants or via the Name Service using abstract names as keys.
 \item \textbf{MessageManager.Async}. Messages shall be delivered asynchronously to a module's
   mailbox. It is not necessary for a module to receive a sent message immediately.
-\item \textbf{MessageManager.Sender}. Messages shall carry the module ID number of the sender to
-  so that replies can be returned.
+\item \textbf{MessageManager.Sender}. Messages shall carry the full CubedOS address of the
+  sender to so that replies can be returned.
 \item \textbf{MessageManager.Unstructured}. Messages shall be unstructured octet arrays. This
   allows all modules to use a common message type. However, to simplify the task of creating and
-  decoding messages, CubedOS shall provide a standard data encoding/decoding facility.
+  decoding messages, CubedOS shall provide a standard message encoding/decoding facility.
   \footnote{This facility is implemented in the Merc tool}
 \item \textbf{MessageManager.Sizes}. It shall be possible for the application developer to tune
   the size of the mailboxes (number of pending messages) and the size of the messages
   themselves.
 \item \textbf{MessageManager.Priority}. Messages shall have a priority assigned to them which
   shall be, by default, the priority of the sending module.
-\item \textbf{MessageManager.PrioritySet}. It shall be possible for the sender to set the
-  priority of a message. In particular, it shall be possible for low priority senders to send
-  high priority messages. \pet{Is this necessary or desirable?}
+\item \textbf{MessageManager.PrioritySet}. It shall be possible for the sender of a message to
+  set the priority of that message to reduce its priority on behalf of a low priority client.
 \item \textbf{MessageManager.FIFO}. Messages shall be received by a module in FIFO order by
   priority.
+\item \textbf{MessageManager.PriorityInheritance}. When a high priority message is received the
+  server task in the receiving module shall have its priority automatically elevated to match
+  that of the message it is processing. The server task's priority shall return to its previous
+  setting after handling the message. \pet{This requires dynamic priorities and thus is in
+    conflict with \textbf{Core.SPARK}}
 \item \textbf{MessageManager.Lost}. Messages may be lost during sending. When a module attempts
   to send to a full mailbox either a) the message shall be lost with a status return to inform
   the sender, b) the message shall be lost with no status return, or c) the oldest message with
   the same or lower priority shall be purged from the mailbox. If no such message exists in the
   last case (because they all have higher priority), the message shall be lost.
-\item \textbf{MessageManager.Inheritance}. If the priority of a received message is higher than
-  the execution priority of the module that receives it, the module's priority shall be elevated
-  to match that of the message until |Receive| is called. At that point the module's priority is
-  returned to its original value. \pet{This requires dynamic priorities and thus is in conflict
-    with \textbf{Core.SPARK}.}
 \end{itemize}
 
 The message manager only provides support for asynchronous messages. No support for synchronous
-messages is needed. If a synchronous send/reply is required, an explicit reply message must be
-sent. This means a module may have to field other, unrelated messages while it waits for a reply
-from an earlier request. This impacts the implementation of modules since they must remember the
-status of all pending requests. \pet{The CubedOS library should provide some assistance with
-  this.} However, it also promotes a high degree of concurrency since, in effect, no requests
-are ever blocking.
+messages is needed. If a synchronous request/reply is required, an explicit reply message must
+be sent. This means a module may have to field other, unrelated messages while it waits for a
+reply from an earlier request. This impacts the implementation of modules since they must
+remember the status of all pending requests. \pet{The CubedOS library should provide some
+  assistance with this.} However, it also promotes a high degree of concurrency since, in
+effect, no requests are ever blocking.
 
-\subsection{Tick Generator}
-\label{sec:tick-generator}
+\subsection{Time Service}
+\label{sec:time-service}
 
-The tick generator module provides real-time clock services. However, due to the latency and
+The Time Server module provides real-time clock services. However, due to the latency and
 overhead of message passing, modules that require high speed, real-time timing services may need
-to use internal tasks instead. The tick generator is suitable for slow speed or non-critical
-timing services. \pet{This needs to be investigated further. What can be specifically said about
-  the timing of the message passing service?} The following requirements apply:
+to use internal tasks instead. The time server is suitable for slow speed or non-critical timing
+services. \pet{This needs to be investigated further. What can be specifically said about the
+  timing of the message passing service?} The following requirements apply:
 
 \begin{itemize}
-\item \textbf{Tick.ID}. The tick generator shall have a module ID of $1$.
-\item \textbf{Tick.RealTime}. The tick generator shall use a real time clock as the basis of its
+\item \textbf{Tick.RealTime}. The time server shall use a real time clock as the basis of its
   timing. Such a clock is monotonic and tracks time independently of any software activity.
-\item \textbf{Tick.Periodic}. The tick generator shall provide a service whereby a module can
+\item \textbf{Tick.Periodic}. The time server shall provide a service whereby a module can
   request the delivery of periodic \newterm{tick messages} with a period ranging from 1 ms to 1
   hour (3,600,000 ms). The total set of tick messages generated in response to such a request is
   called a \newterm{periodic series}.
 \item \textbf{Tick.Latency}. The time between when a request for a periodic series is received
-  by the tick generator and when the first tick message in that series is sent shall be not more
+  by the time server and when the first tick message in that series is sent shall be not more
   than one millisecond plus the latency due to message passing and processing.
-\item \textbf{Tick.OneShot}. The tick generator shall provide a service whereby a module can
+\item \textbf{Tick.OneShot}. The time server shall provide a service whereby a module can
   request the delivery of a single tick message either after a specified delay (in the range
   from 1 ms to 1 hour), or at a specified absolute time. In this case the response message
   constitutes a \newterm{one shot series} of size one.
 \item \textbf{Tick.SeriesID}. Every request shall contain a \newterm{series ID}, specified by
   the requester, that identifies a particular series.
-\item \textbf{Tick.MultiSeries}. The tick generator shall support multiple series being
+\item \textbf{Tick.MultiSeries}. The time server shall support multiple series being
   delivered to the same module. For example a periodic series and a one shot series, or multiple
   periodic series with different periods, all going to the same module is supported.
 \item \textbf{Tick.Message}. Tick messages shall contain a counter, starting at one, that
   indicates which message in the series it is.\footnote{The counter shall always be one in the
     case of one shot ticks.} Also tick messages shall contain the series ID number.
-\item \textbf{Tick.Cancel}. The tick generator shall accept messages that cancel a
+\item \textbf{Tick.Cancel}. The time server shall accept messages that cancel a
   pending\footnote{For example a one shot tick that has not yet occurred can still be canceled}
   or active series. The cancellation message shall contain the series ID. If the ID is invalid,
   there shall be no effect. \pet{Implementing cancellation could be tricky and it may not be
     important. This requirement should be considered low priority.}
 \end{itemize}
 
-\subsection{File Server}
-\label{sec:file-server}
+\subsection{File Service}
+\label{sec:file-service}
 
-Not all missions may require a file system, but many will. The core file server module provides
+Not all missions may require a file system, but many will. The core File Server module provides
 a simple file system interface, but the precise implementation is not specified here. It could
 be implemented as a layer around a host operating system API, through a third party library, or
 even as a RAM disk. The following requirements apply:
 
 \begin{itemize}
-\item \textbf{FileServer.ID}. The file server shall have a module ID of $2$.
 \item \textbf{FileServer.Names}. File names shall be limited to the FAT16 style ``8.3'' naming
   convention. This is a least common denominator naming convention that should be supportable by
   almost any underlying implementation. \pet{What should we say about the case sensitivity of

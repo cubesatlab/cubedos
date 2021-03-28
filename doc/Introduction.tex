@@ -1,14 +1,14 @@
 \chapter{Introduction}
 \label{chapt:introduction}
 
-This document describes the design, implementation, and usage of the CubedOS operating system.
-CubedOS was developed at Vermont Technical College's CubeSat Laboratory with the purpose of
-providing a robust software platform for CubeSat missions and of easing the development of
-CubeSat flight software. In many respects the goals of CubedOS are similar to those of the Core
-Flight Executive (cFE) written by NASA Goddard Space Flight Center \cite{cFE}. However, unlike
-cFE, CubedOS is written in \SPARK\ with critical sections verified to be free of the possibility
-of runtime error. \SPARK\ has also been used to provide some other correctness properties in
-certain cases. We compare CubedOS and cFE in more detail in Section~\ref{chapt:related-work}.
+This document describes the design, implementation, and usage of the CubedOS application
+framework. CubedOS was developed in Vermont Technical College's CubeSat Laboratory with the
+purpose of providing a robust software platform for CubeSat missions and of easing the
+development of CubeSat flight software. In many respects the goals and architecture of CubedOS
+are similar to those of the Core Flight System (CFS) written by NASA Goddard Space Flight Center
+\cite{cFE}. However, unlike CFS, CubedOS is written in \SPARK\ with critical sections verified
+to be free of the possibility of runtime error. We compare CubedOS and CFS in more detail in
+Section~\ref{chapt:related-work}.
 
 Although CubedOS was developed to support the CubeSat missions at Vermont Technical College, the
 intent is for CubedOS to be general enough and modular enough for other groups to profitably
@@ -18,40 +18,46 @@ implement whatever mission functionality is required. CubedOS provides inter-mod
 communication and other common services required by many missions. CubedOS thus serves both as a
 kind of operating environment and as a library of useful tools and functions.
 
-It is our intention that all CubedOS modules also be written in \SPARK\ and at least proved free
-of runtime error. However, CubedOS also allows modules, or parts of modules, to be written in
-full Ada or C if appropriate. This allows CubedOS to take advantage of third party C libraries
-or to integrate with an existing C code base. It is a work in progress to create a bridge
-between CubedOS and cFE so that current cFE/CFS users can migriate mission critical components
-to CubedOS incrementally.
+It is our intention that all CubedOS modules also be written in \SPARK\ and at a minimum proved
+free of runtime error. However, CubedOS also allows modules, or parts of modules, to be written
+in full Ada or C if desired. This allows CubedOS to take advantage of third party C libraries or
+to integrate with an existing C code base. It is a work in progress to create a bridge between
+CubedOS and CFS so that current CFS users can experiment with CubedOS and eventually migrate
+mission critical components to CubedOS.
 
-CubedOS can run directly on top of the hardware, or on top of an operating system such as Linux
-or VxWorks, with the assistance of the Ada runtime system. In particular, CubedOS makes use of
-Ada tasking without directly invoking the underlying system's support for threads. This
-simplifies the implementation of CubedOS while improving its portability. However, it does
-require that an Ada runtime system be available for all envisioned targets.
+CubedOS can run either directly on top of the hardware, or on top of an operating system such as
+Linux or VxWorks, all with the assistance of the Ada runtime system. In particular, CubedOS
+makes use of Ada tasking without directly invoking the underlying system's support for threads.
+This simplifies the implementation of CubedOS while improving its portability. However, it does
+require that an Ada runtime system be available for all envisioned targets. In effect, the Ada
+runtime system is CubedOS's operating system abstraction layer (to borrow a term from the CFS
+community).
 
 For resources that are not accessible through the Ada runtime system, CubedOS driver modules can
 be written that interact with the underlying operating system or hardware more directly.
 Although these modules would not be widely portable, they could, in some cases, be written to
 provide a kind of low level abstraction layer (LLAL) with a portable interface. We have not yet
-attempted to standardize the LLAL interface, although this would be an area for future work.
+attempted to standardize an LLAL interface, although this is an area for future work.
 
-The architecture of CubedOS is a collection of active and passive modules, where each active
-module contains one or more Ada tasks. Although CubedOS is written in \SPARK\ there need not be
-a one-to-one correspondence between CubedOS modules and \SPARK\ packages. In fact, modules are
-routinely written as a collection of Ada packages in a package hierarchy. \pet{Provide a forward
-  reference.}
+The architecture of CubedOS is a collection of modules, each containing one or more Ada tasks.
+Although CubedOS is written in \SPARK\ there need not be a one-to-one correspondence between
+CubedOS modules and \SPARK\ packages. In fact, modules are routinely written as a collection of
+\SPARK\ packages in a package hierarchy. \pet{Provide a forward reference.}
 
-Critical to the plug-and-play nature of CubedOS, each active module is self-contained and does
-not make direct use of any code in any other active module, although passive modules serving as
-library components can be used. All inter-module communication is done through the CubedOS
-infrastructure with no direct sharing of data or executable content. In this respect CubedOS
-modules are similar to processes in a conventional operating system. One consequence of this
-policy is that a library used by several modules must be either duplicated in each module or
-provided as an independent, passive module of its own. In this respect passive modules resemble
-shared libraries in a conventional operating system and have similar concerns regarding task
-safety and global data management.
+Critical to the plug-and-play nature of CubedOS, each module is self-contained and does not make
+direct use of any code that is private to another module. However, CubedOS does allow shared
+library packages to be written for holding utility subprograms of various kinds. The CubedOS
+distribution includes a collection of such library packages that are used by CubedOS core
+modules, but that can also be used by application modules. \pet{It is necessary for shared
+  library packages to have certain properties to ensure ``good behavior.'' Does pragma Pure say
+  what is needed?}
+
+All inter-module communication is done through the CubedOS infrastructure with no direct sharing
+of data or executable content. In this respect CubedOS modules are similar to processes in a
+conventional operating system. One consequence of this policy is that a library used by several
+modules must be task-safe. In this respect library packages resemble shared libraries in a
+conventional operating system and have similar concerns regarding library-wide global data
+management.
 
 In the language of operating systems, CubedOS can be said to have a microkernel architecture
 where task management is provided by the Ada runtime system. Both low level facilities, such as
@@ -59,36 +65,47 @@ device drivers, and high level facilities, such as communication protocol handle
 algorithms, are all implemented as CubedOS modules. All modules are treated equally by CubedOS;
 any layered structuring of the modules is imposed by programmer convention.
 
-We are working on extending the architecture to allow module communication to occur between
-modules in different operating system processes or even on different hosts. This extension will
-allow CubedOS applications to be distributed across multiple spacecraft while still operating as
-a single, integrated application. \pet{Provide a forward reference.}
+We are working on extending the architecture to allow communication to occur between modules in
+different operating system processes or even on different hosts. This extension will allow
+CubedOS applications to be distributed across multiple spacecraft while still operating as a
+single, integrated application. \pet{Provide a forward reference.}
 
 % TODO: Some of this discussion, along with some diagrams, should perhaps be moved to the
 % section describing the architecture of CubedOS. Some orientation to the system is appropriate
 % in the introduction... but how much?
 
-In addition to inter-module communication, CubedOS provides several general purpose facilities.
-In some cases only the interface to the facility is described and different implementations are
-possible (even encouraged). Having a standard interface allows other components of CubedOS to be
-programmed against that interface without concern about the underlying implementation.
+In addition to inter-module communication, CubedOS provides several general purpose, core
+services. In some cases different implementations of a service can be exchanged for that
+provided by CubedOS (e. g., the File Server interface might be implemented in various ways
+depending on the needs of each mission). Having a standard interface allows other components of
+CubedOS to be programmed against that interface without concern about the underlying
+implementation used. The following features are either available or are planned to be
+implemented:
 
 \begin{itemize}
-\item An asynchronous message passing system with mailboxes. This, together with the underlying
-  Ada runtime system constitutes the kernel of CubedOS.
+\item An asynchronous message passing infrastructure with, eventually, the ability to pass
+  messages across operating system processes or even across different hosts. This, together with
+  the underlying Ada runtime system, constitutes the kernel of CubedOS.
 \item A runtime library of useful packages, all verified with \SPARK.
-\item A real time clock module.
-\item A file system interface.
-\item A radio communications interface.
+\item Timing services.
+\item File services. This provides access to non-volatile storage via a general purpose file
+  system abstraction that might be built on different underlying implementations.
+\item Event services.
+\item Command scripting services.
+\item Publish/Subscribe services. This provides the well known publish/subscribe communication
+  model on top of CubedOS's native point-to-point message passing system.
+\item Log and telemetry gathering services.
+\item Name resolution services. This provides a mapping between abstract module names and their
+  module ID values. It also provides a registration service for dynamic module ID assignments.
 \end{itemize}
 
 A CubedOS system also requires drivers for the various hardware components in the system.
 Although the specific drivers required will vary from mission to mission, CubedOS does provide a
 general \newterm{driver model} that allows components to communicate with drivers fairly
-generically. In a typical system there will be low level drivers for accessing hardware busses
+generically. In a typical system there will be low level drivers for accessing hardware buses
 as well as higher level drivers for sending/receiving commands from subsystems such as the
 radio, the power system, the camera, etc. The low level drivers constitute the bulk of the
 CubedOS LLAL.
 
 CubedOS is currently a work in progress. It is our intention to release CubedOS as open source
-once it has been further refined. We anticipate this to happen in late 2020.
+once it has been further refined.

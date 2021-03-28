@@ -15,11 +15,11 @@ priorities are supported on selected bare board systems without an operating sys
 \subsection{Architecture}
 
 All modules are assigned a ``base priority'' statically using suitable Ada language pragmas
-applied to the module's main task. We define the main task of a module as the task that reads
-the module's mailbox and processes the module's messages. We speak of a module's priority as a
-shorthand for the ``priority of a module's main task.'' Note that modules are allowed to have
-internal tasks in addition to the main task. The priority of those tasks is an internal matter
-that does not concern us here.
+applied to the module's server task. We define the server task of a module as the task that
+reads the module's mailbox and processes the module's messages. We speak of a module's priority
+as a shorthand for the ``priority of a module's server task.'' Note that modules are allowed to
+have internal tasks in addition to the main task. The priority of those tasks is an internal
+matter that does not concern us here.
 
 CubedOS also allows messages to be given priorities that can be distinct from the priorities of
 the modules that send and receive them. Message priorities are not a concept known to the Ada
@@ -41,13 +41,19 @@ priority message, just before it fetches the next message from the mailbox, its 
 returned to its original base priority level.
 
 When a module with priority $m$ is processing a message at priority $p < m$, the module's
-priority remains unchanged at its base priority. \pet{Is this the right semantic? Or should the
-  priority always match that of the message?} Thus a high priority module services low priority
-messages at its usual (high) priority. In contrast a low priority module services high priority
-messages at a temporarily elevated priority. This \newterm{priority inheritance} is needed so a
-high priority client isn't slowed down when it requests service from a low priority module. When
-executing on behalf of a high priority client, a low priority server inherits the priority of
-the client temporarily.
+priority remains unchanged at its base priority. Thus a high priority module services low
+priority messages at its usual (high) priority. In contrast a low priority module services high
+priority messages at a temporarily elevated priority. This \newterm{priority inheritance} is
+needed so a high priority client isn't slowed down when it requests service from a low priority
+module. When executing on behalf of a high priority client, a low priority server inherits the
+priority of the client temporarily.
+
+This structure also allows a high priority module to downgrade the priority of outgoing messages
+when servicing a low priority client. The idea is that the high priority module might want to
+make requests to other modules using the client's priority (which is available to it in the
+original request message sent by the client). It is up the application developer to do this if
+it is desired. The default behavior is for all sent messages to be given the priority of the
+sender.
 
 \subsection{Static Analysis}
 
