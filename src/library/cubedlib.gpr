@@ -14,7 +14,7 @@ project CubedLib is
          for Library_Dir use "lib/Debug";
          for Object_Dir use "obj/Debug";
    end case;
-   for Source_Dirs use (".");
+   for Source_Dirs use (".", "..");
    for Languages use ("ada");
 
    package Ide is
