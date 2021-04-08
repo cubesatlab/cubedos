@@ -1,13 +1,11 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-sorters.adb
 -- SUBJECT: Body of a package containing utility sorting procedures.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 
 package body CubedOS.Lib.Sorters is
-
-   --$ TODO
 
    -- Is this procedure needed? It seems too useful to just delete!
    procedure Swap(Values : in out Array_Type; X : in Positive; Y : in Positive)
@@ -75,21 +73,15 @@ package body CubedOS.Lib.Sorters is
    end Insertion_Sort;
 
 
-   procedure Make_Heap(Values : in out Array_Type; Last : in Positive) is
-   begin
-      null;
-   end Make_Heap;
-
-
    procedure Push_Heap(Values : in out Array_Type; Last : in Positive) is
    begin
       null;
    end Push_Heap;
 
 
-   procedure Sort_Heap(Values : in out Array_Type; Last : in Positive) is
+   procedure Pop_Heap(Values : in out Array_Type; Last : in Positive; Result : out Element_Type) is
    begin
       null;
-   end Sort_Heap;
+   end Pop_Heap;
 
 end CubedOS.Lib.Sorters;
