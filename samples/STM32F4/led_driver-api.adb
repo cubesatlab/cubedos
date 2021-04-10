@@ -24,8 +24,8 @@ package body LED_Driver.API is
       Message : Message_Record :=
         Make_Empty_Message
           (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(On_Request), Priority);
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(LED_Type'Pos(LED)), Message.Payload, Position, Last);
@@ -46,8 +46,8 @@ package body LED_Driver.API is
       Message : Message_Record :=
         Make_Empty_Message
           (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(Off_Request), Priority);
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(LED_Type'Pos(LED)), Message.Payload, Position, Last);
@@ -93,8 +93,8 @@ package body LED_Driver.API is
       Decode_Status : out Message_Status_Type;
       LED     : out LED_Type)
    is
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
       Raw_LED  : XDR.XDR_Unsigned;
    begin
       pragma Warnings
@@ -117,8 +117,8 @@ package body LED_Driver.API is
       Decode_Status : out Message_Status_Type;
       LED     : out LED_Type)
    is
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
       Raw_LED  : XDR.XDR_Unsigned;
    begin
       pragma Warnings
