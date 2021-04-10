@@ -70,7 +70,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
-       Pre => Message_Data'Length <= XDR_Size_Type'Last - 8;
+       Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
 
    function Publish_Reply_Encode
      (Receiver_Domain : Domain_ID_Type;
@@ -90,7 +90,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
-       Pre => Message_Data'Length <= XDR_Size_Type'Last - 8;
+       Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
 
 
    function Is_Subscribe_Request(Message : Message_Record) return Boolean is
