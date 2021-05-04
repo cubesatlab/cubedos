@@ -6,6 +6,9 @@ CubedOS Samples
   CubedOS's abilities. Specifically the program controls a simple robot that uses optical
   sensors to follow a black line drawn on a light, concrete floor. This is an adaptation of a
   lab assignment used in the electro-mechanical program at Vermont Technical College.
+  
++ `Pathfinder`: A sample application that demonstrates priority inversion and the solution by
+  priority inheritance using the Mars Pathfinder example.
 
 + `PingPong`: A sample application that where two modules send messages back and forth
   indefinitely. It is the "Hello, World" application of message passing! We use this to evaluate
