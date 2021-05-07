@@ -51,7 +51,7 @@ There are several advantages to the traditional organization:
 \item The protected objects can be tuned to transmit only the information needed so the overhead
   can be kept minimal.
 \item The parameters of the protected procedures and entries specify the precise types of the
-  data transfered so compile-time type safety is provided.
+  data transferred so compile-time type safety is provided.
 \item The communication patterns of the application are known statically, facilitating analysis.
 \end{itemize}
 
@@ -143,7 +143,7 @@ However, CubedOS's architecture also carries some significant disadvantages as w
     pointers outright. Can this requirement be relaxed?}
 
 \item All messages have the same type.\footnote{\textbf{Core.SPARK}'s prohibition on pointers
-    prevents more flexibile designs. However, a more flexible design might be possible with
+    prevents more flexible designs. However, a more flexible design might be possible with
     modern \SPARK} This means the size of a message must be large enough to satisfy the needs of
   every module. As a result, in many cases messages will be larger and slower to copy than
   necessary.
