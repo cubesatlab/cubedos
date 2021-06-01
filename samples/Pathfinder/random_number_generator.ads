@@ -31,6 +31,7 @@ package Random_Number_Generator is
    --  specific module. ID numbers are statically allocated.  We
    --  recommend creating a file, module_map.txt, listing these
    --  allocations. The value 1 below is just an example.
-   ID : constant Message_Manager.Module_ID_Type := 1;
+   ID   : constant Message_Manager.Module_ID_Type := 1;
+   R_ID : constant Message_Manager.Request_ID_Type := 1;
    
 end Random_Number_Generator;

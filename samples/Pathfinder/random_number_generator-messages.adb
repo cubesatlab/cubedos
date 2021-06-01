@@ -10,7 +10,14 @@ pragma SPARK_Mode(On);
 --  Needed so that the types in the API can be used here.
 with Random_Number_Generator.API;
 
+
+with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Numerics.Discrete_Random;
+
 package body Random_Number_Generator.Messages is
+   type Random_Range is range 1..100;
+   package Random_Integer is new Ada.Numerics.Discrete_Random(Random_Range);
+   
    use Message_Manager;
    
    --  The package initializer, if needed.  This procedure might be
@@ -19,8 +26,14 @@ package body Random_Number_Generator.Messages is
    --  it should be removed to avoid SPARK flow issues.
    --
    procedure Initialize is
+      Outgoing_Message : Message_Record;
    begin
-      null;
+      Outgoing_Message := Random_Number_Generator.API.Generate_Number_Request_Encode
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => System.Default_Priority);
+      Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
    
    --------------- Message Handling ---------------
@@ -36,14 +49,44 @@ package body Random_Number_Generator.Messages is
    --  recommend that if a single internal package is used that it
    --  sould be called Sample_Module.Core (for example).
    
-   procedure Handle_A_Request(Message : in Message_Record)
-     with Pre => Random_Number_Generator.API.Is_A_Request(Message)
+   procedure Handle_Generate_Number_Request(Message : in Message_Record)
+     with Pre => Random_Number_Generator.API.Is_Generate_Number_Request(Message)
    is
+      
+      Number_Generator : Random_Integer.Generator;
+      Random_Number : Random_Range;
       Status : Message_Status_Type;
+      Fib_Seed : constant Natural := 45;
+      Fib_Number : Natural;
+      
+      function Fibonacci (N : in Natural) return Natural is
+      begin
+         if N = 0 then 
+            return 0;
+         end if;
+         if N = 1 then
+            return 1;   
+         end if;
+         
+         return Fibonacci(N-1) + Fibonacci(N-2);         
+      end Fibonacci;
+      
    begin
-      Random_Number_Generator.API.A_Request_Decode(Message, Status);
+      Random_Number_Generator.API.Generate_Number_Request_Decode(Message, Status);
       --  Act on the request message.
-   end Handle_A_Request;
+      
+      Random_Integer.Reset(Number_Generator);
+      Random_Number := Random_Integer.Random(Number_Generator);
+      
+      Ada.Text_IO.Put("Generating Fibonacci to waste time: ");
+      Fib_Number := Fibonacci(Fib_Seed);
+      Ada.Text_IO.Put_Line(Fib_Number'Image);
+
+      Ada.Text_IO.Put("+++ Random Numbers: ");
+      Ada.Text_IO.Put_Line(Random_Range'Image(Random_Number));
+      Ada.Text_IO.New_Line;
+
+   end Handle_Generate_Number_Request;
    
    -----------------------------------
    --  Message Decoding and Dispatching
@@ -52,8 +95,8 @@ package body Random_Number_Generator.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if Random_Number_Generator.API.Is_A_Request(Message) then
-         Handle_A_Request(Message);
+      if Random_Number_Generator.API.Is_Generate_Number_Request(Message) then
+         Handle_Generate_Number_Request(Message);
       else
 	 --  An unknown message type has been received. What should be
 	 --  done about that?

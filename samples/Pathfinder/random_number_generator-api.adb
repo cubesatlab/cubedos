@@ -12,7 +12,7 @@ use  CubedOS.Lib;
 
 package body Random_Number_Generator.API is
 
-   function A_Request_Encode
+   function Generate_Number_Request_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender        : Module_ID_Type;        
       Request_ID    : Request_ID_Type;
@@ -30,16 +30,16 @@ package body Random_Number_Generator.API is
 			   Sender, 
 			   ID, 
 			   Request_ID, 
-			   Message_Type'Pos(A_Request), 
+			   Message_Type'Pos(Generate_Number_Request), 
 			   Priority); 
    begin
       --  Fill in the message by encoding the other parameters (not
       --  shown) as required.
       return Message;
-   end A_Request_Encode;
+   end Generate_Number_Request_Encode;
    
    
-   function A_Reply_Encode
+   function Generate_Number_Reply_Encode
      (Receiver_Domain : Domain_ID_Type;
       Receiver        : Module_ID_Type;        
       Request_ID      : Request_ID_Type;
@@ -49,7 +49,7 @@ package body Random_Number_Generator.API is
       -- The skeletal message knows its sender (this module).
       Message : Message_Record := 
         Make_Empty_Message(Domain_ID, Receiver_Domain, ID, Receiver, 
-                           Request_ID, Message_Type'Pos(A_Reply), Priority); 
+                           Request_ID, Message_Type'Pos(Generate_Number_Reply), Priority); 
       
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
@@ -66,10 +66,10 @@ package body Random_Number_Generator.API is
       --  Set the message size.
       Message.Size := Last + 1;
       return Message;
-   end A_Reply_Encode;
+   end Generate_Number_Reply_Encode;
    
 
-   procedure A_Request_Decode
+   procedure Generate_Number_Request_Decode
      (Message : in  Message_Record;
       Decode_Status : out Message_Status_Type)
    is
@@ -77,10 +77,10 @@ package body Random_Number_Generator.API is
       --  Decode the given message and return via out parameters (not
       --  shown) the fields.
       null;
-   end A_Request_Decode;
+   end Generate_Number_Request_Decode;
    
    
-   procedure A_Reply_Decode
+   procedure Generate_Number_Reply_Decode
      (Message       : in  Message_Record;
       Decode_Status : out Message_Status_Type)
    is
@@ -105,6 +105,6 @@ package body Random_Number_Generator.API is
          Value := Positive(Raw_Value);
          Decode_Status := Success;
       end if;
-   end A_Reply_Decode;
+   end Generate_Number_Reply_Decode;
 
 end Random_Number_Generator.API;

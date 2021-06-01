@@ -8,6 +8,13 @@ with Ada.Real_Time;
 with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
+with Random_Number_Generator.Messages;
+with Telemetry.Messages;
+with Read_Number.Messages;
+
+pragma Unreferenced(Random_Number_Generator.Messages);
+pragma Unreferenced(Telemetry.Messages);
+pragma Unreferenced(Read_Number.Messages);
 
 procedure Main is
 

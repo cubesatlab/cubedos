@@ -55,4 +55,4 @@ package Random_Number_Generator.Messages is
       "multiple tasks might suspend on protected object",
       "Every module has a unique ID");
    
-end Random_Number_Gernerator.Messages;
+end Random_Number_Generator.Messages;
