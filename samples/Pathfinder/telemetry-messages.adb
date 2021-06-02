@@ -5,6 +5,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with Ada.Text_IO;
 
 --  Needed so that the types in the API can be used here.
 with Telemetry.API;
@@ -17,8 +18,17 @@ package body Telemetry.Messages is
    --  during package elaboration.  If this procedure is not needed,
    --  it should be removed to avoid SPARK flow issues.
    procedure Initialize is
+      Outgoing_Message : Message_Record;
    begin
-      null;
+      Outgoing_Message := Telemetry.API.Telemetry_Request_Encode
+	(Sender_Domain => Domain_ID,
+	 Sender        => ID,
+	 Request_ID    => R_ID,
+	 Priority      => System.Default_Priority);
+
+      for I in 1 .. 15 loop
+         Message_Manager.Route_Message(Outgoing_Message);
+      end loop;
    end Initialize;
    
    ----------------- Message Handling ---------------
@@ -34,14 +44,40 @@ package body Telemetry.Messages is
    --  recommend that if a single internal package is used that it
    --  sould be called Sample_Module.Core (for example).
    
-   procedure Handle_A_Request(Message : in Message_Record)
-     with Pre => Telemetry.API.Is_A_Request(Message)
+   procedure Handle_Telemetry_Request(Message : in Message_Record)
+     with Pre => Telemetry.API.Is_Telemetry_Request(Message)
    is
       Status : Message_Status_Type;
-   begin
-      Telemetry.API.A_Request_Decode(Message, Status);
-      --  Act on the request message.
-   end Handle_A_Request;
+      Fib_Seed : constant Natural := 40;
+      Fib_Number : Natural;
+      
+      function Fibonacci (N : in Natural) return Natural is
+      begin
+	 if N = 0 then
+	    return 0;
+	 end if;
+	 if N = 1 then
+	    return 1;
+	 end if;
+	 
+	 return Fibonacci(N-1) + Fibonacci(N-2);
+      end Fibonacci;
+      
+   begin -- Handle_Telemetry_Request
+      Telemetry.API.Telemetry_Request_Decode(Message, Status);
+      --  act on the request message.
+      Ada.Text_IO.Put("Generating Fibonacci (");
+      Ada.Text_IO.Put(Fib_Seed'Image);
+      Ada.Text_IO.Put_Line(" ) to waste time...");
+      Fib_Number := Fibonacci(Fib_Seed);
+      
+      Ada.Text_IO.Put("Fibonacci (");
+      Ada.Text_IO.Put(Fib_Seed'Image);
+      Ada.Text_IO.Put(" ) is: ");
+      Ada.Text_IO.Put_Line(Fib_Number'Image);
+      
+      Ada.Text_IO.Put_Line("+++ Telemetry Sent ");
+   end Handle_Telemetry_Request;
    
    -----------------------------------
    --  Message Decoding and Dispatching
@@ -50,8 +86,8 @@ package body Telemetry.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if Telemetry.API.Is_A_Request(Message) then
-         Handle_A_Request(Message);
+      if Telemetry.API.Is_Telemetry_Request(Message) then
+         Handle_Telemetry_Request(Message);
       else
 	 --  An unknown message type has been received. What should be
 	 --  done about that?

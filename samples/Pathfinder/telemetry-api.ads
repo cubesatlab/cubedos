@@ -37,13 +37,7 @@ package Telemetry.API is
    --  defined by the request message; procedures that return nothing
    --  don't have corresponding reply messages.
    --
-   type Message_Type is
-     (A_Request,  -- Message requesting service.
-      A_Reply,    -- Result of previous request (success/failure, or returned data).
-      B_Request,  -- etc...
-      B_Reply,
-      C_Request,
-      C_Reply);
+   type Message_Type is (Telemetry_Request, Telemetry_Reply);
 
    --  The encoding functions should be given names that reflect the
    --  operation but, by convention, should have a suffix of "Encode."
@@ -74,14 +68,14 @@ package Telemetry.API is
    --  ID of zero is reserved as a placeholder and can be used when
    --  this feature is not meaningful or useful.
    --
-   function A_Request_Encode
+   function Telemetry_Request_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender     : Module_ID_Type;
       Request_ID : Request_ID_Type;
       Priority   : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
    
-   function A_Reply_Encode
+   function Telemetry_Reply_Encode
      (Receiver_Domain : Domain_ID_Type;
       Receiver   : Module_ID_Type;
       Request_ID : Request_ID_Type;
@@ -96,11 +90,11 @@ package Telemetry.API is
    --  details of how messages are distinguished (the business about
    --  the position in the Message_Type enumeration).
    --
-   function Is_A_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(A_Request));
+   function Is_Telemetry_Request(Message : Message_Record) return Boolean is
+     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Telemetry_Request));
    
-   function Is_A_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(A_Reply));
+   function Is_Telemetry_Reply(Message : Message_Record) return Boolean is
+     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Telemetry_Reply));
    
    
    --  The decoding procedures take a message of the appropriate type
@@ -115,20 +109,20 @@ package Telemetry.API is
    --  malformed; the precondition only checks the message header and
    --  not the details of the message format.
    --
-   procedure A_Request_Decode
+   procedure Telemetry_Request_Decode
      (Message : in  Message_Record;
       Decode_Status : out Message_Status_Type)
    with
      Global => null,
-     Pre => Is_A_Request(Message),
+     Pre => Is_Telemetry_Request(Message),
      Depends => (Decode_Status => Message);
 
-   procedure A_Reply_Decode
+   procedure Telemetry_Reply_Decode
      (Message : in  Message_Record;
       Decode_Status : out Message_Status_Type)
    with
      Global => null,
-     Pre => Is_A_Reply(Message),
+     Pre => Is_Telemetry_Reply(Message),
      Depends => (Decode_Status => Message);
 
 end Telemetry.API;

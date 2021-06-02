@@ -33,7 +33,10 @@ package body Random_Number_Generator.Messages is
          Sender        => ID,
          Request_ID    => R_ID,
          Priority      => System.Default_Priority);
-      Message_Manager.Route_Message(Outgoing_Message);
+      
+      for I in 1 .. 5 loop
+         Message_Manager.Route_Message(Outgoing_Message);
+      end loop;
    end Initialize;
    
    --------------- Message Handling ---------------
@@ -78,11 +81,17 @@ package body Random_Number_Generator.Messages is
       Random_Integer.Reset(Number_Generator);
       Random_Number := Random_Integer.Random(Number_Generator);
       
-      Ada.Text_IO.Put("Generating Fibonacci to waste time: ");
+      Ada.Text_IO.Put("Generating Fibonacci (");
+      Ada.Text_IO.Put(Fib_Seed'Image);
+      Ada.Text_IO.Put_Line(" ) to waste time...");
       Fib_Number := Fibonacci(Fib_Seed);
+      
+      Ada.Text_IO.Put("Fibonacci (");
+      Ada.Text_IO.Put(Fib_Seed'Image);
+      Ada.Text_IO.Put(" ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
-
-      Ada.Text_IO.Put("+++ Random Numbers: ");
+      
+      Ada.Text_IO.Put("+++ Random Number: ");
       Ada.Text_IO.Put_Line(Random_Range'Image(Random_Number));
       Ada.Text_IO.New_Line;
 
