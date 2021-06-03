@@ -50,6 +50,7 @@ package body Telemetry.Messages is
       Status : Message_Status_Type;
       Fib_Seed : constant Natural := 40;
       Fib_Number : Natural;
+      Msg : constant String := "Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       
       function Fibonacci (N : in Natural) return Natural is
       begin
@@ -66,14 +67,11 @@ package body Telemetry.Messages is
    begin -- Handle_Telemetry_Request
       Telemetry.API.Telemetry_Request_Decode(Message, Status);
       --  act on the request message.
-      Ada.Text_IO.Put("Generating Fibonacci (");
-      Ada.Text_IO.Put(Fib_Seed'Image);
-      Ada.Text_IO.Put_Line(" ) to waste time...");
+      Ada.Text_IO.Put_Line(Msg);
+      
       Fib_Number := Fibonacci(Fib_Seed);
       
-      Ada.Text_IO.Put("Fibonacci (");
-      Ada.Text_IO.Put(Fib_Seed'Image);
-      Ada.Text_IO.Put(" ) is: ");
+      Ada.Text_IO.Put("Fibonacci (" & Fib_Seed'Image & " ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
       
       Ada.Text_IO.Put_Line("+++ Telemetry Sent ");

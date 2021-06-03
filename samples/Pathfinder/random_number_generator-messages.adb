@@ -17,6 +17,13 @@ with Ada.Numerics.Discrete_Random;
 package body Random_Number_Generator.Messages is
    type Random_Range is range 1..100;
    package Random_Integer is new Ada.Numerics.Discrete_Random(Random_Range);
+
+   function Get_Random_Number return Random_Range is
+      Number_Generator : Random_Integer.Generator;
+   begin
+      Random_Integer.Reset(Number_Generator);
+      return Random_Integer.Random(Number_Generator);
+   end Get_Random_Number;
    
    use Message_Manager;
    
@@ -56,11 +63,11 @@ package body Random_Number_Generator.Messages is
      with Pre => Random_Number_Generator.API.Is_Generate_Number_Request(Message)
    is
       
-      Number_Generator : Random_Integer.Generator;
       Random_Number : Random_Range;
       Status : Message_Status_Type;
       Fib_Seed : constant Natural := 45;
       Fib_Number : Natural;
+      Msg : constant String := "Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       
       function Fibonacci (N : in Natural) return Natural is
       begin
@@ -78,17 +85,12 @@ package body Random_Number_Generator.Messages is
       Random_Number_Generator.API.Generate_Number_Request_Decode(Message, Status);
       --  Act on the request message.
       
-      Random_Integer.Reset(Number_Generator);
-      Random_Number := Random_Integer.Random(Number_Generator);
+      Random_Number := Get_Random_Number;
+      Ada.Text_IO.Put_Line(Msg);
       
-      Ada.Text_IO.Put("Generating Fibonacci (");
-      Ada.Text_IO.Put(Fib_Seed'Image);
-      Ada.Text_IO.Put_Line(" ) to waste time...");
       Fib_Number := Fibonacci(Fib_Seed);
       
-      Ada.Text_IO.Put("Fibonacci (");
-      Ada.Text_IO.Put(Fib_Seed'Image);
-      Ada.Text_IO.Put(" ) is: ");
+      Ada.Text_IO.Put("Fibonacci (" & Fib_Seed'Image & " ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
       
       Ada.Text_IO.Put("+++ Random Number: ");

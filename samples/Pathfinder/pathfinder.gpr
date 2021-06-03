@@ -10,4 +10,8 @@ project Pathfinder is
       for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
    end Compiler;
 
+   package Builder is   
+      for Global_Configuration_Pragmas use "gnat.adc";
+   end Builder;
+
 end Pathfinder;
