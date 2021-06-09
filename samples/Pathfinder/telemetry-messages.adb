@@ -12,6 +12,7 @@ with Telemetry.API;
 
 package body Telemetry.Messages is
    use Message_Manager;
+   Count : Positive := 1;
    
    --  The package initializer, if needed.  This procedure might be
    --  called as the message loop (see below) is starting, or perhaps
@@ -21,14 +22,12 @@ package body Telemetry.Messages is
       Outgoing_Message : Message_Record;
    begin
       Outgoing_Message := Telemetry.API.Telemetry_Request_Encode
-	(Sender_Domain => Domain_ID,
-	 Sender        => ID,
-	 Request_ID    => R_ID,
-	 Priority      => System.Default_Priority);
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => System.Default_Priority);
 
-      for I in 1 .. 15 loop
-         Message_Manager.Route_Message(Outgoing_Message);
-      end loop;
+      Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
    
    ----------------- Message Handling ---------------
@@ -47,8 +46,9 @@ package body Telemetry.Messages is
    procedure Handle_Telemetry_Request(Message : in Message_Record)
      with Pre => Telemetry.API.Is_Telemetry_Request(Message)
    is
+      Outgoing_Message : Message_Record;
       Status : Message_Status_Type;
-      Fib_Seed : constant Natural := 40;
+      Fib_Seed : constant Natural := 46;
       Fib_Number : Natural;
       Msg : constant String := "Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       
@@ -74,7 +74,19 @@ package body Telemetry.Messages is
       Ada.Text_IO.Put("Fibonacci (" & Fib_Seed'Image & " ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
       
-      Ada.Text_IO.Put_Line("+++ Telemetry Sent ");
+      Ada.Text_IO.Put("(" & Count'Image & " ) ");
+      Ada.Text_IO.Put_Line("+++ Telemetry Sent");
+      Ada.Text_IO.New_Line;
+      
+      Count := Count + 1;
+      
+      Outgoing_Message := Telemetry.API.Telemetry_Request_Encode
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => System.Default_Priority);
+
+      Message_Manager.Route_Message(Outgoing_Message);
    end Handle_Telemetry_Request;
    
    -----------------------------------

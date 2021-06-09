@@ -27,23 +27,16 @@ package body Random_Number_Generator.Messages is
    
    use Message_Manager;
    
+   Count : Positive := 1;
+   
    --  The package initializer, if needed.  This procedure might be
    --  called as the message loop (see below) is starting, or perhaps
    --  during package elaboration.  If this procedure is not needed,
    --  it should be removed to avoid SPARK flow issues.
    --
    procedure Initialize is
-      Outgoing_Message : Message_Record;
    begin
-      Outgoing_Message := Random_Number_Generator.API.Generate_Number_Request_Encode
-        (Sender_Domain => Domain_ID,
-         Sender        => ID,
-         Request_ID    => R_ID,
-         Priority      => System.Default_Priority);
-      
-      for I in 1 .. 5 loop
-         Message_Manager.Route_Message(Outgoing_Message);
-      end loop;
+      null;
    end Initialize;
    
    --------------- Message Handling ---------------
@@ -93,9 +86,12 @@ package body Random_Number_Generator.Messages is
       Ada.Text_IO.Put("Fibonacci (" & Fib_Seed'Image & " ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
       
+      Ada.Text_IO.Put("(" & Count'Image & " ) ");
       Ada.Text_IO.Put("+++ Random Number: ");
       Ada.Text_IO.Put_Line(Random_Range'Image(Random_Number));
       Ada.Text_IO.New_Line;
+      
+      Count := Count + 1;
 
    end Handle_Generate_Number_Request;
    

@@ -8,6 +8,7 @@ pragma SPARK_Mode(On);
 
 --  Needed so that the types in the API can be used here.
 with Read_Number.API;
+with Random_Number_Generator.API;
 
 package body Read_Number.Messages is
    use Message_Manager;
@@ -17,8 +18,17 @@ package body Read_Number.Messages is
    --  during package elaboration.  If this procedure is not needed,
    --  it should be removed to avoid SPARK flow issues.
    procedure Initialize is
+      Outgoing_Message : Message_Record;
    begin
-      null;
+      Outgoing_Message := Read_Number.API.Read_Number_Request_Encode
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => System.Default_Priority);
+      
+      for I in 1 .. 15 loop
+         Message_Manager.Route_Message(Outgoing_Message);
+      end loop;      
    end Initialize;
    
    ----------------- Message Handling ---------------
@@ -34,14 +44,23 @@ package body Read_Number.Messages is
    --  recommend that if a single internal package is used that it
    --  sould be called Sample_Module.Core (for example).
    
-   procedure Handle_A_Request(Message : in Message_Record)
-     with Pre => Read_Number.API.Is_A_Request(Message)
+   procedure Handle_Read_Number_Request(Message : in Message_Record)
+     with Pre => Read_Number.API.Is_Read_Number_Request(Message)
    is
       Status : Message_Status_Type;
+      Outgoing_Message : Message_Record;
    begin
-      Read_Number.API.A_Request_Decode(Message, Status);
+      Read_Number.API.Read_Number_Request_Decode(Message, Status);
       --  Act on the request message.
-   end Handle_A_Request;
+      
+      Outgoing_Message := Random_Number_Generator.API.Generate_Number_Request_Encode
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => System.Default_Priority);
+      
+         Message_Manager.Route_Message(Outgoing_Message);
+   end Handle_Read_Number_Request;
    
    -----------------------------------
    --  Message Decoding and Dispatching
@@ -50,8 +69,8 @@ package body Read_Number.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if Read_Number.API.Is_A_Request(Message) then
-         Handle_A_Request(Message);
+      if Read_Number.API.Is_Read_Number_Request(Message) then
+         Handle_Read_Number_Request(Message);
       else
 	 --  An unknown message type has been received. What should be
 	 --  done about that?

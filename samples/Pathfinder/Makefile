@@ -4,5 +4,5 @@ main: main.adb
 
 .PHONY: clean
 clean:
-	gprclean
 	rm -rf build/*
+	gprclean
