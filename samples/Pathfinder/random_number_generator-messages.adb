@@ -58,9 +58,9 @@ package body Random_Number_Generator.Messages is
       
       Random_Number : Random_Range;
       Status : Message_Status_Type;
-      Fib_Seed : constant Natural := 45;
+      Fib_Seed : constant Natural := 40;
       Fib_Number : Natural;
-      Msg : constant String := "Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
+      Msg : constant String := "L: Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       
       function Fibonacci (N : in Natural) return Natural is
       begin
@@ -83,10 +83,10 @@ package body Random_Number_Generator.Messages is
       
       Fib_Number := Fibonacci(Fib_Seed);
       
-      Ada.Text_IO.Put("Fibonacci (" & Fib_Seed'Image & " ) is: ");
+      Ada.Text_IO.Put("L: Fibonacci (" & Fib_Seed'Image & " ) is: ");
       Ada.Text_IO.Put_Line(Fib_Number'Image);
       
-      Ada.Text_IO.Put("(" & Count'Image & " ) ");
+      Ada.Text_IO.Put("L: (" & Count'Image & " ) ");
       Ada.Text_IO.Put("+++ Random Number: ");
       Ada.Text_IO.Put_Line(Random_Range'Image(Random_Number));
       Ada.Text_IO.New_Line;

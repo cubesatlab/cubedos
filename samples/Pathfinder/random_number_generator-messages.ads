@@ -37,7 +37,7 @@ package Random_Number_Generator.Messages is
    --  pragma Unreferenced(CubedOS.Sample_Module.Messages);
    task Message_Loop is
       pragma Storage_Size(4 * 1024);
-      pragma Priority(40);
+      pragma Priority(30);
    end Message_Loop;
 
    --  This justifcation is needed to silence a SPARK error related
