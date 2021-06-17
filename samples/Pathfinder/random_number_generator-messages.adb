@@ -58,7 +58,6 @@ package body Random_Number_Generator.Messages is
       
       Random_Number : Random_Range;
       Status : Message_Status_Type;
-      Fib_Seed : constant Natural := 40;
       Fib_Number : Natural;
       Msg : constant String := "L: Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       

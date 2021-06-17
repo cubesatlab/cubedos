@@ -11,6 +11,7 @@
 --  real application.
 --
 --------------------------------------------------------------------------------
+
 pragma SPARK_Mode(On);
 pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 
@@ -24,6 +25,8 @@ pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 --  The message manager package contains the Mailboxes array that is
 --  used by CubedOS for inter-module communication.
 with Message_Manager;
+with System;
+with System.Multiprocessors;
 
 package Telemetry is
    
@@ -34,5 +37,8 @@ package Telemetry is
    --  allocations. The value 1 below is just an example.
    ID : constant Message_Manager.Module_ID_Type    := 2;
    R_ID : constant Message_Manager.Request_ID_Type := 2;
+   Fib_Seed : constant Natural := 38;
+   Priority : constant System.Priority := 20;
+   CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
    
 end Telemetry;

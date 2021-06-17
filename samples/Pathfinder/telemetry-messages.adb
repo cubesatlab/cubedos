@@ -26,7 +26,7 @@ package body Telemetry.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => System.Default_Priority);
+         Priority      => Priority);
 
       Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
@@ -49,7 +49,6 @@ package body Telemetry.Messages is
    is
       Outgoing_Message : Message_Record;
       Status : Message_Status_Type;
-      Fib_Seed : constant Natural := 38;
       Fib_Number : Natural;
       Msg : constant String := "M: Generating Fibonacci (" & Fib_Seed'Image & " ) to waste time...";
       
@@ -85,7 +84,7 @@ package body Telemetry.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => System.Default_Priority);
+         Priority      => Priority);
 
       Message_Manager.Route_Message(Outgoing_Message);
    end Handle_Telemetry_Request;

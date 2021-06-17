@@ -25,11 +25,9 @@ package body Read_Number.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => System.Default_Priority);
+         Priority      => Priority);
       
-      for I in 1 .. 15 loop
-         Message_Manager.Route_Message(Outgoing_Message);
-      end loop;      
+         Message_Manager.Route_Message(Outgoing_Message);    
    end Initialize;
    
    ----------------- Message Handling ---------------
@@ -49,18 +47,25 @@ package body Read_Number.Messages is
      with Pre => Read_Number.API.Is_Read_Number_Request(Message)
    is
       Status : Message_Status_Type;
-      Outgoing_Message : Message_Record;
+      Outgoing_Message, Self_Message : Message_Record;
    begin
       Read_Number.API.Read_Number_Request_Decode(Message, Status);
       --  Act on the request message.
+      
+      Self_Message := Read_Number.API.Read_Number_Request_Encode
+        (Sender_Domain => Domain_ID,
+         Sender        => ID,
+         Request_ID    => R_ID,
+         Priority      => Priority);
       
       Outgoing_Message := Random_Number_Generator.API.Generate_Number_Request_Encode
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => System.Default_Priority);
+         Priority      => Priority);
       
-         Message_Manager.Route_Message(Outgoing_Message);
+      Message_Manager.Route_Message(Outgoing_Message);
+      Message_Manager.Route_Message(Self_Message);
    end Handle_Read_Number_Request;
    
    -----------------------------------

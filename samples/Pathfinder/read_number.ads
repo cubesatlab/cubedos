@@ -24,6 +24,8 @@ pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 --  The message manager package contains the Mailboxes array that is
 --  used by CubedOS for inter-module communication.
 with Message_Manager;
+with System;
+with System.Multiprocessors;
 
 package Read_Number is
    
@@ -34,5 +36,7 @@ package Read_Number is
    --  allocations. The value 1 below is just an example.
    ID   : constant Message_Manager.Module_ID_Type  := 1;
    R_ID : constant Message_Manager.Request_ID_Type := 1;
+   Priority : constant System.Priority := 30;
+   CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
    
 end Read_Number;

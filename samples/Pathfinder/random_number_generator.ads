@@ -24,6 +24,8 @@ pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 --  The message manager package contains the Mailboxes array that is
 --  used by CubedOS for inter-module communication.
 with Message_Manager;
+with System;
+with System.Multiprocessors;
 
 package Random_Number_Generator is
    
@@ -34,5 +36,8 @@ package Random_Number_Generator is
    --  allocations. The value 1 below is just an example.
    ID   : constant Message_Manager.Module_ID_Type  := 3;
    R_ID : constant Message_Manager.Request_ID_Type := 3;
+   Fib_Seed : constant Natural := 40;
+   Priority : constant System.Priority := 10;
+   CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
    
 end Random_Number_Generator;

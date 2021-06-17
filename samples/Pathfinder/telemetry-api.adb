@@ -23,7 +23,7 @@ package body Telemetry.API is
       --  the message and knows what message ID is approriate (there
       --  are different functions for different messages) so it can
       --  fill in those values on its own.
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message(
 			   Sender_Domain, 
 			   Domain_ID, 
