@@ -35,9 +35,9 @@ package Telemetry.Messages is
    --
    --  with CubedOS.Sample_Module.Messages;
    --  pragma Unreferenced(CubedOS.Sample_Module.Messages);
-   task Message_Loop is
+   task type Message_Loop
+      with Priority => 20 is
       pragma Storage_Size(4 * 1024);
-      pragma Priority(50);
    end Message_Loop;
 
    --  This justifcation is needed to silence a SPARK error related

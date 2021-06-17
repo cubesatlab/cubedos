@@ -26,7 +26,7 @@ package body Random_Number_Generator.Messages is
    end Get_Random_Number;
    
    use Message_Manager;
-   
+   ML1 : Message_Loop;   
    Count : Positive := 1;
    
    --  The package initializer, if needed.  This procedure might be
@@ -77,7 +77,6 @@ package body Random_Number_Generator.Messages is
    begin
       Random_Number_Generator.API.Generate_Number_Request_Decode(Message, Status);
       --  Act on the request message.
-      
       Random_Number := Get_Random_Number;
       Ada.Text_IO.Put_Line(Msg);
       

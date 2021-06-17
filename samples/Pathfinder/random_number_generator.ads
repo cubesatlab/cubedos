@@ -12,6 +12,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 
 --  All CubedOS applications should instantiate Generic_Message_Manager
 --  using some suitable name.  The name Message_Manager is recommended

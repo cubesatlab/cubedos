@@ -12,6 +12,7 @@ with Telemetry.API;
 
 package body Telemetry.Messages is
    use Message_Manager;
+   ML1 : Message_Loop;
    Count : Positive := 1;
    
    --  The package initializer, if needed.  This procedure might be

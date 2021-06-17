@@ -35,9 +35,9 @@ package Read_Number.Messages is
    --
    --  with CubedOS.Sample_Module.Messages;
    --  pragma Unreferenced(CubedOS.Sample_Module.Messages);
-   task Message_Loop is
+   task type Message_Loop
+      with Priority => 30 is
       pragma Storage_Size(4 * 1024);
-      pragma Priority(60);
    end Message_Loop;
 
    --  This justifcation is needed to silence a SPARK error related

@@ -12,6 +12,7 @@ with Random_Number_Generator.API;
 
 package body Read_Number.Messages is
    use Message_Manager;
+   ML1: Message_Loop;
    
    --  The package initializer, if needed.  This procedure might be
    --  called as the message loop (see below) is starting, or perhaps
