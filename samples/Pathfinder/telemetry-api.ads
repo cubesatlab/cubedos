@@ -72,7 +72,7 @@ package Telemetry.API is
      (Sender_Domain : Domain_ID_Type;
       Sender     : Module_ID_Type;
       Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+      Priority   : System.Priority := Priority_Num) return Message_Record
    with Global => null;
    
    function Telemetry_Reply_Encode
@@ -80,7 +80,7 @@ package Telemetry.API is
       Receiver   : Module_ID_Type;
       Request_ID : Request_ID_Type;
       Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+      Priority   : System.Priority := Priority_Num) return Message_Record
    with Global => null;
    
    

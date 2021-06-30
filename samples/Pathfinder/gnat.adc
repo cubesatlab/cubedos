@@ -1,7 +1,6 @@
 -- This file is used to ensure that the CubedOS core is Ravenscar and SPARKable.
 --
---pragma SPARK_Mode(On);
+pragma SPARK_Mode(On);
 pragma Profile(Ravenscar);
 pragma Partition_Elaboration_Policy(Sequential);
-pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 --pragma Warnings(Off, "may call Last_Chance_Handler");

@@ -26,7 +26,7 @@ package body Random_Number_Generator.Messages is
    end Get_Random_Number;
    
    use Message_Manager;
-   ML1 : Message_Loop;   
+   ML1 : Message_Loop;
    Count : Positive := 1;
    
    --  The package initializer, if needed.  This procedure might be
@@ -67,10 +67,10 @@ package body Random_Number_Generator.Messages is
             return 0;
          end if;
          if N = 1 then
-            return 1;   
+            return 1;
          end if;
          
-         return Fibonacci(N-1) + Fibonacci(N-2);         
+         return Fibonacci(N-1) + Fibonacci(N-2);       
       end Fibonacci;
       
    begin

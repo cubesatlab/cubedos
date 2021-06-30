@@ -36,7 +36,7 @@ package Read_Number is
    --  allocations. The value 1 below is just an example.
    ID   : constant Message_Manager.Module_ID_Type  := 1;
    R_ID : constant Message_Manager.Request_ID_Type := 1;
-   Priority : constant System.Priority := 30;
+   Priority_Num : constant System.Priority := 30;
    CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
    
 end Read_Number;

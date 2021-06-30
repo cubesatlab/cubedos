@@ -26,7 +26,7 @@ package body Telemetry.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => Priority);
+         Priority      => Priority_Num);
 
       Message_Manager.Route_Message(Outgoing_Message);
    end Initialize;
@@ -84,7 +84,7 @@ package body Telemetry.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => Priority);
+         Priority      => Priority_Num);
 
       Message_Manager.Route_Message(Outgoing_Message);
    end Handle_Telemetry_Request;

@@ -34,7 +34,7 @@ package Random_Number_Generator.Messages is
    --  with CubedOS.Sample_Module.Messages;
    --  pragma Unreferenced(CubedOS.Sample_Module.Messages);
    task type Message_Loop
-      with Priority => Priority, CPU => CPU_Num is
+      with Priority => Priority_Num, CPU => CPU_Num is
       pragma Storage_Size(4 * 1024);
    end Message_Loop;
 

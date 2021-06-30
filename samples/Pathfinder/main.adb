@@ -18,7 +18,7 @@ pragma Unreferenced(Read_Number.Messages);
 
 procedure Main is
 
-   pragma Priority(System.Priority'First);
+   pragma Priority(System.Priority'Last);
    use type Ada.Real_Time.Time;
    Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds(1000);
 begin

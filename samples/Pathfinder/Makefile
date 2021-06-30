@@ -1,3 +1,4 @@
+all: main
 
 main: main.adb
 	gprbuild

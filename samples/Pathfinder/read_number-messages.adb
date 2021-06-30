@@ -5,6 +5,8 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with Ada.Real_Time;
+with Ada.Text_IO;
 
 --  Needed so that the types in the API can be used here.
 with Read_Number.API;
@@ -13,6 +15,7 @@ with Random_Number_Generator.API;
 package body Read_Number.Messages is
    use Message_Manager;
    ML1: Message_Loop;
+   Count : Positive := 1;
    
    --  The package initializer, if needed.  This procedure might be
    --  called as the message loop (see below) is starting, or perhaps
@@ -25,7 +28,7 @@ package body Read_Number.Messages is
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => Priority);
+         Priority      => Priority_Num);
       
          Message_Manager.Route_Message(Outgoing_Message);    
    end Initialize;
@@ -46,26 +49,35 @@ package body Read_Number.Messages is
    procedure Handle_Read_Number_Request(Message : in Message_Record)
      with Pre => Read_Number.API.Is_Read_Number_Request(Message)
    is
+      use Ada.Real_Time;
       Status : Message_Status_Type;
       Outgoing_Message, Self_Message : Message_Record;
+      Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds(1000);
    begin
       Read_Number.API.Read_Number_Request_Decode(Message, Status);
       --  Act on the request message.
+      Next_Release := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds(10_000);
       
       Self_Message := Read_Number.API.Read_Number_Request_Encode
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => Priority);
+         Priority      => Priority_Num);
       
       Outgoing_Message := Random_Number_Generator.API.Generate_Number_Request_Encode
         (Sender_Domain => Domain_ID,
          Sender        => ID,
          Request_ID    => R_ID,
-         Priority      => Priority);
-      
+         Priority      => Priority_Num);
+
+      Ada.Text_IO.Put_Line("H: (" & Count'Image & " ) Requesting Random Number");
       Message_Manager.Route_Message(Outgoing_Message);
+      
+      delay until Next_Release;
+      Next_Release := Next_Release + Ada.Real_Time.Milliseconds(10_000);
+      
       Message_Manager.Route_Message(Self_Message);
+      Count := Count + 1;
    end Handle_Read_Number_Request;
    
    -----------------------------------

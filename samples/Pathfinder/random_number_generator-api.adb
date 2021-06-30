@@ -16,7 +16,7 @@ package body Random_Number_Generator.API is
      (Sender_Domain : Domain_ID_Type;
       Sender        : Module_ID_Type;        
       Request_ID    : Request_ID_Type;
-      Priority      : System.Priority := System.Default_Priority) return Message_Record
+      Priority      : System.Priority := Priority_Num) return Message_Record
    is
       --  Create a skeletal message based on the given sender and
       --  priority.  This function knows what module ID will receive
@@ -44,7 +44,7 @@ package body Random_Number_Generator.API is
       Receiver        : Module_ID_Type;        
       Request_ID      : Request_ID_Type;
       Status          : Status_Type;
-      Priority        : System.Priority := System.Default_Priority) return Message_Record
+      Priority        : System.Priority := Priority_Num) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
       Message : Message_Record := 

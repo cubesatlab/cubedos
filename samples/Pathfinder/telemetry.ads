@@ -13,7 +13,7 @@
 --------------------------------------------------------------------------------
 
 pragma SPARK_Mode(On);
-pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
+--pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 
 --  All CubedOS applications should instantiate Generic_Message_Manager
 --  using some suitable name.  The name Message_Manager is recommended
@@ -37,8 +37,8 @@ package Telemetry is
    --  allocations. The value 1 below is just an example.
    ID : constant Message_Manager.Module_ID_Type    := 2;
    R_ID : constant Message_Manager.Request_ID_Type := 2;
-   Fib_Seed : constant Natural := 38;
-   Priority : constant System.Priority := 20;
+   Fib_Seed : constant Natural := 42;
+   Priority_Num : constant System.Priority := 20;
    CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
    
 end Telemetry;
