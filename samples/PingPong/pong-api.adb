@@ -4,39 +4,47 @@
 -- AUTHOR : (C) Copyright 2017 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-
+with CubedOS.Lib.XDR;
+use CubedOS.Lib;
 
 package body Pong.API is
+   use type XDR.XDR_Unsigned;
 
    function Ponged_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender   : Module_ID_Type;
-      Priority : System.Priority := System.Default_Priority;
-      Request_ID : Request_ID_Type) return Message_Record
+     (Sender_Domain : Domain_ID_Type; Sender : Module_ID_Type;
+      Request_ID    : Request_ID_Type;
+      Priority      : System.Priority := System.Default_Priority;
+      Send_Return   : Boolean) return Message_Record
    is
-      Message : constant Message_Record :=
+      Position : Data_Index_Type := 0;
+      Last     : Data_Index_Type;
+
+      Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
-           Sender     => Sender,
-           Receiver   => ID,
-           Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Ball),
-           Priority   => Priority);
+          (Sender_Domain => Sender_Domain, Receiver_Domain => Domain_ID,
+           Sender        => Sender, Receiver => ID, Request_ID => Request_ID,
+           Message_ID    => Message_Type'Pos (Ball), Priority => Priority);
    begin
-      -- Create an empty message to be recieved. Pong requires no additional information so
-      -- there is no need to add anything to the message, the way the message is instantiated
-      -- above is enough information for Pong to have a proper message recieved
+      Position := 0;
+      XDR.Encode
+        (XDR.XDR_Unsigned (Boolean'Pos (Send_Return)), Message.Payload,
+         Position, Last);
+      Position := Last + 1;
       return Message;
    end Ponged_Encode;
 
-
-   procedure Ponged_Decode(Message : in  Message_Record) is
+   procedure Ponged_Decode
+     (Message : in Message_Record; Send_Return : out Boolean)
+   is
+      Position        : Data_Index_Type;
+      Last            : Data_Index_Type;
+      Raw_Send_Return : XDR.XDR_Unsigned;
    begin
-      -- In this case the entire message is in the header of the message record. The caller
-      -- already has that information, so no additional decoding is needed (and there is
-      -- nothing to decode anyway!)
-      null;
+      -- need to add check if raw_send_return is valid.
+      Position := 0;
+      XDR.Decode (Message.Payload, Position, Raw_Send_Return, Last);
+      Send_Return := Boolean'Val (Raw_Send_Return);
+
    end Ponged_Decode;
 
-end pong.API;
+end Pong.API;
