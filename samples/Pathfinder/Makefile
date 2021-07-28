@@ -1,3 +1,5 @@
+VPATH = src
+
 all: main
 
 main: main.adb
@@ -5,5 +7,5 @@ main: main.adb
 
 .PHONY: clean
 clean:
-	rm -rf build/*
+	rm -rf build/* src/*~
 	gprclean

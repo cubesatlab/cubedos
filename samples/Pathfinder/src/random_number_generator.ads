@@ -11,8 +11,7 @@
 --  real application.
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode(On);
-pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
+pragma SPARK_Mode (On);
 
 --  All CubedOS applications should instantiate Generic_Message_Manager
 --  using some suitable name.  The name Message_Manager is recommended
@@ -26,18 +25,19 @@ pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 with Message_Manager;
 with System;
 with System.Multiprocessors;
+with Fibonacci;
 
 package Random_Number_Generator is
-   
+
    --  Every module has an ID number. CubedOS core modules have "well
    --  known" ID numbers that should not be used in an application
    --  specific module. ID numbers are statically allocated.  We
    --  recommend creating a file, module_map.txt, listing these
    --  allocations. The value 1 below is just an example.
-   ID   : constant Message_Manager.Module_ID_Type  := 3;
-   R_ID : constant Message_Manager.Request_ID_Type := 3;
-   Fib_Seed : constant Natural := 45;
-   Priority_Num : constant System.Priority := 10;
+   ID      : constant Message_Manager.Module_ID_Type   := 1;
+   R_ID    : constant Message_Manager.Request_ID_Type  := 4;
+   FSeed   : constant Fibonacci.Fib_Seed               := 42;
+   Pri     : constant System.Priority                  := 10;
    CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
-   
+
 end Random_Number_Generator;

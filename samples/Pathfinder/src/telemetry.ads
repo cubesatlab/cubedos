@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 --
---  FILE   : read_number.ads
+--  FILE   : Telemetry.ads
 --  SUBJECT: Top level package of a CubedOS Random Number Generator.
 --  AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
@@ -11,8 +11,7 @@
 --  real application.
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode(On);
-pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
+pragma SPARK_Mode (On);
 
 --  All CubedOS applications should instantiate Generic_Message_Manager
 --  using some suitable name.  The name Message_Manager is recommended
@@ -26,17 +25,19 @@ pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 with Message_Manager;
 with System;
 with System.Multiprocessors;
+with Fibonacci;
 
-package Read_Number is
-   
+package Telemetry is
+
    --  Every module has an ID number. CubedOS core modules have "well
    --  known" ID numbers that should not be used in an application
    --  specific module. ID numbers are statically allocated.  We
    --  recommend creating a file, module_map.txt, listing these
    --  allocations. The value 1 below is just an example.
-   ID   : constant Message_Manager.Module_ID_Type  := 1;
-   R_ID : constant Message_Manager.Request_ID_Type := 1;
-   Priority_Num : constant System.Priority := 30;
+   ID      : constant Message_Manager.Module_ID_Type   := 3;
+   R_ID    : constant Message_Manager.Request_ID_Type  := 6;
+   FSeed   : constant Fibonacci.Fib_Seed               := 41;
+   Pri     : constant System.Priority                  := 20;
    CPU_Num : constant System.Multiprocessors.CPU_Range := 1;
-   
-end Read_Number;
+
+end Telemetry;

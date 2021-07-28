@@ -1,15 +1,17 @@
 --------------------------------------------------------------------------------
 --
---  FILE   : read_number-messages.ads
+--  FILE   : Read_Number-messages.ads
 --  SUBJECT: Specification of a package that implements the main part
 --  of the module.
 --  AUTHOR : (C) Copyright 2020 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode(On);
+pragma SPARK_Mode (On);
+with Message_Manager; use Message_Manager;
+with Read_Number.API;
 
 package Read_Number.Messages is
-   
+
    --  Every module contains a message loop that receives messages
    --  from the module's mailbox and processes them.  That loop is
    --  declared here with its attributes.  Be mindful of priorities.
@@ -33,9 +35,11 @@ package Read_Number.Messages is
    --
    --  with CubedOS.Sample_Module.Messages;
    --  pragma Unreferenced(CubedOS.Sample_Module.Messages);
-   task type Message_Loop
-      with Priority => Priority_Num, CPU => CPU_Num is
-      pragma Storage_Size(4 * 1024);
+   task type Message_Loop with
+      Priority => Pri,
+      CPU      => CPU_Num
+   is
+      pragma Storage_Size (4 * 1_024);
    end Message_Loop;
 
    --  This justifcation is needed to silence a SPARK error related
@@ -48,9 +52,14 @@ package Read_Number.Messages is
    --  module has a unique module ID (since module IDs are used as
    --  mailbox identifiers).
    pragma Annotate
-     (GNATprove,
-      Intentional,
+     (GNATprove, Intentional,
       "multiple tasks might suspend on protected object",
       "Every module has a unique ID");
-   
+
+private
+   procedure Initialize;
+   procedure Process (Message : in Message_Record);
+   procedure Handle_Read_Number_Reply (Message : in Message_Record) with
+      Pre => Read_Number.API.Is_Read_Number_Reply (Message);
+
 end Read_Number.Messages;
