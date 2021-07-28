@@ -77,7 +77,7 @@ package body Telemetry.Messages is
    procedure Process (Message : in Message_Record) is
    begin
       if Telemetry.API.Is_Telemetry_Request (Message) then
-         Handle_Telemetry_Request (Message);
+         Handle_Telemetry (Message);
       else
          --  An unknown message type has been received. What should be
          --  done about that?
@@ -102,11 +102,11 @@ package body Telemetry.Messages is
    --  recommend that if a single internal package is used that it
    --  sould be called Sample_Module.Core (for example).
 
-   procedure Handle_Telemetry_Request (Message : in Message_Record) is
+   procedure Handle_Telemetry (Message : in Message_Record) is
       Outgoing_Message : Message_Record;
       Status           : Message_Status_Type;
       Call_Sign        : constant String :=
-        "M[" & Pri'Image & " ] -- Telemetry Request: ";
+        "M[" & Pri'Image & " ] -- Telemetry: ";
    begin
       Telemetry.API.Telemetry_Decode (Message, Status);
       --  Act on the request message.
@@ -128,5 +128,5 @@ package body Telemetry.Messages is
 
       Message_Manager.Route_Message (Outgoing_Message);
 
-   end Handle_Telemetry_Request;
+   end Handle_Telemetry;
 end Telemetry.Messages;

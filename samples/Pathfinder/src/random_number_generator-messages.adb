@@ -124,8 +124,7 @@ package body Random_Number_Generator.Messages is
       Outgoing_Message :=
         Read_Number.API.Read_Number_Reply_Encode
           (Receiver_Domain => Domain_ID, Receiver => Read_Number.ID,
-           Request_ID      => Read_Number.R_ID, Priority => Read_Number.Pri,
-           Value           => Value);
+           Request_ID      => Read_Number.R_ID, Value => Value);
 
       Message_Manager.Route_Message (Outgoing_Message);
 

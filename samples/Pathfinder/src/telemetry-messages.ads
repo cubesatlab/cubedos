@@ -59,7 +59,7 @@ package Telemetry.Messages is
 private
    procedure Initialize;
    procedure Process (Message : in Message_Record);
-   procedure Handle_Telemetry_Request (Message : in Message_Record) with
+   procedure Handle_Telemetry (Message : in Message_Record) with
       Pre => Telemetry.API.Is_Telemetry_Request (Message);
 
 end Telemetry.Messages;
