@@ -20,14 +20,16 @@ package Ping.API is
    function Pinged_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender   : Module_ID_Type;
+      Request_ID : Request_ID_Type;
       Priority : System.Priority := System.Default_Priority;
-      Request_ID : Request_ID_Type) return Message_Record
+      Send_Return : Boolean) return Message_Record
    with Global => null;
 
    function Is_Pinged(Message : Message_Record) return Boolean is
      (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Ball));
 
    procedure Pinged_Decode
-     (Message : Message_Manager.Message_Record);
+     (Message : Message_Manager.Message_Record;
+      Send_Return : out Boolean);
 
 end Ping.API;
