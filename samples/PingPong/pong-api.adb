@@ -10,6 +10,19 @@ use CubedOS.Lib;
 package body Pong.API is
    use type XDR.XDR_Unsigned;
 
+   function Init_Encode
+     (Sender_Domain : Domain_ID_Type; Sender : Module_ID_Type;
+      Request_ID : Request_ID_Type;
+      Priority : System.Priority := System.Default_Priority) return Message_Record
+   is
+      Message : constant Message_Record := Make_Empty_Message
+          (Sender_Domain => Sender_Domain, Receiver_Domain => Domain_ID,
+           Sender        => Sender, Receiver => ID, Request_ID => Request_ID,
+           Message_ID    => Message_Type'Pos (Init), Priority => Priority);
+   begin
+      return Message;
+   end Init_Encode;
+
    function Ponged_Encode
      (Sender_Domain : Domain_ID_Type; Sender : Module_ID_Type;
       Request_ID    : Request_ID_Type;

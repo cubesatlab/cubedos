@@ -22,6 +22,16 @@ package body Pong.Messages is
    -- Message Handling
    -------------------
 
+   procedure Handle_Init (Message : in Message_Record) with
+     Pre => Pong.API.Is_Init (Message)
+   is
+      --  use type Ada.Real_Time.Time;
+   begin
+      Start_Time := Ada.Real_Time.Clock;
+   end Handle_Init;
+
+
+
    procedure Handle_Ponged (Message : in Message_Record) with
       Pre => Pong.API.Is_Ponged (Message)
    is
@@ -72,7 +82,10 @@ package body Pong.Messages is
    begin
       if Pong.API.Is_Ponged (Message) then
          Handle_Ponged (Message);
-      else
+      elsif Pong.API.Is_Init(Message) then
+            Handle_Init(Message);
+         else
+
 -- An unknown message type has been received. What should be done about that?
          null;
       end if;

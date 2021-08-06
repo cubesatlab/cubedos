@@ -24,8 +24,13 @@ package body Ping.Messages is
 
    begin
       Start_Time := Ada.Real_Time.Clock;
-      -- send an empty message to pong to begin the ball rolling. This message requests a 
+      -- send an empty message to pong to begin the ball rolling. This message requests a
       -- return
+      Outgoing_Message :=
+        Pong.API.Init_Encode
+          (Sender_Domain => Domain_ID, Sender => ID,
+           Priority      => System.Default_Priority, Request_ID => R_ID);
+      Message_Manager.Route_Message (Outgoing_Message);
       Outgoing_Message :=
         Pong.API.Ponged_Encode
           (Sender_Domain => Domain_ID, Sender => ID,

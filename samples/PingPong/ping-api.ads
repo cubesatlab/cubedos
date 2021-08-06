@@ -17,6 +17,7 @@ package Ping.API is
    type Message_Type is
      (Ball);
 
+
    function Pinged_Encode
      (Sender_Domain : Domain_ID_Type;
       Sender   : Module_ID_Type;
