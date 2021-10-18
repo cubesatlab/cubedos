@@ -257,6 +257,30 @@ maximally sized messages.
 \pet{Do we want some kind of ``garbage collection'' of open file handles? Maybe have handles
   automatically closed if they are inactive too long?}
 
+\subsection{Command Interpreter Service}
+\label{sec:command-interpreter-service}
+
+The command interpreter service shall be able to run command specific missions at a set time,
+going through the time service, so all limitations of the time service also apply here. this
+service is meant to be able to run high level mission commands, rather than individual CubedOs
+messages.
+
+
+\begin{itemize}
+\item \textbf{Interpreter.Commands}. each interpreter Command shall be a CubedOS message
+\item \textbf{Interpreter.Scheduler}. the interpreter shall be able to schedule commands to be
+	run in future. can be specified to run in future as far as Time Service allows. these
+time intervals can be specified in absolute or relative times, and can be specified relative to
+the time of deploy or relative to the time of the last command sent. 
+\item \textbf{Interpreter.Time}. The interpreter commands shall be run at the specified time
+	based on the time service, with the latency of the time service, as well as the latency
+	of calling the cubedOS messages in the command
+\item \textbf{Interpreter.CommandBuilder}. The interpreter shall come with a seperate program
+used to build these commands, so they are not required to be built by hand, and instead can be
+specified more accurately, as it will give less room for error.
+
+\end{itemize}
+
 \section{Low Level Abstraction Layer}
 \label{sec:llal}
 
