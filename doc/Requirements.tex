@@ -257,29 +257,37 @@ maximally sized messages.
 \pet{Do we want some kind of ``garbage collection'' of open file handles? Maybe have handles
   automatically closed if they are inactive too long?}
 
-\subsection{Command Interpreter Service}
-\label{sec:command-interpreter-service}
+\subsection{Interpreter Service}
+\label{sec:interpreter-service}
 
-The command interpreter service shall be able to run command specific missions at a set time,
-going through the time service, so all limitations of the time service also apply here. this
-service is meant to be able to run high level mission commands, rather than individual CubedOs
-messages.
-
+The Interpreter module shall be able to run mission specific commands at a set time, expressed
+either as an absolute time or as a time interval relative to the previously issued command. It
+shall make use of the Time Server, so all limitations of that service also apply here. The
+Interpreter is meant to issue raw CubedOS messages to other modules. It has no inherent command
+language of its own at this time. However, the addition of ``meta commands'' that support
+control flow or subroutines might be an appropriate avenue for future work.
 
 \begin{itemize}
-\item \textbf{Interpreter.Commands}. each interpreter Command shall be a CubedOS message
-\item \textbf{Interpreter.Scheduler}. the interpreter shall be able to schedule commands to be
-	run in future. can be specified to run in future as far as Time Service allows. these
-time intervals can be specified in absolute or relative times, and can be specified relative to
-the time of deploy or relative to the time of the last command sent. 
-\item \textbf{Interpreter.Time}. The interpreter commands shall be run at the specified time
-	based on the time service, with the latency of the time service, as well as the latency
-	of calling the cubedOS messages in the command
-\item \textbf{Interpreter.CommandBuilder}. The interpreter shall come with a seperate program
-used to build these commands, so they are not required to be built by hand, and instead can be
-specified more accurately, as it will give less room for error.
-
+\item \textbf{Interpreter.Commands}. The commands executed by the Interpreter shall be CubedOS
+  messages consisting of a target address triple (Domain ID, Module ID, Message ID) and message
+  arguments already encoded into an octet stream.
+\item \textbf{Interpreter.Ignore}. The Interpreter shall ignore all reply messages sent to it in
+  response to the commands it is processing. The only incoming messages the Interpreter will
+  process shall be those specifically directed to control its functionality (i.e., to provide it
+  with the command sequence to later interpret).
+\item \textbf{Interpreter.Scheduler}. Each command given to the Interpreter shall have an
+  associated time stamp, either an absolute time, a time relative to the previous command, or a
+  time relatively to \newterm{deployment time}\footnote{A time roughly when the system is deploy
+    after launch.}. The Interpreter shall issue commands at their designated time. \pet{What
+    should happen if the Interpreter encounters a command that must be issued in the past?
+    Should it ignore the command or issue it ``immediately?''}
+\item \textbf{Interpreter.ScriptBuilder}. A separate tool shall be provided that can be used to
+  prepare the input for the Interpreter. It as assumed that hand preparation of that input will
+  be excessively difficult and error prone.
 \end{itemize}
+
+The ScriptBuilder tool has its own requirements, design, and implementation, and is decribed
+elsewhere.
 
 \section{Low Level Abstraction Layer}
 \label{sec:llal}

@@ -27,7 +27,8 @@ require the lower numbered core modules.
 5. Event Server (NOT IMPLEMENTED. Like CFS?)
 6. File Server (non-volatile file storage)
 7. Table Server (NOT IMPLEMENTED. Like CFS?)
-
+8. Interpreter (issues prearranged CubedOS messages to other modules)
+   -- Is the Interpreter basically the same as the Table Server or Event Server? Could it be?
 
 Application-Specific Modules
 ----------------------------
