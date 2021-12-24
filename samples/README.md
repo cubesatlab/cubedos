@@ -2,6 +2,9 @@
 CubedOS Samples
 ===============
 
++ `BBB`. A sample application that runs on the BeagleBone Black. This sample demonstrates that
+  CubedOS applications will run on that platform.
+  
 + `LineRider`: A sample application using the STMF4-discovery platform to demonstrate some of
   CubedOS's abilities. Specifically the program controls a simple robot that uses optical
   sensors to follow a black line drawn on a light, concrete floor. This is an adaptation of a
@@ -19,3 +22,4 @@ CubedOS Samples
 + `STM32F4`: This folder contains a demonstration of CubedOS running on the STM32F4-discovery
   board.
 
++ `Tests`. I'm not sure what this is.
