@@ -20,7 +20,10 @@ package body Sample_Module.API is
       -- Create a skeletal message based on the given sender and priority. This function knows
       -- what module ID will receive the message and knows what message ID is approriate (there
       -- are different functions for different messages) so it can fill in those values on its
-      -- own.
+      -- own.          
+      -- 
+      -- In effect this creates the "header" of the message. The "body" is the octet array      
+      -- contained inside the message holding the message-specific parameters.
       --
       Message : Message_Record :=
         Make_Empty_Message
@@ -77,7 +80,7 @@ package body Sample_Module.API is
       Position : Data_Index_Type;
       Last : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value : Positive; -- Commonly, this would be an out parameter.
+      Value : Positive; -- Normally, this would be an out parameter.
    begin
       -- Set a starting position.
       Position := 0;

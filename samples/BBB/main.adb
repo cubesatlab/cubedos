@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : main.adb
--- SUBJECT: Main program of the Ping/Pong CubedOS demonstration program.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- SUBJECT: Main program of the echo client/server CubedOS demonstration program.
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 with Ada.Real_Time;
@@ -9,11 +9,11 @@ with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
 
-with Ping.Messages;
-with Pong.Messages;
+with Echo_Client.Messages;
+with Echo_Server.Messages;
 
-pragma Unreferenced(Ping.Messages);
-pragma Unreferenced(Pong.Messages);
+pragma Unreferenced(Echo_Client.Messages);
+pragma Unreferenced(Echo_Server.Messages);
 
 procedure Main is
 

@@ -88,7 +88,7 @@ package Sample_Module.API is
      (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(A_Reply));
    
    
-   -- The decoding procedures take a message of the appropriate type and then decode its
+   -- The decoding procedures take a message of the appropriate type and then decodes its
    -- payload, writing the results into various out parameters (not shown below). The
    -- Decode_Status parameter indicates only if the message is malformed or not. It uses a
    -- Message_Status_Type defined in the message manager package. Errors in the handling of the
@@ -98,7 +98,8 @@ package Sample_Module.API is
    -- and not the details of the message format.
    --
    procedure A_Request_Decode
-     (Message : in  Message_Record;
+     (Message : in  Message_Record;     
+      -- This is were appropriate out parameters are defined for the decided items.
       Decode_Status : out Message_Status_Type)
    with
      Global => null,
@@ -106,7 +107,8 @@ package Sample_Module.API is
      Depends => (Decode_Status => Message);
 
    procedure A_Reply_Decode
-     (Message : in  Message_Record;
+     (Message : in  Message_Record;     
+      -- This is where appropriate out parameters are defined for the decoded items.
       Decode_Status : out Message_Status_Type)
    with
      Global => null,

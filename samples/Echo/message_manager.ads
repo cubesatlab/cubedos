@@ -12,4 +12,4 @@ package Message_Manager is
     (Domain_Number =>  1,
      Module_Count  =>  6,
      Mailbox_Size  =>  8,
-     Maximum_Message_Size => 128);
+     Maximum_Message_Size => 1024);

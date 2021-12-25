@@ -2,8 +2,5 @@
 BBB Demo
 ========
 
-This folder contains a CubedOS demonstration program consisting of two modules that trade
-messages back and forth (mutual echo server/client modules). This is effectively the "Hello,
-World" program of message passing systems.
-
-This program is intended to be compiled for the BeagleBone Black.
+This folder contains a CubedOS demonstration program for the BeagleBone Black. It is a copy of
+the echo client/server demo, except using the BBB as the target system.
