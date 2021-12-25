@@ -6,6 +6,31 @@ In this chapter we describe the high level architecture of CubedOS. This include
 architecture of the system and the architecture of the development environment.
 
 \input{Architecture-Overview}
-\input{Architecture-Priorities}
+
+% The priority architecture described below has been implemented (although with limited testing)
+% in the 'priorities' branch of the GitHub repository. Unfortunately, the prohibition on dynamic
+% priorities is enforced by Ravenscar and not SPARK. SPARK requires Ravenscar, and Ravenscar
+% does not allow dynamic priorities; any attempt to use them fails to compile. Even upgrading to
+% the Jorvik profile, which is also supported by SPARK, does not work around this issue. In
+% other words, it's not a matter of merely justifying a SPARK diagnostic as was originally
+% assumed. The program won't compile if the priority architecture below is in place.
+%
+% One potential workaround would be to develop with SPARK and then deploy the program on a full
+% runtime system (not Ravenscar) that allows dynamic priorities. This would require switching
+% the generic_message_manager package to the one using priorities before compiling the deployed
+% system. This isn't a very satisfying approach and may be dangerous. Furthermore, it does
+% impose a requirement on the target platform of supporting a full Ada runtime system.
+%
+% The priorities branch has not been merged into the master branch because the priority system
+% either can't be used at all or can only be used under the controversial approach mentioned
+% above. However, this matter can be revisited in the future if desired, of course. Note that
+% the priorities branch also contains a sample based on the Mars Pathfinder mission which is
+% intended to illustrate priority inversion and how the priority architecture fixes the problem.
+% If priorities ever become part of the main line of CubedOS development, that sample program
+% should be incorporated as well.
+%
+% \input{Architecture-Priorities}
+
+
 \input{Architecture-Encoding}
 \input{Architecture-Code}

@@ -52,8 +52,8 @@ This structure also allows a high priority module to downgrade the priority of o
 when servicing a low priority client. The idea is that the high priority module might want to
 make requests to other modules using the client's priority (which is available to it in the
 original request message sent by the client). It is up the application developer to do this if
-it is desired. The default behavior is for all sent messages to be given the priority of the
-sender.
+it is desired. The default behavior is for all sent messages to be given the (dynamic) priority
+of the sender.
 
 \subsection{Static Analysis}
 
