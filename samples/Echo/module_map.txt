@@ -34,5 +34,5 @@ Application-Specific Modules
 
 Event Server, File Server, and Table Server are not used. Their IDs can be reused.
 
-5. Ping
-6. Pong
+5. Echo_Client
+6. Echo_Server

@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
--- FILE   : pong-messages.adb
+-- FILE   : echo_server-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --------------------------------------------------------------------------------
 with Ada.Text_IO; use Ada.Text_IO;
-with Ping.API;
-with Ping;
-with Pong.API;
+with Echo_Client.API;
+with Echo_Client;
+with Echo_Server.API;
 with Ada.Integer_Text_IO;
 with Ada.Real_Time;
 
-package body Pong.Messages is
+package body Echo_Server.Messages is
    use Message_Manager;
    Start_Time        : Ada.Real_Time.Time;
    Relative_Time     : Ada.Real_Time.Time_Span;
@@ -23,7 +23,7 @@ package body Pong.Messages is
    -------------------
 
    procedure Handle_Init (Message : in Message_Record) with
-     Pre => Pong.API.Is_Init (Message)
+     Pre => Echo_Server.API.Is_Init (Message)
    is
       --  use type Ada.Real_Time.Time;
    begin
@@ -33,16 +33,16 @@ package body Pong.Messages is
 
 
    procedure Handle_Ponged (Message : in Message_Record) with
-      Pre => Pong.API.Is_Ponged (Message)
+      Pre => Echo_Server.API.Is_Ponged (Message)
    is
       use type Ada.Real_Time.Time;
-      package Duration_IO is new Fixed_IO (Duration);
+      package Duration_IO is new Fixed_IO(Duration);
       use Duration_IO;
       Outgoing_Message : Message_Record;
       Message_Val      : Boolean;
    begin
       -- Begin by decoding the message to see if there is any information in it
-      Pong.API.Ponged_Decode (Message, Message_Val);
+      Echo_Server.API.Ponged_Decode (Message, Message_Val);
       -- find time spend between sending and recieving message
       Relative_Time     := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration (Relative_Time);
@@ -64,7 +64,7 @@ package body Pong.Messages is
       -- Send a Grabbed message to Ping if ping asked for one
       if Message_Val then
          Outgoing_Message :=
-           Ping.API.Pinged_Encode
+           Echo_Client.API.Pinged_Encode
              (Sender_Domain => Domain_ID, Sender => ID, Request_ID => R_ID,
               Priority      => System.Default_Priority, Send_Return => True);
          Message_Manager.Route_Message (Outgoing_Message);
@@ -80,9 +80,9 @@ package body Pong.Messages is
    -- This procedure processes exactly one message.
    procedure Process (Message : in Message_Record) is
    begin
-      if Pong.API.Is_Ponged (Message) then
+      if Echo_Server.API.Is_Ponged (Message) then
          Handle_Ponged (Message);
-      elsif Pong.API.Is_Init(Message) then
+      elsif Echo_Server.API.Is_Init(Message) then
             Handle_Init(Message);
          else
 
@@ -106,4 +106,4 @@ package body Pong.Messages is
       end loop;
    end Message_Loop;
 
-end Pong.Messages;
+end Echo_Server.Messages;

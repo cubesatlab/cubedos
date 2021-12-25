@@ -1,13 +1,13 @@
 --------------------------------------------------------------------------------
--- FILE   : pong-api.ads
+-- FILE   : echo_server-api.ads
 -- SUBJECT: Specification of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 with Message_Manager; use Message_Manager;
 with System;
 
-package Pong.API is
+package Echo_Server.API is
 
    type Status_Type is (Success, Failure);
 
@@ -35,4 +35,4 @@ package Pong.API is
    procedure Ponged_Decode
      (Message : Message_Manager.Message_Record; Send_Return : out Boolean);
 
-end Pong.API;
+end Echo_Server.API;

@@ -1,16 +1,17 @@
--- FILE   : ping-messages.adb
+--------------------------------------------------------------------------------
+-- FILE   : echo_client-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 with Ada.Text_IO; use Ada.Text_IO;
-with Ping.API;
-with Pong.API;
-with Pong;
+with Echo_Client.API;
+with Echo_Server.API;
+with Echo_Server;
 with Ada.Integer_Text_IO;
 with Ada.Real_Time;
 
-package body Ping.Messages is
+package body Echo_Client.Messages is
    use Message_Manager;
    Start_Time        : Ada.Real_Time.Time;
    Relative_Time     : Ada.Real_Time.Time_Span;
@@ -27,12 +28,12 @@ package body Ping.Messages is
       -- send an empty message to pong to begin the ball rolling. This message requests a
       -- return
       Outgoing_Message :=
-        Pong.API.Init_Encode
+        Echo_Server.API.Init_Encode
           (Sender_Domain => Domain_ID, Sender => ID,
            Priority      => System.Default_Priority, Request_ID => R_ID);
       Message_Manager.Route_Message (Outgoing_Message);
       Outgoing_Message :=
-        Pong.API.Ponged_Encode
+        Echo_Server.API.Ponged_Encode
           (Sender_Domain => Domain_ID, Sender => ID,
            Priority      => System.Default_Priority, Request_ID => R_ID,
            Send_Return   => True);
@@ -45,7 +46,7 @@ package body Ping.Messages is
    -------------------
 
    procedure Handle_Pinged (Message : in Message_Record) with
-      Pre => Ping.API.Is_Pinged (Message)
+      Pre => Echo_Client.API.Is_Pinged (Message)
    is
       use type Ada.Real_Time.Time;
       package Duration_IO is new Fixed_IO (Duration);
@@ -55,7 +56,7 @@ package body Ping.Messages is
       Message_Val      : Boolean;
    begin
       -- Begin by decoding the message to see if there is any information in it
-      Ping.API.Pinged_Decode (Message, Message_Val);
+      Echo_Client.API.Pinged_Decode (Message, Message_Val);
       -- Do math on time spent on message (possibly faster by saving till end?)
       Relative_Time     := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration (Relative_Time);
@@ -79,13 +80,13 @@ package body Ping.Messages is
       -- if max pings has not been reached, tell pong we want a response
       if i < MAX then
          Outgoing_Message :=
-           Pong.API.Ponged_Encode
+           Echo_Server.API.Ponged_Encode
              (Sender_Domain => Domain_ID, Sender => ID, Request_ID => R_ID,
               Priority      => System.Default_Priority, Send_Return => True);
       else
          -- otherwise tell pong we don't want a response, thus we react to no more messages.
          Outgoing_Message :=
-           Pong.API.Ponged_Encode
+           Echo_Server.API.Ponged_Encode
              (Sender_Domain => Domain_ID, Sender => ID, Request_ID => R_ID,
               Priority      => System.Default_Priority, Send_Return => False);
          Put ("Ending Comms");
@@ -103,7 +104,7 @@ package body Ping.Messages is
    -- This procedure processes exactly one message.
    procedure Process (Message : in Message_Record) is
    begin
-      if Ping.API.Is_Pinged (Message) then
+      if Echo_Client.API.Is_Pinged (Message) then
          Handle_Pinged (Message);
       else
 -- An unknown message type has been received. What should be done about that?
@@ -127,4 +128,4 @@ package body Ping.Messages is
       end loop;
    end Message_Loop;
 
-end Ping.Messages;
+end Echo_Client.Messages;

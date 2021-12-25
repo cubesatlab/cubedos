@@ -1,13 +1,13 @@
 --------------------------------------------------------------------------------
--- FILE   : pong-api.adb
+-- FILE   : echo_server-api.adb
 -- SUBJECT: Body of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 with CubedOS.Lib.XDR;
-use CubedOS.Lib;
+use  CubedOS.Lib;
 
-package body Pong.API is
+package body Echo_Server.API is
    use type XDR.XDR_Unsigned;
 
    function Init_Encode
@@ -60,4 +60,4 @@ package body Pong.API is
 
    end Ponged_Decode;
 
-end Pong.API;
+end Echo_Server.API;

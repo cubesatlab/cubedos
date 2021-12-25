@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : ping-api.ads
+-- FILE   : echo_client-api.ads
 -- SUBJECT: Specification of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -10,7 +10,7 @@
 with Message_Manager;  use Message_Manager;
 with System;
 
-package Ping.API is
+package Echo_Client.API is
 
    type Status_Type is (Success, Failure);
 
@@ -33,4 +33,4 @@ package Ping.API is
      (Message : Message_Manager.Message_Record;
       Send_Return : out Boolean);
 
-end Ping.API;
+end Echo_Client.API;
