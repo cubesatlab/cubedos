@@ -38,8 +38,8 @@ package body CubedOS.Log_Server.API is
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Log_Text),
            Priority   => Priority);
-      Position : XDR_Index_Type;
-      Last : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last : Data_Index_Type;
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Text'Length), Message.Payload, Position, Last);
@@ -56,8 +56,8 @@ package body CubedOS.Log_Server.API is
       Size : out Log_Message_Size_Type;
       Decode_Status : out Message_Status_Type)
    is
-      Position : XDR_Index_Type;
-      Last     : XDR_Index_Type;
+      Position : Data_Index_Type;
+      Last     : Data_Index_Type;
       Raw_Size : XDR.XDR_Unsigned;
       Raw_Text : String(Log_Message_Index_Type) := (others => ' ');
    begin
