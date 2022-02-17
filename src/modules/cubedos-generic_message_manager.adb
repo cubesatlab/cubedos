@@ -5,6 +5,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with CubedOS.Lib.Network;
 
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
@@ -162,6 +163,10 @@ is
       Message_Storage(Message.Receiver).Unchecked_Send(Message);
    end Route_Message;
 
+   procedure Initialize_Network_Interface is
+   begin
+      CubedOS.Lib.Network.Server_Loop_Task;
+   end Initialize_Network_Interface;
 
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record) is
    begin

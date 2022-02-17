@@ -113,6 +113,8 @@ is
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes);
 
+   procedure Initialize_Network_Interface with Global => (In_Out => Mailboxes);
+
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
    -- returns at once. If the message could not be delivered it is lost with no indication.
    procedure Route_Message(Message : in Message_Record)
