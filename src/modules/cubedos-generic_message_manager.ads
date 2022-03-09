@@ -23,7 +23,6 @@ package CubedOS.Generic_Message_Manager
     Abstract_State => ((Mailboxes with External), (Request_ID_Generator with External)),
     Initializes => (Mailboxes, Request_ID_Generator)
 is
-
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
    Maximum_Domain_Count : constant := 256;
@@ -112,8 +111,6 @@ is
    -- of Mailbox_Full indicates that delivery did not occur.
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes);
-
-   procedure Initialize_Network_Interface with Global => (In_Out => Mailboxes);
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
    -- returns at once. If the message could not be delivered it is lost with no indication.
