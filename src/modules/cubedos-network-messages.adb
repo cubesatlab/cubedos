@@ -35,28 +35,16 @@ package body CubedOS.Network.Messages is
          if Character'Val(Data(I)) = '!' then
             case Property_Position is
                when 1 => 
-                 Ada.Text_IO.Put("Sender Domain: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Sender_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
                when 2 =>
-                 Ada.Text_IO.Put("Sender Module: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Sender_Module := Message_Manager.Module_ID_Type(Property_Digits);
                when 3 =>
-                 Ada.Text_IO.Put("Receiver Domain: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Receiver_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
                when 4 =>
-                 Ada.Text_IO.Put("Receiver Module: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Receiver_Module := Message_Manager.Module_ID_Type(Property_Digits);
                when 5 =>
-                 Ada.Text_IO.Put("Request ID: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Request_ID := Message_Manager.Request_ID_Type(Property_Digits);
                when 6 =>
-                 Ada.Text_IO.Put("Message ID: ");
-                 Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
                  Message_ID := Message_Manager.Message_ID_Type(Property_Digits);
                when others => null;
              end case;
@@ -71,9 +59,7 @@ package body CubedOS.Network.Messages is
             POW := 10;
          end if;
       end loop;
-      
-      Ada.Text_IO.Put_Line("");
-    
+   
       return Message_Manager.Make_Empty_Message
       (Sender_Domain   => Sender_Domain,
        Receiver_Domain => Receiver_Domain,
@@ -139,72 +125,6 @@ package body CubedOS.Network.Messages is
        -- Transmit a message to another socket.
       Send_Socket (Socket, Buffer, Last, Address);        
    end Send_Network_Message;
-   
-   function Parse_Message_Image(Message_String : String) return Message_Manager.Message_Record
-    is
-      Property_Digits : Integer := 0;
-      Current_Digit : Integer := 0;
-      Property_Position : Integer := 1;
-      POW : Integer := 10;
-      Sender_Domain : Message_Manager.Domain_ID_Type;
-      Sender_Module : Message_Manager.Module_ID_Type;
-      Receiver_Domain : Message_Manager.Domain_ID_Type;
-      Receiver_Module :Message_Manager. Module_ID_Type;
-      Request_ID : Message_Manager.Request_ID_Type;
-      Message_ID : Message_Manager.Message_ID_Type;
-    begin
-      for Index in Message_String'Range loop
-        if Message_String(Index) = '!' then
-          case Property_Position is
-            when 1 => 
-              Ada.Text_IO.Put("Sender Domain: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Sender_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
-            when 2 =>
-              Ada.Text_IO.Put("Sender Module: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Sender_Module := Message_Manager.Module_ID_Type(Property_Digits);
-            when 3 =>
-              Ada.Text_IO.Put("Receiver Domain: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Receiver_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
-            when 4 =>
-              Ada.Text_IO.Put("Receiver Module: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Receiver_Module := Message_Manager.Module_ID_Type(Property_Digits);
-            when 5 =>
-              Ada.Text_IO.Put("Request ID: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Request_ID := Message_Manager.Request_ID_Type(Property_Digits);
-            when 6 =>
-              Ada.Text_IO.Put("Message ID: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Message_ID := Message_Manager.Message_ID_Type(Property_Digits);
-            when others => null;
-          end case;
-          Property_Position := Property_Position + 1;
-          Property_Digits := 0;
-        else
-          Current_Digit := Integer'Value("" & Message_String(Index));
-          while Current_Digit >= POW loop
-             POW := POW * 10;
-          end loop;
-          Property_Digits := Property_Digits * POW + Current_Digit;
-          POW := 10;
-        end if;
-        -- Property_Digits := Integer'Value(Message_String(Index)'Image);
-        -- Ada.Text_IO.Put("Digits: " & Integer'Image(Property_Digits));
-        -- Property_Digits := 0;
-      end loop;
-      
-      return Message_Manager.Make_Empty_Message
-      (Sender_Domain   => Sender_Domain,
-       Receiver_Domain => Receiver_Domain,
-       Sender          => Sender_Module,
-       Receiver        => Receiver_Module,
-       Request_ID      => Request_ID,
-       Message_ID      => Message_ID);
-    end Parse_Message_Image;
    
     -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Manager.Message_Record) is
