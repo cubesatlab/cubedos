@@ -27,6 +27,7 @@ package body Networking_Client.Messages is
    procedure Initialize is
    begin
       -- Send the first message!
+      Ada.Text_IO.Put_Line("From Client Message");
       Send_Time := Ada.Real_Time.Clock;
       Outgoing_Message := Networking_Server.API.Ping_Request_Encode
         (Sender_Domain => Domain_ID,

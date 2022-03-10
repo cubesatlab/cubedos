@@ -8,10 +8,11 @@ with Ada.Real_Time;
 with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
-
 with Networking_Client.Messages;
 with Networking_Server.Messages;
+with CubedOS.Network.Messages;
 
+pragma Unreferenced(CubedOS.Network.Messages);
 pragma Unreferenced(Networking_Client.Messages);
 pragma Unreferenced(Networking_Server.Messages);
 

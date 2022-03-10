@@ -5,15 +5,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-with CubedOS.Lib.Network;
-with Ada.Strings.Fixed; use Ada.Strings.Fixed;
-with Ada.Numerics.Elementary_Functions;
-with Ada.Strings;       use Ada.Strings;
-with Ada.Streams;
-with Ada.Strings;
-with Ada.Text_IO.Text_Streams;
 with Ada.Text_IO;
-use Ada.Text_IO;
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
 is
@@ -163,94 +155,13 @@ is
       Message_Storage(Message.Receiver).Send(Message, Status);
    end Route_Message;
 
-   function Create_Message_Image(Message : in Message_Record) return String
-   is
-      -- Convert Item to String (with no trailing space)
-      Sender_Domain_String : String := Trim(Domain_ID_Type'Image(Message.Sender_Domain), Left);
-      Sender_Module_String : String := Trim(Module_ID_Type'Image(Message.Sender), Left);
-      Receiver_Domain_String : String := Trim(Module_ID_Type'Image(Message.Receiver_Domain), Left);         
-      Receiver_Module_String : String := Trim(Module_ID_Type'Image(Message.Receiver), Left);
-      Request_ID_String : String := Trim(Request_ID_Type'Image(Message.Request_ID), Left);
-      Message_ID_String : String := Trim(Message_ID_Type'Image(Message.Message_ID), Left);
-   begin 
-      Ada.Text_IO.Put_Line("Outgoing: " & Sender_Domain_String & "!" & Sender_Module_String & "!" & Receiver_Domain_String & "!" & Receiver_Module_String & "!" & Request_ID_String & "!" & Message_ID_String & "!");
-      return Sender_Domain_String & "!" & Sender_Module_String & "!" & Receiver_Domain_String & "!" & Receiver_Module_String & "!" & Request_ID_String & "!" & Message_ID_String & "!";
-   end Create_Message_Image;
-    
-   function Parse_Message_Image(Message_String : String) return Message_Record
-    is
-      Property_Digits : Integer := 0;
-      Current_Digit : Integer := 0;
-      Property_Position : Integer := 1;
-      POW : Integer := 10;
-      Sender_Domain : Domain_ID_Type;
-      Sender_Module : Module_ID_Type;
-      Receiver_Domain : Domain_ID_Type;
-      Receiver_Module : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Message_ID : Message_ID_Type;
-    begin
-      for Index in Message_String'Range loop
-        if Message_String(Index) = '!' then
-          case Property_Position is
-            when 1 => 
-              Ada.Text_IO.Put("Sender Domain: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Sender_Domain := Domain_ID_Type(Property_Digits);
-            when 2 =>
-              Ada.Text_IO.Put("Sender Module: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Sender_Module := Module_ID_Type(Property_Digits);
-            when 3 =>
-              Ada.Text_IO.Put("Receiver Domain: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Receiver_Domain := Domain_ID_Type(Property_Digits);
-            when 4 =>
-              Ada.Text_IO.Put("Receiver Module: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Receiver_Module := Module_ID_Type(Property_Digits);
-            when 5 =>
-              Ada.Text_IO.Put("Request ID: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Request_ID := Request_ID_Type(Property_Digits);
-            when 6 =>
-              Ada.Text_IO.Put("Message ID: ");
-              Ada.Text_IO.Put_Line(Integer'Image(Property_Digits));
-              Message_ID := Message_ID_Type(Property_Digits);
-            when others => null;
-          end case;
-          Property_Position := Property_Position + 1;
-          Property_Digits := 0;
-        else
-          Current_Digit := Integer'Value("" & Message_String(Index));
-          while Current_Digit >= POW loop
-             POW := POW * 10;
-          end loop;
-          Property_Digits := Property_Digits * POW + Current_Digit;
-          POW := 10;
-        end if;
-        -- Property_Digits := Integer'Value(Message_String(Index)'Image);
-        -- Ada.Text_IO.Put("Digits: " & Integer'Image(Property_Digits));
-        -- Property_Digits := 0;
-      end loop;
-      
-      return Make_Empty_Message
-      (Sender_Domain   => Sender_Domain,
-       Receiver_Domain => Receiver_Domain,
-       Sender          => Sender_Module,
-       Receiver        => Receiver_Module,
-       Request_ID      => Request_ID,
-       Message_ID      => Message_ID);
-    end Parse_Message_Image;
 
    procedure Route_Message(Message : in Message_Record) is
-    X : Integer := 10;
-    Parsed_Message : Message_Record;
    begin
-      -- For now, let's ignore the domain and just use the receiver Module_ID only.
       if Message.Receiver_Domain /= Domain_ID then
-        -- Parsed_Message := Parse_Message_Image(Create_Message_Image(Message));
-        CubedOS.Lib.Network.Send_Network_Message(Create_Message_Image(Message));
+        Ada.Text_IO.Put_Line("Routing Message");
+        
+        Message_Storage(8).Unchecked_Send(Message);
       else 
         Message_Storage(Message.Receiver).Unchecked_Send(Message);
       end if;
