@@ -6,11 +6,11 @@
 --------------------------------------------------------------------------------
 with System;
 
-package Networking_Client.Messages is
+package DomainA_Client.Messages is
 
    task Message_Loop is
-      pragma Storage_Size(4 * 1024);
-      pragma Priority(System.Default_Priority);
+	  pragma Storage_Size(4 * 1024);
+	  pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-end Networking_Client.Messages;
+end DomainA_Client.Messages;

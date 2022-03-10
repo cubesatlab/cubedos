@@ -7,6 +7,6 @@
 
 with Message_Manager;
 
-package Networking_Server is
+package DomainB_Server is
    ID : constant Message_Manager.Module_ID_Type := 6;
-end Networking_Server;
+end DomainB_Server;

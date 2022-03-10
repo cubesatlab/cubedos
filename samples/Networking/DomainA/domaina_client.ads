@@ -6,6 +6,6 @@
 --------------------------------------------------------------------------------
 with Message_Manager;
 
-package Networking_Client is
+package DomainA_Client is
    ID : constant Message_Manager.Module_ID_Type := 5;
-end Networking_Client;
+end DomainA_Client;

@@ -6,11 +6,11 @@
 --------------------------------------------------------------------------------
 with System;
 
-package Networking_Server.Messages is
+package DomainB_Server.Messages is
 
    task Message_Loop is
-      pragma Storage_Size(4 * 1024);
-      pragma Priority(System.Default_Priority);
+	  pragma Storage_Size(4 * 1024);
+	  pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-end Networking_Server.Messages;
+end DomainB_Server.Messages;
