@@ -15,11 +15,13 @@ package body CubedOS.Lib.Network is
    function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Integer is
       Char : Character;
    begin
-      Ada.Text_IO.Put_Line ("Incoming Message Data");
+      Ada.Text_IO.Put("Incoming: ");
         
       for I in 1..Last loop
-         Ada.Text_IO.Put_Line("" & Character'Val(Data(I)));
+         Ada.Text_IO.Put("" & Character'Val(Data(I)));
       end loop;
+    
+      Ada.Text_IO.Put_Line("");
     
       return 1;
    end Read_Stream_Message;
@@ -42,9 +44,10 @@ package body CubedOS.Lib.Network is
         
       loop
          begin
+            -- Receive message from Socket. If Socket is not connection-oriented, the source address From of the message is filled in. Last is the index value such that Item (Last) is the last character assigned.
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
             Temp := Read_Stream_Message(Data, Last);
-            Ada.Text_IO.Put_Line ("last : " & Last'Img);
+            -- Ada.Text_IO.Put_Line ("last : " & Last'Img);
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
          exception
             when E : others =>
@@ -67,11 +70,11 @@ package body CubedOS.Lib.Network is
       Address.Port := 50001;
       Address.Addr := Inet_Addr ("127.0.0.1");
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
-      -- Copy Descr to Buffer
+      -- I is Ada.Streams.Stream_Element_Offset
       for I in Buffer'Range loop
-         Buffer (I) := Ada.Streams.Stream_Element (Character'Pos (Message_Description (Integer (I))));
+         Buffer (I) := Ada.Streams.Stream_Element (Character'Pos (Message_Description (Integer(I))));
       end loop; 
-        
+       -- Transmit a message to another socket.
       Send_Socket (Socket, Buffer, Last, Address);        
    end Send_Network_Message;
     
