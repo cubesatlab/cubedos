@@ -105,6 +105,12 @@ package body CubedOS.Network.Messages is
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
             Message := Read_Stream_Message(Data, Last);
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
+            if Message.Sender_Domain = Message_Manager.Domain_ID then
+               Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
+            else
+               Ada.Text_IO.Put_Line ("This message was sent from a different domain! Routing Message");
+               Message_Manager.Route_Message(Message);
+            end if;
          exception
             when E : others =>
                Ada.Text_IO.Put_Line
