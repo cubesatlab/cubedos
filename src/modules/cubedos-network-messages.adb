@@ -81,7 +81,11 @@ package body CubedOS.Network.Messages is
       Create_Socket (Server, Family_Inet, Socket_Datagram);
       Set_Socket_Option (Server, Socket_Level, (Reuse_Address, True));
       Address.Addr := Any_Inet_Addr;
-      Address.Port := 50_001;
+      if Message_Manager.Domain_ID = 1 then
+         Address.Port := 50000;
+      else
+         Address.Port := 50001;
+      end if;
       Ada.Text_IO.Put_Line ("My Addr: " & Image (Address.Addr));
       Bind_Socket (Server, Address);
         
@@ -115,7 +119,11 @@ package body CubedOS.Network.Messages is
       Buffer : Ada.Streams.Stream_Element_Array (1 .. Ada.Streams.Stream_Element_Offset (Message_Description'Length));
         
    begin
-      Address.Port := 50001;
+      if Message_Manager.Domain_ID = 1 then
+         Address.Port := 50001;
+      else
+         Address.Port := 50000;
+      end if;
       Address.Addr := Inet_Addr ("127.0.0.1");
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
       -- I is Ada.Streams.Stream_Element_Offset
