@@ -10,20 +10,22 @@ requirements are used to drive the architecture and design of the system. \pet{T
 \section{Core Requirements}
 \label{sec:core-requirements}
 
-At its heart CubedOS is a message passing microkernel. Conceptually each component of the system
-is stored in a \newterm{module} consisting of one or more Ada packages arranged in a package
-hierarchy. Each module has a \newterm{module root package} that is the parent of the module's
-package hierarchy. Modules in CubedOS are conceptually similar to processes in a conventional
-operating system or ``applications'' in CFS.
+At its heart CubedOS is a message passing microkernel. Conceptually, each component of the
+system is stored in a \newterm{module} consisting of one or more Ada packages arranged in a
+package hierarchy. Each module has a \newterm{module root package} that is the parent of the
+module's package hierarchy. Modules in CubedOS are conceptually similar to processes in a
+conventional operating system or ``applications'' in CFS.
 
-CubedOS uses modules for application code, high level, operating system-like components, and
+CubedOS uses modules for application code, high level operating system-like components, and
 device drivers. Applications can be constructed from multiple application level modules. The
 system does not distinguish between different types of modules (for example, between application
-modules and device drivers). There is no specific ``kernel mode'' of execution. The architecture
+specific modules and device drivers). There is no ``kernel mode'' of execution. The architecture
 we describe here is thus enforced primarily by convention. In theory, any structuring
 expressible using normal Ada visibility rules would be acceptable, but there are advantages to
 following the conventions of CubedOS, as we describe throughout this document. \pet{We should
-  consider building a tool that enforces the aspects of our convention that are most important.}
+  consider building a tool that enforces the aspects of our convention that are most important.
+  We should also consider writing a document that specifies all CubedOS conventions in a single,
+  easy to reference place.}
 
 For example it is possible, even if not normally desirable, for an application module to
 directly invoke functionality in a device driver. In contrast, conventional operating systems
@@ -37,9 +39,11 @@ CubedOS does distinguish between active modules and packages of shared library c
 distinguished from library code in that a module contains at least one task, whereas library
 packages are entirely passive. CubedOS conventions do permit library packages to be shared among
 multiple modules, but it is not permitted for any module to directly call subprograms or entries
-in another module. \pet{Ada has some pragmas in the distributed systems annex that we can
-  perhaps use here to provide compiler enforcement of this restriction.} The only way
-functionality in another module can be invoked is by sending that module a message.
+in another module. It is also not permitted for one module to communicate with another module
+via the internal state of a library package. \pet{Ada has some pragmas in the distributed
+  systems annex that we can perhaps use here to provide compiler enforcement of this
+  restriction.} The only way functionality in another module can be invoked is by sending that
+module a message.
 
 In each module one task selected by the programmer, called the module's \newterm{server task},
 is distinguished. The server task is the \emph{only} task in a module that is allowed to receive
@@ -48,7 +52,7 @@ task is the only task. The following requirements apply:
 
 \begin{itemize}
 \item \textbf{Core.SPARK}. The core system, including the core modules described in this
-  document, shall be written in \SPARK\ and proved free information flow errors and execution
+  document, shall be written in \SPARK\ and proved free of information flow errors and execution
   runtime errors.
 \item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
   document, shall be written to conform with the restrictions of the Ravenscar profile. \pet{We
@@ -61,11 +65,14 @@ task is the only task. The following requirements apply:
     these requirements?}
 \item \textbf{Core.UniqueID}. Each active module shall have a unique ID number that is either
   statically assigned by the application developer or dynamically assigned at system
-  initialization time by the Name Service. CubedOS core modules (described below) shall have
-  fixed, ``well known'' module ID numbers.
+  initialization time by the Name Service. \pet{The Name Service is controversial. We might not
+    want it and instead require that module ID numbers all be statically assigned.} CubedOS core
+  modules (described below) shall have fixed, ``well known'' module ID numbers.
 \item \textbf{Core.IDNumbers}. Module ID numbers shall be small integers beginning at $1$ and
   ranging up to the number of modules in the system. However, if a particular core module is not
-  used, it's ID number is skipped (not reassigned).
+  used, it's ID number is skipped (not reassigned). \pet{We probably don't really want to waste
+    module ID number space like this. Reassigning core module ID numbers for core modules that
+    are not used seems like a desirable optimization that we should allow developers.}
 \end{itemize}
 
 \section{Runtime Library}
@@ -79,16 +86,17 @@ libraries, the CubedOS runtime library is written in \SPARK. The following requi
 \item \textbf{Lib.SPARK}. The runtime library shall be written in \SPARK\ and proved free of
   information flow and execution runtime errors.
 \item \textbf{Lib.Tests}. Unit tests shall be provided for all library components with an
-  emphaisis on sections that may not yet be proving fully.
+  emphasis on sections that may not yet be fully proved.
 \item \textbf{Lib.TaskSafety}. All library components shall be task safe in the sense that they
-  can be called simultaneously from multiple tasks without error.
+  can be called simultaneously from multiple tasks without error. This is needed because library
+  packages are shared among the modules.
 \item \textbf{Lib.PackageDeployment}. Only the packages actually used by an application shall
   become part of the application's executable. This means the library can contain a rich
   collection of packages without burdening applications that don't require them.
 \end{itemize}
 
 The precise library components provided is not specified here but is intended to be an open
-ended set of components found useful in CubedOS applications. Example of such components
+ended set of components found useful in CubedOS applications. Examples of such components
 include, but are not limited to:
 
 \begin{itemize}
@@ -109,7 +117,9 @@ Notice, however, that some library components may wish to send messages to other
 components, such as the file server. In that case the library cannot directly receive the reply
 (only a module can receive from a mailbox), but instead must rely on the module using the
 library to forward replies into the library as appropriate. This unusual organization also
-distinguishes the CubedOS runtime library from most other libraries.
+distinguishes the CubedOS runtime library from most other libraries. \pet{Probably it would be
+  better for library components to never send messages. Maybe we should make that another aspect
+  of our CubedOS coding conventions.}
 
 \section{Core Modules}
 \label{sec:core-modules}
@@ -117,7 +127,8 @@ distinguishes the CubedOS runtime library from most other libraries.
 Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. They always
 exist and have fixed, well-known module ID numbers. Note that it is possible that some core
 modules will not be required by all applications. However, their module ID numbers remain
-reserved. In this section we describe these core modules.
+reserved. \pet{The motivation for using well-known ID numbers is to facilitate third party
+  module development.} In this section we describe these core modules.
 
 \subsection{Message Manager}
 \label{sec:message-manager}
@@ -139,7 +150,7 @@ communication between the other active modules in the system. The following requ
 \item \textbf{MessageManager.Unstructured}. Messages shall be unstructured octet arrays. This
   allows all modules to use a common message type. However, to simplify the task of creating and
   decoding messages, CubedOS shall provide a standard message encoding/decoding facility.
-  \footnote{This facility is implemented in the Merc tool}
+  \footnote{This facility is implemented in the Merc tool.}
 \item \textbf{MessageManager.Sizes}. It shall be possible for the application developer to tune
   the size of the mailboxes (number of pending messages) and the size of the messages
   themselves.
@@ -148,8 +159,9 @@ communication between the other active modules in the system. The following requ
 \item \textbf{MessageManager.PrioritySet}. It shall be possible for the sender of a message to
   set the priority of that message to reduce its priority on behalf of a low priority client.
 \item \textbf{MessageManager.FIFO}. Messages shall be received by a module in FIFO order by
-  priority.
-\item \textbf{MessageManager.PriorityInheritance}. When a high priority message is received the
+  priority. In other words, high priority messages shall be received first (in FIFO order),
+  followed by lower priority messages (also in FIFO order).
+\item \textbf{MessageManager.PriorityInheritance}. When a high priority message is received, the
   server task in the receiving module shall have its priority automatically elevated to match
   that of the message it is processing. The server task's priority shall return to its previous
   setting after handling the message. \pet{This requires dynamic priorities and thus is in
@@ -263,24 +275,25 @@ maximally sized messages.
 The Interpreter module shall be able to run mission specific commands at a set time, expressed
 either as an absolute time or as a time interval relative to the previously issued command. It
 shall make use of the Time Server, so all limitations of that service also apply here. The
-Interpreter is meant to issue raw CubedOS messages to other modules. It has no inherent command
-language of its own at this time. However, the addition of ``meta commands'' that support
-control flow or subroutines might be an appropriate avenue for future work.
+Interpreter is meant to issue raw CubedOS messages to other modules. At this time it is not
+required to have any inherent command language of its own. However, the addition of ``meta
+commands'' that support control flow or subroutines might be an appropriate avenue for future
+work. The following requirements apply:
 
 \begin{itemize}
 \item \textbf{Interpreter.Commands}. The commands executed by the Interpreter shall be CubedOS
   messages consisting of a target address triple (Domain ID, Module ID, Message ID) and message
   arguments already encoded into an octet stream.
 \item \textbf{Interpreter.Ignore}. The Interpreter shall ignore all reply messages sent to it in
-  response to the commands it is processing. The only incoming messages the Interpreter will
+  response to the command messages it sends. The only incoming messages the Interpreter will
   process shall be those specifically directed to control its functionality (i.e., to provide it
   with the command sequence to later interpret).
 \item \textbf{Interpreter.Scheduler}. Each command given to the Interpreter shall have an
   associated time stamp, either an absolute time, a time relative to the previous command, or a
-  time relatively to \newterm{deployment time}\footnote{A time roughly when the system is deploy
-    after launch.}. The Interpreter shall issue commands at their designated time. \pet{What
-    should happen if the Interpreter encounters a command that must be issued in the past?
-    Should it ignore the command or issue it ``immediately?''}
+  time relative to \newterm{deployment time}\footnote{The absolute time when the system is
+    deploy after launch.}. The Interpreter shall issue commands at their designated time.
+  \pet{What should happen if the Interpreter encounters a command that must be issued in the
+    past? Should it ignore the command or issue it ``immediately?''}
 \item \textbf{Interpreter.ScriptBuilder}. A separate tool shall be provided that can be used to
   prepare the input for the Interpreter. It as assumed that hand preparation of that input will
   be excessively difficult and error prone.
@@ -288,6 +301,48 @@ control flow or subroutines might be an appropriate avenue for future work.
 
 The ScriptBuilder tool has its own requirements, design, and implementation, and is decribed
 elsewhere.
+
+\subsection{Log Service}
+\label{sec:log-service}
+
+The Log Server module is used to log messages from other modules. \pet{Library components
+  shouldn't attempt to log messages directly. They should return appropriate status indications
+  to the calling module and that module can then log an appropriate message if necessary.} Here
+we use ``log'' expansively to include telemetry messages. The log can be stored on non-volatile
+storage, printed on a console (if one is available), or gathered in a data structure for later
+transmission to a ground station. Unlike telemetry ``data'' which might be in an unreadible
+binary form, telemetry messages are expected to be human readible. The following requirements
+apply:
+
+\begin{itemize}
+  \item \textbf{Log.MessageSize}. Log messages are intended to be relatively short and should be
+    limited to only 128 characters at most. This effectively creates a lower bound on the size
+    of CubedOS messages at 128 octets since log messages are transmitted to the Log Server via
+    the usual CubedOS message system. Restricting log messages to 128 characters, however, means
+    that all useful instantiates of the generic Message Manager will be able to pass log
+    messages without issue. The Log Server will not impose a large message size on applications
+    that don't need it.
+  \item \textbf{Log.CharacterSet}. Log messages shall use only printable ASCII characters, free
+    from all control characters (including tabs, carriage return, or line feed). This will
+    minimize problems with processing the messages later.
+  \item \textbf{Log.Language}. Log messages shall be written in English using, as much as
+    possible, standard (American) English spelling and punctuation. Log messages are intended to
+    be human readible.
+  \item \textbf{Log.Level}. The Log Server shall allow messages to be marked with different
+    ``levels'' including (but not limited to): debug, informational, warning, error, and
+    critical levels. This can be used to classify each message with respect to its criticality.
+  \item \textbf{Log.Source}. The Log Server shall automatically prefix log messages with an
+    indication of which module sent the message (domain ID and module ID).
+  \item \textbf{Log.Timestamp}. The Log Server shall automatically record a timestamp for each
+    log message that it receives and prefix the message with the timestamp. The timestamp shall
+    have the format: YYYY-MM-DD HH:MM:SS.SSS based on the system clock running on the
+    spacecraft. It is outside the scope of the Log Server's requirements to define how that
+    clock is set and how its time is maintained. Those details are likely to be
+    mission-specific.
+  \item \textbf{Log.Storage}. The Log Server shall store a certain number of log messages and
+    make them available for later transmission as telemetry messages. \pet{How many messages
+      should it store? Should that be configurable?}
+\end{itemize}
 
 \section{Low Level Abstraction Layer}
 \label{sec:llal}
