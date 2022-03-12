@@ -319,15 +319,15 @@ apply:
     limited to only 128 characters at most. This effectively creates a lower bound on the size
     of CubedOS messages at 128 octets since log messages are transmitted to the Log Server via
     the usual CubedOS message system. Restricting log messages to 128 characters, however, means
-    that all useful instantiates of the generic Message Manager will be able to pass log
+    that all useful instantiations of the generic Message Manager will be able to pass log
     messages without issue. The Log Server will not impose a large message size on applications
     that don't need it.
   \item \textbf{Log.CharacterSet}. Log messages shall use only printable ASCII characters, free
     from all control characters (including tabs, carriage return, or line feed). This will
     minimize problems with processing the messages later.
-  \item \textbf{Log.Language}. Log messages shall be written in English using, as much as
-    possible, standard (American) English spelling and punctuation. Log messages are intended to
-    be human readible.
+  \item \textbf{Log.Language}. Log messages shall be written in (American) English using, as
+    much as possible, standard English spelling and punctuation. Log messages are intended to be
+    human readible.
   \item \textbf{Log.Level}. The Log Server shall allow messages to be marked with different
     ``levels'' including (but not limited to): debug, informational, warning, error, and
     critical levels. This can be used to classify each message with respect to its criticality.
@@ -335,10 +335,10 @@ apply:
     indication of which module sent the message (domain ID and module ID).
   \item \textbf{Log.Timestamp}. The Log Server shall automatically record a timestamp for each
     log message that it receives and prefix the message with the timestamp. The timestamp shall
-    have the format: YYYY-MM-DD HH:MM:SS.SSS based on the system clock running on the
-    spacecraft. It is outside the scope of the Log Server's requirements to define how that
-    clock is set and how its time is maintained. Those details are likely to be
-    mission-specific.
+    have the format: YYYY-MM-DD HH:MM:SS.SSS (i.e., one millisecond resolution) based on the
+    system clock running on the spacecraft. It is outside the scope of the Log Server's
+    requirements to define how that clock is set and how its time is maintained. Those details
+    are likely to be mission-specific.
   \item \textbf{Log.Storage}. The Log Server shall store a certain number of log messages and
     make them available for later transmission as telemetry messages. \pet{How many messages
       should it store? Should that be configurable?}
