@@ -5,6 +5,7 @@
 --
 --------------------------------------------------------------------------------
 with Message_Manager; use Message_Manager;
+with Name_Resolver;
 with System;
 
 package Echo_Server.API is
@@ -32,10 +33,10 @@ package Echo_Server.API is
        Global => null;
 
    function Is_Ping_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Ping_Request));
+     (Message.Receiver = Name_Resolver.Echo_Server.Module_ID and Message.Message_ID = Message_Type'Pos(Ping_Request));
 
    function Is_Ping_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Ping_Reply));
+     (Message.Sender = Name_Resolver.Echo_Server.Module_ID and Message.Message_ID = Message_Type'Pos(Ping_Reply));
 
    procedure Ping_Request_Decode
      (Message : in Message_Record;

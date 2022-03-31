@@ -10,6 +10,6 @@ pragma Elaborate_All(CubedOS.Generic_Message_Manager);
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
     (Domain_Number =>  1,
-     Module_Count  =>  6,
+     Module_Count  =>  9,
      Mailbox_Size  =>  8,
-     Maximum_Message_Size => 1024);
+     Maximum_Message_Size => 512);

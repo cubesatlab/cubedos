@@ -19,9 +19,9 @@ package body Echo_Server.API is
       Message : constant Message_Record :=
         Make_Empty_Message
           (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
+           Receiver_Domain => Name_Resolver.Echo_Server.Domain_ID,
            Sender          => Sender,
-           Receiver        => ID,
+           Receiver        => Name_Resolver.Echo_Server.Module_ID,
            Request_ID      => Request_ID,
            Message_ID      => Message_Type'Pos(Ping_Request),
            Priority        => Priority);
@@ -39,9 +39,9 @@ package body Echo_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Domain_ID,
+          (Sender_Domain   => Name_Resolver.Echo_Server.Domain_ID,
            Receiver_Domain => Receiver_Domain,
-           Sender          => ID,
+           Sender          => Name_Resolver.Echo_Server.Module_ID,
            Receiver        => Receiver,
            Request_ID      => Request_ID,
            Message_ID      => Message_Type'Pos(Ping_Reply),

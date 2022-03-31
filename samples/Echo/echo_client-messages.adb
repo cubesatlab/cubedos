@@ -8,6 +8,7 @@ with Ada.Text_IO;
 with Ada.Real_Time;
 
 with Echo_Server.API;
+with Name_Resolver;
 
 package body Echo_Client.Messages is
    use Message_Manager;
@@ -29,8 +30,8 @@ package body Echo_Client.Messages is
       -- Send the first message!
      Send_Time := Ada.Real_Time.Clock;
      Outgoing_Message := Echo_Server.API.Ping_Request_Encode
-        (Sender_Domain => Domain_ID,
-         Sender        => ID,
+        (Sender_Domain => Name_Resolver.Echo_Client.Domain_ID,
+         Sender        => Name_Resolver.Echo_Client.Module_ID,
          Request_ID    => Request_Number);
       Route_Message(Outgoing_Message);
    end Initialize;
@@ -68,8 +69,8 @@ package body Echo_Client.Messages is
          -- Send the next message!
          Send_Time := Ada.Real_Time.Clock;
          Outgoing_Message := Echo_Server.API.Ping_Request_Encode
-           (Sender_Domain => Domain_ID,
-            Sender        => ID,
+           (Sender_Domain => Name_Resolver.Echo_Client.Domain_ID,
+            Sender        => Name_Resolver.Echo_Client.Module_ID,
             Request_ID    => Request_Number);
          Route_Message(Outgoing_Message);
       end if;
@@ -120,7 +121,7 @@ package body Echo_Client.Messages is
    begin
       Initialize;
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Echo_Client.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

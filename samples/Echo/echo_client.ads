@@ -7,5 +7,5 @@
 with Message_Manager;
 
 package Echo_Client is
-   ID : constant Message_Manager.Module_ID_Type := 5;
+
 end Echo_Client;
