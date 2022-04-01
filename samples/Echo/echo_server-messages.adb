@@ -26,8 +26,7 @@ package body Echo_Server.Messages is
       if Decode_Status = Message_Manager.Success then
          Outgoing_Message :=
            Echo_Server.API.Ping_Reply_Encode
-             (Receiver_Domain => Message.Sender_Domain,
-              Receiver        => Message.Sender,
+             (Receiver_Address => Message.Sender_Address,
               Request_ID      => Message.Request_ID,
               Status          => Echo_Server.API.Success);  -- Ping is always successful.
          Message_Manager.Route_Message(Outgoing_Message);

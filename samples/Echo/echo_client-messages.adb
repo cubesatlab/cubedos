@@ -30,8 +30,7 @@ package body Echo_Client.Messages is
       -- Send the first message!
      Send_Time := Ada.Real_Time.Clock;
      Outgoing_Message := Echo_Server.API.Ping_Request_Encode
-        (Sender_Domain => Name_Resolver.Echo_Client.Domain_ID,
-         Sender        => Name_Resolver.Echo_Client.Module_ID,
+        (Sender_Address => Name_Resolver.Echo_Client,
          Request_ID    => Request_Number);
       Route_Message(Outgoing_Message);
    end Initialize;
@@ -69,8 +68,7 @@ package body Echo_Client.Messages is
          -- Send the next message!
          Send_Time := Ada.Real_Time.Clock;
          Outgoing_Message := Echo_Server.API.Ping_Request_Encode
-           (Sender_Domain => Name_Resolver.Echo_Client.Domain_ID,
-            Sender        => Name_Resolver.Echo_Client.Module_ID,
+           (Sender_Address => Name_Resolver.Echo_Client,
             Request_ID    => Request_Number);
          Route_Message(Outgoing_Message);
       end if;
