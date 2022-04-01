@@ -59,6 +59,12 @@ is
    subtype Data_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
    subtype Data_Array is XDR_Array(Data_Index_Type);
 
+   -- Message Addresses hold the Domain_ID and Module_ID for Modules in a CubedOS Application
+   type Message_Address is 
+      record
+         Domain_ID : Domain_ID_Type := 0;
+         Module_ID : Module_ID_Type := 1;
+       end record;
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
    -- dynamic task priorities, however, so the usefulness of this idea is questionable. We could
@@ -66,39 +72,27 @@ is
    -- useful.
    type Message_Record is
       record
-         Sender_Domain   : Domain_ID_Type := 0;
-         Receiver_Domain : Domain_ID_Type := 0;
-         Sender     : Module_ID_Type  := 1;  -- Would another module ID be more appropriate?
-         Receiver   : Module_ID_Type  := 1;  -- Would another module ID be more appropriate?
+         Sender_Address : Message_Address := (0, 1);
+         Receiver_Address : Message_Address := (0 , 1);
          Request_ID : Request_ID_Type := 0;
          Message_ID : Message_ID_Type := 0;
          Priority   : System.Priority := System.Default_Priority;
          Size       : Data_Size_Type  := 0;
          Payload    : Data_Array      := (others => 0);
       end record;
-   
-   type Message_Address is 
-      record
-         Domain_ID : Domain_ID_Type;
-         Module_ID : Module_ID_Type;
-       end record;
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
-     (Sender_Domain   : Domain_ID_Type;
-      Receiver_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Receiver   : Module_ID_Type;
+     (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
       Message_ID : Message_ID_Type;
       Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Post=>
-         Make_Empty_Message'Result.Sender_Domain   = Sender_Domain   and
-         Make_Empty_Message'Result.Receiver_Domain = Receiver_Domain and
-         Make_Empty_Message'Result.Sender     = Sender     and
-         Make_Empty_Message'Result.Receiver   = Receiver   and
+         Make_Empty_Message'Result.Sender_Address   = Sender_Address   and
+         Make_Empty_Message'Result.Receiver_Address = Receiver_Address and
          Make_Empty_Message'Result.Request_ID = Request_ID and
          Make_Empty_Message'Result.Message_ID = Message_ID and
          Make_Empty_Message'Result.Priority   = Priority   and
