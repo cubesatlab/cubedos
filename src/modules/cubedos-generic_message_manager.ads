@@ -76,6 +76,12 @@ is
          Size       : Data_Size_Type  := 0;
          Payload    : Data_Array      := (others => 0);
       end record;
+   
+   type Message_Address is 
+      record
+         Domain_ID : Domain_ID_Type;
+         Module_ID : Module_ID_Type;
+       end record;
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
