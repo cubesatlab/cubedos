@@ -40,19 +40,19 @@ begin
 
    -- Try to open a file to read.
    Message_Manager.Route_Message
-     (Open_Request_Encode(Domain_ID, My_Module_ID, 1, Read, "example.txt"));
+     (Open_Request_Encode((Domain_ID, My_Module_ID), 1, Read, "example.txt"));
    Put_Line("TX : Open_Request message sent for reading 'example.txt'");
 
    -- Try to open file for writing
    Message_Manager.Route_Message
-     (Open_Request_Encode(Domain_ID, My_Module_ID, 2, Write, "write_test.txt"));
+     (Open_Request_Encode((Domain_ID, My_Module_ID), 2, Write, "write_test.txt"));
    Put_Line("TX : Open_Request message sent for writing 'write_test.txt'");
 
    loop
       Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
       Put_Line("+++ Fetch returned!");
-      Put("+++    Sender    : "); Put(Incoming_Message.Sender); New_Line;
-      Put("+++    Receiver  : "); Put(Incoming_Message.Receiver); New_Line;
+      Put("+++    Sender    : "); Put(Incoming_Message.Sender_Address.Module_ID); New_Line;
+      Put("+++    Receiver  : "); Put(Incoming_Message.Receiver_Address.Module_ID); New_Line;
       Put("+++    Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
 
       -- Process open reply messages.
@@ -74,7 +74,7 @@ begin
                   -- We got a reply to our open-for-reading request.
                   Read_Handle := Handle;
                   Message_Manager.Route_Message
-                    (Read_Request_Encode(Domain_ID, My_Module_ID, 0, Read_Handle, Maximum_Read_Size));
+                    (Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
                   Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
 
                when 2 =>
@@ -95,7 +95,7 @@ begin
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
 	    Message_Manager.Route_Message
-	      (Close_Request_Encode(Domain_ID, My_Module_ID, 0, Read_Handle));
+	      (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
 	    Put_Line("TX : Close_Request message sent (input file)");
          else
             Put_Line("     +++ Successfully read " & Read_Size_Type'Image(Amount_Read) & " octets");
@@ -103,11 +103,11 @@ begin
             if Amount_Read = 0 then
                -- Close the files (both of them).
                Message_Manager.Route_Message
-                 (Close_Request_Encode(Domain_ID, My_Module_ID, 0, Read_Handle));
+                 (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
                Put_Line("TX : Close_Request message sent (input file)");
 
                Message_Manager.Route_Message
-                 (Close_Request_Encode(Domain_ID, My_Module_ID, 0, Write_Handle));
+                 (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
                Put_Line("TX : Close_Request message sent (output file)");
             else
                -- Print the data we just read (it's a text file).
@@ -119,12 +119,12 @@ begin
                -- Write this data to the output file too.
                Amount_Write := Amount_Read;
                Message_Manager.Route_Message
-                 (Write_Request_Encode(Domain_ID, My_Module_ID, 0, Write_Handle, Amount_Write, Data));
+                 (Write_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle, Amount_Write, Data));
                Put_Line("TX : Write_Request message sent writing " & Integer'Image(Amount_Write) & " octets");
 
                -- Request the next chunk from the file.
                Message_Manager.Route_Message
-                 (Read_Request_Encode(Domain_ID, My_Module_ID, 0, Read_Handle, Maximum_Read_Size));
+                 (Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
                Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
             end if;
          end if;
@@ -136,7 +136,7 @@ begin
 	 if Status = Malformed then
 	    Put_Line("     *** Message is malformed!");
 	    Message_Manager.Route_Message
-	      (Close_Request_Encode(Domain_ID, My_Module_ID, 0, Write_Handle));
+	      (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
 	    Put_Line("TX : Close_Request message sent (output file)");
 	 else
 	    Put_Line("     +++ Successfully wrote " & Write_Result_Size_Type'Image(Amount_Write) & " octets");
