@@ -10,6 +10,7 @@
 pragma SPARK_Mode(On);
 
 with Message_Manager;  use Message_Manager;
+with Name_Resolver;
 with System;
 
 package CubedOS.Log_Server.API is
@@ -34,27 +35,25 @@ package CubedOS.Log_Server.API is
 
    -- Convenience procedure that creates and sends a log message.
    procedure Log_Message
-     (Sender_Domain : in Domain_ID_Type;
-      Sender        : in Module_ID_Type;
-      Log_Level     : in Log_Level_Type;
-      Text          : in String)
+     (Sender_Address : in Message_Address;
+      Log_Level      : in Log_Level_Type;
+      Text           : in String)
      with Pre => Text'Length <= Maximum_Log_Message_Size;
 
 
    function Log_Text_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Log_Level  : Log_Level_Type;
-      Text       : String;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Log_Level      : Log_Level_Type;
+      Text           : String;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre    => Text'Length <= Maximum_Log_Message_Size;
 
 
    function Is_A_Log_Text(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Log_Text));
+     (Message.Receiver_Address = Name_Resolver.Log_Server and Message.Message_ID = Message_Type'Pos(Log_Text));
 
 
    procedure Log_Text_Decode
