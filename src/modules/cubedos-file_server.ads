@@ -10,6 +10,4 @@ with Message_Manager;
 
 package CubedOS.File_Server is
 
-    ID : constant Message_Manager.Module_ID_Type := 6;
-
 end CubedOS.File_Server;

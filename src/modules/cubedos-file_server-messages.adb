@@ -13,6 +13,7 @@ with Ada.Text_IO;
 with Ada.Sequential_IO;
 with CubedOS.File_Server.API;
 with CubedOS.Lib;
+with Name_Resolver;
 
 use Ada.Text_IO;
 
@@ -60,8 +61,7 @@ package body CubedOS.File_Server.Messages is
       if Handle = API.Invalid_Handle then
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
-              (Receiver_Domain => Incoming_Message.Sender_Domain,
-               Receiver   => Incoming_Message.Sender,
+              (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
          return;
@@ -70,8 +70,7 @@ package body CubedOS.File_Server.Messages is
       if Status = Malformed then
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
-              (Receiver_Domain=> Incoming_Message.Sender_Domain,
-               Receiver   => Incoming_Message.Sender,
+              (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
       else
@@ -87,8 +86,7 @@ package body CubedOS.File_Server.Messages is
 
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
-              (Receiver_Domain => Incoming_Message.Sender_Domain,
-               Receiver   => Incoming_Message.Sender,
+              (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => Handle));
       end if;
@@ -98,8 +96,7 @@ package body CubedOS.File_Server.Messages is
          -- Open failed. Send back an invalid handle.
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
-              (Receiver_Domain => Incoming_Message.Sender_Domain,
-               Receiver   => Incoming_Message.Sender,
+              (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
    end Process_Open_Request;
@@ -131,8 +128,7 @@ package body CubedOS.File_Server.Messages is
             -- Send what we have (could be zero octets!).
             Message_Manager.Route_Message
               (API.Read_Reply_Encode
-                 (Receiver_Domain => Incoming_Message.Sender_Domain,
-                  Receiver   => Incoming_Message.Sender,
+                 (Receiver_Address => Incoming_Message.Sender_Address,
                   Request_ID => Incoming_Message.Request_ID,
                   Handle     => Handle,
                   Amount     => Size,
@@ -168,8 +164,7 @@ package body CubedOS.File_Server.Messages is
             end;
             Message_Manager.Route_Message
               (API.Write_Reply_Encode
-                 (Receiver_Domain => Incoming_Message.Sender_Domain,
-                  Receiver   => Incoming_Message.Sender,
+                 (Receiver_Address => Incoming_Message.Sender_Address,
                   Request_ID => Incoming_Message.Request_ID,
                   Handle     => Handle,
                   Amount     => Size));
@@ -220,10 +215,12 @@ package body CubedOS.File_Server.Messages is
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.File_Server.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
 
 
 end CubedOS.File_Server.Messages;
+
+

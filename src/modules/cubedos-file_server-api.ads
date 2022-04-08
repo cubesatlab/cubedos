@@ -12,7 +12,7 @@ pragma SPARK_Mode(On);
 with CubedOS.Lib;
 with Message_Manager;
 with System;
-
+with Name_Resolver;
 use Message_Manager;
 
 package CubedOS.File_Server.API is
@@ -44,97 +44,90 @@ package CubedOS.File_Server.API is
    subtype Write_Size_Type is Natural range 1 .. Write_Result_Size_Type'Last;
 
    function Open_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Mode       : Mode_Type;
-      Name       : String;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Mode           : Mode_Type;
+      Name           : String;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => (0 < Name'Length and Name'Length <= Data_Size_Type'Last - 12);
 
    function Open_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : File_Handle_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : File_Handle_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null;
 
    function Read_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Read_Size_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Amount         : Read_Size_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Read_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Read_Result_Size_Type;
-      Data       : CubedOS.Lib.Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : Valid_File_Handle_Type;
+      Amount           : Read_Result_Size_Type;
+      Data             : CubedOS.Lib.Octet_Array;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => Amount <= Data'Length;
 
    function Write_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Write_Size_Type;
-      Data       : CubedOS.Lib.Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Amount         : Write_Size_Type;
+      Data           : CubedOS.Lib.Octet_Array;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => Amount <= Data'Length;
 
    function Write_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Write_Result_Size_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : Valid_File_Handle_Type;
+      Amount           : Write_Result_Size_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Close_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
 
 
    function Is_Open_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Open_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Request));
 
    function Is_Open_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Open_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Reply));
 
    function Is_Read_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Read_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Request));
 
    function Is_Read_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Read_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Reply));
 
    function Is_Write_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Write_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Request));
 
    function Is_Write_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Write_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Reply));
 
    function Is_Close_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Close_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Close_Request));
 
 
 
