@@ -10,6 +10,8 @@
 pragma SPARK_Mode(On);
 
 with Message_Manager;  use Message_Manager;
+with Name_Resolver;
+
 with System;
 
 package CubedOS.Interpreter.API is
@@ -24,56 +26,51 @@ package CubedOS.Interpreter.API is
       Add_Reply);     -- Indicates if the addition was successful. Failure => insufficient space.
 
    function Clear_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
 
    function Set_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
 
    function Set_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Status           : Status_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
 
    function Add_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
 
    function Add_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Status           : Status_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
 
    function Is_Clear_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Clear_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Clear_Request));
 
    function Is_Set_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Set_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Set_Request));
 
    function Is_Set_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Set_Reply));
+     (Message.Sender_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Set_Reply));
 
    function Is_Add_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Add_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Add_Request));
 
    function Is_Add_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Add_Reply));
+     (Message.Sender_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Add_Reply));
 
    procedure Clear_Request_Decode
      (Message : in  Message_Record;
