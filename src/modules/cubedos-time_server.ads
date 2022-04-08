@@ -10,6 +10,4 @@ with Message_Manager;
 
 package CubedOS.Time_Server is
 
-   ID : constant Message_Manager.Module_ID_Type := 4;
-
 end CubedOS.Time_Server;
