@@ -10,6 +10,4 @@ with Message_Manager;
 
 package Button_Driver is
 
-   ID : constant Message_Manager.Module_ID_Type := 6;
-
 end Button_Driver;
