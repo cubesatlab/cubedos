@@ -18,18 +18,15 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Reason  => "The last value of Last is not needed");
 
    function Subscribe_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
+     (Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
-           Sender     => Sender,
-           Receiver   => ID,
+          (Sender_Address   => Sender_Address,
+           Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Subscribe_Request),
            Priority   => Priority);
@@ -44,8 +41,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Subscribe_Reply_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
+     (Receiver_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Status     : in Status_Type;
@@ -53,10 +49,8 @@ package body CubedOS.Publish_Subscribe_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Domain_ID,
-           Receiver_Domain => Receiver_Domain,
-           Sender     => ID,
-           Receiver   => Receiver,
+          (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
+           Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Subscribe_Reply),
            Priority   => Priority);
@@ -73,18 +67,15 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Unsubscribe_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
+     (Sender_Address : Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
-           Sender     => Sender,
-           Receiver   => ID,
+          (Sender_Address => Sender_Address,
+           Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Unsubscribe_Request),
            Priority   => Priority);
@@ -99,8 +90,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Unsubscribe_Reply_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
+     (Receiver_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Status     : in Status_Type;
@@ -108,10 +98,8 @@ package body CubedOS.Publish_Subscribe_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Domain_ID,
-           Receiver_Domain => Receiver_Domain,
-           Sender     => ID,
-           Receiver   => Receiver,
+          (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
+           Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Unsubscribe_Reply),
            Priority   => Priority);
@@ -128,8 +116,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Publish_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender       : in Module_ID_Type;
+     (Sender_Address : in Message_Address;
       Request_ID   : in Request_ID_Type;
       Channel      : in Channel_ID_Type;
       Message_Data : in CubedOS.Lib.Octet_Array;
@@ -137,10 +124,8 @@ package body CubedOS.Publish_Subscribe_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
-           Sender     => Sender,
-           Receiver   => ID,
+          (Sender_Address => Sender_Address,
+           Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Publish_Request),
            Priority   => Priority);
@@ -159,8 +144,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Publish_Reply_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
+     (Receiver_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Status     : in Status_Type;
@@ -168,10 +152,8 @@ package body CubedOS.Publish_Subscribe_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Domain_ID,
-           Receiver_Domain => Receiver_Domain,
-           Sender     => ID,
-           Receiver   => Receiver,
+          (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
+           Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Publish_Reply),
            Priority   => Priority);
@@ -188,8 +170,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Publish_Result_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
+     (Receiver_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Channel    : in Channel_ID_Type;
       Message_Data : in CubedOS.Lib.Octet_Array;
@@ -197,10 +178,8 @@ package body CubedOS.Publish_Subscribe_Server.API is
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Domain_ID,
-           Receiver_Domain => Receiver_Domain,
-           Sender     => ID,
-           Receiver   => Receiver,
+          (Sender_Address => Name_Resolver.Publish_Subscribe_Server,
+           Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
            Message_ID => Message_Type'Pos(Publish_Result),
            Priority   => Priority);

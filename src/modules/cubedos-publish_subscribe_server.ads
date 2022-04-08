@@ -22,6 +22,4 @@ with Message_Manager;
 
 package CubedOS.Publish_Subscribe_Server is
 
-   ID : constant Message_Manager.Module_ID_Type := 3;
-
 end CubedOS.Publish_Subscribe_Server;

@@ -9,7 +9,7 @@ pragma SPARK_Mode(On);
 with CubedOS.Lib;
 with CubedOS.Publish_Subscribe_Server.API;
 with Message_Manager;
-
+with Name_Resolver;
 use  CubedOS.Publish_Subscribe_Server.API;
 
 package body CubedOS.Publish_Subscribe_Server.Messages
@@ -37,12 +37,13 @@ is
       if Status = Malformed then
          Route_Message
            (API.Subscribe_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Failure));
+              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
-         Subscription_Map(Message.Sender, Channel) := True;
+         -- Should we have the Subscription_Map handle the entire Message Address?
+         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := True;
          Route_Message
            (API.Subscribe_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Success));
+              (Message.Sender_Address, Message.Request_ID, Channel, Success));
       end if;
    end Handle_Subscribe_Request;
 
@@ -57,15 +58,15 @@ is
       if Status = Malformed then
          Route_Message
            (API.Unsubscribe_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Failure));
+              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
          -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
          -- The operation returns Success without comment.
          -- TODO: Is this appropriate?
-         Subscription_Map(Message.Sender, Channel) := False;
+         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := False;
          Route_Message
            (API.Unsubscribe_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Success));
+              (Message.Sender_Address, Message.Request_ID, Channel, Success));
       end if;
    end Handle_Unsubscribe_Request;
 
@@ -82,18 +83,18 @@ is
       if Status = Malformed then
          Route_Message
            (API.Publish_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Failure));
+              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
          Route_Message
            (API.Publish_Reply_Encode
-              (Message.Sender_Domain, Message.Sender, Message.Request_ID, Channel, Success));
+              (Message.Sender_Address, Message.Request_ID, Channel, Success));
 
          -- Do the actual publishing.
          for I in Module_ID_Type loop
             if Subscription_Map(I, Channel) then
                Route_Message
                  (API.Publish_Result_Encode
-                    (Domain_ID, I, 0, Channel, Message_Data(1 .. Size)));
+                    ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I), 0, Channel, Message_Data(1 .. Size)));
             end if;
          end loop;
       end if;
@@ -125,7 +126,7 @@ is
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
