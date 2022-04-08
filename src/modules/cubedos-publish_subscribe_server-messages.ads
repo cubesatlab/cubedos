@@ -8,7 +8,7 @@ pragma SPARK_Mode(On);
 pragma Profile(Ravenscar);
 pragma Partition_Elaboration_Policy(Sequential);
 pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
-pragma Queing_Policy(FIFO_Within_Priorities);
+pragma Queuing_Policy(FIFO_Within_Priorities);
 
 with System;
 
