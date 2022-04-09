@@ -15,15 +15,14 @@ package body LED_Driver.API is
    pragma Warnings (Off, "*may call Last_Chance_Handler");
 
    function On_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      LED        : LED_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      LED            : LED_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(On_Request), Priority);
+          (Sender_Address, Name_Resolver.LED_Driver, Request_ID, Message_Type'Pos(On_Request), Priority);
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
    begin
@@ -37,15 +36,14 @@ package body LED_Driver.API is
 
 
    function Off_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      LED        : LED_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      LED            : LED_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(Off_Request), Priority);
+          (Sender_Address, Name_Resolver.LED_Driver, Request_ID, Message_Type'Pos(Off_Request), Priority);
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
    begin
@@ -59,14 +57,13 @@ package body LED_Driver.API is
 
 
    function All_On_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(All_On_Request), Priority);
+          (Sender_Address, Name_Resolver.LED_Driver, Request_ID, Message_Type'Pos(All_On_Request), Priority);
    begin
       Message.Size := 0;
       return Message;
@@ -74,14 +71,13 @@ package body LED_Driver.API is
 
 
    function All_Off_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain, Domain_ID, Sender, ID, Request_ID, Message_Type'Pos(All_Off_Request), Priority);
+          (Sender_Address, Name_Resolver.LED_Driver, Request_ID, Message_Type'Pos(All_Off_Request), Priority);
    begin
       Message.Size := 0;
       return Message;

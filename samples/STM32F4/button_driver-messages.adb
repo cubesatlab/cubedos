@@ -9,6 +9,7 @@
 pragma SPARK_Mode(On);
 
 with Button; use Button;
+with Name_Resolver;
 --with LEDs; -- Used for testing
 with CubedOS.Lib; use CubedOS.Lib;
 with CubedOS.Publish_Subscribe_Server.API; use CubedOS.Publish_Subscribe_Server.API;
@@ -27,8 +28,7 @@ package body Button_Driver.Messages is
 
        -- Craft a publish request message
        Outgoing_Message := Publish_Request_Encode
-        (Sender_Domain => Domain_ID,
-         Sender        => Button_Driver.ID,
+        (Sender_Address => Name_Resolver.Button_Driver,
          Request_ID    => 0,
          Channel       => 1,
          Message_Data  => Message_Data,

@@ -48,11 +48,11 @@ begin
 
    -- Do some setup...
    Message_Manager.Route_Message
-     (Relative_Request_Encode(Domain_ID, My_Module_ID, 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
+     (Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
    Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
 
    Message_Manager.Route_Message
-     (Relative_Request_Encode(Domain_ID, My_Module_ID, 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
+     (Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
    Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
 
    loop
@@ -74,7 +74,7 @@ begin
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then
                Message_Manager.Route_Message
-                 (Cancel_Request_Encode(Domain_ID, My_Module_ID, 1, Series_ID => 1));
+                 (Cancel_Request_Encode((Domain_ID, My_Module_ID), 1, Series_ID => 1));
                Put_Line("TX : Cancel_Request message sent for Series_ID = 1");
             end if;
 

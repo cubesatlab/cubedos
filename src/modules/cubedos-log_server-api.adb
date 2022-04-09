@@ -16,33 +16,29 @@ package body CubedOS.Log_Server.API is
    use type XDR.XDR_Unsigned;
 
    procedure Log_Message
-     (Sender_Domain : in Domain_ID_Type;
-      Sender        : in Module_ID_Type;
-      Log_Level     : in Log_Level_Type;
-      Text          : in String)
+     (Sender_Address : in Message_Address;
+      Log_Level      : in Log_Level_Type;
+      Text           : in String)
    is
    begin
-      Message_Manager.Route_Message(Log_Text_Encode(Sender_Domain, Sender, 0, Log_Level, Text));
+      Message_Manager.Route_Message(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    end Log_Message;
 
 
    function Log_Text_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Log_Level  : Log_Level_Type;
-      Text       : String;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Log_Level      : Log_Level_Type;
+      Text           : String;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
-          (Sender_Domain   => Sender_Domain,
-           Receiver_Domain => Domain_ID,
-           Sender     => Sender,
-           Receiver   => ID,
-           Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Log_Text),
-           Priority   => Priority);
+          (Sender_Address   => Sender_Address,
+           Receiver_Address => Name_Resolver.Log_Server,
+           Request_ID       => Request_ID,
+           Message_ID       => Message_Type'Pos(Log_Text),
+           Priority         => Priority);
       Position : Data_Index_Type;
       Last : Data_Index_Type;
    begin

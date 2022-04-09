@@ -7,15 +7,17 @@
 pragma SPARK_Mode(On);
 pragma Profile(Ravenscar);
 pragma Partition_Elaboration_Policy(Sequential);
+
+-- Why are these here?
 pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
-pragma Queing_Policy(FIFO_Within_Priorities);
+pragma Queuing_Policy(FIFO_Queuing);
 
 with System;
 
 package CubedOS.Publish_Subscribe_Server.Messages
   with
     Abstract_State => Database,
-    Initializes => (Database, Message_Loop)
+    Initializes => Database
 is
 
    task type Message_Loop

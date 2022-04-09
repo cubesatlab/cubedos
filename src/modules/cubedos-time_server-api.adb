@@ -18,13 +18,12 @@ package body CubedOS.Time_Server.API is
       Reason  => "The last value of Last is not needed");
 
    function Relative_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender        : in Module_ID_Type;
-      Request_ID    : in Request_ID_Type;
-      Tick_Interval : in Ada.Real_Time.Time_Span;
-      Request_Type  : in Series_Type;
-      Series_ID     : in Series_ID_Type;
-      Priority      : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Tick_Interval  : in Ada.Real_Time.Time_Span;
+      Request_Type   : in Series_Type;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : Data_Index_Type;
@@ -32,10 +31,8 @@ package body CubedOS.Time_Server.API is
       Interval   : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
    begin
       Message := Make_Empty_Message
-        (Sender_Domain   => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address   => Sender_Address,
+         Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Relative_Request),
          Priority   => Priority);
@@ -52,12 +49,11 @@ package body CubedOS.Time_Server.API is
 
 
    function Absolute_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Tick_Time  : in Ada.Real_Time.Time;
-      Series_ID  : in Series_ID_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Tick_Time      : in Ada.Real_Time.Time;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : Data_Index_Type;
@@ -66,10 +62,8 @@ package body CubedOS.Time_Server.API is
       Fraction   : Ada.Real_Time.Time_Span;
    begin
       Message := Make_Empty_Message
-        (Sender_Domain   => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address => Sender_Address,
+         Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Absolute_Request),
          Priority   => Priority);
@@ -86,18 +80,15 @@ package body CubedOS.Time_Server.API is
 
 
    function Tick_Reply_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Series_ID  : in Series_ID_Type;
-      Count      : in Series_Count_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Series_ID        : in Series_ID_Type;
+      Count            : in Series_Count_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       Result : Message_Record := Make_Empty_Message
-        (Sender_Domain   => Domain_ID,
-         Receiver_Domain => Receiver_Domain,
-         Sender     => ID,
-         Receiver   => Receiver,
+        (Sender_Address   => Name_Resolver.Time_Server,
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Tick_Reply),
          Priority   => Priority);
@@ -117,21 +108,18 @@ package body CubedOS.Time_Server.API is
 
 
    function Cancel_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Series_ID  : in Series_ID_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message    : Message_Record;
       Position   : Data_Index_Type;
       Last       : Data_Index_Type;
    begin
       Message := Make_Empty_Message
-        (Sender_Domain   => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address   => Sender_Address,
+         Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Cancel_Request),
          Priority   => Priority);

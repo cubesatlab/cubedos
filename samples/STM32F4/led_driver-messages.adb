@@ -8,6 +8,7 @@ pragma SPARK_Mode(On);
 
 with LEDs;
 with LED_Driver.API;
+with Name_Resolver;
 
 package body LED_Driver.Messages is
    use Message_Manager;
@@ -98,7 +99,7 @@ package body LED_Driver.Messages is
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.LED_Driver.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

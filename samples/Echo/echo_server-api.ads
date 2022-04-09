@@ -5,6 +5,7 @@
 --
 --------------------------------------------------------------------------------
 with Message_Manager; use Message_Manager;
+with Name_Resolver;
 with System;
 
 package Echo_Server.API is
@@ -15,16 +16,14 @@ package Echo_Server.API is
    type Message_Type is (Ping_Request, Ping_Reply);
 
    function Ping_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender        : Module_ID_Type;
+     (Sender_Address : Message_Address;
       Request_ID    : Request_ID_Type;
       Priority      : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null;
 
    function Ping_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
+     (Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
       Status     : Status_Type;
       Priority   : System.Priority := System.Default_Priority) return Message_Record
@@ -32,10 +31,10 @@ package Echo_Server.API is
        Global => null;
 
    function Is_Ping_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Ping_Request));
+     (Message.Receiver_Address = Name_Resolver.Echo_Server and Message.Message_ID = Message_Type'Pos(Ping_Request));
 
    function Is_Ping_Reply(Message : Message_Record) return Boolean is
-     (Message.Sender = ID and Message.Message_ID = Message_Type'Pos(Ping_Reply));
+     (Message.Sender_Address = Name_Resolver.Echo_Server and Message.Message_ID = Message_Type'Pos(Ping_Reply));
 
    procedure Ping_Request_Decode
      (Message : in Message_Record;

@@ -12,6 +12,7 @@ pragma SPARK_Mode(On);
 with Ada.Real_Time;
 with Message_Manager;
 with System;
+with Name_Resolver;
 
 use Message_Manager;
 
@@ -52,13 +53,12 @@ package CubedOS.Time_Server.API is
    -- @param Series_ID The ID number for the series (selected by the caller and thus only
    --   meaningful to the requesting module).
    function Relative_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender        : in Module_ID_Type;
-      Request_ID    : in Request_ID_Type;
-      Tick_Interval : in Ada.Real_Time.Time_Span;
-      Request_Type  : in Series_Type;
-      Series_ID     : in Series_ID_Type;
-      Priority      : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Tick_Interval  : in Ada.Real_Time.Time_Span;
+      Request_Type   : in Series_Type;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    -- Return a message for requesting a single tick message at a specific, absolute time.
@@ -67,12 +67,11 @@ package CubedOS.Time_Server.API is
    -- @param Series_ID The ID number of the series (selected by the caller and thus only
    --   meaningful to the requesting module).
    function Absolute_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Tick_Time  : in Ada.Real_Time.Time;
-      Series_ID  : in Series_ID_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Tick_Time      : in Ada.Real_Time.Time;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    -- The tick messages themselves.
@@ -83,36 +82,34 @@ package CubedOS.Time_Server.API is
    --   count sequence). Should the count reach Series_Count_Type'Last, the series is canceled
    --   after a Tick_Reply with that count is sent.
    function Tick_Reply_Encode
-     (Receiver_Domain : in Domain_ID_Type;
-      Receiver   : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Series_ID  : in Series_ID_Type;
-      Count      : in Series_Count_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record;
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Series_ID        : in Series_ID_Type;
+      Count            : in Series_Count_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record;
 
    -- Return a message for canceling previous tick requests (of any kind).
    -- @param Series_ID The ID number of the series being canceled. If the series does not
    --   exist or has already been canceled or removed (due to being a one shot series that has
    --   already fired), there is no effect.
    function Cancel_Request_Encode
-     (Sender_Domain : in Domain_ID_Type;
-      Sender     : in Module_ID_Type;
-      Request_ID : in Request_ID_Type;
-      Series_ID  : in Series_ID_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Series_ID      : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Is_Relative_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Relative_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Relative_Request));
 
    function Is_Absolute_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Absolute_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Absolute_Request));
 
    function Is_Tick_Reply(Message : in Message_Record) return Boolean is
-      (Message.Sender = ID and Message.Message_ID = Message_Type'Pos (Tick_Reply));
+      (Message.Sender_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Tick_Reply));
 
    function Is_Cancel_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos (Cancel_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Cancel_Request));
 
    -- Decode Relative_Request messages. See Relative_Request_Encode for information about the
    -- parameters.

@@ -7,6 +7,7 @@
 pragma SPARK_Mode(On);
 
 with CubedOS.Log_Server.API;
+with Name_Resolver;
 
 package body CubedOS.Log_Server.Messages is
    use Message_Manager;
@@ -33,8 +34,8 @@ package body CubedOS.Log_Server.Messages is
       if Status = Success then
          Ada.Text_IO.Put_Line
            (Level_Strings(Log_Level) &
-            " ("  & Domain_ID_Type'Image(Message.Sender_Domain) &
-            ","   & Module_ID_Type'Image(Message.Sender) &
+            " ("  & Domain_ID_Type'Image(Message.Sender_Address.Domain_ID) &
+            ","   & Module_ID_Type'Image(Message.Sender_Address.Module_ID) &
             "): " & Text(1 .. Size));
       end if;
    end Handle_Log_Text;
@@ -63,7 +64,7 @@ package body CubedOS.Log_Server.Messages is
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Log_Server.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

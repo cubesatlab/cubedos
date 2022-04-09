@@ -11,6 +11,7 @@ with CubedOS.Time_Server.API;
 use  CubedOS;
 with LED_Driver.API;
 with LED_Driver; use LED_Driver;
+with Name_Resolver;
 --with LEDs; -- Used for testing
 with CubedOS.Publish_Subscribe_Server.API; use CubedOS.Publish_Subscribe_Server.API;
 
@@ -40,16 +41,14 @@ package body Control.Messages is
      -- Cancel the tick request, set tick timer to 10.0 seconds
      if (Counter mod 3 = 0) then
       Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Series_ID     => 1,
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
       Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
          Request_Type  => Time_Server.API.Periodic,
@@ -60,16 +59,14 @@ package body Control.Messages is
    -- Cancel the tick request, set tick timer to 3.0 seconds
      elsif (Counter mod 3 = 1) then
       Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Series_ID     => 1,
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
       Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(3.0),
          Request_Type  => Time_Server.API.Periodic,
@@ -80,16 +77,14 @@ package body Control.Messages is
      -- Cancel the tick request, set tick timer to 1.0 seconds
      elsif (Counter mod 3 = 2) then
       Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Series_ID     => 1,
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
       Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
          Request_Type  => Time_Server.API.Periodic,
@@ -108,8 +103,7 @@ package body Control.Messages is
       Outgoing_Message : Message_Record;
    begin
       Outgoing_Message := LED_Driver.API.Off_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          LED           => Pattern(Current_LED));
       Route_Message(Outgoing_Message);
@@ -117,8 +111,7 @@ package body Control.Messages is
       Current_LED := Current_LED + 1;
 
       Outgoing_Message := LED_Driver.API.On_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          LED           => Pattern(Current_LED));
       Route_Message(Outgoing_Message);
@@ -160,23 +153,20 @@ package body Control.Messages is
 
       -- Make sure all the LEDs are off.
       Outgoing_Message := LED_Driver.API.All_Off_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0);
       Route_Message(Outgoing_Message);
 
       -- Turn blue LED on for init state
       Outgoing_Message := LED_Driver.API.On_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          LED           => LED_Driver.Blue);
       Route_Message(Outgoing_Message);
 
       -- Request a periodic tick every 10.0 seconds.
       Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
          Request_Type  => Time_Server.API.Periodic,
@@ -185,8 +175,7 @@ package body Control.Messages is
 
          -- Subscribe to channel 1.
       Outgoing_Message := Subscribe_Request_Encode
-        (Sender_Domain => 1,
-         Sender        => Control.ID,
+        (Sender_Address => Name_Resolver.Control,
          Request_ID    => 0,
          Channel       => 1,
          Priority      => System.Default_Priority);
@@ -194,7 +183,7 @@ package body Control.Messages is
 
 
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Control.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
