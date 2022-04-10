@@ -17,18 +17,15 @@ package body CubedOS.File_Server.API is
 
    -- Requester-side Use
    function Open_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Mode       : Mode_Type;
-      Name       : String;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Mode           : Mode_Type;
+      Name           : String;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address => Sender_Address,
+         Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Open_Request),
          Priority   => Priority);
@@ -49,17 +46,14 @@ package body CubedOS.File_Server.API is
 
    -- Server-side Use
    function Open_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : API.File_Handle_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : API.File_Handle_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Domain_ID,
-         Receiver_Domain => Receiver_Domain,
-         Sender     => ID,
-         Receiver   => Receiver,
+        (Sender_Address => Name_Resolver.File_Server,
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(API.Open_Reply),
          Priority   => Priority);
@@ -75,18 +69,15 @@ package body CubedOS.File_Server.API is
 
 
    function Read_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Read_Size_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Amount         : Read_Size_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address => Sender_Address,
+         Receiver_Address => Name_Resolver.File_Server, 
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Read_Request),
          Priority   => Priority);
@@ -105,19 +96,16 @@ package body CubedOS.File_Server.API is
 
    -- Server-side use.
    function Read_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Read_Result_Size_Type;
-      Data       : Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : Valid_File_Handle_Type;
+      Amount           : Read_Result_Size_Type;
+      Data             : Octet_Array;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Domain_ID,
-         Receiver_Domain => Receiver_Domain,
-         Sender     => ID,
-         Receiver   => Receiver,
+        (Sender_Address => Name_Resolver.File_Server,
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(API.Read_Reply),
          Priority   => Priority);
@@ -137,19 +125,16 @@ package body CubedOS.File_Server.API is
 
 
    function Write_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Write_Size_Type;
-      Data       : Octet_Array;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Amount         : Write_Size_Type;
+      Data           : Octet_Array;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address => Sender_Address,
+         Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Write_Request),
          Priority   => Priority);
@@ -170,18 +155,15 @@ package body CubedOS.File_Server.API is
 
    -- Server-side use.
    function Write_Reply_Encode
-     (Receiver_Domain : Domain_ID_Type;
-      Receiver   : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Amount     : Write_Result_Size_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : Message_Address;
+      Request_ID       : Request_ID_Type;
+      Handle           : Valid_File_Handle_Type;
+      Amount           : Write_Result_Size_Type;
+      Priority         : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Domain_ID,
-         Receiver_Domain => Receiver_Domain,
-         Sender     => ID,
-         Receiver   => Receiver,
+        (Sender_Address => Name_Resolver.File_Server,
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(API.Write_Reply),
          Priority   => Priority);
@@ -199,17 +181,14 @@ package body CubedOS.File_Server.API is
 
 
    function Close_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Handle     : Valid_File_Handle_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Handle         : Valid_File_Handle_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
-        (Sender_Domain => Sender_Domain,
-         Receiver_Domain => Domain_ID,
-         Sender     => Sender,
-         Receiver   => ID,
+        (Sender_Address => Sender_Address,
+         Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Close_Request),
          Priority   => Priority);

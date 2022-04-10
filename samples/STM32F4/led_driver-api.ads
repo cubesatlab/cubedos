@@ -7,6 +7,7 @@
 pragma SPARK_Mode(On);
 
 with Message_Manager;  use Message_Manager;
+with Name_Resolver;
 with System;
 
 package LED_Driver.API is
@@ -15,47 +16,43 @@ package LED_Driver.API is
 
 
    function On_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      LED        : LED_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      LED            : LED_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Off_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      LED        : LED_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      LED            : LED_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function All_On_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function All_Off_Request_Encode
-     (Sender_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : Message_Address;
+      Request_ID     : Request_ID_Type;
+      Priority       : System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
 
    function Is_On_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(On_Request));
+     (Message.Receiver_Address = Name_Resolver.LED_Driver and Message.Message_ID = Message_Type'Pos(On_Request));
 
    function Is_Off_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(Off_Request));
+     (Message.Receiver_Address = Name_Resolver.LED_Driver and Message.Message_ID = Message_Type'Pos(Off_Request));
 
    function Is_All_On_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(All_On_Request));
+     (Message.Receiver_Address = Name_Resolver.LED_Driver and Message.Message_ID = Message_Type'Pos(All_On_Request));
 
    function Is_All_Off_Request(Message : Message_Record) return Boolean is
-     (Message.Receiver = ID and Message.Message_ID = Message_Type'Pos(All_Off_Request));
+     (Message.Receiver_Address = Name_Resolver.LED_Driver and Message.Message_ID = Message_Type'Pos(All_Off_Request));
 
 
    procedure On_Request_Decode

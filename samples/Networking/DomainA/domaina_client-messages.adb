@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 with Ada.Text_IO;
 with Ada.Real_Time;
-
+with Name_Resolver;
 with DomainB_Server.API;
 
 package body DomainA_Client.Messages is
@@ -30,9 +30,7 @@ package body DomainA_Client.Messages is
 	  Ada.Text_IO.Put_Line("From Client Message");
 	  Send_Time := Ada.Real_Time.Clock;
 	  Outgoing_Message := DomainB_Server.API.Ping_Request_Encode
-		(Sender_Domain => Domain_ID,
-		 Receiver_Domain => 2,
-		 Sender        => ID,
+		(Sender_Address => Name_Resolver.DomainA_Client,
 		 Request_ID    => Request_Number);
 	  Route_Message(Outgoing_Message);
    end Initialize;
@@ -70,10 +68,8 @@ package body DomainA_Client.Messages is
 		 -- Send the next message!
 		 Send_Time := Ada.Real_Time.Clock;
 		 Outgoing_Message := DomainB_Server.API.Ping_Request_Encode
-		   (Sender_Domain => Domain_ID,
-			Receiver_Domain => Message.Sender_Domain,
-			Sender        => ID,
-			Request_ID    => Request_Number);
+		   (Sender_Address => Name_Resolver.DomainA_Client,
+                    Request_ID    => Request_Number);
 		 Route_Message(Outgoing_Message);
 	  end if;
 
@@ -123,7 +119,7 @@ package body DomainA_Client.Messages is
    begin
 	  Initialize;
 	  loop
-		 Message_Manager.Fetch_Message(ID, Incoming_Message);
+		 Message_Manager.Fetch_Message(Name_Resolver.DomainA_Client.Module_ID, Incoming_Message);
 		 Process(Incoming_Message);
 	  end loop;
    end Message_Loop;

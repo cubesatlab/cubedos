@@ -6,11 +6,10 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+pragma Warnings (Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
 
 package LED_Driver is
-
-   ID : constant Message_Manager.Module_ID_Type := 5;
 
    type LED_Type is (Green, Orange, Red, Blue);
 

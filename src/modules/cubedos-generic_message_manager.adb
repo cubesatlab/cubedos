@@ -6,6 +6,7 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 with Ada.Text_IO;
+
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
 is
@@ -120,20 +121,16 @@ is
 
 
    function Make_Empty_Message
-     (Sender_Domain   : Domain_ID_Type;
-      Receiver_Domain : Domain_ID_Type;
-      Sender     : Module_ID_Type;
-      Receiver   : Module_ID_Type;
+     (Sender_Address   : Message_Address;
+      Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
       Message_ID : Message_ID_Type;
       Priority   : System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record;
    begin
-      Message.Sender_Domain   := Sender_Domain;
-      Message.Receiver_Domain := Receiver_Domain;
-      Message.Sender     := Sender;
-      Message.Receiver   := Receiver;
+      Message.Sender_Address := Sender_Address;
+      Message.Receiver_Address   := Receiver_Address;
       Message.Request_ID := Request_ID;
       Message.Message_ID := Message_ID;
       Message.Priority   := Priority;
@@ -152,18 +149,18 @@ is
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type) is
    begin
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
-      Message_Storage(Message.Receiver).Send(Message, Status);
+      Message_Storage(Message.Receiver_Address.Module_ID).Send(Message, Status);
    end Route_Message;
 
 
    procedure Route_Message(Message : in Message_Record) is
    begin
-      if Message.Receiver_Domain /= Domain_ID then
+      if Message.Receiver_Address.Domain_ID /= Domain_ID then
         Ada.Text_IO.Put_Line("Routing Message");
-        
-        Message_Storage(8).Unchecked_Send(Message);
+        -- Circular Dependency with Name_Resolver so resorting to hardcoding
+        Message_Storage(1).Unchecked_Send(Message);
       else 
-        Message_Storage(Message.Receiver).Unchecked_Send(Message);
+        Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
       end if;
    end Route_Message;
 

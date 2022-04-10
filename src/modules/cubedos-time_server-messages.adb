@@ -6,6 +6,7 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+with Name_Resolver;
 with CubedOS.Time_Server.API;
 use  CubedOS.Time_Server.API;
 
@@ -22,6 +23,7 @@ package body CubedOS.Time_Server.Messages
 
    subtype Restricted_Module_ID is Positive range 2 .. Module_ID_Type'Last;
 
+   -- Should Series_Record hold the Domain_ID?
    type Series_Record is
       record
          Module_ID : Restricted_Module_ID := Restricted_Module_ID'First;
@@ -135,8 +137,7 @@ package body CubedOS.Time_Server.Messages
                if Current_Series.Is_Used and then Current_Series.Next <= Current_Time then
                   Route_Message
                     (Tick_Reply_Encode
-                       (Receiver_Domain => Domain_ID,
-                        Receiver   => Current_Series.Module_ID,
+                       (Receiver_Address => (Name_Resolver.Time_Server.Domain_ID, Current_Series.Module_ID),
                         Request_ID => 0,
                         Series_ID  => Current_Series.ID,
                         Count      => Current_Series.Count));
@@ -198,8 +199,8 @@ package body CubedOS.Time_Server.Messages
          -- a tick request to itself, that logic error should perhaps be logged somehow. It
          -- would be nice to statically show that situation can never happen.
          --
-         if Incoming_Message.Sender in Restricted_Module_ID then
-            Series.Module_ID := Incoming_Message.Sender;
+         if Incoming_Message.Sender_Address.Module_ID in Restricted_Module_ID then
+            Series.Module_ID := Incoming_Message.Sender_Address.Module_ID;
             Series.ID        := Series_ID;
             Series.Kind      := Request_Type;
             Series.Interval  := Tick_Interval;
@@ -228,8 +229,8 @@ package body CubedOS.Time_Server.Messages
          -- a tick request to itself, that logic error should perhaps be logged somehow. It
          -- would be nice to statically show that situation can never happen.
          --
-         if Incoming_Message.Sender in Restricted_Module_ID then
-            Series.Module_ID := Incoming_Message.Sender;
+         if Incoming_Message.Sender_Address.Module_ID in Restricted_Module_ID then
+            Series.Module_ID := Incoming_Message.Sender_Address.Module_ID;
             Series.ID        := Series_ID;
             Series.Kind      := One_Shot;
             Series.Interval  := Ada.Real_Time.Time_Span_Zero;
@@ -255,8 +256,8 @@ package body CubedOS.Time_Server.Messages
       -- a cancel request to itself, that logic error should perhaps be logged somehow. It
       -- would be nice to statically show that situation can never happen.
       --
-      if Status = Success and Incoming_Message.Sender in Restricted_Module_ID then
-         Series_Database.Remove_Series_Record(Incoming_Message.Sender, Series_ID);
+      if Status = Success and Incoming_Message.Sender_Address.Module_ID in Restricted_Module_ID then
+         Series_Database.Remove_Series_Record(Incoming_Message.Sender_Address.Module_ID, Series_ID);
       end if;
    end Process_Cancel_Request;
 
@@ -292,7 +293,7 @@ package body CubedOS.Time_Server.Messages
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Time_Server.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

@@ -4,7 +4,7 @@
 -- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --------------------------------------------------------------------------------
 with DomainB_Server.API;
-
+with Name_Resolver;
 package body DomainB_Server.Messages is
    use Message_Manager;
 
@@ -25,8 +25,7 @@ package body DomainB_Server.Messages is
 	  if Decode_Status = Message_Manager.Success then
 		 Outgoing_Message :=
 		   DomainB_Server.API.Ping_Reply_Encode
-			 (Receiver_Domain => Message.Sender_Domain,
-			  Receiver        => Message.Sender,
+			 (Receiver_Address => Message.Sender_Address,
 			  Request_ID      => Message.Request_ID,
 			  Status          => DomainB_Server.API.Success);  -- Ping is always successful.
 		 Message_Manager.Route_Message(Outgoing_Message);
@@ -56,7 +55,7 @@ package body DomainB_Server.Messages is
 	  Incoming_Message : Message_Manager.Message_Record;
    begin
 	  loop
-		 Message_Manager.Fetch_Message(ID, Incoming_Message);
+		 Message_Manager.Fetch_Message(Name_Resolver.DomainB_Server.Module_ID, Incoming_Message);
 		 Process(Incoming_Message);
 	  end loop;
    end Message_Loop;

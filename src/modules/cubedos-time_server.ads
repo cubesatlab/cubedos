@@ -6,10 +6,9 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+pragma Warnings (Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
 
 package CubedOS.Time_Server is
-
-   ID : constant Message_Manager.Module_ID_Type := 4;
 
 end CubedOS.Time_Server;

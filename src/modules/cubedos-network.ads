@@ -10,6 +10,4 @@ with Message_Manager;
 
 package CubedOS.Network is
 
-   ID : constant Message_Manager.Module_ID_Type := 8;
-
 end CubedOS.Network;

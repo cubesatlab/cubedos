@@ -12,10 +12,11 @@ with Ada.Text_IO;
 with Ada.Strings;       use Ada.Strings;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
+with Name_Resolver;
+
 package body CubedOS.Network.Messages is
     
    function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
-      Char : Character;
       Property_Digits : Integer := 0;
       Current_Digit : Integer := 0;
       Property_Position : Integer := 1;
@@ -61,12 +62,10 @@ package body CubedOS.Network.Messages is
       end loop;
    
       return Message_Manager.Make_Empty_Message
-      (Sender_Domain   => Sender_Domain,
-       Receiver_Domain => Receiver_Domain,
-       Sender          => Sender_Module,
-       Receiver        => Receiver_Module,
-       Request_ID      => Request_ID,
-       Message_ID      => Message_ID);
+        (Sender_Address => (Sender_Domain, Sender_Module),
+         Receiver_Address => (Receiver_Domain, Receiver_Module),
+         Request_ID      => Request_ID,
+         Message_ID      => Message_ID);
    end Read_Stream_Message;
     
    procedure Server_Loop is
@@ -95,7 +94,7 @@ package body CubedOS.Network.Messages is
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
             Message := Read_Stream_Message(Data, Last);
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
-            if Message.Sender_Domain = Message_Manager.Domain_ID then
+            if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
                Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
             else
                Ada.Text_IO.Put_Line ("This message was sent from a different domain! Routing Message");
@@ -137,10 +136,10 @@ package body CubedOS.Network.Messages is
     -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Manager.Message_Record) is
       -- Convert Item to String (with no trailing space)
-      Sender_Domain_String : constant String := Trim(Message_Manager.Domain_ID_Type'Image(Message.Sender_Domain), Left);
-      Sender_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Sender), Left);
-      Receiver_Domain_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver_Domain), Left);         
-      Receiver_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver), Left);
+      Sender_Domain_String : constant String := Trim(Message_Manager.Domain_ID_Type'Image(Message.Sender_Address.Domain_ID), Left);
+      Sender_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Sender_Address.Module_ID), Left);
+      Receiver_Domain_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver_Address.Domain_ID), Left);         
+      Receiver_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver_Address.Module_ID), Left);
       Request_ID_String : constant String := Trim(Message_Manager.Request_ID_Type'Image(Message.Request_ID), Left);
       Message_ID_String : constant String := Trim(Message_Manager.Message_ID_Type'Image(Message.Message_ID), Left);
       Message_Image     : constant String := Sender_Domain_String & "!" & Sender_Module_String & "!" & Receiver_Domain_String & "!" & Receiver_Module_String & "!" & Request_ID_String & "!" & Message_ID_String & "!";
@@ -162,7 +161,7 @@ package body CubedOS.Network.Messages is
    begin
       Ada.Text_IO.Put_Line ("Start Message Loop");
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Network_Server, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

@@ -18,10 +18,9 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+pragma Warnings (Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
 
 package CubedOS.Publish_Subscribe_Server is
-
-   ID : constant Message_Manager.Module_ID_Type := 3;
 
 end CubedOS.Publish_Subscribe_Server;

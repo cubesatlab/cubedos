@@ -8,5 +8,5 @@
 with Message_Manager;
 
 package DomainB_Server is
-   ID : constant Message_Manager.Module_ID_Type := 6;
+
 end DomainB_Server;
