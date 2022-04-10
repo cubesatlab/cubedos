@@ -1,11 +1,13 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-
+       
+with Message_Manager;    -- See the comments in SAMPLE_MODULE-api.ads.  
+with Name_Resolver;      -- See the comments in SAMPLE_MODULE-api.ads.
 with Sample_Module.API;  -- Needed so that the types in the API can be used here.
 
 package body Sample_Module.Messages is
@@ -33,11 +35,11 @@ package body Sample_Module.Messages is
    -- it sould be called Sample_Module.Core (for example).
    
    procedure Handle_A_Request(Message : in Message_Record)
-     with Pre => SAMPLE_MODULE.API.Is_A_Request(Message)
+     with Pre => Sample_Module.API.Is_A_Request(Message)
    is
       Status : Message_Status_Type;
    begin
-      SAMPLE_MODULE.API.A_Request_Decode(Message, Status);
+      Sample_Module.API.A_Request_Decode(Message, Status);
       -- Act on the request message.
    end Handle_A_Request;
    
@@ -48,7 +50,7 @@ package body Sample_Module.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record) is
    begin
-      if SAMPLE_MODULE.API.Is_A_Request(Message) then
+      if Sample_Module.API.Is_A_Request(Message) then
          Handle_A_Request(Message);
       else
          -- An unknown message type has been received. What should be done about that?
@@ -79,7 +81,7 @@ package body Sample_Module.Messages is
       -- Process_Message.
       --
       loop
-         Message_Manager.Fetch_Message(ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Sample_Module.Message_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;

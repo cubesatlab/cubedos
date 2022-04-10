@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE.ads
 -- SUBJECT: Top level package of a CubedOS SAMPLE MODULE.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 -- This module is a skeleton, with comments, showing how to set up a standard CubedOS module.
 -- CubedOS modules do not need to follow this structure exactly, but it is recommended to at
@@ -10,21 +10,11 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
--- All CubedOS applications should instantiate Generic_Message_Manager using some suitable name.
--- The name Message_Manager is recommended but not required. In fact, some CubedOS applications
--- may wish to create multiple "communication domains" using multiple message managers with
--- different instantiation arguments. However, this sample does not demonstrate that feature.
---
--- The message manager package contains the Mailboxes array that is used by CubedOS for
--- inter-module communication.
-with Message_Manager;
-
-package Sample_Module is
+package Sample_Module is        
+   pragma Pure;
    
-   -- Every module has an ID number. CubedOS core modules have "well known" ID numbers that
-   -- should not be used in an application specific module. ID numbers are statically allocated.
-   -- We recommend creating a file, module_map.txt, listing these allocations. The value 1 below
-   -- is just an example.
-   ID : constant Message_Manager.Module_ID_Type := 1;
-
+   -- Every module has a domain ID number and a module ID number. However, those numbers are
+   -- assigned by the application programming in a package Name_Resolver. Modules are not
+   -- directly aware of their own ID numbers but instead look them up from the Name_Resolver
+   -- just as clients must.
 end Sample_Module;
