@@ -25,10 +25,10 @@ gnatdoc -P src/cubedos.gpr --output=html
 
 # Build the main documentation.
 cd doc
-pdflatex -halt-on-error CubedOS.tex > /dev/null
+pdflatex -file-line-error -halt-on-error CubedOS.tex
 bibtex CubedOS
-pdflatex -halt-on-error CubedOS.tex > /dev/null
-pdflatex -halt-on-error CubedOS.tex > /dev/null
+pdflatex -file-line-error -halt-on-error CubedOS.tex > /dev/null
+pdflatex -file-line-error -halt-on-error CubedOS.tex > /dev/null
 cd ..
 
 # Do SPARK analysis.
