@@ -17,8 +17,12 @@ gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
 gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 #gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
 
+# Do unit testing with GNATtest.
+gnattest -P src/library/cubedlib.gpr
+gprbuild -P src/library/obj/Debug/gnattest/harness/test_driver.gpr
+src/library/obj/Debug/gnattest/harness/test_runner --skeleton-default=pass
+
 # TODO: Do a style check using GNATcheck.
-# TODO: Get the GNATtest stuff working so we can build/execute it here.
 
 # Build the API documentation. This has to be done after a successful build.
 gnatdoc -P src/cubedos.gpr --output=html
