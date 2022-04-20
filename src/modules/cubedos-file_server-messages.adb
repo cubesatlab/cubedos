@@ -64,10 +64,7 @@ package body CubedOS.File_Server.Messages is
               (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
-         return;
-      end if;
-
-      if Status = Malformed then
+      elsif Status = Malformed then
          Message_Manager.Route_Message
            (API.Open_Reply_Encode
               (Receiver_Address => Incoming_Message.Sender_Address,
@@ -153,9 +150,9 @@ package body CubedOS.File_Server.Messages is
          if Octet_IO.Is_Open(Files(Handle).Underlying) then
             Size := 0;
             begin
-	    -- Loop thorugh data to write each character
-	       while Size < Amount loop
-	          Octet_IO.Write(Files(Handle).Underlying, Data(Size));
+               -- Loop thorugh data to write each character
+               while Size < Amount loop
+                  Octet_IO.Write(Files(Handle).Underlying, Data(Size));
                   Size := Size + 1;
                end loop;
             exception
@@ -196,7 +193,7 @@ package body CubedOS.File_Server.Messages is
       elsif API.Is_Read_Request(Incoming_Message) then
          Process_Read_Request(Incoming_Message);
       elsif API.Is_Write_Request(Incoming_Message) then
-	 Process_Write_Request(Incoming_Message);
+         Process_Write_Request(Incoming_Message);
       elsif API.Is_Close_Request(Incoming_Message) then
          Process_Close_Request(Incoming_Message);
       else
@@ -222,5 +219,3 @@ package body CubedOS.File_Server.Messages is
 
 
 end CubedOS.File_Server.Messages;
-
-

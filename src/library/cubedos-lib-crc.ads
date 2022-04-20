@@ -9,10 +9,10 @@ pragma SPARK_Mode(On);
 package CubedOS.Lib.CRC is
 
    function CRC_Calculation
-     (Buffer : Octet_Array) return Double_Octet;
+     (Buffer : in Octet_Array) return Double_Octet;
 
    function Continuation_CRC_Calculation
-     (Buffer : Octet_Array;
-      Seed   : Double_Octet) return Double_Octet;
+     (Buffer : in Octet_Array;
+      Seed   : in Double_Octet) return Double_Octet;
 
 end CubedOS.Lib.CRC;

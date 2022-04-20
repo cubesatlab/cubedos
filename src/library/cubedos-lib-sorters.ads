@@ -7,11 +7,11 @@
 generic
    type Element_Type is private;
    type Array_Type is array(Positive range <>) of Element_Type;
-   with function "<"(Left, Right : Element_Type) return Boolean is <>;
+   with function "<"(Left, Right : in Element_Type) return Boolean is <>;
 package CubedOS.Lib.Sorters is
 
    -- Convenience function.
-   function "<="(Left, Right : Element_Type) return Boolean is
+   function "<="(Left, Right : in Element_Type) return Boolean is
       (Left = Right or Left < Right);
 
    -- Sorts the elements in the array Values in ascending order

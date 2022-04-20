@@ -26,23 +26,20 @@ use Message_Manager;
 procedure Main_Time is
    use type Ada.Real_Time.Time;
 
-   package Duration_IO is new Fixed_IO(Duration);
-   use Duration_IO;
-
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
 
-   Incoming_Message : Message_Manager.Message_Record;
-   Series_ID  : Series_ID_Type;
-   Count      : Natural;
-   Status     : Message_Status_Type;
-   Start_Time : Ada.Real_Time.Time;
-   Relative_Time : Ada.Real_Time.Time_Span;
+   Incoming_Message  : Message_Manager.Message_Record;
+   Series_ID         : Series_ID_Type;
+   Count             : Natural;
+   Status            : Message_Status_Type;
+   Start_Time        : Ada.Real_Time.Time;
+   Relative_Time     : Ada.Real_Time.Time_Span;
    Relative_Duration : Duration;
-   Absolute_Time : String := GNAT.Time_Stamp.Current_Time;
+   Absolute_Time     : String := GNAT.Time_Stamp.Current_Time;
 
-
-
+   package Duration_IO is new Fixed_IO(Duration);
+   use Duration_IO;
 begin
    Start_Time := Ada.Real_Time.Clock;
 
@@ -57,10 +54,10 @@ begin
 
    loop
       Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
-      --Put_Line("+++ Fetch returned!");
-      --Put("+++    Sender    : "); Put(Incoming_Message.Sender); New_Line;
-      --Put("+++    Receiver  : "); Put(Incoming_Message.Receiver); New_Line;
-      --Put("+++    Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
+      -- Put_Line("+++ Fetch returned!");
+      -- Put("+++ Sender    : "); Put(Incoming_Message.Sender); New_Line;
+      -- Put("+++ Receiver  : "); Put(Incoming_Message.Receiver); New_Line;
+      -- Put("+++ Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
 
       Relative_Time := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);

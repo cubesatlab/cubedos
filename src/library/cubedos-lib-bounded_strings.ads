@@ -23,27 +23,27 @@ package CubedOS.Lib.Bounded_Strings is
    -- the private part for important information regarding these operations.
 
    -- Returns the number of characters stored in this bounded string.
-   function Length(Source : Bounded_String) return Length_Type
+   function Length(Source : in Bounded_String) return Length_Type
      with
        Global => null,
        Inline;
 
-   function Is_Empty(Source: Bounded_String) return Boolean
+   function Is_Empty(Source: in Bounded_String) return Boolean
      with
        Global => null,
        Inline;
 
    -- A convenient alias.
-   function Size(Source : Bounded_String) return Length_Type renames Length;
+   function Size(Source : in Bounded_String) return Length_Type renames Length;
 
    -- This function expresses the Bounded_String invariant. It is called explicitly at the
    -- interface of the various operations below. Once type invariants are supported by SPARK
    -- for child units, it should be possible to remove this function and use a type invariant.
-   function BSI(BS : Bounded_String) return Boolean is
-      (Length(BS) <= BS.Bound);
+   function BSI(S : in Bounded_String) return Boolean is
+      (Length(S) <= S.Bound);
 
    -- Returns a bounded string with the given upper bound and set to the initializer.
-   function Make(Upper_Bound : Index_Type; Initializer : Bounded_String) return Bounded_String
+   function Make(Upper_Bound : in Index_Type; Initializer : in Bounded_String) return Bounded_String
      with
        Global => null,
        Pre => BSI(Initializer) and Length(Initializer) <= Upper_Bound,
@@ -54,7 +54,7 @@ package CubedOS.Lib.Bounded_Strings is
             Element(Make'Result, I) = Element(Initializer, I));
 
    -- Returns a bounded string with the given upper bound and set to the initializer string.
-   function Make(Upper_Bound : Index_Type; Initializer : String) return Bounded_String
+   function Make(Upper_Bound : in Index_Type; Initializer : in String) return Bounded_String
      with
        Global => null,
        Pre => Initializer'Length <= Upper_Bound,
@@ -65,7 +65,7 @@ package CubedOS.Lib.Bounded_Strings is
             Element(Make'Result, I) = Initializer(Initializer'First - 1 + I));
 
    -- Returns a bounded string with the given upper bound and set to the initializer character.
-   function Make(Upper_Bound : Index_Type; Initializer : Character) return Bounded_String
+   function Make(Upper_Bound : in Index_Type; Initializer : in Character) return Bounded_String
      with
        Global => null,
        Post =>
@@ -74,14 +74,14 @@ package CubedOS.Lib.Bounded_Strings is
            Element(Make'Result, 1) = Initializer;
 
    -- Returns the character at position 'Index' in the given bounded string.
-   function Element(Source : Bounded_String; Index : Index_Type) return Character
+   function Element(Source : in Bounded_String; Index : in Index_Type) return Character
      with
        Global => null,
        Pre => BSI(Source) and Index <= Length(Source);
 
    -- Replaces the character at position 'Index' with 'Item' in the given bounded string.
    procedure Replace_Element
-     (Target : in out Bounded_String; Index : in Index_Type; Item : Character)
+     (Target : in out Bounded_String; Index : in Index_Type; Item : in Character)
      with
        Global => null,
        Depends => (Target =>+ (Index, Item)),
@@ -90,7 +90,7 @@ package CubedOS.Lib.Bounded_Strings is
          BSI(Target) and
          Length(Target) = Length(Target)'Old and Element(Target, Index) = Item;
 
-   function To_String(Source : Bounded_String) return String
+   function To_String(Source : in Bounded_String) return String
      with
        Global => null,
        Pre => BSI(Source),
@@ -160,13 +160,13 @@ private
    -- characters. Thus care is needed in any operation that might reduce the length of a bounded
    -- string.
 
-   function Length(Source : Bounded_String) return Length_Type is
+   function Length(Source : in Bounded_String) return Length_Type is
      (Source.Length);
 
-   function Is_Empty(Source : Bounded_String) return Boolean is
+   function Is_Empty(Source : in Bounded_String) return Boolean is
      (Source.Length = 0);
 
-   function Element(Source : Bounded_String; Index : Index_Type) return Character is
+   function Element(Source : in Bounded_String; Index : in Index_Type) return Character is
      (Source.Text(Index));
 
 end CubedOS.Lib.Bounded_Strings;

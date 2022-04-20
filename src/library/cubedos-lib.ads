@@ -30,37 +30,37 @@ package CubedOS.Lib is
 
    -- Declare intrinsic shift functions for these types.
 
-   function Shift_Left(Value : Octet; Count : Natural) return Octet
+   function Shift_Left(Value : in Octet; Count : in Natural) return Octet
      with
        Import,
        Convention => Intrinsic,
        Global     => null;
 
-   function Shift_Right(Value : Octet; Count : Natural) return Octet
+   function Shift_Right(Value : in Octet; Count : in Natural) return Octet
      with
        Import,
        Convention => Intrinsic,
        Global     => null;
 
-   function Shift_Left(Value : Double_Octet; Count : Natural) return Double_Octet
+   function Shift_Left(Value : in Double_Octet; Count : in Natural) return Double_Octet
      with
        Import,
        Convention => Intrinsic,
        Global     => null;
 
-   function Shift_Right(Value : Double_Octet; Count : Natural) return Double_Octet
+   function Shift_Right(Value : in Double_Octet; Count : in Natural) return Double_Octet
      with
        Import,
        Convention => Intrinsic,
        Global     => null;
 
-   function Shift_Left(Value : Quadruple_Octet; Count : Natural) return Quadruple_Octet
+   function Shift_Left(Value : in Quadruple_Octet; Count : in Natural) return Quadruple_Octet
      with
        Import,
        Convention => Intrinsic,
        Global     => null;
 
-   function Shift_Right(Value : Quadruple_Octet; Count : Natural) return Quadruple_Octet
+   function Shift_Right(Value : in Quadruple_Octet; Count : in Natural) return Quadruple_Octet
      with
        Import,
        Convention => Intrinsic,

@@ -8,7 +8,7 @@ pragma SPARK_Mode(On);
 
 package body CubedOS.Lib.Bounded_Strings is
 
-   function Make(Upper_Bound : Index_Type; Initializer : Bounded_String) return Bounded_String is
+   function Make(Upper_Bound : in Index_Type; Initializer : in Bounded_String) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
       Result.Text := (others => Ada.Characters.Latin_1.Nul);
@@ -18,7 +18,7 @@ package body CubedOS.Lib.Bounded_Strings is
    end Make;
 
 
-   function Make(Upper_Bound : Index_Type; Initializer : String) return Bounded_String is
+   function Make(Upper_Bound : in Index_Type; Initializer : in String) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
       Result.Text := (others => Ada.Characters.Latin_1.Nul);
@@ -28,7 +28,7 @@ package body CubedOS.Lib.Bounded_Strings is
    end Make;
 
 
-   function Make(Upper_Bound : Index_Type; Initializer : Character) return Bounded_String is
+   function Make(Upper_Bound : in Index_Type; Initializer : in Character) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
       Result.Text := (others => Ada.Characters.Latin_1.Nul);
@@ -39,13 +39,13 @@ package body CubedOS.Lib.Bounded_Strings is
 
 
    procedure Replace_Element
-     (Target : in out Bounded_String; Index : in Index_Type; Item : Character) is
+     (Target : in out Bounded_String; Index : in Index_Type; Item : in Character) is
    begin
       Target.Text(Index) := Item;
    end Replace_Element;
 
 
-   function To_String(Source : Bounded_String) return String is
+   function To_String(Source : in Bounded_String) return String is
       Result : constant String(1 .. Source.Length) := Source.Text(1 .. Source.Length);
    begin
       return Result;
