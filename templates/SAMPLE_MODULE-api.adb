@@ -12,9 +12,9 @@ use  CubedOS.Lib;
 package body Sample_Module.API is
 
    function A_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- Create a skeletal message based on the given sender and priority. This function knows
       -- what domain and module ID will receive the message and knows what message ID is
@@ -34,10 +34,10 @@ package body Sample_Module.API is
    
    
    function A_Reply_Encode
-     (Receiver_Address : Message_Address
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address
+      Request_ID       : in Request_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
       Message : Message_Record :=
@@ -61,24 +61,18 @@ package body Sample_Module.API is
    end A_Reply_Encode;
    
 
-   procedure A_Request_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
+   procedure A_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
    begin
       -- Decode the given message and return via out parameters (not shown) the fields.
       null;
    end A_Request_Decode;
    
    
-   procedure A_Reply_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure A_Reply_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
+      Position  : Data_Index_Type;
+      Last      : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value : Positive; -- Normally, this would be an out parameter.
+      Value     : Positive; -- Normally, this would be an out parameter.
    begin
       -- Set a starting position.
       Position := 0;

@@ -67,10 +67,10 @@ package body CubedOS.Publish_Subscribe_Server.API is
 
 
    function Unsubscribe_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : in Request_ID_Type;
-      Channel    : in Channel_ID_Type;
-      Priority   : in System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Channel        : in Channel_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message

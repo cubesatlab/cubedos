@@ -12,11 +12,11 @@ use  CubedOS.Lib;
 package body CubedOS.Interpreter.API is
 
    function Clear_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message
           (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Clear_Request), Priority);
    begin
@@ -26,11 +26,11 @@ package body CubedOS.Interpreter.API is
 
 
    function Set_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message
           (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Set_Request), Priority);
    begin
@@ -40,10 +40,10 @@ package body CubedOS.Interpreter.API is
 
 
    function Set_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
       Message : Message_Record :=
@@ -68,11 +68,11 @@ package body CubedOS.Interpreter.API is
 
 
    function Add_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message
           (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Add_Request), Priority);
    begin
@@ -82,10 +82,10 @@ package body CubedOS.Interpreter.API is
 
 
    function Add_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
       Message : Message_Record :=
@@ -109,34 +109,25 @@ package body CubedOS.Interpreter.API is
    end Add_Reply_Encode;
 
 
-   procedure Clear_Request_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
+   procedure Clear_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
    begin
       -- Decode the given message and return via out parameters (not shown) the fields.
       null;
    end Clear_Request_Decode;
 
 
-   procedure Set_Request_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
+   procedure Set_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
    begin
       -- Decode the given message and return via out parameters (not shown) the fields.
       null;
    end Set_Request_Decode;
 
 
-   procedure Set_Reply_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Set_Reply_Decode (Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
+      Position  : Data_Index_Type;
+      Last      : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value : Positive; -- Commonly, this would be an out parameter.
+      Value     : Positive; -- Commonly, this would be an out parameter.
    begin
       -- Set a starting position.
       Position := 0;
@@ -156,24 +147,18 @@ package body CubedOS.Interpreter.API is
    end Set_Reply_Decode;
 
 
-   procedure Add_Request_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
+   procedure Add_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
    begin
       -- Decode the given message and return via out parameters (not shown) the fields.
       null;
    end Add_Request_Decode;
 
 
-   procedure Add_Reply_Decode
-     (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   is
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Add_Reply_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
+      Position  : Data_Index_Type;
+      Last      : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value : Positive; -- Commonly, this would be an out parameter.
+      Value     : Positive; -- Commonly, this would be an out parameter.
    begin
       -- Set a starting position.
       Position := 0;

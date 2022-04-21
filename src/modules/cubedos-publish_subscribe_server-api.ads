@@ -29,83 +29,83 @@ package CubedOS.Publish_Subscribe_Server.API is
       Publish_Result);     -- Delivery of data published to a channel.
 
    function Subscribe_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Channel        : Channel_ID_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Channel        : in Channel_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Subscribe_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Channel          : Channel_ID_Type;
-      Status           : Status_Type;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Channel          : in Channel_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Unsubscribe_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Channel        : Channel_ID_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Channel        : in Channel_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Unsubscribe_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Channel          : Channel_ID_Type;
-      Status           : Status_Type;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Channel          : in Channel_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Publish_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Channel        : Channel_ID_Type;
-      Message_Data   : CubedOS.Lib.Octet_Array;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Channel        : in Channel_ID_Type;
+      Message_Data   : in CubedOS.Lib.Octet_Array;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
 
    function Publish_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Channel          : Channel_ID_Type;
-      Status           : Status_Type;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Channel          : in Channel_ID_Type;
+      Status           : in Status_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
      with Global => null;
 
    function Publish_Result_Encode
-     (Receiver_Address :  Message_Address;
-      Request_ID       : Request_ID_Type;
-      Channel          : Channel_ID_Type;
-      Message_Data     : CubedOS.Lib.Octet_Array;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Channel          : in Channel_ID_Type;
+      Message_Data     : in CubedOS.Lib.Octet_Array;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
 
 
-   function Is_Subscribe_Request(Message : Message_Record) return Boolean is
+   function Is_Subscribe_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Subscribe_Request));
 
-   function Is_Subscribe_Reply(Message : Message_Record) return Boolean is
+   function Is_Subscribe_Reply(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Subscribe_Reply));
 
-   function Is_Unsubscribe_Request(Message : Message_Record) return Boolean is
+   function Is_Unsubscribe_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Unsubscribe_Request));
 
-   function Is_Unsubscribe_Reply(Message : Message_Record) return Boolean is
+   function Is_Unsubscribe_Reply(Message : in Message_Record) return Boolean is
      (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Unsubscribe_Reply));
 
-   function Is_Publish_Request(Message : Message_Record) return Boolean is
+   function Is_Publish_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Publish_Request));
 
-   function Is_Publish_Reply(Message : Message_Record) return Boolean is
+   function Is_Publish_Reply(Message : in Message_Record) return Boolean is
      (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Publish_Reply));
 
-   function Is_Publish_Result(Message : Message_Record) return Boolean is
+   function Is_Publish_Result(Message : in Message_Record) return Boolean is
      (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and Message.Message_ID = Message_Type'Pos(Publish_Result));
 
 
@@ -155,7 +155,10 @@ package CubedOS.Publish_Subscribe_Server.API is
       Decode_Status : out Message_Status_Type)
    with
      Global => null,
-     Depends => (Channel => Message, Size => (Message, Message_Data), (Message_Data, Decode_Status) => (Message, Message_Data)),
+     Depends =>
+       (Channel => Message,
+        Size    => (Message, Message_Data),
+        (Message_Data, Decode_Status) => (Message, Message_Data)),
      Pre => Is_Publish_Request(Message),
      Post => Size <= Message_Data'Length;
 
@@ -177,7 +180,10 @@ package CubedOS.Publish_Subscribe_Server.API is
       Decode_Status : out Message_Status_Type)
    with
      Global => null,
-     Depends => (Channel => Message, Size => (Message, Message_Data), (Message_Data, Decode_Status) => (Message, Message_Data)),
+     Depends =>
+       (Channel => Message,
+        Size => (Message, Message_Data),
+        (Message_Data, Decode_Status) => (Message, Message_Data)),
      Pre => Is_Publish_Result(Message),
      Post => Size <= Message_Data'Length;
 

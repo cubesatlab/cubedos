@@ -7,7 +7,6 @@
 pragma SPARK_Mode(On);
 
 with System;
-with Name_Resolver;
 
 package CubedOS.Interpreter.Messages is
 

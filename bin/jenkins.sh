@@ -22,11 +22,9 @@ gnattest -P src/library/cubedlib.gpr
 gprbuild -P src/library/obj/Debug/gnattest/harness/test_driver.gpr
 src/library/obj/Debug/gnattest/harness/test_runner --skeleton-default=pass
 
-# Do a style check using GNATcheck.
-# (it is necessary to cd into the 'src' folder so that cubedos-casing-exceptions.txt is found)
-#cd src
-#codepeer-gnatcheck -P cubedos.gpr
-#cd ..
+# Do a style check using GNATcheck using a helper shell script.
+# See the comments in the script file for an explanation.
+bin/run-gnatcheck.sh
 
 # Build the API documentation. This has to be done after a successful build.
 gnatdoc -P src/cubedos.gpr --output=html

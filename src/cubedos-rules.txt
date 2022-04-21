@@ -28,6 +28,7 @@
 +RMisplaced_Representation_Items
 +RNull_Paths
 +RSingle_Value_Enumeration_Types
+-- +RHeaders:cubedos.hdr
 +RIdentifier_Casing:Type=mixed
 +RIdentifier_Casing:Others=mixed
 +RIdentifier_Casing:Constant=mixed

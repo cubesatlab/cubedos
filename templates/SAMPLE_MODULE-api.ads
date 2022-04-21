@@ -73,19 +73,19 @@ package Sample_Module.API is
    -- reserved as a placeholder and can be used when this feature is not useful.
    --
    function A_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID : Request_ID_Type;     
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;     
       -- This is where appropriate IN parameters are defined for additional items.
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
    
    function A_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Status     : Status_Type; 
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Status           : in Status_Type; 
       -- This is where appropriate IN parameters are defined for additional items.      
       -- Not all replies necessarily need to return a Status value. However, that is common.
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    with Global => null;
    
    
@@ -94,10 +94,10 @@ package Sample_Module.API is
    -- details of how messages are distinguished (the business about the position in the
    -- Message_Type enumeration).
    --
-   function Is_A_Request(Message : Message_Record) return Boolean is
+   function Is_A_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Sample_Module and Message.Message_ID = Message_Type'Pos(A_Request));
    
-   function Is_A_Reply(Message : Message_Record) return Boolean is
+   function Is_A_Reply(Message : in Message_Record) return Boolean is
      (Message.Sender_Address = Name_Resolver.Sample_Module and Message.Message_ID = Message_Type'Pos(A_Reply));
    
    
