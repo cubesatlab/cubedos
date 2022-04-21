@@ -7,7 +7,7 @@
 
 # It is necessary to cd into the 'src' folder so that cubedos-casing-exceptions.txt is found.
 cd src
-codepeer-gnatcheck -P cubedos.gpr
+codepeer-gnatcheck -P cubedos.gpr -U
 cd ..
 
 exit 0  # Success!

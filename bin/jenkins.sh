@@ -8,9 +8,10 @@ set -e
 export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/codepeer/bin:/opt/gnatstudio/bin:$PATH
 
 # Build the test programs. We can't run them right now because they are infinite loops.
+gprbuild -P src/cubedos.gpr src/check/main.adb
+gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
 gprbuild -P src/cubedos.gpr src/check/main_file.adb
 gprbuild -P src/cubedos.gpr src/check/main_time.adb
-gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
 
 # Build the sample programs.
 gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
