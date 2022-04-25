@@ -1,28 +1,30 @@
 --------------------------------------------------------------------------------
--- FILE   : check_message_manager.ads
--- SUBJECT: Body of an XDR encoding/decoding package test.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- FILE   : check_lib_xdr.adb
+-- SUBJECT: Body of an XDR encoding/decoding unit test package.
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 --with Ada.Exceptions;
-with Ada.Assertions;
-with Ada.Text_IO;
+with AUnit.Assertions;
 with CubedOS.Lib.XDR;
 --with Ada.Characters.Handling;
 
 --use Ada.Exceptions;
-use Ada.Assertions;
-use Ada.Text_IO;
+use AUnit.Assertions;
 use CubedOS.Lib;
 use CubedOS.Lib.XDR;
 --use Ada.Characters.Handling;
 
-package body CubedOS.Lib.XDR.Check is
+package body Check_Lib_XDR is
+
+   Test_XDR_Size : constant := 128;
 
    -- Test encoding/decoding of XDR 32 bit integer.
-   procedure Test_Encode_Decode_1 is
-      Data_1 : XDR_Array;
-      Data_2 : XDR_Array;
+   procedure Test_Encode_Decode_1(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data_1 : XDR_Array(0 .. Test_XDR_Size - 1);
+      Data_2 : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Last : XDR_Index_Type;
       Value_1 : constant XDR_Integer := 16#12345678#; -- Test when all octets are filled.
@@ -53,10 +55,12 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR 32 bit integer using negative values.
-   procedure Test_Encode_Decode_2 is
-      Data_1 : XDR_Array;
-      Data_2 : XDR_Array;
-      Data_3 : XDR_Array;
+   procedure Test_Encode_Decode_2(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data_1 : XDR_Array(0 .. Test_XDR_Size - 1);
+      Data_2 : XDR_Array(0 .. Test_XDR_Size - 1);
+      Data_3 : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Last : XDR_Index_Type;
       Value_1 : constant XDR_Integer := -12345678;
@@ -88,8 +92,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR 32 bit unsigned integer.
-   procedure Test_Encode_Decode_3 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_3(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Last : XDR_Index_Type;
       Value : constant XDR_Integer := 16#12345678#;
@@ -113,8 +119,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR boolean value
-   procedure Test_Encode_Decode_4 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_4(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Position_1 : constant XDR_Index_Type := 0;
       Position_2 : constant XDR_Index_Type := 4;
       Last : Octet_Array_Index;
@@ -139,8 +147,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR 64 bit integer.
-   procedure Test_Encode_Decode_5 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_5(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Value : constant XDR_Hyper := 16#1234567876543210#;
       Decoded_Value : XDR_Hyper;
@@ -171,8 +181,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR 64 bit integer using negative values.
-   procedure Test_Encode_Decode_6 is
-      Data_1, Data_2, Data_3 : XDR_Array;
+   procedure Test_Encode_Decode_6(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data_1, Data_2, Data_3 : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Value_1 : constant XDR_Hyper := (-2**63);
       Value_2 : constant XDR_Hyper := -123456789123456;
@@ -205,8 +217,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR unsigned 64 bit integer.
-   procedure Test_Encode_Decode_7 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_7(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Position : constant XDR_Index_Type := 0;
       Value : constant XDR_Hyper := 16#1234567876543210#;
       Decoded_Value : XDR_Hyper;
@@ -237,8 +251,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR single precision float.
-   procedure Test_Encode_Decode_8 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_8(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Decoded_Value : XDR_Float;
       Last : XDR_Index_Type;
    begin
@@ -265,8 +281,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of XDR double precision float.
-   procedure Test_Encode_Decode_9 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_9(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Decoded_Value : XDR_Double;
       Last : XDR_Index_Type;
    begin
@@ -293,8 +311,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
    -- Test encoding/decoding of fixed length opaque data.
-   procedure Test_Encode_Decode_10 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_10(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Value_1 : constant Octet_Array(0 .. 5) := (others => 2);
       Value_2 : constant Octet_Array(0 .. 7) := (others => 2);
       Decoded_Value_1 : Octet_Array(0 .. 5);
@@ -327,8 +347,10 @@ package body CubedOS.Lib.XDR.Check is
 
 
     -- Test encoding/decoding of fixed length string.
-   procedure Test_Encode_Decode_11 is
-      Data : XDR_Array;
+   procedure Test_Encode_Decode_11(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
       Value : constant String := "Hello";
       Last : XDR_Index_Type;
       Decoded_Value : String(1 .. 5);
@@ -348,20 +370,27 @@ package body CubedOS.Lib.XDR.Check is
    end Test_Encode_Decode_11;
 
 
-   procedure Run_Tests is
+   procedure Register_Tests(T : in out Lib_XDR_Test) is
    begin
-      Put("XDR: Encode/Decode Integer"); Test_Encode_Decode_1; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Negative Integer"); Test_Encode_Decode_2; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Unsigned"); Test_Encode_Decode_3; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Boolean"); Test_Encode_Decode_4; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Hyper"); Test_Encode_Decode_5; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Negative Hyper"); Test_Encode_Decode_6; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Unsigned Hyper"); Test_Encode_Decode_7; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Float"); Test_Encode_Decode_8; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Double"); Test_Encode_Decode_9; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode Fixed Opaque Data"); Test_Encode_Decode_10; Put_Line(" (Ok)");
-      Put("XDR: Encode/Decode String"); Test_Encode_Decode_11; Put_Line(" (Ok)");
-   end Run_Tests;
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_1'Access, "32 bit integer");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_2'Access, "32 bit integer (with negatives)");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_3'Access, "32 bit unsigned integer");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_4'Access, "Boolean");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_5'Access, "64 bit integer");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_10'Access, "fixed length opaque data");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_11'Access, "fixed length string");
+   end Register_Tests;
 
 
-end CubedOS.Lib.XDR.Check;
+   function Name(T : Lib_XDR_Test) return AUnit.Message_String is
+      pragma Unreferenced(T);
+
+   begin
+      return AUnit.Format("Lib.XDR");
+   end Name;
+
+end Check_Lib_XDR;

@@ -7,6 +7,10 @@ set -e
 # Make sure we have the environment we need.
 export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/codepeer/bin:/opt/gnatstudio/bin:$PATH
 
+# Build and run the unit tests.
+gprbuild -P src/cubedos.gpr src/check/cubedos_check.adb
+src/check/build/cubedos_check
+
 # Build the test programs. We can't run them right now because they are infinite loops.
 gprbuild -P src/cubedos.gpr src/check/main.adb
 gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
@@ -17,11 +21,6 @@ gprbuild -P src/cubedos.gpr src/check/main_time.adb
 gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
 gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 #gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
-
-# Do unit testing with GNATtest.
-gnattest -P src/library/cubedlib.gpr
-gprbuild -P src/library/obj/Debug/gnattest/harness/test_driver.gpr
-src/library/obj/Debug/gnattest/harness/test_runner --skeleton-default=pass
 
 # Do a style check using GNATcheck using a helper shell script.
 # See the comments in the script file for an explanation.
