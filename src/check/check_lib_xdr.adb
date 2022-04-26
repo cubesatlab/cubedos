@@ -4,16 +4,12 @@
 -- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
---with Ada.Exceptions;
 with AUnit.Assertions;
 with CubedOS.Lib.XDR;
---with Ada.Characters.Handling;
 
---use Ada.Exceptions;
 use AUnit.Assertions;
 use CubedOS.Lib;
 use CubedOS.Lib.XDR;
---use Ada.Characters.Handling;
 
 package body Check_Lib_XDR is
 
@@ -325,7 +321,7 @@ package body Check_Lib_XDR is
 
       -- Try encoding...
       Encode(Value_1, Data, 0, Last);
-      --Assert(Data(0 .. 5) = Value_1, "Array encoded incorrectly");
+      -- Assert(Data(0 .. 5) = Value_1, "Array encoded incorrectly");
       Assert
         (Data(Value_1'Length) = 0 and Data(Value_1'Length + 1) = 0,
          "Padding encoded incorrectly");
@@ -338,7 +334,7 @@ package body Check_Lib_XDR is
 
       -- Try encoding...
       Encode(Value_2, Data, 0, Last);
-      --Assert(Data(0 .. 7) = Value_2, "Array encoded incorrectly");
+      -- Assert(Data(0 .. 7) = Value_2, "Array encoded incorrectly");
 
       -- Try decoding...
       Decode(Data, 0, Decoded_Value_2, Last);
@@ -346,7 +342,7 @@ package body Check_Lib_XDR is
    end Test_Encode_Decode_10;
 
 
-    -- Test encoding/decoding of fixed length string.
+   -- Test encoding/decoding of fixed length string.
    procedure Test_Encode_Decode_11(T : in out AUnit.Test_Cases.Test_Case'Class) is
       pragma Unreferenced(T);
 
@@ -386,7 +382,7 @@ package body Check_Lib_XDR is
    end Register_Tests;
 
 
-   function Name(T : Lib_XDR_Test) return AUnit.Message_String is
+   function Name(T : in Lib_XDR_Test) return AUnit.Message_String is
       pragma Unreferenced(T);
 
    begin

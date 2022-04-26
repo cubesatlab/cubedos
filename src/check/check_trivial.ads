@@ -14,6 +14,6 @@ package Check_Trivial is
    type Trivial_Test is new AUnit.Test_Cases.Test_Case with null record;
 
    procedure Register_Tests(T : in out Trivial_Test);
-   function Name(T : Trivial_Test) return AUnit.Message_String;
+   function Name(T : in Trivial_Test) return AUnit.Message_String;
 
 end Check_Trivial;

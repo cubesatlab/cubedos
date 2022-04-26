@@ -25,7 +25,7 @@ package body Check_Trivial is
    end Register_Tests;
 
 
-   function Name(T : Trivial_Test) return AUnit.Message_String is
+   function Name(T : in Trivial_Test) return AUnit.Message_String is
       pragma Unreferenced(T);
    begin
       return AUnit.Format("Trivial");

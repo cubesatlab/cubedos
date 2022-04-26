@@ -12,6 +12,6 @@ package Check_Lib_XDR is
    type Lib_XDR_Test is new AUnit.Test_Cases.Test_Case with null record;
 
    procedure Register_Tests(T : in out Lib_XDR_Test);
-   function Name(T : Lib_XDR_Test) return AUnit.Message_String;
+   function Name(T : in Lib_XDR_Test) return AUnit.Message_String;
 
 end Check_Lib_XDR;

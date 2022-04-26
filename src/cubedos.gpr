@@ -20,7 +20,8 @@ project CubedOS is
    package Builder is
    end Builder;
 
-   package Documentation is
+   package Documentation is     
+      for Ignored_Subprojects use ("aunit");
    end Documentation;
 
    package Prove is

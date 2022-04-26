@@ -7,3 +7,5 @@ BSI
 *RID*
 *TC*
 *XDR*
+CubedOS_Check
+CubedLib_Suite
