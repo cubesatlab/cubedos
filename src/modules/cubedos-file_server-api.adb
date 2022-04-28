@@ -17,11 +17,11 @@ package body CubedOS.File_Server.API is
 
    -- Requester-side Use
    function Open_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Mode           : Mode_Type;
-      Name           : String;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Mode           : in Mode_Type;
+      Name           : in String;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
@@ -46,10 +46,10 @@ package body CubedOS.File_Server.API is
 
    -- Server-side Use
    function Open_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Handle           : API.File_Handle_Type;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Handle           : in API.File_Handle_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
@@ -69,15 +69,15 @@ package body CubedOS.File_Server.API is
 
 
    function Read_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Handle         : Valid_File_Handle_Type;
-      Amount         : Read_Size_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Handle         : in Valid_File_Handle_Type;
+      Amount         : in Read_Size_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
-         Receiver_Address => Name_Resolver.File_Server, 
+         Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Read_Request),
          Priority   => Priority);
@@ -96,12 +96,12 @@ package body CubedOS.File_Server.API is
 
    -- Server-side use.
    function Read_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Handle           : Valid_File_Handle_Type;
-      Amount           : Read_Result_Size_Type;
-      Data             : Octet_Array;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Handle           : in Valid_File_Handle_Type;
+      Amount           : in Read_Result_Size_Type;
+      Data             : in Octet_Array;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
@@ -125,12 +125,12 @@ package body CubedOS.File_Server.API is
 
 
    function Write_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Handle         : Valid_File_Handle_Type;
-      Amount         : Write_Size_Type;
-      Data           : Octet_Array;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Handle         : in Valid_File_Handle_Type;
+      Amount         : in Write_Size_Type;
+      Data           : in Octet_Array;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
@@ -155,11 +155,11 @@ package body CubedOS.File_Server.API is
 
    -- Server-side use.
    function Write_Reply_Encode
-     (Receiver_Address : Message_Address;
-      Request_ID       : Request_ID_Type;
-      Handle           : Valid_File_Handle_Type;
-      Amount           : Write_Result_Size_Type;
-      Priority         : System.Priority := System.Default_Priority) return Message_Record
+     (Receiver_Address : in Message_Address;
+      Request_ID       : in Request_ID_Type;
+      Handle           : in Valid_File_Handle_Type;
+      Amount           : in Write_Result_Size_Type;
+      Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
@@ -181,10 +181,10 @@ package body CubedOS.File_Server.API is
 
 
    function Close_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Handle         : Valid_File_Handle_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Handle         : in Valid_File_Handle_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
@@ -217,7 +217,7 @@ package body CubedOS.File_Server.API is
       Raw_Name_Size : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-       pragma Warnings
+      pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
       Decode_Status := Success;
       Name := (others => ' ');
@@ -230,7 +230,7 @@ package body CubedOS.File_Server.API is
          Mode := Mode_Type'Val(Raw_Mode);
       else
          Decode_Status := Malformed;
-         Mode := Mode_Type'First; --appropriate?
+         Mode := Mode_Type'First; -- appropriate?
       end if;
       XDR.Decode(Message.Payload, Position, Raw_Name_Size, Last);
       Position := Last + 1;
@@ -281,7 +281,7 @@ package body CubedOS.File_Server.API is
       Raw_Amount : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-       pragma Warnings
+      pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
       Decode_Status := Success;
 
@@ -290,7 +290,8 @@ package body CubedOS.File_Server.API is
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       Position := Last + 1;
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
-                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
+                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
+      then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
          Decode_Status := Malformed;
@@ -298,11 +299,12 @@ package body CubedOS.File_Server.API is
       end if;
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Read_Size_Type'First) ..
-                       XDR.XDR_Unsigned(Read_Size_Type'Last) then
+                       XDR.XDR_Unsigned(Read_Size_Type'Last)
+      then
          Amount := Read_Size_Type(Raw_Amount);
       else
          Decode_Status := Malformed;
-         Amount := Read_Size_Type'First; --what type is this?
+         Amount := Read_Size_Type'First; -- What type is this?
       end if;
    end Read_Request_Decode;
 
@@ -364,16 +366,18 @@ package body CubedOS.File_Server.API is
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
-        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
+                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
+      then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
          Decode_Status := Malformed;
-         Handle := Valid_File_Handle_Type'First; --is that what this should be?
+         Handle := Valid_File_Handle_Type'First; -- Is that what this should be?
       end if;
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Write_Result_Size_Type'First + 1) ..
-        XDR.XDR_Unsigned(Write_Result_Size_Type'Last) then
+                       XDR.XDR_Unsigned(Write_Result_Size_Type'Last)
+      then
          Amount := Write_Result_Size_Type(Raw_Amount);
       else
          Amount := 1;
@@ -426,7 +430,7 @@ package body CubedOS.File_Server.API is
       Raw_Handle : XDR.XDR_Unsigned;
       Last       : Data_Index_Type;
    begin
-       pragma Warnings
+      pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
       Decode_Status := Success;
 
@@ -434,11 +438,12 @@ package body CubedOS.File_Server.API is
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
-        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
+                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
+      then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
          Decode_Status := Malformed;
-         Handle := Valid_File_Handle_Type'First; --again, is that what this should be?
+         Handle := Valid_File_Handle_Type'First; -- Again, is that what this should be?
       end if;
    end Close_Request_Decode;
 

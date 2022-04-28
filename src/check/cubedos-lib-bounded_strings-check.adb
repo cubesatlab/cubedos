@@ -1,20 +1,20 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-bounded_strings-check.adb
 -- SUBJECT: Package containing unit tests of bounded_strings
--- AUTHOR : (C) Copyright 2015 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with Ada.Assertions;
 with Ada.Characters.Latin_1;
-with Ada.Text_IO;
+with AUnit.Assertions;
 
-use Ada.Assertions;
-use Ada.Text_IO;
+use AUnit.Assertions;
 
 package body CubedOS.Lib.Bounded_Strings.Check is
    Nul : Character renames Ada.Characters.Latin_1.Nul;
 
-   procedure Test_Make_1 is
+   procedure Test_Make_1(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : constant Bounded_String := Make(1, "");          -- Minimum size, empty intializer.
       B2 : constant Bounded_String := Make(1, "1");         -- Minimum size, fully initialized.
       B3 : constant Bounded_String := Make(8, "");          -- Typical case, empty initializer.
@@ -31,7 +31,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Make_1;
 
 
-   procedure Test_Make_2 is
+   procedure Test_Make_2(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : constant Bounded_String := Make(3, "123");
       B2 : constant Bounded_String := Make(8, B1);
       B3 : constant Bounded_String := Make(8, B2);
@@ -42,7 +44,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Make_2;
 
 
-   procedure Test_Make_3 is
+   procedure Test_Make_3(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       C1 : constant Character := '1';
       B1 : constant Bounded_String := Make(1, C1);           -- Make taking character, minimum bound.
       B2 : constant Bounded_String := Make(8, '1');          -- Make taking character normal bound.
@@ -52,7 +56,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Make_3;
 
 
-   procedure Test_Element is
+   procedure Test_Element(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : constant Bounded_String := Make(1, "1");
       B2 : constant Bounded_String := Make(3, "123");
       C1 : constant Character := Element(B1, 1);       -- Test for Index = Size.
@@ -64,7 +70,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Element;
 
 
-   procedure Test_Replace_Element is
+   procedure Test_Replace_Element(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : Bounded_String := Make(1, "1");
       B2 : Bounded_String := Make(3, "123");
    begin
@@ -75,7 +83,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Replace_Element;
 
 
-   procedure Test_To_String is
+   procedure Test_To_String(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : constant Bounded_String := Make(1, "1");
       B2 : constant Bounded_String := Make(5, "1234");
       S1 : constant String := To_String(B1);
@@ -86,7 +96,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_To_String;
 
 
-   procedure Test_Append_1 is
+   procedure Test_Append_1(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : Bounded_String := Make(4,"1");
       B2 : constant Bounded_String := Make(3, "234");
    begin
@@ -95,7 +107,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Append_1;
 
 
-   procedure Test_Append_2 is
+   procedure Test_Append_2(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : Bounded_String := Make(4, "1");
       S1 : constant String := "234";
       B2 : Bounded_String := Make(8, "");
@@ -108,7 +122,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Append_2;
 
 
-   procedure Test_Append_3 is
+   procedure Test_Append_3(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : Bounded_String := Make(4, "123");
       C1 : constant Character := '4';
       B2 : Bounded_String := Make(8, "");
@@ -121,7 +137,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Append_3;
 
 
-   procedure Test_Clear is
+   procedure Test_Clear(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       B1 : Bounded_String := Make(1, "");
       B2 : Bounded_String := Make(8, "12345678");
    begin
@@ -132,19 +150,27 @@ package body CubedOS.Lib.Bounded_Strings.Check is
    end Test_Clear;
 
 
-   procedure Run_Tests is
+   procedure Register_Tests(T : in out Lib_Bounded_Strings_Test) is
    begin
-      Put("Bounded_Strings: Make 1");   Test_Make_1;   Put_Line(" (Ok)");
-      Put("Bounded_Strings: Make 2");   Test_Make_2;   Put_Line(" (Ok)");
-      Put("Bounded_Strings: Make 3");   Test_Make_3;   Put_LIne(" (Ok)");
-      Put("Bounded_Strings: Element");  Test_ELement;  Put_Line(" (Ok)");
-      Put("Bounded_Strings: Replace_Element"); Test_Replace_Element; Put_Line(" (Ok)");
-      Put("Bounded_Strings: To_String"); Test_To_String; Put_Line(" (Ok)");
-      Put("Bounded_Strings: Append 1"); Test_Append_1; Put_Line(" (Ok)");
-      Put("Bounded_Strings: Append 2"); Test_Append_2; Put_Line(" (Ok)");
-      Put("Bounded_Strings: Append 3"); Test_Append_3; Put_Line(" (Ok)");
-      Put("Bounded_Strings: Clear");    Test_Clear;    Put_Line(" (Ok)");
-   end Run_Tests;
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Make_1'Access, "Make 1");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Make_2'Access, "Make 2");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Make_3'Access, "Make 3");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Element'Access, "Element");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Replace_Element'Access, "Replace_Element");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_To_String'Access, "To_String");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Append_1'Access, "Append 1");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Append_2'Access, "Append 2");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Append_3'Access, "Append 3");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Clear'Access, "Clear");
+   end Register_Tests;
+
+
+   function Name(T : in Lib_Bounded_Strings_Test) return AUnit.Message_String is
+      pragma Unreferenced(T);
+
+   begin
+      return AUnit.Format("Lib.Bounded_Strings");
+   end Name;
 
 
 end CubedOS.Lib.Bounded_Strings.Check;

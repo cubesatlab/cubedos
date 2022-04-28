@@ -6,9 +6,9 @@
 --
 --------------------------------------------------------------------------------
 
-package body CubedOS.Lib.Generic_rID_Map is
+package body CubedOS.Lib.Generic_RID_Map is
 
-   --insert into the next available space
+   -- Insert into the next available space
    procedure Insert(Map : in out RID_Map_Record; Key : in Natural;
                     Value : in Value_Type)
    is
@@ -18,15 +18,15 @@ package body CubedOS.Lib.Generic_rID_Map is
       Next_Found := False;
       Temp_Index := 0;
 
-      --TODO: out of bounds checking everywhere in here
+      -- TODO: out of bounds checking everywhere in here
 
-      --add the new value
+      -- Add the new value
       Map.Key_Array(Map.Next_Free_Index) := Key;
       Map.Value_Array(Map.Next_Free_Index) := Value;
       Map.Used_Indices_Array(Map.Next_Free_Index) := True;
 
-      --TODO: possible to get stuck in here forever
-      --figure out the next free index
+      -- TODO: possible to get stuck in here forever
+      -- figure out the next free index
       while not Next_Found loop
          if not Map.Used_Indices_Array(Temp_Index) then
             Map.Next_Free_Index := Temp_Index;
@@ -42,11 +42,11 @@ package body CubedOS.Lib.Generic_rID_Map is
 
    end Insert;
 
-   --purge entries up to this index
+   -- Purge entries up to this index
    procedure Purge(Map : in out RID_Map_Record; Index : in Num_Entries_Type)
    is
    begin
-      --reset the used_index array and key
+      -- Reset the used_index array and key
       for I in 0 .. Index loop
          if Map.Used_Indices_Array(I) then
             Map.Used_Indices_Array(I) := False;
@@ -54,21 +54,20 @@ package body CubedOS.Lib.Generic_rID_Map is
          end if;
       end loop;
 
-      --we know that at least 0 is free now for sure, so..
+      -- We know that at least 0 is free now for sure, so..
       Map.Next_Free_Index := 0;
    end Purge;
 
-   --get entry for this ID (not sure yet what to do if there isn't an entry)
-   function Get_At(Map : RID_Map_Record; Key : Natural) return Value_Type
-   is
-      Value : Value_Type;
+   -- Get entry for this ID (not sure yet what to do if there isn't an entry)
+   function Get_At(Map : in RID_Map_Record; Key : in Natural) return Value_Type is
+      Value       : Value_Type;
       Found_Index : Boolean;
-      Index : Num_Entries_Type;
+      Index       : Num_Entries_Type;
    begin
       Found_Index := False;
       Index := 0;
 
-      --set index to the index of the key
+      -- Set index to the index of the key
       while not Found_Index loop
          if Map.Key_Array(Index) = Key then
             Found_Index := True;
@@ -80,7 +79,7 @@ package body CubedOS.Lib.Generic_rID_Map is
       if Map.Used_Indices_Array(Index) then
          Value := Map.Value_Array(Index);
       else
-         null; --This is a bad place to reach. need to do something about this error.
+         null; -- This is a bad place to reach. need to do something about this error.
       end if;
 
       return Value;

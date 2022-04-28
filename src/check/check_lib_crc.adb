@@ -1,31 +1,35 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-crc-check.adb
--- SUBJECT: Body of a CRC test.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- SUBJECT: Body of a CRC unit test package.
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with Ada.Assertions;
-with Ada.Text_IO;
+with AUnit.Assertions;
+with CubedOS.Lib;
+with CubedOS.Lib.CRC;
 
-use Ada.Assertions;
-use Ada.Text_IO;
+use AUnit.Assertions;
+use CubedOS.Lib;
+use CubedOS.Lib.CRC;
 
-package body CubedOS.Lib.CRC.Check is
+package body Check_Lib_CRC is
 
-   procedure Test_CRC_Output is
+   procedure Test_CRC_Output(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
       Test_Table_One : Octet_Array(1 .. 35539);
       Test_Table_Follow : Octet_Array(1 .. 30000);
       Test_Table_Two : constant Octet_Array(1 .. 10) :=
         (16#11#, 16#15#, 16#C3#, 16#F0#, 16#00#, 16#05#, 16#20#, 16#DC#, 16#55#, 16#F5#);
       CRC_Output : Double_Octet;
    begin
-      ---initializes Test_Table_One---
+      -- Initializes Test_Table_One
       for I in Integer range 1 .. 35539 loop
-               Test_Table_One(I) := 16#10#;
+         Test_Table_One(I) := 16#10#;
       end loop;
-      ---initializes Test_Table_Follow---
+      -- Initializes Test_Table_Follow
       for I in Integer range 1 .. 30000 loop
-               Test_Table_Follow(I) := 16#10#;
+         Test_Table_Follow(I) := 16#10#;
       end loop;
       CRC_Output := CRC_Calculation(Test_Table_One);
       CRC_Output := Continuation_CRC_Calculation(Test_Table_Follow, CRC_Output);
@@ -36,10 +40,19 @@ package body CubedOS.Lib.CRC.Check is
    end Test_CRC_Output;
 
 
-   procedure Run_Tests is
+   procedure Register_Tests(T : in out Lib_CRC_Test) is
    begin
-      Put("CRC: Output"); Test_CRC_Output; Put_Line(" (Ok)");
-   end Run_Tests;
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_CRC_Output'Access, "Output");
+   end Register_Tests;
 
 
-end CubedOS.Lib.CRC.Check;
+   function Name(T : in Lib_CRC_Test) return AUnit.Message_String is
+      pragma Unreferenced(T);
+
+   begin
+      return AUnit.Format("Lib.CRC");
+   end Name;
+
+
+
+end Check_Lib_CRC;

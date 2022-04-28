@@ -9,12 +9,12 @@ pragma SPARK_Mode(On);
 package body CubedOS.Lib.Space_Packets is
 
    function Format_Primary_Header
-     (APID           : APID_Type;
-      Packet_Type    : Packet_Type_Type;
-      Sequence_Count : Sequence_Count_Type;
-      Data_Length    : Packet_Data_Size_Type;
-      Secondary_Header_Flag : Boolean := False;
-      Segementation_Flags : Segementation_Flag_Type := Unsegmented) return Primary_Header
+     (APID           : in APID_Type;
+      Packet_Type    : in Packet_Type_Type;
+      Sequence_Count : in Sequence_Count_Type;
+      Data_Length    : in Packet_Data_Size_Type;
+      Secondary_Header_Flag : in Boolean := False;
+      Segementation_Flags   : in Segementation_Flag_Type := Unsegmented) return Primary_Header
    is
       Header : Primary_Header := (others => 0);
    begin

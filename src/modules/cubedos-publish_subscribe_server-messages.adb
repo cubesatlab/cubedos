@@ -94,7 +94,10 @@ is
             if Subscription_Map(I, Channel) then
                Route_Message
                  (API.Publish_Result_Encode
-                    ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I), 0, Channel, Message_Data(1 .. Size)));
+                    ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
+                     0,
+                     Channel,
+                     Message_Data(1 .. Size)));
             end if;
          end loop;
       end if;

@@ -44,7 +44,7 @@ package body CubedOS.Lib.CRC is
 
 
    function CRC_Calculation
-     (Buffer : Octet_Array) return Double_Octet
+     (Buffer : in Octet_Array) return Double_Octet
    is
       CRC           : Double_Octet := 16#ffff#;
       Buffer_Holder : Double_Octet;
@@ -60,8 +60,8 @@ package body CubedOS.Lib.CRC is
 
    -- Use Continuation_CRC_Calculation if Buffer array would be larger than 65,535
    function Continuation_CRC_Calculation
-     (Buffer : Octet_Array;
-      Seed   : Double_Octet) return Double_Octet
+     (Buffer : in Octet_Array;
+      Seed   : in Double_Octet) return Double_Octet
    is
       CRC           : Double_Octet;
       Buffer_Holder : Double_Octet;

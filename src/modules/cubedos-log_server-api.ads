@@ -17,7 +17,7 @@ package CubedOS.Log_Server.API is
 
    -- This type is not needed right now. It is intended to be used in replies to indicate success or failure
    -- of a request. However, the Log Server never sends any reply messages. Maybe later?
-   --type Status_Type is (Success, Failure);
+   -- type Status_Type is (Success, Failure);
 
    -- The maximum size of a log message.
    -- The other types here are for convenience only, but notice that Log_Message_Type is always 128 characters.
@@ -42,17 +42,17 @@ package CubedOS.Log_Server.API is
 
 
    function Log_Text_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Log_Level      : Log_Level_Type;
-      Text           : String;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Log_Level      : in Log_Level_Type;
+      Text           : in String;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Pre    => Text'Length <= Maximum_Log_Message_Size;
 
 
-   function Is_A_Log_Text(Message : Message_Record) return Boolean is
+   function Is_A_Log_Text(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Log_Server and Message.Message_ID = Message_Type'Pos(Log_Text));
 
 
@@ -64,7 +64,7 @@ package CubedOS.Log_Server.API is
       Decode_Status : out Message_Status_Type)
    with
      Global  => null,
-     Pre     => Is_A_Log_Text(Message) and Text'Length >= Maximum_Log_Message_Size,
-     Depends => (Text =>+ Message, (Log_Level, Size, Decode_Status) => Message);
+     Depends => (Text =>+ Message, (Log_Level, Size, Decode_Status) => Message),
+     Pre     => Is_A_Log_Text(Message) and Text'Length >= Maximum_Log_Message_Size;
 
 end CubedOS.Log_Server.API;

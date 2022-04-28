@@ -60,16 +60,14 @@ package body CubedOS.Lib.Sorters is
 
    procedure Insertion_Sort(Values : in out Array_Type) is
    begin
-      if Values'Length = 1 then
-         return;
+      if Values'Length /= 1 then
+         for I in Values'First + 1 .. Values'Last loop
+            Insert_Single(Values, I);
+
+            pragma Loop_Invariant
+              (for all J in Values'First .. I - 1=> Values(J) <= Values(J + 1));
+         end loop;
       end if;
-
-      for I in Values'First + 1 .. Values'Last loop
-         Insert_Single(Values, I);
-
-         pragma Loop_Invariant
-           (for all J in Values'First .. I - 1=> Values(J) <= Values(J + 1));
-      end loop;
    end Insertion_Sort;
 
 

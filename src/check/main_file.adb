@@ -7,8 +7,6 @@
 -- window, and ^C out of it when a suitable time has passed. Then observe the behavior to ensure
 -- the desired effects are happening.
 --------------------------------------------------------------------------------
-
-with Ada.Integer_Text_IO;
 with Ada.Text_IO;
 with CubedOS.Lib;
 with CubedOS.File_Server.API;
@@ -16,7 +14,6 @@ with CubedOS.File_Server.Messages;
 pragma Unreferenced(CubedOS.File_Server.Messages);
 with Message_Manager;
 
-use Ada.Integer_Text_IO;
 use Ada.Text_IO;
 use CubedOS;
 use CubedOS.File_Server.API;
@@ -51,9 +48,10 @@ begin
    loop
       Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
       Put_Line("+++ Fetch returned!");
-      Put("+++    Sender    : "); Put(Incoming_Message.Sender_Address.Module_ID); New_Line;
-      Put("+++    Receiver  : "); Put(Incoming_Message.Receiver_Address.Module_ID); New_Line;
-      Put("+++    Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
+      Put_Line("+++    Sender    : " & Module_ID_Type'Image(Incoming_Message.Sender_Address.Module_ID));
+      Put_Line("+++    Receiver  : " & Module_ID_Type'Image(Incoming_Message.Receiver_Address.Module_ID));
+      Put_Line("+++    Message_ID: " & Message_ID_Type'Image(Incoming_Message.Message_ID));
+      New_Line;
 
       -- Process open reply messages.
       if Is_Open_Reply(Incoming_Message) then
@@ -84,7 +82,7 @@ begin
                when others =>
                   -- Should never happen. Let's just ignore this.
                   null;
-	    end case;
+            end case;
          end if;
 
       -- Process reply messages.
@@ -94,9 +92,9 @@ begin
          Read_Reply_Decode(Incoming_Message, Handle, Amount_Read, Data, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
-	    Message_Manager.Route_Message
-	      (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
-	    Put_Line("TX : Close_Request message sent (input file)");
+            Message_Manager.Route_Message
+              (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
+            Put_Line("TX : Close_Request message sent (input file)");
          else
             Put_Line("     +++ Successfully read " & Read_Size_Type'Image(Amount_Read) & " octets");
 
@@ -130,18 +128,17 @@ begin
          end if;
 
       elsif Is_Write_Reply(Incoming_Message) then
-	 Put_Line("RX : Write_Reply message");
+         Put_Line("RX : Write_Reply message");
 
          Write_Reply_Decode(Incoming_Message, Handle, Amount_Write, Status);
-	 if Status = Malformed then
-	    Put_Line("     *** Message is malformed!");
-	    Message_Manager.Route_Message
-	      (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
-	    Put_Line("TX : Close_Request message sent (output file)");
-	 else
-	    Put_Line("     +++ Successfully wrote " & Write_Result_Size_Type'Image(Amount_Write) & " octets");
-	 end if;
-
+         if Status = Malformed then
+            Put_Line("     *** Message is malformed!");
+            Message_Manager.Route_Message
+              (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
+            Put_Line("TX : Close_Request message sent (output file)");
+         else
+            Put_Line("     +++ Successfully wrote " & Write_Result_Size_Type'Image(Amount_Write) & " octets");
+         end if;
       end if;
    end loop;
 
