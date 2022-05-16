@@ -96,7 +96,10 @@ is
          Make_Empty_Message'Result.Message_ID = Message_ID and
          Make_Empty_Message'Result.Priority   = Priority   and
          Make_Empty_Message'Result.Size       = 0;
-
+   
+   -- Convenience function to stringify messages
+   function Stringify_Message (Message : in Message_Record) return String;
+     
    -- Returns an arbitrary, domain-unique request ID. Probably these IDs should also be unique
    -- across domains, but that is not yet implemented.
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
