@@ -5,6 +5,8 @@
 --------------------------------------------------------------------------------
 with DomainB_Server.API;
 with Name_Resolver;
+with Ada.Text_IO;
+
 package body DomainB_Server.Messages is
    use Message_Manager;
 
@@ -22,13 +24,21 @@ package body DomainB_Server.Messages is
 	  DomainB_Server.API.Ping_Request_Decode(Message, Decode_Status);
 
 	  -- Just ignore messages that don't decode properly (decoding Ping_Requests can't fail anyway).
-	  if Decode_Status = Message_Manager.Success then
-		 Outgoing_Message :=
-		   DomainB_Server.API.Ping_Reply_Encode
-			 (Receiver_Address => Message.Sender_Address,
-			  Request_ID      => Message.Request_ID,
-			  Status          => DomainB_Server.API.Success);  -- Ping is always successful.
+	  -- Report a failed request	  
+	  if Decode_Status = Message_Manager.Success and Message.Request_ID <= 10 then
+		Outgoing_Message :=
+		  DomainB_Server.API.Ping_Reply_Encode
+			(Receiver_Address => Message.Sender_Address,
+			 Request_ID       => Message.Request_ID,
+			 Status           => DomainB_Server.API.Success);
 		 Message_Manager.Route_Message(Outgoing_Message);
+      else
+	    Outgoing_Message :=
+	      DomainB_Server.API.Ping_Reply_Encode
+		    (Receiver_Address => Message.Sender_Address,
+			 Request_ID       => Message.Request_ID,
+			 Status           => DomainB_Server.API.Failure); 
+		Message_Manager.Route_Message(Outgoing_Message);
 	  end if;
    end Handle_Ping_Request;
 
