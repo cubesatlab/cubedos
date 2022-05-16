@@ -50,6 +50,8 @@ package body DomainA_Client.Messages is
 	  Receive_Time := Ada.Real_Time.Clock;
 	  Round_Trip_Time := Receive_Time - Send_Time;
 
+	  Ada.Text_IO.Put_Line("Checking for Reported Failure");
+
 	  if Decode_Status /= Success then
 		 Ada.Text_IO.Put_Line("ERROR: Unable to decode a Ping_Reply message!");
 	  elsif Status /= DomainB_Server.API.Success then

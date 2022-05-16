@@ -6,6 +6,7 @@
 --------------------------------------------------------------------------------
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib;
+with Ada.Text_IO;
 
 package body DomainB_Server.API is
    use type XDR.XDR_Unsigned;
@@ -78,8 +79,10 @@ package body DomainB_Server.API is
 	  Position := Last + 1;
 
 	  if Raw_Value > Status_Type'Pos(Status_Type'Last) then
+		 Ada.Text_IO.Put_Line("Malformed Message");
 		 Decode_Status := Malformed;
 	  else
+		 Ada.Text_IO.Put_Line("Good Message");
 		 Status := Status_Type'Val(Raw_Value);
 		 Decode_Status := Success;
 	  end if;
