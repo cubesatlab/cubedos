@@ -13,65 +13,50 @@ with Ada.Strings;       use Ada.Strings;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Name_Resolver;
-
+with CubedOS.Lib.XDR;
+use  CubedOS.Lib;
 package body CubedOS.Network.Messages is
     
    function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
-      Property_Digits : Integer := 0;
-      Current_Digit : Integer := 0;
-      Property_Position : Integer := 1;
-      POW : Integer := 10;
       Sender_Domain : Message_Manager.Domain_ID_Type;
       Sender_Module : Message_Manager.Module_ID_Type;
       Receiver_Domain : Message_Manager.Domain_ID_Type;
       Receiver_Module :Message_Manager. Module_ID_Type;
       Request_ID : Message_Manager.Request_ID_Type;
       Message_ID : Message_Manager.Message_ID_Type;
+      Message_Payload_Size : Integer;
+      Message : Message_Manager.Message_Record;
+      --
+      Payload    : Message_Manager.Data_Array      := (others => 0);
+      Position : Message_Manager.Data_Index_Type := 0;
+      Last_XDR     : Message_Manager.Data_Index_Type;
+      Value : XDR.XDR_Unsigned;
    begin
-      Ada.Text_IO.Put_Line("Incoming: ");
-        
-      for I in 1..Last loop
-         Ada.Text_IO.Put("" & Character'Val(Data(I)));
-         
-         if Character'Val(Data(I)) = '!' then
-            case Property_Position is
-               when 1 => 
-                 Sender_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
-               when 2 =>
-                 Sender_Module := Message_Manager.Module_ID_Type(Property_Digits);
-               when 3 =>
-                 Receiver_Domain := Message_Manager.Domain_ID_Type(Property_Digits);
-               when 4 =>
-                 Receiver_Module := Message_Manager.Module_ID_Type(Property_Digits);
-               when 5 =>
-                 Request_ID := Message_Manager.Request_ID_Type(Property_Digits);
-               when 6 =>
-                 Message_ID := Message_Manager.Message_ID_Type(Property_Digits);
-               when others => null;
-             end case;
-             Property_Position := Property_Position + 1;
-             Property_Digits := 0;
-         else
-            Current_Digit := Integer'Value("" & Character'Val(Data(I)));
-            while Current_Digit >= POW loop
-               POW := POW * 10;
-            end loop;
-            Property_Digits := Property_Digits * POW + Current_Digit;
-            POW := 10;
-         end if;
-      end loop;
-   
-      return Message_Manager.Make_Empty_Message
+
+      Sender_Domain := Message_Manager.Domain_ID_Type(Data(0));
+      Sender_Module := Message_Manager.Module_ID_Type(Data(1));
+      Receiver_Domain := Message_Manager.Domain_ID_Type(Data(2));
+      Receiver_Module := Message_Manager.Module_ID_Type(Data(3));
+      Request_ID := Message_Manager.Request_ID_Type(Data(4));
+      Message_ID := Message_Manager.Message_ID_Type(Data(5));
+      
+      Message := Message_Manager.Make_Empty_Message
         (Sender_Address => (Sender_Domain, Sender_Module),
          Receiver_Address => (Receiver_Domain, Receiver_Module),
          Request_ID      => Request_ID,
          Message_ID      => Message_ID);
+      
+      for I in 6 .. Last loop
+         Message.Payload(Integer(I) - 6) := XDR.XDR_Octet(Data(I));
+      end loop;
+
+      return Message;
    end Read_Stream_Message;
     
    procedure Server_Loop is
       Server        : Socket_Type;
       Address, From : Sock_Addr_Type;
-      Data          : Ada.Streams.Stream_Element_Array (1 .. 512);
+      Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Message_Manager.Data_Index_Type'Last + 6)));
       Last          : Ada.Streams.Stream_Element_Offset;
       Message : Message_Manager.Message_Record;
       Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds (1_000);
@@ -85,6 +70,7 @@ package body CubedOS.Network.Messages is
       else
          Address.Port := 50001;
       end if;
+      
       Ada.Text_IO.Put_Line ("My Addr: " & Image (Address.Addr));
       Bind_Socket (Server, Address);
         
@@ -92,6 +78,7 @@ package body CubedOS.Network.Messages is
          begin
             -- Receive message from Socket
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
+            -- Decode Stream_Elements into a CubedOS Message_Record_Type
             Message := Read_Stream_Message(Data, Last);
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
             if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
@@ -111,45 +98,53 @@ package body CubedOS.Network.Messages is
       end loop;
    end Server_Loop;
 
-   procedure Send_Network_Message(Message_Description : in String )is
+   procedure Send_Network_Message(Message : in Message_Manager.Message_Record )is
       Address : Sock_Addr_Type;
       Socket : Socket_Type;
       Last : Ada.Streams.Stream_Element_Offset;
-      Buffer : Ada.Streams.Stream_Element_Array (1 .. Ada.Streams.Stream_Element_Offset (Message_Description'Length));
-        
+      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
+      Message_Payload_Size : Integer := Message.Payload'Length;
+      Payload    : Message_Manager.Data_Array      := (others => 0);
+      Position : Message_Manager.Data_Index_Type := 0;
+      Last_XDR     : Message_Manager.Data_Index_Type;
    begin
+      
       if Message_Manager.Domain_ID = 1 then
          Address.Port := 50001;
       else
          Address.Port := 50000;
       end if;
+      
       Address.Addr := Inet_Addr ("127.0.0.1");
+      
+      XDR.Encode(XDR.XDR_Unsigned(Integer'Pos(Message_Payload_Size)), Payload, Position, Last_XDR);      
+      Position := Last_XDR + 1; -- currently not utilized
+
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
-      -- I is Ada.Streams.Stream_Element_Offset
-      for I in Buffer'Range loop
-         Buffer (I) := Ada.Streams.Stream_Element (Character'Pos (Message_Description (Integer(I))));
-      end loop; 
-       -- Transmit a message to another socket.
+      
+      Buffer (0) := Ada.Streams.Stream_Element (Message.Sender_Address.Domain_ID); -- Sender Domain
+      Buffer (1) := Ada.Streams.Stream_Element (Message.Sender_Address.Module_ID); -- Sender Module
+      Buffer (2) := Ada.Streams.Stream_Element (Message.Receiver_Address.Domain_ID); -- Receiver Domain
+      Buffer (3) := Ada.Streams.Stream_Element (Message.Receiver_Address.Module_ID); -- Receiver Module
+      Buffer (4) := Ada.Streams.Stream_Element (Message.Request_ID); -- Request ID
+      Buffer (5) := Ada.Streams.Stream_Element (Message.Message_ID); -- Message ID 
+
+      for I in 6 .. Message_Manager.Data_Index_Type'Last loop
+         Buffer (Ada.Streams.Stream_Element_Offset(I)) := Ada.Streams.Stream_Element(Message.Payload(I - 6));
+      end loop;
+   
       Send_Socket (Socket, Buffer, Last, Address);        
    end Send_Network_Message;
    
     -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Manager.Message_Record) is
-      -- Convert Item to String (with no trailing space)
-      Sender_Domain_String : constant String := Trim(Message_Manager.Domain_ID_Type'Image(Message.Sender_Address.Domain_ID), Left);
-      Sender_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Sender_Address.Module_ID), Left);
-      Receiver_Domain_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver_Address.Domain_ID), Left);         
-      Receiver_Module_String : constant String := Trim(Message_Manager.Module_ID_Type'Image(Message.Receiver_Address.Module_ID), Left);
-      Request_ID_String : constant String := Trim(Message_Manager.Request_ID_Type'Image(Message.Request_ID), Left);
-      Message_ID_String : constant String := Trim(Message_Manager.Message_ID_Type'Image(Message.Message_ID), Left);
-      Message_Image     : constant String := Sender_Domain_String & "!" & Sender_Module_String & "!" & Receiver_Domain_String & "!" & Receiver_Module_String & "!" & Request_ID_String & "!" & Message_ID_String & "!";
    begin
       -- should there be some check here?
       Ada.Text_IO.Put_Line("Sending from domain " & Message_Manager.Domain_ID_Type'Image(Message_Manager.Domain_ID));
-      Ada.Text_IO.Put_Line(Message_Image);
-      Send_Network_Message(Message_Image);
+      Ada.Text_IO.Put_Line(Message_Manager.Stringify_Message(Message));
+      Send_Network_Message(Message);
    end Process;
-    
+   
    task body Network_Loop is
    begin
       Ada.Text_IO.Put_Line ("Start Network Loop");
