@@ -33,6 +33,7 @@ package body DomainB_Server.Messages is
 			 Status           => DomainB_Server.API.Success);
 		 Message_Manager.Route_Message(Outgoing_Message);
       else
+		Ada.Text_IO.Put_Line("Report Failure");
 	    Outgoing_Message :=
 	      DomainB_Server.API.Ping_Reply_Encode
 		    (Receiver_Address => Message.Sender_Address,

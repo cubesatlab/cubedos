@@ -82,7 +82,6 @@ package body DomainB_Server.API is
 		 Ada.Text_IO.Put_Line("Malformed Message");
 		 Decode_Status := Malformed;
 	  else
-		 Ada.Text_IO.Put_Line("Good Message");
 		 Status := Status_Type'Val(Raw_Value);
 		 Decode_Status := Success;
 	  end if;

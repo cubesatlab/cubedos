@@ -171,7 +171,6 @@ is
    procedure Route_Message(Message : in Message_Record) is
    begin
       if Message.Receiver_Address.Domain_ID /= Domain_ID then
-        Ada.Text_IO.Put_Line("Routing Message");
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
         Message_Storage(1).Unchecked_Send(Message);
       else 

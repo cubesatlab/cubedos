@@ -27,7 +27,6 @@ package body DomainA_Client.Messages is
    procedure Initialize is
    begin
 	  -- Send the first message!
-	  Ada.Text_IO.Put_Line("From Client Message");
 	  Send_Time := Ada.Real_Time.Clock;
 	  Outgoing_Message := DomainB_Server.API.Ping_Request_Encode
 		(Sender_Address => Name_Resolver.DomainA_Client,
@@ -49,8 +48,6 @@ package body DomainA_Client.Messages is
 	  DomainB_Server.API.Ping_Reply_Decode(Message, Status, Decode_Status);
 	  Receive_Time := Ada.Real_Time.Clock;
 	  Round_Trip_Time := Receive_Time - Send_Time;
-
-	  Ada.Text_IO.Put_Line("Checking for Reported Failure");
 
 	  if Decode_Status /= Success then
 		 Ada.Text_IO.Put_Line("ERROR: Unable to decode a Ping_Reply message!");
