@@ -109,13 +109,16 @@ package body CubedOS.Network.Messages is
       Last_XDR     : Message_Manager.Data_Index_Type;
    begin
       
+      -- Replace addresses with localhost for local testing
       if Message_Manager.Domain_ID = 1 then
+         -- DomainA sending to DomainB
          Address.Port := 50001;
+         Address.Addr := Inet_Addr ("54.87.1.233");
       else
+         -- DomainB sending to DomainA
          Address.Port := 50000;
+         Address.Addr := Inet_Addr ("54.226.181.101");
       end if;
-      
-      Address.Addr := Inet_Addr ("127.0.0.1");
       
       XDR.Encode(XDR.XDR_Unsigned(Integer'Pos(Message_Payload_Size)), Payload, Position, Last_XDR);      
       Position := Last_XDR + 1; -- currently not utilized
@@ -129,7 +132,7 @@ package body CubedOS.Network.Messages is
       Buffer (4) := Ada.Streams.Stream_Element (Message.Request_ID); -- Request ID
       Buffer (5) := Ada.Streams.Stream_Element (Message.Message_ID); -- Message ID 
 
-      for I in 6 .. Message_Manager.Data_Index_Type'Last loop
+      for I in 6 .. Message.Payload'Length loop
          Buffer (Ada.Streams.Stream_Element_Offset(I)) := Ada.Streams.Stream_Element(Message.Payload(I - 6));
       end loop;
    
