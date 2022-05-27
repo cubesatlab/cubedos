@@ -4,13 +4,14 @@ src/library/lib
 src/library/doc
 
 # LaTeX build artifacts
-CubedOS.aux
-CubedOS.bbl
-CubedOS.blg
-CubedOS.log
-CubedOS.out
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+Getting-Started.pdf
 CubedOS.pdf
-CubedOS.toc
+*.toc
 
 # Generated API packages
 src/modules/MXDR/*.ads

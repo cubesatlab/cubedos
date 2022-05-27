@@ -1,0 +1,72 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE    : Getting-Started.tex
+% AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+% SUBJECT : A document for new CubedOS programmers.
+%
+% TODO:
+%  + Document the intended multi-domain features.
+%
+% Send comments or bug reports to:
+%
+%    Carl Brandon
+%    Vermont Technical College
+%    Randolph Center, VT 05061
+%    cbrandon@vtc.edu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%+++++++++++++++++++++++++++++++++
+% Preamble and global declarations
+%+++++++++++++++++++++++++++++++++
+\documentclass{scrreprt}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1.75ex plus0.5ex minus0.5ex}
+
+\input{macros}
+
+%++++++++++++++++++++
+% The document itself
+%++++++++++++++++++++
+\begin{document}
+
+%-----------------------
+% Title page information
+%-----------------------
+\title{CubedOS Getting Started}
+\author{\copyright\ Copyright 2022 by Vermont Technical College}
+\date{Last Generated: \today}
+\maketitle
+
+\tableofcontents
+
+%\lstMakeShortInline[basicstyle=\ttfamily]|
+\lstMakeShortInline|
+
+\section*{Legal}
+\label{sec:legal}
+
+\textit{Permission is granted to copy, distribute and/or modify this document under the terms of
+  the GNU Free Documentation License, Version 1.1 or any later version published by the Free
+  Software Foundation; with no Invariant Sections, with no Front-Cover Texts, and with no
+  Back-Cover Texts. A copy of the license is included in the file \texttt{GFDL.txt} distributed
+  with the \LaTeX\ source of this document.}
+
+\chapter{Introduction}
+
+Welcome to CubedOS!
+
+
+\lstDeleteShortInline|
+
+% -----------
+% Bibliography
+% ------------
+
+\bibliographystyle{plain}
+\bibliography{references-CubeSat,references-General,references-SPARK}
+
+\end{document}
