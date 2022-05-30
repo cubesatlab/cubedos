@@ -10,7 +10,7 @@ package body Network_Configuration is
 		elsif Domain_ID = 2 then
 			Domain_Addr := DomainB_Addr;
 		else
-			Domain_Addr := Inet_Addr("asdf");
+			Domain_Addr := Local_Host_Addr;
 		end if;
 		return Domain_Addr;
 	end Get_Address;
@@ -25,7 +25,7 @@ package body Network_Configuration is
 		elsif Domain_ID = 2 then
 			Port := DomainB_Port;
 		else
-			Port := 0;
+			Port := Default_Port;
 		end if;
 		return Port;
 	end Get_Port;

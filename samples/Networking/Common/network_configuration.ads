@@ -10,8 +10,11 @@ package Network_Configuration is
 
 	DomainA_Addr : Inet_Addr_Type := Inet_Addr ("127.0.0.1");
 	DomainB_Addr : Inet_Addr_Type := Inet_Addr("127.0.0.1");
+	Local_Host_Addr : Inet_Addr_Type := Inet_Addr("127.0.0.1");
+
 	DomainA_Port : Port_Type := 50000;
 	DomainB_Port : Port_Type := 50001;
+	Default_Port : Port_Type := 50000;
 	
 	function Get_Port
 	 (Domain_ID   : Domain_ID_Type) return Port_Type;
