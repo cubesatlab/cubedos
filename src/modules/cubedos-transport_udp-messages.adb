@@ -1,22 +1,19 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-time_server-messages.ads
--- SUBJECT: Specification of a package for a time server module.
+-- FILE   : cubedos-transport_udp-messages.ads
+-- SUBJECT: body package for the UDP implementation of the CubedOS Message Service.
 -- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with CubedOS.Generic_Message_Manager;
-with Ada.Real_Time; use type Ada.Real_Time.Time;
 with GNAT.Sockets;   use GNAT.Sockets;
 with Ada.Streams; 
 with Ada.Text_IO;
-with Ada.Strings;       use Ada.Strings;
 with Ada.Exceptions; use Ada.Exceptions;
-with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Name_Resolver;
 with Network_Configuration;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib;
-package body CubedOS.Network.Messages is
+
+package body CubedOS.Transport_UDP.Messages is
     
    function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
       Sender_Domain : Message_Manager.Domain_ID_Type;
@@ -25,13 +22,7 @@ package body CubedOS.Network.Messages is
       Receiver_Module :Message_Manager. Module_ID_Type;
       Request_ID : Message_Manager.Request_ID_Type;
       Message_ID : Message_Manager.Message_ID_Type;
-      Message_Payload_Size : Integer;
       Message : Message_Manager.Message_Record;
-      --
-      Payload    : Message_Manager.Data_Array      := (others => 0);
-      Position : Message_Manager.Data_Index_Type := 0;
-      Last_XDR     : Message_Manager.Data_Index_Type;
-      Value : XDR.XDR_Unsigned;
    begin
 
       Sender_Domain := Message_Manager.Domain_ID_Type(Data(0));
@@ -89,7 +80,7 @@ package body CubedOS.Network.Messages is
       Socket : Socket_Type;
       Last : Ada.Streams.Stream_Element_Offset;
       Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
-      Message_Payload_Size : Integer := Message.Payload'Length;
+      Message_Payload_Size : constant Integer := Message.Payload'Length;
       Payload    : Message_Manager.Data_Array      := (others => 0);
       Position : Message_Manager.Data_Index_Type := 0;
       Last_XDR     : Message_Manager.Data_Index_Type;
@@ -138,4 +129,4 @@ package body CubedOS.Network.Messages is
    end Message_Loop;
    
    
-end CubedOS.Network.Messages;
+end CubedOS.Transport_UDP.Messages;
