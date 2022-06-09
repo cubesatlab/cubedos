@@ -9,9 +9,9 @@ with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
 with DomainA_Client.Messages;
-with CubedOS.Network.Messages;
+with CubedOS.Transport_UDP.Messages;
 
-pragma Unreferenced(CubedOS.Network.Messages);
+pragma Unreferenced(CubedOS.Transport_UDP.Messages);
 pragma Unreferenced(DomainA_Client.Messages);
 
 procedure Main is
