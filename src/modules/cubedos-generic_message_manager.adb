@@ -6,6 +6,8 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+-- with Name_Resolver;
+
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
 is
@@ -171,7 +173,8 @@ is
    begin
       if Message.Receiver_Address.Domain_ID /= Domain_ID then
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
-        Message_Storage(1).Unchecked_Send(Message);
+        -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
+        Message_Storage(2).Unchecked_Send(Message);
       else
         Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
       end if;
