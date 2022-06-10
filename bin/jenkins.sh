@@ -19,6 +19,8 @@ gprbuild -P src/cubedos.gpr src/check/main_time.adb
 
 # Build the sample programs.
 gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
+gprbuild -P samples/Networking/networking.gpr samples/Networking/DomainA/main.adb
+grpbuild -P samples/Networking/networking.gpr samples/Networking/DomainB/main.adb
 gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 #gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
 

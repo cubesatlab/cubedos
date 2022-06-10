@@ -1,11 +1,10 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.adb
 -- SUBJECT: Body of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-with Ada.Text_IO;
 
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
@@ -138,22 +137,22 @@ is
       Message.Payload := (others => 0);
       return Message;
    end Make_Empty_Message;
-   
-   
+
+
    function Stringify_Message (Message : in Message_Record) return String is
       Sender_Domain_String : constant String := Domain_ID_Type'Image(Message.Sender_Address.Domain_ID);
       Sender_Module_String : constant String := Module_ID_Type'Image(Message.Sender_Address.Module_ID);
-      Receiver_Domain_String : constant String := Module_ID_Type'Image(Message.Receiver_Address.Domain_ID);         
+      Receiver_Domain_String : constant String := Module_ID_Type'Image(Message.Receiver_Address.Domain_ID);
       Receiver_Module_String : constant String := Module_ID_Type'Image(Message.Receiver_Address.Module_ID);
       Request_ID_String : constant String := Request_ID_Type'Image(Message.Request_ID);
       Message_ID_String : constant String := Message_ID_Type'Image(Message.Message_ID);
-      Message_Image     : constant String := Sender_Domain_String & "!" & Sender_Module_String & "!" & 
-                                             Receiver_Domain_String & "!" &  Receiver_Module_String & "!" & 
+      Message_Image     : constant String := Sender_Domain_String & "!" & Sender_Module_String & "!" &
+                                             Receiver_Domain_String & "!" &  Receiver_Module_String & "!" &
                                              Request_ID_String & "!" & Message_ID_String & "!";
     begin
       return Message_Image;
     end Stringify_Message;
-    
+
 
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type) is
    begin
@@ -173,7 +172,7 @@ is
       if Message.Receiver_Address.Domain_ID /= Domain_ID then
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
         Message_Storage(1).Unchecked_Send(Message);
-      else 
+      else
         Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
       end if;
    end Route_Message;

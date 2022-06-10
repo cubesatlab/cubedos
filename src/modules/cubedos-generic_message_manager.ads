@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.ads
 -- SUBJECT: Specification of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 -- This package defines the core CubedOS mailbox system with associated types, etc. Each time
 -- this package is instantiated a new "domain" is created. In a distributed CubedOS system,
@@ -59,7 +59,7 @@ is
    subtype Data_Array is XDR_Array(Data_Index_Type);
 
    -- Message Addresses hold the Domain_ID and Module_ID for Modules in a CubedOS Application
-   type Message_Address is 
+   type Message_Address is
       record
          Domain_ID : Domain_ID_Type := 0;
          Module_ID : Module_ID_Type := 1;
@@ -96,10 +96,10 @@ is
          Make_Empty_Message'Result.Message_ID = Message_ID and
          Make_Empty_Message'Result.Priority   = Priority   and
          Make_Empty_Message'Result.Size       = 0;
-   
+
    -- Convenience function to stringify messages
    function Stringify_Message (Message : in Message_Record) return String;
-     
+
    -- Returns an arbitrary, domain-unique request ID. Probably these IDs should also be unique
    -- across domains, but that is not yet implemented.
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
