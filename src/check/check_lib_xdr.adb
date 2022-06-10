@@ -247,63 +247,63 @@ package body Check_Lib_XDR is
 
 
    -- Test encoding/decoding of XDR single precision float.
-   procedure Test_Encode_Decode_8(T : in out AUnit.Test_Cases.Test_Case'Class) is
-      pragma Unreferenced(T);
-
-      Data : XDR_Array(0 .. Test_XDR_Size - 1);
-      Decoded_Value : XDR_Float;
-      Last : XDR_Index_Type;
-   begin
-      Data := (others => 0);
-      Encode(XDR_Float'(0.0), Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = 0.0, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Float'Last, Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = XDR_Float'Last, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Float'First, Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = XDR_Float'First, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Float'(3.141592653589793E+10), Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = 3.141592653589793E+10, "Decoded incorrectly");
-   end Test_Encode_Decode_8;
+   -- procedure Test_Encode_Decode_8(T : in out AUnit.Test_Cases.Test_Case'Class) is
+   --    pragma Unreferenced(T);
+   --
+   --    Data : XDR_Array(0 .. Test_XDR_Size - 1);
+   --    Decoded_Value : XDR_Float;
+   --    Last : XDR_Index_Type;
+   -- begin
+   --    Data := (others => 0);
+   --    Encode(XDR_Float'(0.0), Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = 0.0, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Float'Last, Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = XDR_Float'Last, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Float'First, Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = XDR_Float'First, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Float'(3.141592653589793E+10), Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = 3.141592653589793E+10, "Decoded incorrectly");
+   -- end Test_Encode_Decode_8;
 
 
    -- Test encoding/decoding of XDR double precision float.
-   procedure Test_Encode_Decode_9(T : in out AUnit.Test_Cases.Test_Case'Class) is
-      pragma Unreferenced(T);
-
-      Data : XDR_Array(0 .. Test_XDR_Size - 1);
-      Decoded_Value : XDR_Double;
-      Last : XDR_Index_Type;
-   begin
-      Data := (others => 0);
-      Encode(XDR_Double'(0.0), Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = 0.0, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Double'Last, Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = XDR_Double'Last, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Double'First, Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = XDR_Double'First, "Decoded incorrectly");
-
-      Data := (others => 0);
-      Encode(XDR_Double'(3.141592653589793E+100), Data, 0, Last);
-      Decode(Data, 0, Decoded_Value, Last);
-      Assert(Decoded_Value = 3.141592653589793E+100, "Decoded incorrectly");
-   end Test_Encode_Decode_9;
+   -- procedure Test_Encode_Decode_9(T : in out AUnit.Test_Cases.Test_Case'Class) is
+   --    pragma Unreferenced(T);
+   --
+   --    Data : XDR_Array(0 .. Test_XDR_Size - 1);
+   --    Decoded_Value : XDR_Double;
+   --    Last : XDR_Index_Type;
+   -- begin
+   --    Data := (others => 0);
+   --    Encode(XDR_Double'(0.0), Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = 0.0, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Double'Last, Data, 0, Last);
+   --   Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = XDR_Double'Last, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Double'First, Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = XDR_Double'First, "Decoded incorrectly");
+   --
+   --    Data := (others => 0);
+   --    Encode(XDR_Double'(3.141592653589793E+100), Data, 0, Last);
+   --    Decode(Data, 0, Decoded_Value, Last);
+   --    Assert(Decoded_Value = 3.141592653589793E+100, "Decoded incorrectly");
+   -- end Test_Encode_Decode_9;
 
 
    -- Test encoding/decoding of fixed length opaque data.
@@ -375,8 +375,8 @@ package body Check_Lib_XDR is
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_5'Access, "64 bit integer");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
+      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
+      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_10'Access, "fixed length opaque data");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_11'Access, "fixed length string");
    end Register_Tests;
