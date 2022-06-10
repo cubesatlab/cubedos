@@ -123,7 +123,7 @@ package body CubedOS.Transport_UDP.Messages is
       Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.Network_Server.Module_ID, Incoming_Message);
+         Message_Manager.Fetch_Message(Name_Resolver.Network_Server, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
