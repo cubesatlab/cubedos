@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-lib-xdr.ads
+-- FILE   : cubedos-lib-xdr.adb
 -- SUBJECT: Body of an XDR encoding/decoding package.
--- AUTHOR : (C) Copyright 2016 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -20,15 +20,20 @@ package body CubedOS.Lib.XDR is
    function XDR_Unsigned_To_Hyper is
      new Ada.Unchecked_Conversion(Source => XDR_Unsigned_Hyper, Target => XDR_Hyper);
 
+   -- Floating point types are "not suitable as the target of an unchecked conversion" because
+   -- not every possible bit pattern is a distinct, valid value of a floating point type
+   -- (specifically, the bit pattern corresponding to NaN is not a "valid" number). See the
+   -- SPARK Reference Manual, section 13.9.
+   --
    function XDR_Float_To_Unsigned is
      new Ada.Unchecked_Conversion(Source => XDR_Float, Target => XDR_Unsigned);
-   function XDR_Unsigned_To_Float is
-     new Ada.Unchecked_Conversion(Source => XDR_Unsigned, Target => XDR_Float);
+   -- function XDR_Unsigned_To_Float is
+   --   new Ada.Unchecked_Conversion(Source => XDR_Unsigned, Target => XDR_Float);
 
    function XDR_Double_To_Unsigned is
      new Ada.Unchecked_Conversion(Source => XDR_Double, Target => XDR_Unsigned_Hyper);
-   function XDR_Unsigned_To_Double is
-     new Ada.Unchecked_Conversion(Source => XDR_Unsigned_Hyper, Target => XDR_Double);
+   -- function XDR_Unsigned_To_Double is
+   --   new Ada.Unchecked_Conversion(Source => XDR_Unsigned_Hyper, Target => XDR_Double);
 
 
    procedure Encode
@@ -159,6 +164,11 @@ package body CubedOS.Lib.XDR is
    is
       Temporary_Array : Octet_Array(0 .. Value'Length - 1);
    begin
+      -- Convert the string to an octet array and then encode the octet array.
+      --
+      -- This approch puts an artificial restriction on the size of the strings we can encode. Since
+      -- XDR_Arrays can be huge, in theory it should be possible to encode a huge string into one. Going
+      -- through Octet_Array inhibits that ability since Octet_Arrays have moderate length.
       Temporary_Array := (others => 0);
       for I in Value'Range loop
          Temporary_Array(I - Value'First) := Character'Pos(Value(I));
@@ -255,30 +265,36 @@ package body CubedOS.Lib.XDR is
    end Decode;
 
 
-   procedure Decode
-     (Data     : in  XDR_Array;
-      Position : in  XDR_Index_Type;
-      Value    : out XDR_Float;
-      Last     : out XDR_Index_Type)
-   is
-      Temp : XDR_Unsigned;
-   begin
-      Decode(Data, Position, Temp, Last);
-      Value := XDR_Unsigned_To_Float(Temp);
-   end Decode;
+   -- Unfortunately decoding floating point values isn't this easy. The unchecked conversion
+   -- being used here isn't acceptable to SPARK (see the comments where they are declared),
+   -- so a much fussier approach is required. Furthermore, the bit pattern in the Data array
+   -- may not form a valid floating point value, so some method of dealing with that error
+   -- must be provided.
+   --
+   -- procedure Decode
+   --   (Data     : in  XDR_Array;
+   --    Position : in  XDR_Index_Type;
+   --    Value    : out XDR_Float;
+   --    Last     : out XDR_Index_Type)
+   -- is
+   --    Temp : XDR_Unsigned;
+   -- begin
+   --    Decode(Data, Position, Temp, Last);
+   --    Value := XDR_Unsigned_To_Float(Temp);
+   -- end Decode;
 
 
-   procedure Decode
-     (Data     : in  XDR_Array;
-      Position : in  XDR_Index_Type;
-      Value    : out XDR_Double;
-      Last     : out XDR_Index_Type)
-   is
-      Temp : XDR_Unsigned_Hyper;
-   begin
-      Decode(Data, Position, Temp, Last);
-      Value := XDR_Unsigned_To_Double(Temp);
-   end Decode;
+   -- procedure Decode
+   --   (Data     : in  XDR_Array;
+   --    Position : in  XDR_Index_Type;
+   --    Value    : out XDR_Double;
+   --    Last     : out XDR_Index_Type)
+   -- is
+   --    Temp : XDR_Unsigned_Hyper;
+   -- begin
+   --    Decode(Data, Position, Temp, Last);
+   --    Value := XDR_Unsigned_To_Double(Temp);
+   -- end Decode;
 
 
    -- Decodes a fixed length array of opaque data from Data starting at Position.

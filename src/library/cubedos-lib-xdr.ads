@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-xdr.ads
 -- SUBJECT: Specification of an XDR encoding/decoding package.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 -- XDR is a standard for converting typed data into an octet stream suitable for exchange
 -- between communicating partners. Unlike ASN.1, the data is not self describing so the
@@ -34,7 +34,7 @@ package CubedOS.Lib.XDR is
    type XDR_Unsigned_Hyper is mod 2**64;
    type XDR_Float is new Float;
    type XDR_Double is new Long_Float;
-   -- TODO: Add support for XDR floating point types? Maybe someday.
+   -- TODO: Add support for XDR floating point types? See comments in the body.
 
    ----------------------
    -- Encoding Procedures
@@ -50,9 +50,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Encodes an XDR unsigned integer into Data starting at Position.
@@ -65,9 +65,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Encodes an XDR Boolean into Data starting at Position.
@@ -80,9 +80,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Encodes an XDR hyper integer into Data starting at Position.
@@ -95,9 +95,10 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
+         Position <= Data'Last - (8 - 1),
        Post => Last = Position + (8 - 1);
 
    -- Encodes an XDR unsigned hyper integer into Data starting at Position.
@@ -110,9 +111,10 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
+         Position <= Data'Last - (8 - 1),
      Post => Last = Position + (8 - 1);
 
    -- Encodes an XDR float into Data starting at Position.
@@ -125,9 +127,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Encodes an XDR double into Data starting at Position.
@@ -140,9 +142,10 @@ package CubedOS.Lib.XDR is
       Global  => null,
        Depends => (Data =>+ (Value, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
+         Position <= Data'Last - (8 - 1),
        Post => Last = Position + (8 - 1);
 
    function Length_With_Padding(Length : Octet_Array_Count) return Octet_Array_Count is
@@ -158,9 +161,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => (Value, Position)),
        Pre =>
-         Position rem 4 = 0 and then
-         Data'Length > 0 and then
-         Data'Length rem 4 = 0 and then
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
          Length_With_Padding(Value'Length) <= (Data'Last - Position) + 1,
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
@@ -174,9 +177,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Data =>+ (Value, Position), Last => (Value, Position)),
        Pre =>
-         Position rem 4 = 0 and then
-         Data'Length > 0 and then
-         Data'Length rem 4 = 0 and then
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
          Value'Length <= Octet_Array_Count'Last and then
          Length_With_Padding(Value'Length) <= (Data'Last - Position) + 1,
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
@@ -196,9 +199,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value => (Data, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Decodes an unsigned integer from Data starting at Position up to and including Last.
@@ -211,9 +214,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value => (Data, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Decodes a Boolean from Data starting at Position up to and including Last.
@@ -227,9 +230,9 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value => (Data, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0,
        Post => Last = Position + (4 - 1);
 
    -- Decodes a hyper integer from Data starting at Position up to and including Last.
@@ -242,9 +245,10 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value => (Data, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
+         Position <= Data'Last - (8 - 1),
        Post => Last = Position + (8 - 1);
 
    -- Decodes an unsigned hyper integer from Data starting at Position up to and including Last.
@@ -257,40 +261,41 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value => (Data, Position), Last => Position),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
-        Post => Last = Position + (8 - 1);
+         Position in Data'Range            and then
+         (Position - Data'First) rem 4 = 0 and then
+         Data'Length             rem 4 = 0 and then
+         Position <= Data'Last - (8 - 1),
+       Post => Last = Position + (8 - 1);
 
    -- Decodes an float from Data starting at Position up to and including Last.
-   procedure Decode
-     (Data     : in  XDR_Array;
-      Position : in  XDR_Index_Type;
-      Value    : out XDR_Float;
-      Last     : out XDR_Index_Type)
-     with
-       Global  => null,
-       Depends => (Value => (Data, Position), Last => Position),
-       Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (4 - 1) <= Data'Last,
-       Post => Last = Position + (4 - 1);
+   -- procedure Decode
+   --   (Data     : in  XDR_Array;
+   --    Position : in  XDR_Index_Type;
+   --    Value    : out XDR_Float;
+   --    Last     : out XDR_Index_Type)
+   --   with
+   --     Global  => null,
+   --     Depends => (Value => (Data, Position), Last => Position),
+   --     Pre =>
+   --       Position rem 4 = 0 and
+   --       Data'Length rem 4 = 0 and
+   --       Position + (4 - 1) <= Data'Last,
+   --     Post => Last = Position + (4 - 1);
 
    -- Decodes an double from Data starting at Position up to and including Last.
-   procedure Decode
-     (Data     : in  XDR_Array;
-      Position : in  XDR_Index_Type;
-      Value    : out XDR_Double;
-      Last     : out XDR_Index_Type)
-     with
-       Global  => null,
-       Depends => (Value => (Data, Position), Last => Position),
-       Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (8 - 1) <= Data'Last,
-       Post => Last = Position + (8 - 1);
+   -- procedure Decode
+   --   (Data     : in  XDR_Array;
+   --    Position : in  XDR_Index_Type;
+   --    Value    : out XDR_Double;
+   --    Last     : out XDR_Index_Type)
+   --   with
+   --     Global  => null,
+   --     Depends => (Value => (Data, Position), Last => Position),
+   --     Pre =>
+   --       Position rem 4 = 0 and
+   --       Data'Length rem 4 = 0 and
+   --       Position + (8 - 1) <= Data'Last,
+   --     Post => Last = Position + (8 - 1);
 
    -- Decodes a fixed length array of opaque data from Data starting at Position.
    procedure Decode
