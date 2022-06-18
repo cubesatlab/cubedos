@@ -59,6 +59,77 @@
 
 Welcome to CubedOS!
 
+This document is for new CubedOS developers who want learn how to build CubedOS applications. Here we will walk you through the process of creating a simple application and then refer you to the samples folder in the CubedOS GitHub repository for additional examples. The CubedOS Reference Manual will also be helpful to you once you understand the basic architecture of the system.
+
+CubedOS applications consists of one or more \newterm{domains} where each domain consists of one or more \newterm{modules}. Simple (and even many not-so-simple) applications are built as a single domain. Multi-domain applications are outside the scope of this document, but the Networking sample in the repository shows an example of such an application.
+
+Each module in a domain communicates with other modules by passing messages. Some modules act as servers; they receive request messages, process those requests, and return reply messages to the requester. Some modules act as clients; they send request messages to servers, receive the replies, and do other processing. Many modules play both roles at different times; they receive request messages and send requests of their own as they process their incoming requests. CubedOS encourages a client/server application architecture, or, more generally, a distributed application architecture with messages being sent between modules freely. However, the Request/Reply terminology is conventionally used throughout. In some cases ``requests'' are sent even when no reply is expected, and in other cases ``replies'' are sent unsolicited.
+
+Normally modules are written in SPARK/Ada as a package hierarchy. The top-level, parent package has the same name as the module. Child packages are used to implement the various subsystems within a module. Some of the child packages have conventional names, as we will describe later. This precise organization is not strictly required, but it is recommended and certain aspects of the system assume this organization. It is possible, in principle, to write CubedOS modules in other languages such as full Ada or even C. We do not discuss how to do that in this document.
+
+Communication in CubedOS is point-to-point, asynchronous, and unreliable. There is no built-in mechanism for broadcasting or multi-casting messages; doing so requires writing code that explicitly sends multiple point-to-point messages as needed. There is, however, a publish/subscribe core module that offers a ``channel'' abstraction. Modules can subscribe to particular channels and receive messages that are published to those channels by other modules.  This decouples senders and receivers so they are not aware of each other and provides a form of multi-casting.
+
+Messages are asynchronous in the sense that the sender is allowed to continue before the message has been received. The send operation only queues the message for later delivery. After a successful send, the sending module can reuse any data structures it populated for the outgoing message. Every module has at least one task, called the \newterm{module main task} that receives and processes messages. Modules may have other internal tasks for other reasons. Multiple modules execute in parallel. It is possible, even common, for senders to send multiple requests, possibly to different modules, before getting any replies, and replies may arrive in a different order from which the requests were sent. It is up to you to coordinate this activity in your modules, although CubedOS provides some assistance, as we will discuss.
+
+Messages are unreliable in the sense that final delivery is not guaranteed. Senders can elect to receive a status code to inform them if their messages are dropped by the message passing infrastructure, but even this status code does not indicate if the message was actually received by the destination module (for example, if the destination module is stuck or crashed or unreachable over the network). If a server module wishes to indicate an error in a request, or any other kind of failure, it must send an explicit reply message saying so.
+
+Every CubedOS domain contains an array of ``mailboxes'' that hold pending messages. There is a one-to-one correspondence between the modules of a domain and the mailboxes. In other words, each module has exactly one mailbox and each mailbox services exactly one module. The main task of a module is normally blocked trying to read a message from that module's mailbox. When a message is available, the main task fetches it, processes it, and then (likely) blocks again trying to read the next message. Since the mailboxes have, in general, space for holding multiple messages, it is possible that some messages arrived while the module was processing an earlier message. In that case, the next message is retrieved at once. Modules never process more than one message at a time. Outstanding messages are queued in the module's mailbox. The mailbox array thus defines the domain and forms the communication infrastructure for the domain.
+
+In normal operation, all module tasks are blocked and the CPU is idle. When a hardware interrupt is generated, an interrupt service routine inside one of the modules (a driver module for the associated hardware device) activates and sends a message, as appropriate to another, higher-level module to handle the interrupt. That module may send other messages, etc., creating a cascade of activity in the system. Once the interrupt has been fully handled and that activity dies down, all modules return to their quiescent state of being blocked waiting for a message. If multiple interrupts happen at about the same time, this presents no problem as the modules are able to queue messages and execute in parallel as needed. However, the modules do need to be coded with this scenario in mind. CubedOS is thus a \newterm{reactive} programming system since it reacts to external input, but does not initiate any activity.
+
+CubedOS comes with a collection of \newterm{core modules} that provide services commonly needed by many applications. The publish/subscribe server mentioned earlier is an example of a core module. There is also a time server module that can be requested to send messages to other modules at specified times or periodically. "Reacting" to such messages gives modules a way to perform activities without other specific hardware stimulation (i.e., routine monitoring, telemetry reporting, and so forth).
+
+CubedOS also comes with a collection of \newterm{library packages} that contain general-purpose reusable code of various kinds. Unlike a core module, a library package does \emph{not} contain a task\footnote{In a previous version of CubedOS, library packages were called ``passive modules'' to distinguish them from active modules with tasks. That terminology has been dropped.}. Subprograms inside library packages are called in the usual way and return results in the usual way, and not via messages\footnote{It is permitted for a library package to send a message as a side effect.}. Also library packages can be shared by modules. One consequence of this is that library packages can have no modifiable global data since they might be called by multiple tasks at once. All task interactions are via the message passing mechanism. Modules should not attempt to communicate via global data inside library packages. You are able to write additional, application-specific library packages as well as application-specific modules.
+
+The rest of this document walks you through the steps for creating a simple, single-domain CubedOS application. You can use these steps as a framework for creating your own applications. Although we build the application here incrementally for educational purposes, you can review the final form of the application in the GettingStarted folder of the samples folder in the repository. 
+
+\chapter{Getting Started}
+
+The application we will build demonstrates many, but not all, aspects of CubedOS development. It is intended to be easy to understand, implement, and modify. It is not intended to be an exhaustive demonstration of CubedOS and its libraries.
+
+We will create an application that periodically selects a random number between one million and two million, counts the number of primes less than or equal to that number, and displays the result. To make this application more interesting, we will define three modules:
+\begin{enumerate}
+    \item A pseudo-random number generator server that accepts requests for a random number and returns replies containing the number generated.
+    \item A display server that accepts strings of text and displays them on a suitable output device.
+    \item A ``main'' module that periodically requests a random number, computes the number of primes less than or equal to that number, and then displays the result. This module will make use of the other two modules described above. It will also use the time server core module as a source of periodic ``trigger'' messages.
+\end{enumerate}
+
+The architecture described here is more complicated than needed for this simple application, but its true purpose is to illustrate a CubedOS system. Real CubedOS systems are naturally more complex. Also a real application would likely be more reactive. After initialization, a real application would rely on hardware interrupts to trigger activity, as described in the earlier chapter, rather than being driven entirely by the time server.
+
+To get started, you will need space for your application's files. You will also need to clone the CubedOS repository from GitHub. At the time of this writing CubedOS is distributed in source form via its development repository. There is no release distribution yet.
+
+The folder for your application need not be included in the CubedOS repository folder. In fact, we recommend that you do \emph{not} include it there. Instead create a folder somewhere else on your system for your application. You can organize this folder as you please, but for this example, we will assume all the source files are stored directly in the folder and not, for example, in a \texttt{src} subfolder.
+
+It is often useful to use an existing application as a baseline for new work. The Echo application in the CubedOS repository is a good place to start. First, create a project file in your application folder named \texttt{getting\_started.gpr} that contains the following:
+\begin{verbatim}
+project Getting_Started is
+   for Main use ("main.adb");
+   for Object_Dir use "build";
+   for Source_Dirs use (".", "../../src", "../../src/modules", "../../src/library");
+   for Languages use ("Ada");
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+   end Compiler;
+
+end Getting_Started;
+\end{verbatim}
+
+The source paths should include the current folder (``.''), or wherever you plan to store the source files for your application, together with the three source folders from the CubedOS repository. Edit the paths above as appropriate for your system. Create a folder named \texttt{build} beneath your application folder (so the relative path in the project file works). The default switches are fine for this getting started application. They enable all warnings, runtime assertion checking, and debugging support. In a real application you may want different switches or multiple build scenarios.
+
+Every Ada program requires a library-level, parameterless procedure to serve as the program's entry point. CubedOS applications don't actually use this procedure, but it is required for the Ada language. Use the name \texttt{main.adb} as indicated above. We will describe what must be in this file later.
+
+Filling in the rest of the application requires the following steps:
+\begin{enumerate}
+    \item Instantiating the CubedOS generic message manager to create a domain (mailbox array) for your application.
+    \item Writing a name resolver package to assign ID numbers to the modules you will use (including core modules).
+    \item Creating skeletons for the modules you will write by copying the templates from the CubedOS repository and editing them.
+    \item Writing the Ada-required main procedure to ensure the modules you need will be compiled into your executable.
+    \item Writing API packages for the modules that receive request messages or send reply messages.
+    \item Implementing the logic of your application by filling in the skeleton modules you created earlier.
+\end{enumerate}
+
+We will cover the first two items above in this chapter. The other items will be covered in later chapters.
 
 \lstDeleteShortInline|
 
