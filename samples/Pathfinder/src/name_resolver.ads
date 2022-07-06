@@ -32,20 +32,13 @@ package Name_Resolver is
    Name_Resolver            : constant Module_ID_Type := 1;
    Network_Server           : constant Module_ID_Type := 2;
 
-   Log_Server               : constant Message_Address := (0, 3);
-   Publish_Subscribe_Server : constant Message_Address := (0, 4);
-   Time_Server              : constant Message_Address := (0, 5);
-   -- Event_Server             : constant Message_Address := (0, 6);
-   File_Server              : constant Message_Address := (0, 7);
-   -- Table_Server             : constant Message_Address := (0, 8);
-   Interpreter              : constant Message_Address := (0, 9);
-
    -- Application-Specific Modules.
    -- Make up names as you see fit (typically the same as your module's top level package).
    -- Be sure there are no duplicate (Domain_ID, Module_ID) pairs.
-   -- The names below are examples.
 
-   -- Echo_Client             : constant Message_Address := (0, 3);
-   -- Echo_Server             : constant Message_Address := (0, 4);
+   Random_Number_Generator : constant Message_Address := (0, 3);
+   Read_Number             : constant Message_Address := (0, 4);
+   System_Bus              : constant Message_Address := (0, 5);
+   Telemetry               : constant Message_Address := (0, 6);
 
 end Name_Resolver;
