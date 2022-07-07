@@ -11,6 +11,9 @@ CubedOS Samples
   It is the "Hello, World" application of message passing! We use this sample to evaluate rough
   performance and as a base for other, more interesting programs.
   
++ `GettingStarted`: The final form of the sample application described in the "Getting Started"
+  guide in the documentation folder. [Not yet implemented.]
+  
 + `LineRider`: A sample application using the STMF4DISCOVERY platform to demonstrate some of
   CubedOS's abilities. Specifically, the program controls a simple robot that uses optical
   sensors to follow a black line drawn on a light, concrete floor. This is an adaptation of a
@@ -25,7 +28,8 @@ CubedOS Samples
   passing system. Roughly this sample replicates the issue that existed in the Mars Pathfinder
   mission, albeit as a limited demonstration. When (if) priority inheritance is implemented in
   CubedOS, this sample can be used to check that the implementation solves the inversion
-  problem.
+  problem. [This sample has only been partially updated to reflect the Name_Resolver
+  discipline.]
   
 + `PubSub`: A sample application that demonstrates the Publish/Subscribe server. [Not yet
   implemented.]
@@ -34,5 +38,5 @@ CubedOS Samples
   STM32F4-discovery board.
 
 + `Tests`: I'm not sure what this is. I think it is just a holding area for CubedOS tests that
-  need to be integrated into the test program.
-
+  need to be integrated into the test program. Once that integration is complete this folder
+  can be deleted.
