@@ -16,3 +16,5 @@ CubedOS.pdf
 # Generated API packages
 src/modules/MXDR/*.ads
 src/modules/MXDR/*.adb
+
+*.DS_Store
