@@ -72,27 +72,6 @@ package body Echo_Client.Messages is
             Request_ID    => Request_Number);
          Route_Message(Outgoing_Message);
       end if;
-
-      -- Do math on time spent on message (possibly faster by saving till end?)
-      --Relative_Time     := Ada.Real_Time.Clock - Start_Time;
-      --Relative_Duration := Ada.Real_Time.To_Duration (Relative_Time);
-      --Total_Time := Total_Time + Ada.Real_Time.To_Duration (Relative_Time);
-
-      -- Print information about the ping
-      --Ada.Text_IO.Put ("+++ Ping ");
-      --Ada.Integer_Text_IO.Put (Item => i, Width => 0, Base => 10);
-
-      --Put (" | Request ID: " & Request_ID_Type'Image (Message.Request_ID));
-
-      --Ada.Text_IO.Put_Line (" | Received PINGED");
-      --Put ("Ping");
-      --Put (i'Image);
-      --Put (" Time Duration:   ");
-      --Put (Relative_Duration);
-      --New_Line;
-      -- Wait a bit.
-      -- delay(2.5);
-
   end Handle_Ping_Reply;
 
    -----------------------------------
