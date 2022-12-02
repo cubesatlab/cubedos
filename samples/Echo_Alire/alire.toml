@@ -1,0 +1,9 @@
+name = "echo"
+description = "Shiny new project"
+version = "0.1.0-dev"
+
+authors = ["Sevo"]
+maintainers = ["Sevo <sgolnaza@gmail.com>"]
+maintainers-logins = ["sevanbadal"]
+
+executables = ["echo"]
