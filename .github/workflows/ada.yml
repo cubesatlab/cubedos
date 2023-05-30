@@ -17,16 +17,8 @@ jobs:
 
     - name: Set up GNAT toolchain
       run: >
-        sudo apt-get update &&
-        sudo apt-get install gnat gprbuild
+        actions/setup-gnat@v1
         
-    - name: Install AUnit
-      run: |
-        git clone https://github.com/AdaCore/aunit.git
-        cd aunit
-        gprbuild -P aunit.gpr
-        
-
     - name: Build
       run: > 
         /bin/bash bin/jenkins.sh
