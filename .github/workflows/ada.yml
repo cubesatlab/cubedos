@@ -14,10 +14,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      
+    - name: Install GNAT
+      uses: ada-actions/toolchain@dev
+      with:
+        distrib: community
+        target: arm-elf
+        install_dir: ./cached_gnat
 
-    - name: Set up GNAT toolchain
-      run: >
-        actions/setup-gnat@v1
+
         
     - name: Build
       run: > 
