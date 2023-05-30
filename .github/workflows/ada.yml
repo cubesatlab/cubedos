@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/cache@v2
+      with:
+        path: ./cached_gnat
+        key: ${{ runner.os }}-gnat-ce-2020
+        
     - name: Checkout
       uses: actions/checkout@v3
       
