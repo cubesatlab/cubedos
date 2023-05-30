@@ -19,6 +19,13 @@ jobs:
       run: >
         sudo apt-get update &&
         sudo apt-get install gnat gprbuild
+        
+    - name: Install AUnit
+      run: |
+        git clone https://github.com/AdaCore/aunit.git
+        cd aunit
+        gprbuild -P aunit.gpr
+        
 
     - name: Build
       run: > 
