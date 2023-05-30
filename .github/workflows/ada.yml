@@ -22,4 +22,5 @@ jobs:
 
     - name: Build
       run: > 
-        gprbuild -j0 -p src/cubedos.gpr
+        ♯gprbuild -j0 -p src/cubedos.gpr
+        bin/jenkins.sh
