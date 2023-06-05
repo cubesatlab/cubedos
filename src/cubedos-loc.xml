@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<Locations >
+  <Project>
+    <vfs_file>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_file>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_project>
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/modules/test_module.adb</vfs_file>
+    </file_marker>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_project>
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/modules/test_module.ads</vfs_file>
+    </file_marker>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_project>
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/modules/cubedos-message_system-modules.adb</vfs_file>
+    </file_marker>
+    <file_marker column=" 6" line=" 26" >
+      <vfs_project>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_project>
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/check/main.adb</vfs_file>
+    </file_marker>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_project>
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/modules/cubedos-message_system-modules.adb</vfs_file>
+    </file_marker>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project />
+      <vfs_file>/home/cubesat/Desktop/cubedos/src/cubedos.gpr</vfs_file>
+    </file_marker>
+    <file_marker column=" 1" line=" 1" >
+      <vfs_project />
+      <vfs_file>/home/cubesat/Desktop/SPARKlib/sparklib.gpr</vfs_file>
+    </file_marker>
+    <file_marker current="true" column=" 23" line=" 8" >
+      <vfs_project />
+      <vfs_file>/home/cubesat/Desktop/SPARKlib/sparklib.gpr</vfs_file>
+    </file_marker>
+  </Project>
+</Locations>
