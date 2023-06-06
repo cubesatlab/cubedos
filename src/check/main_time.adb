@@ -28,8 +28,9 @@ procedure Main_Time is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
+   My_Mailbox : Message_Manager.Module_Mailbox;
 
-   Incoming_Message  : Message_Manager.Message_Record;
+   Incoming_Message  : Message_Manager.Msg_Owner;
    Series_ID         : Series_ID_Type;
    Count             : Natural;
    Status            : Message_Status_Type;
@@ -42,36 +43,37 @@ procedure Main_Time is
    use Duration_IO;
 begin
    Start_Time := Ada.Real_Time.Clock;
+   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox);
 
    -- Do some setup...
-   Message_Manager.Route_Message
-     (Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
+   Message_Manager.Send_Message
+     (My_Mailbox, Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
    Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
 
-   Message_Manager.Route_Message
-     (Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
+   Message_Manager.Send_Message
+     (My_Mailbox, Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
    Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
 
    loop
-      Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
+      Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
       -- Put_Line("+++ Fetch returned!");
-      -- Put("+++ Sender    : "); Put(Incoming_Message.Sender); New_Line;
-      -- Put("+++ Receiver  : "); Put(Incoming_Message.Receiver); New_Line;
-      -- Put("+++ Message_ID: "); Put(Integer(Incoming_Message.Message_ID)); New_Line(2);
+      -- Put("+++ Sender    : "); Put(Incoming_Message.all.Sender); New_Line;
+      -- Put("+++ Receiver  : "); Put(Incoming_Message.all.Receiver); New_Line;
+      -- Put("+++ Message_ID: "); Put(Integer(Incoming_Message.all.Message_ID)); New_Line(2);
 
       Relative_Time := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
       Absolute_Time := GNAT.Time_Stamp.Current_Time;
-      if Is_Tick_Reply(Incoming_Message) then
-         Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
+      if Is_Tick_Reply(Incoming_Message.all) then
+         Tick_Reply_Decode(Incoming_Message.all, Series_ID, Count, Status);
          if Status = Success then
             Put("Time Duration: "); Put(Relative_Duration); Put("     Time Stamp:      "); Put(Absolute_Time);
             Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
 
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then
-               Message_Manager.Route_Message
-                 (Cancel_Request_Encode((Domain_ID, My_Module_ID), 1, Series_ID => 1));
+               Message_Manager.Send_Message
+                 (My_Mailbox, Cancel_Request_Encode((Domain_ID, My_Module_ID), 1, Series_ID => 1));
                Put_Line("TX : Cancel_Request message sent for Series_ID = 1");
             end if;
 

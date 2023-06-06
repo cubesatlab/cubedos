@@ -23,8 +23,9 @@ procedure Main_File is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
+   My_Mailbox : Module_Mailbox;
 
-   Incoming_Message : Message_Manager.Message_Record;
+   Incoming_Message : Message_Manager.Msg_Owner;
    Handle       : File_Handle_Type;
    Read_Handle  : File_Handle_Type;
    Write_Handle : File_Handle_Type;
@@ -33,20 +34,22 @@ procedure Main_File is
    Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
    Status : Message_Manager.Message_Status_Type;
 begin
+   Register_Module(My_Module_ID, 8, My_Mailbox);
+
    -- TEST : Open two files. Read from one file, and write to another file.
 
    -- Try to open a file to read.
-   Message_Manager.Route_Message
-     (Open_Request_Encode((Domain_ID, My_Module_ID), 1, Read, "example.txt"));
+   Message_Manager.Send_Message
+     (My_Mailbox, Open_Request_Encode((Domain_ID, My_Module_ID), 1, Read, "example.txt"));
    Put_Line("TX : Open_Request message sent for reading 'example.txt'");
 
    -- Try to open file for writing
-   Message_Manager.Route_Message
-     (Open_Request_Encode((Domain_ID, My_Module_ID), 2, Write, "write_test.txt"));
+   Message_Manager.Send_Message
+     (My_Mailbox, Open_Request_Encode((Domain_ID, My_Module_ID), 2, Write, "write_test.txt"));
    Put_Line("TX : Open_Request message sent for writing 'write_test.txt'");
 
    loop
-      Message_Manager.Fetch_Message(My_Module_ID, Incoming_Message);
+      Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
       Put_Line("+++ Fetch returned!");
       Put_Line("+++    Sender    : " & Module_ID_Type'Image(Incoming_Message.Sender_Address.Module_ID));
       Put_Line("+++    Receiver  : " & Module_ID_Type'Image(Incoming_Message.Receiver_Address.Module_ID));
@@ -54,12 +57,12 @@ begin
       New_Line;
 
       -- Process open reply messages.
-      if Is_Open_Reply(Incoming_Message) then
+      if Is_Open_Reply(Incoming_Message.all) then
          Put_Line
            ("RX : Open_Reply message (Request_ID = " &
               Request_ID_Type'Image(Incoming_Message.Request_ID) & ")");
 
-         Open_Reply_Decode(Incoming_Message, Handle, Status);
+         Open_Reply_Decode(Incoming_Message.all, Handle, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
          elsif Handle = Invalid_Handle then
@@ -71,8 +74,8 @@ begin
                when 1 =>
                   -- We got a reply to our open-for-reading request.
                   Read_Handle := Handle;
-                  Message_Manager.Route_Message
-                    (Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
+                  Message_Manager.Send_Message
+                    (My_Mailbox, Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
                   Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
 
                when 2 =>
@@ -86,26 +89,26 @@ begin
          end if;
 
       -- Process reply messages.
-      elsif Is_Read_Reply(Incoming_Message) then
+      elsif Is_Read_Reply(Incoming_Message.all) then
          Put_Line("RX : Read_Reply message");
 
-         Read_Reply_Decode(Incoming_Message, Handle, Amount_Read, Data, Status);
+         Read_Reply_Decode(Incoming_Message.all, Handle, Amount_Read, Data, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
-            Message_Manager.Route_Message
-              (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
+            Message_Manager.Send_Message
+              (My_Mailbox, Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
             Put_Line("TX : Close_Request message sent (input file)");
          else
             Put_Line("     +++ Successfully read " & Read_Size_Type'Image(Amount_Read) & " octets");
 
             if Amount_Read = 0 then
                -- Close the files (both of them).
-               Message_Manager.Route_Message
-                 (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
+               Message_Manager.Send_Message
+                 (My_Mailbox, Close_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle));
                Put_Line("TX : Close_Request message sent (input file)");
 
-               Message_Manager.Route_Message
-                 (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
+               Message_Manager.Send_Message
+                 (My_Mailbox, Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
                Put_Line("TX : Close_Request message sent (output file)");
             else
                -- Print the data we just read (it's a text file).
@@ -116,25 +119,25 @@ begin
 
                -- Write this data to the output file too.
                Amount_Write := Amount_Read;
-               Message_Manager.Route_Message
-                 (Write_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle, Amount_Write, Data));
+               Message_Manager.Send_Message
+                 (My_Mailbox, Write_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle, Amount_Write, Data));
                Put_Line("TX : Write_Request message sent writing " & Integer'Image(Amount_Write) & " octets");
 
                -- Request the next chunk from the file.
-               Message_Manager.Route_Message
-                 (Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
+               Message_Manager.Send_Message
+                 (My_Mailbox, Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
                Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
             end if;
          end if;
 
-      elsif Is_Write_Reply(Incoming_Message) then
+      elsif Is_Write_Reply(Incoming_Message.all) then
          Put_Line("RX : Write_Reply message");
 
-         Write_Reply_Decode(Incoming_Message, Handle, Amount_Write, Status);
+         Write_Reply_Decode(Incoming_Message.all, Handle, Amount_Write, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
-            Message_Manager.Route_Message
-              (Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
+            Message_Manager.Send_Message
+              (My_Mailbox, Close_Request_Encode((Domain_ID, My_Module_ID), 0, Write_Handle));
             Put_Line("TX : Close_Request message sent (output file)");
          else
             Put_Line("     +++ Successfully wrote " & Write_Result_Size_Type'Image(Amount_Write) & " octets");

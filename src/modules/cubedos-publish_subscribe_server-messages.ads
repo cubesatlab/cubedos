@@ -16,12 +16,12 @@ with System;
 
 package CubedOS.Publish_Subscribe_Server.Messages
   with
-    Abstract_State => Database,
+    Abstract_State => (Database, Own_Mailbox),
     Initializes => Database
 is
 
    task type Message_Loop
-     with Global => (In_Out => (Database, Message_Manager.Mailboxes)),
+     with Global => (In_Out => (Database, Own_Mailbox)),
         Priority => System.Default_Priority
    is
       -- pragma Storage_Size(4 * 1024);

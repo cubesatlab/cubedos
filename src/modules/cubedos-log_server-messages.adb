@@ -61,12 +61,14 @@ package body CubedOS.Log_Server.Messages is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Log_Server.Module_ID, Incoming_Message);
-         Process(Incoming_Message);
+         Process(Incoming_Message.all);
       end loop;
    end Message_Loop;
 
+begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
 end CubedOS.Log_Server.Messages;
