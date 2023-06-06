@@ -80,6 +80,8 @@ is
          Payload    : Data_Array      := (others => 0);
       end record;
 
+   type Msg_Owner is access Message_Record;
+
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
      (Sender_Address : Message_Address;
@@ -124,12 +126,26 @@ is
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
      with Global => (In_Out => Mailboxes);
 
+   type Module_Mailbox is protected interface;
+
+   procedure Send_Message(Box : access constant Module_Mailbox; Msg : Msg_Owner; Dest_Module : Module_ID_Type; Dest_Domain : Domain_ID_Type) is abstract;
+
+   procedure Receive(Box : access constant Module_Mailbox; Msg : Msg_Owner) is abstract;
+
+   -- Register a module with the mail system.
+   -- Gets an observer for that module's mailbox.
+   procedure Register_Module(Module_ID : in Module_ID_Type;
+                             Msg_Queue_Size : in Positive;
+                             Mailbox : access constant Module_Mailbox'Class
+                            )
+     with Global => (In_Out => Mailboxes);
+
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.
    subtype Message_Index_Type is Positive range 1 .. Mailbox_Size;
    subtype Message_Count_Type is Natural range 0 .. Mailbox_Size;
-   type Message_Array is array(Message_Index_Type) of Message_Record;
+   type Message_Ptr_Array is array(Message_Index_Type) of Msg_Owner;
 
    type Message_Count_Array is array(Module_ID_Type) of Message_Count_Type;
 
