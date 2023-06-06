@@ -5,12 +5,17 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with Ada.Unchecked_Deallocation;
 
 -- with Name_Resolver;
+
+
 
 package body CubedOS.Generic_Message_Manager
   with Refined_State => (Mailboxes => Message_Storage, Request_ID_Generator => Request_ID_Gen)
 is
+
+   procedure Free is new Ada.Unchecked_Deallocation (Object => Message_Record, Name => Msg_Owner);
 
    -- A protected object for generating request ID values.
    protected Request_ID_Gen is
@@ -19,17 +24,18 @@ is
       Next_Request_ID : Request_ID_Type := 1;
    end Request_ID_Gen;
 
+   type Msg_Ptr_Array_Ptr is access Message_Ptr_Array;
 
   -- A protected type for holding messages.
-   protected type Mailbox is
+   protected type Mailbox is new Module_Mailbox
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the returned status indicates this.
-      procedure Send(Message : in Message_Record; Status : out Status_Type);
+      procedure Send(Message : not null access constant Message_Record; Status : out Status_Type);
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the message is lost.
-      procedure Unchecked_Send(Message : in Message_Record);
+      procedure Unchecked_Send(Message : not null access constant Message_Record);
 
       -- Returns the number of messages in the mailbox.
       function Message_Count return Message_Count_Type;
@@ -37,8 +43,12 @@ is
       -- Receive a message. This entry waits indefinitely for a message to be available.
       entry Receive(Message : out Message_Record);
 
+      -- Change the array used to store messages.
+      procedure Set_Msg_Array(Arr : Msg_Ptr_Array_Ptr)
+        with Pre => Message_Count = 0;
+
    private
-      Messages : Message_Array;
+      Messages : Msg_Ptr_Array_Ptr;
       Count    : Message_Count_Type := 0;
       Next_In  : Message_Index_Type := 1;
       Next_Out : Message_Index_Type := 1;
@@ -65,12 +75,12 @@ is
 
    protected body Mailbox is
 
-      procedure Send(Message : in Message_Record; Status : out Status_Type) is
+      procedure Send(Message : not null access constant Message_Record; Status : out Status_Type) is
       begin
          if Count = Mailbox_Size then
             Status := Mailbox_Full;
          else
-            Messages(Next_In) := Message;
+            Messages(Next_In) := new Message_Record'(Message.all);
             if Next_In = Mailbox_Size then
                Next_In := 1;
             else
@@ -83,10 +93,10 @@ is
       end Send;
 
 
-      procedure Unchecked_Send(Message : in Message_Record) is
+      procedure Unchecked_Send(Message : not null access constant Message_Record) is
       begin
          if Count /= Mailbox_Size then
-            Messages(Next_In) := Message;
+            Messages(Next_In) := new Message_Record'(Message.all);
             if Next_In = Mailbox_Size then
                Next_In := 1;
             else
@@ -106,7 +116,8 @@ is
 
       entry Receive(Message : out Message_Record) when Message_Waiting is
       begin
-         Message := Messages(Next_Out);
+         Message := Messages(Next_Out).all;
+         Free (Messages(Next_Out));
          if Next_Out = Mailbox_Size then
             Next_Out := 1;
          else
@@ -163,27 +174,41 @@ is
 
 
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type) is
+      Ptr : Msg_Owner := new Message_Record'(Message);
    begin
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
-      Message_Storage(Message.Receiver_Address.Module_ID).Send(Message, Status);
+      Message_Storage(Message.Receiver_Address.Module_ID).Send(Ptr, Status);
+      Free (Ptr);
    end Route_Message;
 
 
    procedure Route_Message(Message : in Message_Record) is
+      Ptr : Msg_Owner := new Message_Record'(Message);
    begin
       if Message.Receiver_Address.Domain_ID /= Domain_ID then
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
         -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
-        Message_Storage(2).Unchecked_Send(Message);
+        Message_Storage(2).Unchecked_Send(Ptr);
       else
-        Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
+        Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Ptr);
       end if;
+      Free (Ptr);
    end Route_Message;
 
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record) is
    begin
       Message_Storage(Module).Receive(Message);
    end Fetch_Message;
+
+   procedure Register_Module(Module_ID : in Module_ID_Type;
+                             Msg_Queue_Size : in Positive;
+                             Module_Mailbox : out access constant Module_Mailbox;
+                            )
+   is
+   begin
+      -- Create a new mailbox for the ID
+      Message_Storage(Module_ID).Set_Msg
+   end Register_Module;
 
 
    procedure Get_Message_Counts(Count_Array : out Message_Count_Array) is
