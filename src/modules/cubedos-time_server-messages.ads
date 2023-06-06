@@ -14,16 +14,17 @@ with Message_Manager;
 
 package CubedOS.Time_Server.Messages
   with
-    Abstract_State => (Tick_Database with External),
-    Initializes => (Message_Loop, Tick_Database)
+    Abstract_State => ((Tick_Database with External), Own_Mailbox),
+    Initializes => (Message_Loop, Tick_Database, Own_Mailbox)
 is
 
    task Message_Loop
      with
-       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => (Tick_Database, Message_Manager.Mailboxes))
+       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => (Tick_Database, Own_Mailbox))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
+
 
 end CubedOS.Time_Server.Messages;

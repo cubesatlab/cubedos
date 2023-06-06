@@ -6,11 +6,13 @@ use Message_Manager;
 
 procedure Main_Message_Manager is
 
-   Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Message_Record;
+   Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Msg_Owner
+     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, 0));
    Message_ID : constant Message_Manager.Message_ID_Type:= 1;
    Message_ID_2 : constant Message_Manager.Message_ID_Type:= 2;
    Message_Status : Message_Manager.Status_Type;
    X : Integer := 1;
+   Mailbox_1, Mailbox_2 : Message_Manager.Module_Mailbox;
 
    procedure Fetch is
       Y : Integer := 1;
@@ -18,7 +20,7 @@ procedure Main_Message_Manager is
       Put_Line("+++++ FETCHING MESSAGES FOR RECIEVER ID = 1 +++++");
       New_Line;
       while Y < 9 loop
-         Fetch_Message(Module  => Message.Receiver_Address.Module_ID, Message => Message);
+         Message_Manager.Read_Next(Mailbox_1, Message);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message.Sender_Address.Module_ID));
          Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message.Receiver_Address.Module_ID));
@@ -38,7 +40,7 @@ procedure Main_Message_Manager is
       Put_Line("+++++ FETCHING MESSAGES FOR RECIEVER ID = 2 +++++");
       New_Line;
       while Y < 9 loop
-         Fetch_Message(Module  => Message_5.Receiver_Address.Module_ID, Message => Message_5);
+         Message_Manager.Read_Next(Mailbox_2, Message_5);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_5.Sender_Address.Module_ID));
          Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_5.Receiver_Address.Module_ID));
@@ -53,6 +55,9 @@ procedure Main_Message_Manager is
    end Fetch_2;
 
 begin
+   -- Register receiving mailboxes
+   Message_Manager.Register_Module(1, 8, Mailbox_1);
+   Message_Manager.Register_Module(2, 8, Mailbox_2);
 
    -- Test Get_Next_Request_ID
    Put_Line("Testing Get_Next_Request_ID");
@@ -72,33 +77,33 @@ begin
    New_Line(2);
 
    -- Test Make_Empty_Message
-   Message_3 := Make_Empty_Message
+   Message_3 := new Message_Record'(Make_Empty_Message
      (Sender_Address   => (0, 2),
       Receiver_Address => (0, 1),
       Request_ID       => 4,
       Message_ID       => Message_ID,
-      Priority         => 2);
+      Priority         => 2));
 
-   Message_4 := Make_Empty_Message
+   Message_4 := new Message_Record'(Make_Empty_Message
      (Sender_Address   => (1, 1),
       Receiver_Address => (1, 2),
       Request_ID       => 8,
       Message_ID       => Message_ID_2,
-      Priority         => 5);
+      Priority         => 5));
 
-   Message_5 := Make_Empty_Message
+   Message_5 := new Message_Record'(Make_Empty_Message
      (Sender_Address   => (2, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_ID       => 1,
-      Priority         => 1);
+      Priority         => 1));
 
-   Message_6 := Make_Empty_Message
+   Message_6 := new Message_Record'(Make_Empty_Message
      (Sender_Address   => (1, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_ID       => Message_ID_2,
-      Priority         => 4);
+      Priority         => 4));
 
 
    -- 20 messages should be attempted to be sent, only first eight should be sent
@@ -107,7 +112,7 @@ begin
    while X < 40 loop
       -- Ensure the Make_Empty_Message works properly
       if X = 12 or X = 31 then
-         Route_Message(Message => Message_3, Status => Message_Status);
+         Route_Message(Message => Message_3.all, Status => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_3.Sender_Address.Module_ID));
@@ -118,7 +123,7 @@ begin
          X := X + 1;
 
       elsif X = 15 or X = 22 then
-         Route_Message(Message => Message_4, Status  => Message_Status);
+         Route_Message(Message => Message_4.all, Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_4.Sender_Address.Module_ID));
@@ -129,7 +134,7 @@ begin
          X := X + 1;
 
       elsif X = 11 or X = 28 then
-         Route_Message(Message => Message_5, Status  => Message_Status);
+         Route_Message(Message => Message_5.all, Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_5.Sender_Address.Module_ID));
@@ -142,7 +147,7 @@ begin
 
       elsif X = 4 or X = 23 then
          -- Test Route_Message without status parameter
-         Route_Message(Message => Message_2);
+         Route_Message(Message => Message_2.all);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
          Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_2.Sender_Address.Module_ID));
@@ -155,7 +160,7 @@ begin
       else
          -- Testing Route_Message with Status parameter
          if X < 22 then
-            Route_Message(Message => Message, Status => Message_Status);
+            Route_Message(Message => Message.all, Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
             Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message.Sender_Address.Module_ID));
@@ -167,7 +172,7 @@ begin
          end if;
 
          if X > 20 then
-            Route_Message(Message => Message_6, Status => Message_Status);
+            Route_Message(Message => Message_6.all, Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
             Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_6.Sender_Address.Module_ID));
