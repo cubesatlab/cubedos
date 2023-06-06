@@ -51,6 +51,7 @@ package body CubedOS.Transport_UDP.Messages is
       Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Message_Manager.Data_Index_Type'Last + 6)));
       Last          : Ada.Streams.Stream_Element_Offset;
       Message : Message_Manager.Message_Record;
+      Msg_Ptr : Message_Manager.Msg_Owner;
    begin
       Create_Socket (Server, Family_Inet, Socket_Datagram);
       Set_Socket_Option (Server, Socket_Level, (Reuse_Address, True));
@@ -65,7 +66,8 @@ package body CubedOS.Transport_UDP.Messages is
             if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
                Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
             else
-               Message_Manager.Route_Message(Message);
+               Msg_Ptr := new Message_Manager.Message_Record'(Message);
+               Message_Manager.Route_Message(Msg_Ptr);
             end if;
          exception
             when E : others =>
@@ -120,11 +122,11 @@ package body CubedOS.Transport_UDP.Messages is
    end Network_Loop;
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Network_Server, Incoming_Message);
-         Process(Incoming_Message);
+         Process(Incoming_Message.all);
       end loop;
    end Message_Loop;
 

@@ -59,14 +59,14 @@ package body CubedOS.File_Server.Messages is
 
       -- Don't even bother if there are no available handles.
       if Handle = API.Invalid_Handle then
-         Message_Manager.Route_Message
-           (API.Open_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Open_Reply_Encode
               (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
       elsif Status = Malformed then
-         Message_Manager.Route_Message
-           (API.Open_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Open_Reply_Encode
               (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
@@ -81,8 +81,8 @@ package body CubedOS.File_Server.Messages is
                Octet_IO.Create(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
          end case;
 
-         Message_Manager.Route_Message
-           (API.Open_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Open_Reply_Encode
               (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => Handle));
@@ -91,8 +91,8 @@ package body CubedOS.File_Server.Messages is
    exception
       when others =>
          -- Open failed. Send back an invalid handle.
-         Message_Manager.Route_Message
-           (API.Open_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Open_Reply_Encode
               (Receiver_Address => Incoming_Message.Sender_Address,
                Request_ID => Incoming_Message.Request_ID,
                Handle     => API.Invalid_Handle));
@@ -123,8 +123,8 @@ package body CubedOS.File_Server.Messages is
                   null;
             end;
             -- Send what we have (could be zero octets!).
-            Message_Manager.Route_Message
-              (API.Read_Reply_Encode
+            Message_Manager.Send_Message
+              (Mailbox, API.Read_Reply_Encode
                  (Receiver_Address => Incoming_Message.Sender_Address,
                   Request_ID => Incoming_Message.Request_ID,
                   Handle     => Handle,
@@ -159,8 +159,8 @@ package body CubedOS.File_Server.Messages is
                when Octet_IO.End_Error =>
                   null;
             end;
-            Message_Manager.Route_Message
-              (API.Write_Reply_Encode
+            Message_Manager.Send_Message
+              (Mailbox, API.Write_Reply_Encode
                  (Receiver_Address => Incoming_Message.Sender_Address,
                   Request_ID => Incoming_Message.Request_ID,
                   Handle     => Handle,
@@ -208,14 +208,16 @@ package body CubedOS.File_Server.Messages is
    end Process;
 
 
+
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.File_Server.Module_ID, Incoming_Message);
-         Process(Incoming_Message);
+         Message_Manager.Read_Next(Mailbox, Incoming_Message);
+         Process(Incoming_Message.all);
       end loop;
    end Message_Loop;
 
-
+begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
 end CubedOS.File_Server.Messages;

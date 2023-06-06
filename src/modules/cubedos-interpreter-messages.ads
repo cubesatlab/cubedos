@@ -15,4 +15,6 @@ package CubedOS.Interpreter.Messages is
       pragma Priority(System.Default_Priority);
    end Message_Loop;
 
+private
+   Mailbox : Message_Manager.Module_Mailbox;
 end CubedOS.Interpreter.Messages;
