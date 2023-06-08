@@ -13,9 +13,10 @@ with Name_Resolver;
 use  CubedOS.Publish_Subscribe_Server.API;
 
 package body CubedOS.Publish_Subscribe_Server.Messages
-  with Refined_State => (Database => Subscription_Map)
+  with Refined_State => (Database => Subscription_Map, Own_Mailbox => Mailbox)
 is
    use Message_Manager;
+   Mailbox : Message_Manager.Module_Mailbox;
 
    -- If this is really packed, the memory cost is minimal.
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean
@@ -35,14 +36,14 @@ is
    begin
       Subscribe_Request_Decode(Message, Channel, Status);
       if Status = Malformed then
-         Route_Message
-           (API.Subscribe_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Subscribe_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
          -- Should we have the Subscription_Map handle the entire Message Address?
          Subscription_Map(Message.Sender_Address.Module_ID, Channel) := True;
-         Route_Message
-           (API.Subscribe_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Subscribe_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Success));
       end if;
    end Handle_Subscribe_Request;
@@ -56,16 +57,16 @@ is
    begin
       Unsubscribe_Request_Decode(Message, Channel, Status);
       if Status = Malformed then
-         Route_Message
-           (API.Unsubscribe_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Unsubscribe_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
          -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
          -- The operation returns Success without comment.
          -- TODO: Is this appropriate?
          Subscription_Map(Message.Sender_Address.Module_ID, Channel) := False;
-         Route_Message
-           (API.Unsubscribe_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Unsubscribe_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Success));
       end if;
    end Handle_Unsubscribe_Request;
@@ -81,19 +82,19 @@ is
    begin
       Publish_Request_Decode(Message, Channel, Message_Data, Size, Status);
       if Status = Malformed then
-         Route_Message
-           (API.Publish_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Publish_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Failure));
       else
-         Route_Message
-           (API.Publish_Reply_Encode
+         Message_Manager.Send_Message
+           (Mailbox, API.Publish_Reply_Encode
               (Message.Sender_Address, Message.Request_ID, Channel, Success));
 
          -- Do the actual publishing.
          for I in Module_ID_Type loop
             if Subscription_Map(I, Channel) then
-               Route_Message
-                 (API.Publish_Result_Encode
+               Message_Manager.Send_Message
+                 (Mailbox, API.Publish_Result_Encode
                     ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
                      0,
                      Channel,
@@ -126,12 +127,14 @@ is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
-         Process(Incoming_Message);
+         Process(Incoming_Message.all);
       end loop;
    end Message_Loop;
 
+begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
 end CubedOS.Publish_Subscribe_Server.Messages;

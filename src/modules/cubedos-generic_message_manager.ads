@@ -16,12 +16,11 @@ use  CubedOS.Lib.XDR;
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
    Module_Count  : Positive;  -- Number of modules in the system.
-   Mailbox_Size  : Positive;  -- Maximum number of pending messages in a mailbox.
    Maximum_Message_Size : Positive;  -- Maximum size of each message payload.
 package CubedOS.Generic_Message_Manager
   with
-    Abstract_State => ((Mailboxes with External), (Request_ID_Generator with External)),
-    Initializes => (Mailboxes, Request_ID_Generator)
+    Abstract_State => ((Mailboxes with External), Mailbox_Init_Tracker, (Request_ID_Generator with External)),
+    Initializes => (Mailboxes, Request_ID_Generator, Mailbox_Init_Tracker)
 is
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
@@ -80,6 +79,8 @@ is
          Payload    : Data_Array      := (others => 0);
       end record;
 
+   type Msg_Owner is access Message_Record;
+
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
      (Sender_Address : Message_Address;
@@ -109,27 +110,55 @@ is
    type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
    type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
 
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once with a status of Accepted if the message was definitely delivered. A status
-   -- of Mailbox_Full indicates that delivery did not occur.
-   procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
-     with Global => (In_Out => Mailboxes);
-
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once. If the message could not be delivered it is lost with no indication.
-   procedure Route_Message(Message : in Message_Record)
-     with Global => (In_Out => Mailboxes);
-
    -- Retrieves a message from the indicated mailbox. May block indefinitely.
-   procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
+   procedure Fetch_Message(Module : in Module_ID_Type; Message : out Msg_Owner)
      with Global => (In_Out => Mailboxes);
+
+   -- True if the module is ready to receive mail.
+   function Module_Ready(Module_ID : Module_ID_Type) return Boolean
+     with Global => (Input => Mailbox_Init_Tracker);
+
+
+   -- A mailbox used by modules to send and receive messages.
+   -- This is the only way to receive messages sent to a module
+   -- and the only intended way to send messages from it.
+   -- Modules should keep their instance of this object invisible
+   -- to outside modules.
+   type Module_Mailbox is limited private;
+
+   -- Sends the given message to the given address from this mailbox's address.
+   -- Returns immediately.
+   procedure Send_Message(Box : Module_Mailbox; Msg : Message_Record)
+     with Global => (In_Out => Mailboxes),
+     Depends => (Mailboxes => +(Box, Msg));
+
+   -- Sends the given message to the given address from this mailbox's address.
+   -- Returns immediately with the status of the operation's result.
+   procedure Send_Message(Box : Module_Mailbox; Msg : Message_Record; Status : out Status_Type)
+     with Global => (In_Out => Mailboxes);
+
+   -- Reads the next message, removing it from the message queue.
+   -- Blocks until a message is available.
+   procedure Read_Next(Box : Module_Mailbox; Msg : out Msg_Owner);
+
+   -- Register a module with the mail system.
+   -- Gets an observer for that module's mailbox.
+   procedure Register_Module(Module_ID : in Module_ID_Type;
+                             Msg_Queue_Size : in Positive;
+                             Mailbox : out Module_Mailbox)
+     with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
+       Depends => (Mailboxes => +(Msg_Queue_Size, Module_ID),
+                   Mailbox_Init_Tracker => +(Module_ID),
+                   Mailbox => Module_ID),
+       Pre => Module_Ready(Module_ID) = False,
+       Post => Module_Ready(Module_ID) = True;
 
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.
-   subtype Message_Index_Type is Positive range 1 .. Mailbox_Size;
-   subtype Message_Count_Type is Natural range 0 .. Mailbox_Size;
-   type Message_Array is array(Message_Index_Type) of Message_Record;
+   subtype Message_Index_Type is Positive;
+   subtype Message_Count_Type is Natural;
+   type Message_Ptr_Array is array(Positive range <>) of Msg_Owner;
 
    type Message_Count_Array is array(Module_ID_Type) of Message_Count_Type;
 
@@ -138,6 +167,39 @@ is
    -- the counts are being gathered. This procedure is intended to be used for software
    -- telemetry and debugging.
    procedure Get_Message_Counts(Count_Array : out Message_Count_Array)
-     with Global => (In_Out => Mailboxes);
+     with Global => (In_Out => Mailboxes, Input => Mailbox_Init_Tracker),
+       Pre => (for all I in Module_ID_Type => Module_Ready(I));
+
+
+   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
+   -- returns at once with a status of Accepted if the message was definitely delivered. A status
+   -- of Mailbox_Full indicates that delivery did not occur.
+   --
+   -- Depreciated: Use Mailboxes to send messages
+   procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
+     with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
+       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+
+   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
+   -- returns at once. If the message could not be delivered it is lost with no indication.
+   --
+   -- Depreciated: Use Mailboxes to send messages
+   procedure Route_Message(Message : in out Msg_Owner)
+     with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
+       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+
+   procedure Route_Message(Message : in Message_Record)
+     with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
+     Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+   procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
+     with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
+       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+
+private
+
+      type Module_Mailbox is
+      record
+         Address : Message_Address;
+      end record;
 
 end CubedOS.Generic_Message_Manager;

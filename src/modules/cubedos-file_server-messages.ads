@@ -22,5 +22,7 @@ package CubedOS.File_Server.Messages is
       Intentional,
       "multiple tasks might queue on protected entry",
       "Every module has a unique ID");
+private
+   Mailbox : Message_Manager.Module_Mailbox;
 
 end CubedOS.File_Server.Messages;

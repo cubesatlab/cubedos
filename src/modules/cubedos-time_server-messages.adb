@@ -11,12 +11,14 @@ with CubedOS.Time_Server.API;
 use CubedOS.Time_Server.API;
 
 package body CubedOS.Time_Server.Messages with
-   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))
+   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages), Own_Mailbox => Mailbox)
 is
 
    use Message_Manager;
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
+
+   Mailbox : Message_Manager.Module_Mailbox;
 
    -- Stores all persistent info about a series.
    type Series_Record is record
@@ -134,8 +136,8 @@ is
                if Current_Series.Is_Used
                  and then Current_Series.Next <= Current_Time
                then
-                  Route_Message
-                    (Tick_Reply_Encode
+                  Message_Manager.Send_Message
+                    (Mailbox, Tick_Reply_Encode
                        (Receiver_Address => Current_Series.Address,
                         Request_ID       => 0, Series_ID => Current_Series.ID,
                         Count            => Current_Series.Count));
@@ -261,21 +263,22 @@ is
 
    task body Message_Loop with
       Refined_Global => (Input => Ada.Real_Time.Clock_Time,
-       In_Out => (Series_Database, Mailboxes))
+       In_Out => (Series_Database, Mailbox))
    is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       loop
-         Message_Manager.Fetch_Message
-           (Name_Resolver.Time_Server.Module_ID, Incoming_Message);
+         Read_Next(Mailbox, Incoming_Message);
 
          -- This module should never receive a message from itself.
          -- We check that here because technically any module can
          -- send a message to and from anywhere.
          if Incoming_Message.Sender_Address /= Name_Resolver.Time_Server then
-            Process (Incoming_Message);
+            Process (Incoming_Message.all);
          end if;
       end loop;
    end Message_Loop;
 
+begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
 end CubedOS.Time_Server.Messages;

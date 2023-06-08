@@ -77,14 +77,16 @@ package body CubedOS.Interpreter.Messages is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Manager.Msg_Owner;
    begin
       Initialize;
 
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Interpreter.Module_ID, Incoming_Message);
-         Process(Incoming_Message);
+         Process(Incoming_Message.all);
       end loop;
    end Message_Loop;
 
+begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
 end CubedOS.Interpreter.Messages;
