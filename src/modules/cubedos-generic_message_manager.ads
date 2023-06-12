@@ -74,12 +74,12 @@ is
    -- useful.
    type Message_Record is
       record
-         Sender_Address : Message_Address := (0, 1);
-         Receiver_Address : Message_Address := (0 , 1);
-         Request_ID : Request_ID_Type := 0;
-         Message_ID : Message_ID_Type := 0;
-         Priority   : System.Priority := System.Default_Priority;
-         Payload    : Data_Array_Owner := null;
+         Sender_Address : Message_Address;
+         Receiver_Address : Message_Address;
+         Request_ID : Request_ID_Type;
+         Message_ID : Message_ID_Type;
+         Priority   : System.Priority;
+         Payload    : not null Data_Array_Owner;
       end record;
 
    type Msg_Owner is access Message_Record;
@@ -210,6 +210,8 @@ private
          Address : Message_Address;
       end record;
 
+   -- Create a copy of the given message on the heap,
+   -- also making a copy of the payload content.
    function Copy(Msg : Message_Record) return Msg_Owner;
 
 end CubedOS.Generic_Message_Manager;
