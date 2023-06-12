@@ -36,7 +36,8 @@ package body CubedOS.Transport_UDP.Messages is
         (Sender_Address => (Sender_Domain, Sender_Module),
          Receiver_Address => (Receiver_Domain, Receiver_Module),
          Request_ID      => Request_ID,
-         Message_ID      => Message_ID);
+         Message_ID      => Message_ID,
+         Payload_Size     => Positive(Last) - 6);
 
       for I in 6 .. Last loop
          Message.Payload(Integer(I) - 6) := XDR.XDR_Octet(Data(I));
@@ -50,8 +51,7 @@ package body CubedOS.Transport_UDP.Messages is
       Address, From : Sock_Addr_Type;
       Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Message_Manager.Data_Index_Type'Last + 6)));
       Last          : Ada.Streams.Stream_Element_Offset;
-      Message : Message_Manager.Message_Record;
-      Msg_Ptr : Message_Manager.Msg_Owner;
+      Message : Message_Manager.Msg_Owner;
    begin
       Create_Socket (Server, Family_Inet, Socket_Datagram);
       Set_Socket_Option (Server, Socket_Level, (Reuse_Address, True));
@@ -61,13 +61,12 @@ package body CubedOS.Transport_UDP.Messages is
       loop
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
-            Message := Read_Stream_Message(Data, Last);
+            Message := new Message_Manager.Message_Record'(Read_Stream_Message(Data, Last));
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
             if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
                Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
             else
-               Msg_Ptr := new Message_Manager.Message_Record'(Message);
-               Message_Manager.Route_Message(Msg_Ptr);
+               Message_Manager.Route_Message(Message);
             end if;
          exception
             when E : others =>
@@ -83,7 +82,7 @@ package body CubedOS.Transport_UDP.Messages is
       Last : Ada.Streams.Stream_Element_Offset;
       Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
       Message_Payload_Size : constant Integer := Message.Payload'Length;
-      Payload    : Message_Manager.Data_Array      := (others => 0);
+      Payload    : Message_Manager.Data_Array(0 .. Message.Payload'Length) := (others => 0);
       Position : Message_Manager.Data_Index_Type := 0;
       Last_XDR     : Message_Manager.Data_Index_Type;
    begin
