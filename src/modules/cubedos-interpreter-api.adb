@@ -46,9 +46,9 @@ package body CubedOS.Interpreter.API is
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message
-          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Set_Reply), Priority);
+          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Set_Reply), Max_Message_Size, Priority);
 
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
@@ -58,11 +58,10 @@ package body CubedOS.Interpreter.API is
 
       -- Encode one parameter (decoding logic must be consistent).
       -- Set Position to get ready for the next parameter.
-      XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
       -- Set the message size.
-      Message.Size := Last + 1;
       return Message;
    end Set_Reply_Encode;
 
@@ -88,9 +87,9 @@ package body CubedOS.Interpreter.API is
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
-      Message : Message_Record :=
+      Message : constant Message_Record :=
         Make_Empty_Message
-          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Add_Reply), Priority);
+          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Add_Reply), Max_Message_Size, Priority);
 
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
@@ -100,11 +99,10 @@ package body CubedOS.Interpreter.API is
 
       -- Encode one parameter (decoding logic must be consistent).
       -- Set Position to get ready for the next parameter.
-      XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
       -- Set the message size.
-      Message.Size := Last + 1;
       return Message;
    end Add_Reply_Encode;
 
@@ -134,7 +132,7 @@ package body CubedOS.Interpreter.API is
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
-      XDR.Decode(Message.Payload, Position, Raw_Value, Last);
+      XDR.Decode(Message.Payload.all, Position, Raw_Value, Last);
       Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!
@@ -165,7 +163,7 @@ package body CubedOS.Interpreter.API is
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
-      XDR.Decode(Message.Payload, Position, Raw_Value, Last);
+      XDR.Decode(Message.Payload.all, Position, Raw_Value, Last);
       Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!

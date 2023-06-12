@@ -147,18 +147,19 @@ is
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
       Request_ID     : Request_ID_Type; Message_ID : Message_ID_Type;
+      Payload_Size : Natural;
       Priority       : System.Priority := System.Default_Priority)
       return Message_Record
    is
       Message : Message_Record;
+      subtype Definite_Data_Array is Data_Array(0 .. Payload_Size - 1);
    begin
       Message.Sender_Address   := Sender_Address;
       Message.Receiver_Address := Receiver_Address;
       Message.Request_ID       := Request_ID;
       Message.Message_ID       := Message_ID;
       Message.Priority         := Priority;
-      Message.Size             := 0;
-      Message.Payload          := (others => 0);
+      Message.Payload          := new Definite_Data_Array'(others => 0);
       return Message;
    end Make_Empty_Message;
 
@@ -210,7 +211,7 @@ is
    end Route_Message;
 
    procedure Route_Message (Message : in Message_Record) is
-      Ptr : Msg_Owner := new Message_Record'(Message);
+      Ptr : Msg_Owner := Copy(Message);
    begin
       Route_Message (Ptr);
    end Route_Message;
@@ -218,10 +219,25 @@ is
    procedure Route_Message
      (Message : in Message_Record; Status : out Status_Type)
    is
-      Ptr : Msg_Owner := new Message_Record'(Message);
+      Ptr : Msg_Owner := Copy(Message);
    begin
       Route_Message (Ptr, Status);
    end Route_Message;
+
+   function Copy(Msg : Message_Record) return Msg_Owner
+   is
+      subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
+   begin
+      return new Message_Record'(
+                                Sender_Address => Msg.Sender_Address,
+                                Receiver_Address => Msg.Receiver_Address,
+                                Request_ID => Msg.Request_ID,
+                                Message_ID => Msg.Message_ID,
+                                Priority => Msg.Priority,
+                                Payload => new Definite_Data_Array'(Msg.Payload.all)
+                               );
+   end;
+
 
    procedure Fetch_Message
      (Module : in Module_ID_Type; Message : out Msg_Owner)
@@ -231,7 +247,7 @@ is
    end Fetch_Message;
 
    procedure Send_Message (Box : Module_Mailbox; Msg : Message_Record) is
-      Ptr : Msg_Owner := new Message_Record'(Msg);
+      Ptr : Msg_Owner := Copy(Msg);
    begin
       Route_Message (Ptr);
    end Send_Message;
@@ -239,7 +255,7 @@ is
    procedure Send_Message
      (Box : Module_Mailbox; Msg : Message_Record; Status : out Status_Type)
    is
-      Ptr : Msg_Owner := new Message_Record'(Msg);
+      Ptr : Msg_Owner := Copy(Msg);
    begin
       Route_Message (Ptr, Status);
    end Send_Message;
