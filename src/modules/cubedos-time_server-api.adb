@@ -25,19 +25,17 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message    : Message_Record;
-      Position   : Data_Index_Type;
-      Last       : Data_Index_Type;
-      Interval   : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
-   begin
-      Message := Make_Empty_Message
+      Message : constant Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Relative_Request),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
-
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      Interval   : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
+   begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(1000*Interval), Message.Payload.all, Position, Last);
       Position := Last + 1;
@@ -55,20 +53,18 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message    : Message_Record;
-      Position   : Data_Index_Type;
-      Last       : Data_Index_Type;
-      Seconds    : Ada.Real_Time.Seconds_Count;
-      Fraction   : Ada.Real_Time.Time_Span;
-   begin
-      Message := Make_Empty_Message
+      Message : constant Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Absolute_Request),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
-
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      Seconds    : Ada.Real_Time.Seconds_Count;
+      Fraction   : Ada.Real_Time.Time_Span;
+   begin
       Ada.Real_Time.Split(Tick_Time, Seconds, Fraction);
 
       Position := 0;
@@ -113,18 +109,16 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message    : Message_Record;
-      Position   : Data_Index_Type;
-      Last       : Data_Index_Type;
-   begin
-      Message := Make_Empty_Message
+      Message : constant Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
          Message_ID => Message_Type'Pos(Cancel_Request),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
-
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+   begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
       return message;

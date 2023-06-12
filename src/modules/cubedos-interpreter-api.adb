@@ -61,7 +61,6 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      -- Set the message size.
       return Message;
    end Set_Reply_Encode;
 
@@ -102,7 +101,6 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      -- Set the message size.
       return Message;
    end Add_Reply_Encode;
 

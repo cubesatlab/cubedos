@@ -151,16 +151,16 @@ is
       Priority       : System.Priority := System.Default_Priority)
       return Message_Record
    is
-      Message : Message_Record;
       subtype Definite_Data_Array is Data_Array(0 .. Payload_Size - 1);
    begin
-      Message.Sender_Address   := Sender_Address;
-      Message.Receiver_Address := Receiver_Address;
-      Message.Request_ID       := Request_ID;
-      Message.Message_ID       := Message_ID;
-      Message.Priority         := Priority;
-      Message.Payload          := new Definite_Data_Array'(others => 0);
-      return Message;
+      return (
+              Sender_Address => Sender_Address,
+              Receiver_Address => Receiver_Address,
+              Request_ID => Request_ID,
+              Message_ID => Message_ID,
+              Priority => Priority,
+              Payload => new Definite_Data_Array'(others => 0)
+             );
    end Make_Empty_Message;
 
    function Stringify_Message (Message : in Message_Record) return String is
