@@ -16,7 +16,6 @@ use  CubedOS.Lib.XDR;
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
    Module_Count  : Positive;  -- Number of modules in the system.
-   Maximum_Message_Size : Positive;  -- Maximum size of each message payload.
 package CubedOS.Generic_Message_Manager
   with
     Abstract_State => ((Mailboxes with External), Mailbox_Init_Tracker, (Request_ID_Generator with External)),
@@ -52,10 +51,15 @@ is
    -- given zero length values to encode. Support for encoding zero length arrays and strings is
    -- useful.
    --
-   subtype Data_Index_Type is XDR_Index_Type range 0 .. Maximum_Message_Size - 1;
-   subtype Data_Extended_Index_Type is XDR_Extended_Index_Type range -1 .. Maximum_Message_Size - 1;
-   subtype Data_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
-   subtype Data_Array is XDR_Array(Data_Index_Type);
+   subtype Data_Index_Type is XDR_Index_Type;
+   subtype Data_Extended_Index_Type is XDR_Extended_Index_Type;
+   subtype Data_Size_Type is XDR_Size_Type;
+   subtype Data_Array is XDR_Array;
+   type Data_Array_Owner is access Data_Array;
+
+   -- TODO: All references to this value by API packages should be replaced
+   -- with actual message sizes and this constant should be removed.
+   Max_Message_Size : constant Positive := 1024;
 
    -- Message Addresses hold the Domain_ID and Module_ID for Modules in a CubedOS Application
    type Message_Address is
@@ -75,8 +79,7 @@ is
          Request_ID : Request_ID_Type := 0;
          Message_ID : Message_ID_Type := 0;
          Priority   : System.Priority := System.Default_Priority;
-         Size       : Data_Size_Type  := 0;
-         Payload    : Data_Array      := (others => 0);
+         Payload    : Data_Array_Owner := null;
       end record;
 
    type Msg_Owner is access Message_Record;
@@ -87,6 +90,7 @@ is
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
       Message_ID : Message_ID_Type;
+      Payload_Size : Natural;
       Priority   : System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
@@ -95,8 +99,9 @@ is
          Make_Empty_Message'Result.Receiver_Address = Receiver_Address and
          Make_Empty_Message'Result.Request_ID = Request_ID and
          Make_Empty_Message'Result.Message_ID = Message_ID and
-         Make_Empty_Message'Result.Priority   = Priority   and
-         Make_Empty_Message'Result.Size       = 0;
+         Make_Empty_Message'Result.Payload /= null and
+         Make_Empty_Message'Result.Payload'Length = Payload_Size and
+         Make_Empty_Message'Result.Priority   = Priority;
 
    -- Convenience function to stringify messages
    function Stringify_Message (Message : in Message_Record) return String;
@@ -178,7 +183,9 @@ is
    -- Depreciated: Use Mailboxes to send messages
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
-       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+     Pre => Message /= null and
+     (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID)),
+       Posr => Message = null;
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
    -- returns at once. If the message could not be delivered it is lost with no indication.
@@ -186,7 +193,8 @@ is
    -- Depreciated: Use Mailboxes to send messages
    procedure Route_Message(Message : in out Msg_Owner)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
-       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+     Pre => Message /= null and
+     (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
 
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
@@ -201,5 +209,7 @@ private
       record
          Address : Message_Address;
       end record;
+
+   function Copy(Msg : Message_Record) return Msg_Owner;
 
 end CubedOS.Generic_Message_Manager;
