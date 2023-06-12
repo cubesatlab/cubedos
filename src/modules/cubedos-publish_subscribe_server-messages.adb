@@ -76,7 +76,7 @@ is
      with Pre => Is_Publish_Request(Message)
    is
       Channel : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array(1 .. Data_Size_Type'Last - 8);
+      Message_Data : CubedOS.Lib.Octet_Array(1 .. Message.Payload'Length - 8);
       Size    : CubedOS.Lib.Octet_Array_Count;
       Status  : Message_Status_Type;
    begin

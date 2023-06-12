@@ -7,7 +7,7 @@ use Message_Manager;
 procedure Main_Message_Manager is
 
    Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Msg_Owner
-     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, 0));
+     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, 0, 0));
    Message_ID : constant Message_Manager.Message_ID_Type:= 1;
    Message_ID_2 : constant Message_Manager.Message_ID_Type:= 2;
    Message_Status : Message_Manager.Status_Type;
@@ -82,6 +82,7 @@ begin
       Receiver_Address => (0, 1),
       Request_ID       => 4,
       Message_ID       => Message_ID,
+      Payload_Size     => 0,
       Priority         => 2));
 
    Message_4 := new Message_Record'(Make_Empty_Message
@@ -89,6 +90,7 @@ begin
       Receiver_Address => (1, 2),
       Request_ID       => 8,
       Message_ID       => Message_ID_2,
+      Payload_Size     => 0,
       Priority         => 5));
 
    Message_5 := new Message_Record'(Make_Empty_Message
@@ -96,6 +98,7 @@ begin
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_ID       => 1,
+      Payload_Size     => 0,
       Priority         => 1));
 
    Message_6 := new Message_Record'(Make_Empty_Message
@@ -103,6 +106,7 @@ begin
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_ID       => Message_ID_2,
+      Payload_Size     => 0,
       Priority         => 4));
 
 
