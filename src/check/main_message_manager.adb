@@ -7,9 +7,9 @@ use Message_Manager;
 procedure Main_Message_Manager is
 
    Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Msg_Owner
-     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, 0, 0));
-   Message_ID : constant Message_Manager.Message_ID_Type:= 1;
-   Message_ID_2 : constant Message_Manager.Message_ID_Type:= 2;
+     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, (1, 1), 0));
+   Message_Type : constant Message_Manager.Universal_Message_Type := (1, 1);
+   Message_Type_2 : constant Message_Manager.Universal_Message_Type := (1, 2);
    Message_Status : Message_Manager.Status_Type;
    X : Integer := 1;
    Mailbox_1, Mailbox_2 : Message_Manager.Module_Mailbox;
@@ -22,10 +22,7 @@ procedure Main_Message_Manager is
       while Y < 9 loop
          Message_Manager.Read_Next(Mailbox_1, Message);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
 
          Y := Y + 1;
@@ -42,10 +39,7 @@ procedure Main_Message_Manager is
       while Y < 9 loop
          Message_Manager.Read_Next(Mailbox_2, Message_5);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_5.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_5.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_5.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_5.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
 
          Y := Y + 1;
@@ -56,8 +50,8 @@ procedure Main_Message_Manager is
 
 begin
    -- Register receiving mailboxes
-   Message_Manager.Register_Module(1, 8, Mailbox_1);
-   Message_Manager.Register_Module(2, 8, Mailbox_2);
+   Message_Manager.Register_Module(1, 8, Mailbox_1, Unchecked_Type);
+   Message_Manager.Register_Module(2, 8, Mailbox_2, Unchecked_Type);
 
    -- Test Get_Next_Request_ID
    Put_Line("Testing Get_Next_Request_ID");
@@ -81,7 +75,7 @@ begin
      (Sender_Address   => (0, 2),
       Receiver_Address => (0, 1),
       Request_ID       => 4,
-      Message_ID       => Message_ID,
+      Message_Type     => Message_Type,
       Payload_Size     => 0,
       Priority         => 2));
 
@@ -89,7 +83,7 @@ begin
      (Sender_Address   => (1, 1),
       Receiver_Address => (1, 2),
       Request_ID       => 8,
-      Message_ID       => Message_ID_2,
+      Message_Type       => Message_Type_2,
       Payload_Size     => 0,
       Priority         => 5));
 
@@ -97,7 +91,7 @@ begin
      (Sender_Address   => (2, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
-      Message_ID       => 1,
+      Message_Type       => Message_Type,
       Payload_Size     => 0,
       Priority         => 1));
 
@@ -105,7 +99,7 @@ begin
      (Sender_Address   => (1, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
-      Message_ID       => Message_ID_2,
+      Message_Type       => Message_Type_2,
       Payload_Size     => 0,
       Priority         => 4));
 
@@ -119,10 +113,7 @@ begin
          Route_Message(Message => Message_3.all, Status => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_3.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_3.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_3.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_3.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
          X := X + 1;
 
@@ -130,10 +121,7 @@ begin
          Route_Message(Message => Message_4.all, Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_4.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_4.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_4.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_4.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
          X := X + 1;
 
@@ -141,10 +129,7 @@ begin
          Route_Message(Message => Message_5.all, Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_5.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_5.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_5.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_5.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
          X := X + 1;
 
@@ -154,10 +139,7 @@ begin
          Route_Message(Message => Message_2.all);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_2.Sender_Address.Module_ID));
-         Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_2.Receiver_Address.Module_ID));
-         Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_2.Message_ID));
-         Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_2.Request_ID));
+         Put_Line(Message_Manager.Stringify_Message(Message.all));
          New_Line;
          X := X + 1;
 
@@ -167,10 +149,7 @@ begin
             Route_Message(Message => Message.all, Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message.Sender_Address.Module_ID));
-            Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message.Receiver_Address.Module_ID));
-            Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message.Message_ID));
-            Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message.Request_ID));
+            Put_Line(Message_Manager.Stringify_Message(Message.all));
             New_Line;
             X := X + 1;
          end if;
@@ -179,10 +158,7 @@ begin
             Route_Message(Message => Message_6.all, Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line("+++ Sender ID   : " & Module_ID_Type'Image (Message_6.Sender_Address.Module_ID));
-            Put_Line("+++ Reciever ID : " & Module_ID_Type'Image (Message_6.Receiver_Address.Module_ID));
-            Put_Line("+++ Message ID  : " & Message_ID_Type'Image(Message_6.Message_ID));
-            Put_Line("+++ Request ID  : " & Request_ID_Type'Image(Message_6.Request_ID));
+            Put_Line(Message_Manager.Stringify_Message(Message.all));
             New_Line;
             X := X + 1;
          end if;

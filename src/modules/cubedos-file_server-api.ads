@@ -17,6 +17,8 @@ use Message_Manager;
 
 package CubedOS.File_Server.API is
 
+   This_Module : constant Module_ID_Type := Name_Resolver.File_Server.Module_ID;
+
    type Message_Type is
      (Open_Request,
       Open_Reply,
@@ -25,6 +27,15 @@ package CubedOS.File_Server.API is
       Write_Request,
       Write_Reply,
       Close_Request);
+
+   -- Describe the message types
+   Open_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Open_Request));
+   Open_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Open_Reply));
+   Read_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Read_Request));
+   Read_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Read_Reply));
+   Write_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Write_Request));
+   Write_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Write_Reply));
+   Close_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Close_Request));
 
    type Mode_Type is (Read, Write);
    type File_Handle_Type is range 0 .. 64;
@@ -109,25 +120,25 @@ package CubedOS.File_Server.API is
 
 
    function Is_Open_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Request));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Open_Request)));
 
    function Is_Open_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Reply));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Open_Reply)));
 
    function Is_Read_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Request));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Read_Request)));
 
    function Is_Read_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Reply));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Read_Reply)));
 
    function Is_Write_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Request));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Write_Request)));
 
    function Is_Write_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Reply));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Write_Reply)));
 
    function Is_Close_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Close_Request));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Close_Request)));
 
 
 

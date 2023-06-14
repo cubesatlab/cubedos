@@ -88,5 +88,5 @@ package body CubedOS.Interpreter.Messages is
    end Message_Loop;
 
 begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Unchecked_Type);
 end CubedOS.Interpreter.Messages;

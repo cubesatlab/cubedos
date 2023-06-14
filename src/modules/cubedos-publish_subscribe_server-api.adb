@@ -28,7 +28,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address   => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Subscribe_Request),
+           Message_Type => (This_Module, Message_Type'Pos(Subscribe_Request)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -52,7 +52,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Subscribe_Reply),
+           Message_Type => (This_Module, Message_Type'Pos(Subscribe_Reply)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -77,7 +77,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Unsubscribe_Request),
+           Message_Type => (This_Module, Message_Type'Pos(Unsubscribe_Request)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -101,7 +101,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Unsubscribe_Reply),
+           Message_Type => (This_Module, Message_Type'Pos(Unsubscribe_Reply)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -127,7 +127,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Publish_Request),
+           Message_Type => (This_Module, Message_Type'Pos(Publish_Request)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -155,7 +155,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Publish_Reply),
+           Message_Type => (This_Module, Message_Type'Pos(Publish_Reply)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
@@ -181,7 +181,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
           (Sender_Address => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
            Request_ID => Request_ID,
-           Message_ID => Message_Type'Pos(Publish_Result),
+           Message_Type => (This_Module, Message_Type'Pos(Publish_Result)),
            Payload_Size => Message_Manager.Max_Message_Size,
            Priority   => Priority);
       Position : XDR_Index_Type;
