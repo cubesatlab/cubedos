@@ -69,7 +69,7 @@ package body CubedOS.Log_Server.API is
    begin
       Text := (others => ' ');
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Log_Level, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Log_Level, Last);
       Position := Last + 1;
       if Raw_Log_Level > Log_Level_Type'Pos(Log_Level_Type'Last) then
          Log_Level     := Critical;
@@ -77,7 +77,7 @@ package body CubedOS.Log_Server.API is
          Decode_Status := Malformed;
       else
          Log_Level := Log_Level_Type'Val(Raw_Log_Level);
-         XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+         XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
          Position := Last + 1;
          if Raw_Size > Maximum_Log_Message_Size then
             Log_Level     := Critical;
@@ -89,7 +89,7 @@ package body CubedOS.Log_Server.API is
             pragma Warnings
               (Off, """Last"" is set by ""Decode"" but not used after the call",
                     Reason  => "The last value of Last is not needed");
-            XDR.Decode(Message.Payload.all, Position, Raw_Text(1 .. Size), Last);
+            XDR.Decode(Payload(Message).all, Position, Raw_Text(1 .. Size), Last);
             Text(Text'First .. (Text'First - 1) + Size) := Raw_Text(1 .. Size);
             Decode_Status := Success;
          end if;

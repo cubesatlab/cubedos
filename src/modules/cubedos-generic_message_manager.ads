@@ -18,7 +18,7 @@ generic
    Module_Count  : Positive;  -- Number of modules in the system.
 package CubedOS.Generic_Message_Manager
   with
-    Abstract_State => ((Mailboxes with External), Mailbox_Init_Tracker, Receiver_Types, (Request_ID_Generator with External)),
+    Abstract_State => ((Mailboxes with External => (Async_Readers, Async_Writers, Effective_Writes)), Mailbox_Init_Tracker, Receiver_Types, (Request_ID_Generator with External)),
     Initializes => (Mailboxes, Request_ID_Generator, Mailbox_Init_Tracker)
 is
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
@@ -99,7 +99,7 @@ is
       end record;
 
    -- Immutible version of message record
-   type Message_Record is tagged private;
+   type Message_Record is private;
    type Msg_Owner is access Message_Record;
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record;
@@ -111,9 +111,13 @@ is
    function Priority(Msg : Message_Record) return System.Priority;
    function Payload(Msg : Message_Record) return not null access constant Data_Array;
 
-
-
-
+   -- Adding duplicates for pointers cuts down on Ada's disgusting syntax
+   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address;
+   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address;
+   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type;
+   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type;
+   function Priority(Msg : not null access constant Message_Record) return System.Priority;
+   function Payload(Msg : not null access constant Message_Record) return not null access constant Data_Array;
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
@@ -179,15 +183,15 @@ is
 
    -- Count the number of messages in the mailbox waiting
    -- to be read.
-   function Queue_Size(Box : Module_Mailbox) return Natural;
+   function Queue_Size(Box : Module_Mailbox) return Natural
+     with Global => (Input => Mailboxes),
+       Volatile_Function => True;
 
    type Message_Type_Array is array (Natural range <>) of Universal_Message_Type;
-   Unchecked_Type : constant Message_Type_Array(1 .. 0) := (others => <>);
+   Empty_Type_Array : constant Message_Type_Array(1 .. 0) := (others => (1, 1));
 
    -- Register a module with the mail system.
    -- Gets an observer for that module's mailbox.
-   -- If Receives is set to Unchecked_Type, there will be no
-   -- type checking on messages sent to this module.
    procedure Register_Module(Module_ID : in Module_ID_Type;
                              Msg_Queue_Size : in Positive;
                              Mailbox : out Module_Mailbox;
@@ -225,8 +229,8 @@ is
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
      Pre => Message /= null
-     and then (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID))
-     and then Receives(Message.Receiver_Address, Message.Message_Type),
+     and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
+     and then Receives(Receiver_Address(Message), Message_Type(Message)),
      Post => Message = null;
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
@@ -236,18 +240,18 @@ is
    procedure Route_Message(Message : in out Msg_Owner)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
      Pre => Message /= null
-     and then (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID))
-     and then Receives(Message.Receiver_Address, Message.Message_Type);
+     and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
+     and then Receives(Receiver_Address(Message.all), Message_Type(Message.all));
 
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
-     Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+     Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID));
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes, Mailbox_Init_Tracker)),
-       Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
+       Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID));
 
 private
-   type Message_Record is tagged
+   type Message_Record is
       record
          Sender_Address : Message_Address;
          Receiver_Address : Message_Address;

@@ -55,7 +55,7 @@ package CubedOS.Log_Server.API is
 
 
    function Is_A_Log_Text(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Log_Text)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Log_Text)));
 
 
    procedure Log_Text_Decode

@@ -209,7 +209,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel := Channel_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -237,9 +237,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -269,7 +269,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel := Channel_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -297,9 +297,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -334,9 +334,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Size := 0;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
       Position := Last + 1;
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
@@ -354,7 +354,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
                Size := 0;
             else
                XDR.Decode
-                 (Message.Payload.all,
+                 (Payload(Message).all,
                   Position,
                   Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
                   Last);
@@ -380,9 +380,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -417,9 +417,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Size := 0;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
       Position := Last + 1;
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
@@ -437,7 +437,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
                Size := 0;
             else
                XDR.Decode
-                 (Message.Payload.all,
+                 (Payload(Message).all,
                   Position,
                   Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
                   Last);

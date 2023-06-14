@@ -28,7 +28,7 @@ package body Check_Message_Passing is
       Receiver : Module_Mailbox;
    begin
       -- Register mailboxes
-      Register_Module(Sender_Addr.Module_ID, 1, Sender, Unchecked_Type);
+      Register_Module(Sender_Addr.Module_ID, 1, Sender, Empty_Type_Array);
       Register_Module(Receiver_Addr.Module_ID, 1, Receiver, (0 => Acceptable_Type));
 
       -- Check that acceptable message reaches receiver

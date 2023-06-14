@@ -130,7 +130,7 @@ package body CubedOS.Interpreter.API is
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
-      XDR.Decode(Message.Payload.all, Position, Raw_Value, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Value, Last);
       Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!
@@ -161,7 +161,7 @@ package body CubedOS.Interpreter.API is
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
-      XDR.Decode(Message.Payload.all, Position, Raw_Value, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Value, Last);
       Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!
