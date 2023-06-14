@@ -18,7 +18,7 @@ package body CubedOS.Interpreter.API is
    is
       Message : constant Message_Record :=
         Make_Empty_Message
-          (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Clear_Request), Priority);
+          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Clear_Request)), Priority);
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
       return Message;
@@ -32,7 +32,7 @@ package body CubedOS.Interpreter.API is
    is
       Message : constant Message_Record :=
         Make_Empty_Message
-          (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Set_Request), Priority);
+          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Set_Request)), Priority);
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
       return Message;
@@ -48,7 +48,7 @@ package body CubedOS.Interpreter.API is
       -- The skeletal message knows its sender (this module).
       Message : constant Message_Record :=
         Make_Empty_Message
-          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Set_Reply), Max_Message_Size, Priority);
+          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, (This_Module, Message_Type'Pos(Set_Reply)), Max_Message_Size, Priority);
 
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
@@ -61,7 +61,6 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      -- Set the message size.
       return Message;
    end Set_Reply_Encode;
 
@@ -73,7 +72,7 @@ package body CubedOS.Interpreter.API is
    is
       Message : constant Message_Record :=
         Make_Empty_Message
-          (Sender_Address, Name_Resolver.Interpreter, Request_ID, Message_Type'Pos(Add_Request), Priority);
+          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Add_Request)), Priority);
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
       return Message;
@@ -89,7 +88,7 @@ package body CubedOS.Interpreter.API is
       -- The skeletal message knows its sender (this module).
       Message : constant Message_Record :=
         Make_Empty_Message
-          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, Message_Type'Pos(Add_Reply), Max_Message_Size, Priority);
+          (Name_Resolver.Interpreter, Receiver_Address, Request_ID, (This_Module, Message_Type'Pos(Add_Reply)), Max_Message_Size, Priority);
 
       Position : Data_Index_Type;
       Last     : Data_Index_Type;
@@ -102,7 +101,6 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      -- Set the message size.
       return Message;
    end Add_Reply_Encode;
 

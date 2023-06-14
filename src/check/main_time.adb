@@ -43,7 +43,7 @@ procedure Main_Time is
    use Duration_IO;
 begin
    Start_Time := Ada.Real_Time.Clock;
-   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox);
+   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Unchecked_Type);
 
    -- Do some setup...
    Message_Manager.Send_Message

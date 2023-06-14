@@ -10,8 +10,8 @@ with Ada.Unchecked_Deallocation;
 -- with Name_Resolver;
 
 package body CubedOS.Generic_Message_Manager with
-   Refined_State => (Mailboxes => Message_Storage,
-    Mailbox_Init_Tracker => Inited, Request_ID_Generator => Request_ID_Gen)
+   Refined_State => (Mailboxes => (Message_Storage),
+    Mailbox_Init_Tracker => Inited, Receiver_Types => Mailbox_Types, Request_ID_Generator => Request_ID_Gen)
 is
 
    procedure Free is new Ada.Unchecked_Deallocation
@@ -25,6 +25,7 @@ is
    end Request_ID_Gen;
 
    type Msg_Ptr_Array_Ptr is access Message_Ptr_Array;
+   type Msg_Type_Array_Ptr is access Message_Type_Array;
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -51,7 +52,7 @@ is
       procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr);
 
    private
-      Messages        : Msg_Ptr_Array_Ptr;
+      Messages        : Msg_Ptr_Array_Ptr  := null;
       Count           : Message_Count_Type := 0;
       Next_In         : Message_Index_Type := 1;
       Next_Out        : Message_Index_Type := 1;
@@ -61,7 +62,10 @@ is
 
    -- One mailbox for each module.
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
+   Mailbox_Types   : array (Module_ID_Type) of Msg_Type_Array_Ptr;
    Inited          : array (Module_ID_Type) of Boolean := (others => False);
+
+   Unchecked_Type_Access : constant Msg_Type_Array_Ptr := new Message_Type_Array'(Unchecked_Type);
 
    function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
      (Inited (Module_ID));
@@ -146,21 +150,21 @@ is
 
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
-      Request_ID     : Request_ID_Type; Message_ID : Message_ID_Type;
+      Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
       Payload_Size : Natural;
       Priority       : System.Priority := System.Default_Priority)
       return Message_Record
    is
-      Message : Message_Record;
       subtype Definite_Data_Array is Data_Array(0 .. Payload_Size - 1);
    begin
-      Message.Sender_Address   := Sender_Address;
-      Message.Receiver_Address := Receiver_Address;
-      Message.Request_ID       := Request_ID;
-      Message.Message_ID       := Message_ID;
-      Message.Priority         := Priority;
-      Message.Payload          := new Definite_Data_Array'(others => 0);
-      return Message;
+      return (
+              Sender_Address => Sender_Address,
+              Receiver_Address => Receiver_Address,
+              Request_ID => Request_ID,
+              Message_Type => Message_Type,
+              Priority => Priority,
+              Payload => new Definite_Data_Array'(others => 0)
+             );
    end Make_Empty_Message;
 
    function Stringify_Message (Message : in Message_Record) return String is
@@ -175,7 +179,7 @@ is
       Request_ID_String : constant String :=
         Request_ID_Type'Image (Message.Request_ID);
       Message_ID_String : constant String :=
-        Message_ID_Type'Image (Message.Message_ID);
+        Module_ID_Type'Image(Message.Message_Type.Module_ID) & Message_ID_Type'Image (Message.Message_Type.Message_ID);
       Message_Image : constant String :=
         Sender_Domain_String & "!" & Sender_Module_String & "!" &
         Receiver_Domain_String & "!" & Receiver_Module_String & "!" &
@@ -189,6 +193,9 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
+   function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
+     is (if Mailbox_Types(Receiver.Module_ID) /= Unchecked_Type_Access then (for some T of Mailbox_Types(Receiver.Module_ID).all => T = Msg_Type));
+
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
    is
@@ -196,6 +203,7 @@ is
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
       Message_Storage (Message.Receiver_Address.Module_ID).Send
         (Message, Status);
+      Message := null;
    end Route_Message;
 
    procedure Route_Message (Message : in out Msg_Owner) is
@@ -207,6 +215,7 @@ is
       else
          Message_Storage (Message.Receiver_Address.Module_ID).Unchecked_Send
            (Message);
+         Message := null;
       end if;
    end Route_Message;
 
@@ -232,7 +241,7 @@ is
                                 Sender_Address => Msg.Sender_Address,
                                 Receiver_Address => Msg.Receiver_Address,
                                 Request_ID => Msg.Request_ID,
-                                Message_ID => Msg.Message_ID,
+                                Message_Type => Msg.Message_Type,
                                 Priority => Msg.Priority,
                                 Payload => new Definite_Data_Array'(Msg.Payload.all)
                                );
@@ -245,6 +254,10 @@ is
    begin
       Message_Storage (Module).Receive (Message);
    end Fetch_Message;
+
+   -------------
+   -- Mailbox
+   -------------
 
    procedure Send_Message (Box : Module_Mailbox; Msg : Message_Record) is
       Ptr : Msg_Owner := Copy(Msg);
@@ -265,14 +278,23 @@ is
       Fetch_Message (Box.Address.Module_ID, Msg);
    end Read_Next;
 
+   function Queue_Size(Box : Module_Mailbox) return Natural is
+      (Message_Storage (Box.Address.Module_ID).Message_Count);
+
    procedure Register_Module
      (Module_ID : in     Module_ID_Type; Msg_Queue_Size : in Positive;
-      Mailbox   :    out Module_Mailbox)
+      Mailbox   :    out Module_Mailbox; Receives : in Message_Type_Array)
    is
       Arr : Msg_Ptr_Array_Ptr := new Message_Ptr_Array (1 .. Msg_Queue_Size);
    begin
       -- Create a new mailbox for the ID
       Message_Storage (Module_ID).Set_Msg_Array (Arr);
+      if Receives = Unchecked_Type then
+         Mailbox_Types (Module_ID) := Unchecked_Type_Access;
+      else
+         Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
+      end if;
+
       Mailbox            := (Address => (Domain_ID, Module_ID));
       Inited (Module_ID) := True;
    end Register_Module;

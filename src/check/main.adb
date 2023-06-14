@@ -20,14 +20,14 @@ with CubedOS.Interpreter.Messages;
 with CubedOS.Log_Server.Messages;
 with CubedOS.Publish_Subscribe_Server.Messages;
 with CubedOS.Time_Server.Messages;
-with CubedOS.Transport_UDP.Messages;
+--with CubedOS.Transport_UDP.Messages;
 
 pragma Unreferenced(CubedOS.File_Server.Messages);
 pragma Unreferenced(CubedOS.Interpreter.Messages);
 pragma Unreferenced(CubedOS.Log_Server.Messages);
 pragma Unreferenced(CubedOS.Publish_Subscribe_Server.Messages);
 pragma Unreferenced(CubedOS.Time_Server.Messages);
-pragma Unreferenced(CubedOS.Transport_UDP.Messages);
+--pragma Unreferenced(CubedOS.Transport_UDP.Messages);
 
 procedure Main is
 

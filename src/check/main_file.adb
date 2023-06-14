@@ -34,7 +34,7 @@ procedure Main_File is
    Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
    Status : Message_Manager.Message_Status_Type;
 begin
-   Register_Module(My_Module_ID, 8, My_Mailbox);
+   Register_Module(My_Module_ID, 8, My_Mailbox, Unchecked_Type);
 
    -- TEST : Open two files. Read from one file, and write to another file.
 
@@ -51,9 +51,7 @@ begin
    loop
       Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
       Put_Line("+++ Fetch returned!");
-      Put_Line("+++    Sender    : " & Module_ID_Type'Image(Incoming_Message.Sender_Address.Module_ID));
-      Put_Line("+++    Receiver  : " & Module_ID_Type'Image(Incoming_Message.Receiver_Address.Module_ID));
-      Put_Line("+++    Message_ID: " & Message_ID_Type'Image(Incoming_Message.Message_ID));
+      Put_Line(Message_Manager.Stringify_Message(Incoming_Message.all));
       New_Line;
 
       -- Process open reply messages.

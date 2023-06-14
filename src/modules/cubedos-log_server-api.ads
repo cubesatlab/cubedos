@@ -15,6 +15,8 @@ with System;
 
 package CubedOS.Log_Server.API is
 
+   This_Module : constant Module_ID_Type := Name_Resolver.Log_Server.Module_ID;
+
    -- This type is not needed right now. It is intended to be used in replies to indicate success or failure
    -- of a request. However, the Log Server never sends any reply messages. Maybe later?
    -- type Status_Type is (Success, Failure);
@@ -53,7 +55,7 @@ package CubedOS.Log_Server.API is
 
 
    function Is_A_Log_Text(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Log_Server and Message.Message_ID = Message_Type'Pos(Log_Text));
+     (Message.Message_Type = (This_Module, Message_Type'Pos(Log_Text)));
 
 
    procedure Log_Text_Decode
