@@ -54,8 +54,8 @@ procedure Main_Message_Manager is
 
 begin
    -- Register receiving mailboxes
-   Message_Manager.Register_Module(1, 8, Mailbox_1, Unchecked_Type);
-   Message_Manager.Register_Module(2, 8, Mailbox_2, Unchecked_Type);
+   Message_Manager.Register_Module(1, 8, Mailbox_1, Empty_Type_Array);
+   Message_Manager.Register_Module(2, 8, Mailbox_2, Empty_Type_Array);
 
    -- Test Get_Next_Request_ID
    Put_Line("Testing Get_Next_Request_ID");

@@ -195,7 +195,7 @@ is
         (Incoming_Message, Tick_Interval, Request_Type, Series_ID, Status);
       if Status = Success then
          Series :=
-           (Address => Incoming_Message.Sender_Address, ID => Series_ID,
+           (Address => Sender_Address(Incoming_Message), ID => Series_ID,
             Kind    => Request_Type, Interval => Tick_Interval,
             Next => Current_Time + Tick_Interval, Count => 1, Is_Used => True);
          Series_Database.Unchecked_Add_Series_Record (Series);
@@ -217,7 +217,7 @@ is
       if Status = Success then
 
          Series :=
-           (Address => Incoming_Message.Sender_Address, ID => Series_ID,
+           (Address => Sender_Address(Incoming_Message), ID => Series_ID,
             Kind    => One_Shot, Interval => Ada.Real_Time.Time_Span_Zero,
             Next    => Tick_Time, Count => 1, Is_Used => True);
          Series_Database.Unchecked_Add_Series_Record (Series);
@@ -235,7 +235,7 @@ is
 
       if Status = Success then
          Series_Database.Remove_Series_Record
-           (Incoming_Message.Sender_Address, Series_ID);
+           (Sender_Address(Incoming_Message), Series_ID);
       end if;
    end Process_Cancel_Request;
 
@@ -273,12 +273,12 @@ is
          -- This module should never receive a message from itself.
          -- We check that here because technically any module can
          -- send a message to and from anywhere.
-         if Incoming_Message.Sender_Address /= Name_Resolver.Time_Server then
+         if Sender_Address(Incoming_Message) /= Name_Resolver.Time_Server then
             Process (Incoming_Message.all);
          end if;
       end loop;
    end Message_Loop;
 
 begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Unchecked_Type);
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
 end CubedOS.Time_Server.Messages;
