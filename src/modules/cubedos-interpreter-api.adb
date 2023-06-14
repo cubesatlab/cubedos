@@ -17,8 +17,8 @@ package body CubedOS.Interpreter.API is
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : constant Message_Record :=
-        Make_Empty_Message
-          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Clear_Request)), Priority);
+        Immutable(Make_Empty_Message
+          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Clear_Request)), Priority));
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
       return Message;
@@ -31,8 +31,8 @@ package body CubedOS.Interpreter.API is
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : constant Message_Record :=
-        Make_Empty_Message
-          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Set_Request)), Priority);
+        Immutable(Make_Empty_Message
+          (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Set_Request)), Priority));
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
       return Message;
@@ -46,7 +46,7 @@ package body CubedOS.Interpreter.API is
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Name_Resolver.Interpreter, Receiver_Address, Request_ID, (This_Module, Message_Type'Pos(Set_Reply)), Max_Message_Size, Priority);
 
@@ -61,7 +61,7 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      return Message;
+      return Immutable(Message);
    end Set_Reply_Encode;
 
 
@@ -70,12 +70,12 @@ package body CubedOS.Interpreter.API is
       Request_ID     : in Request_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address, Name_Resolver.Interpreter, Request_ID, (This_Module, Message_Type'Pos(Add_Request)), Priority);
    begin
       -- Fill in the message by encoding the other parameters (not shown) as required.
-      return Message;
+      return Immutable(Message);
    end Add_Request_Encode;
 
 
@@ -86,7 +86,7 @@ package body CubedOS.Interpreter.API is
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
       -- The skeletal message knows its sender (this module).
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Name_Resolver.Interpreter, Receiver_Address, Request_ID, (This_Module, Message_Type'Pos(Add_Reply)), Max_Message_Size, Priority);
 
@@ -101,7 +101,7 @@ package body CubedOS.Interpreter.API is
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
       Position := Last + 1;
 
-      return Message;
+      return Immutable(Message);
    end Add_Reply_Encode;
 
 

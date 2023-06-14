@@ -88,7 +88,7 @@ is
    -- dynamic task priorities, however, so the usefulness of this idea is questionable. We could
    -- still sort mailboxes by message priority (not currently done) which might be a little
    -- useful.
-   type Message_Record is
+   type Mutable_Message_Record is
       record
          Sender_Address : Message_Address;
          Receiver_Address : Message_Address;
@@ -98,7 +98,22 @@ is
          Payload    : not null Data_Array_Owner;
       end record;
 
+   -- Immutible version of message record
+   type Message_Record is tagged private;
    type Msg_Owner is access Message_Record;
+   -- Creates an immutible copy of the given message
+   function Immutable(Msg : Mutable_Message_Record) return Message_Record;
+
+   function Sender_Address(Msg : Message_Record) return Message_Address;
+   function Receiver_Address(Msg : Message_Record) return Message_Address;
+   function Request_ID(Msg : Message_Record) return Request_ID_Type;
+   function Message_Type(Msg : Message_Record) return Universal_Message_Type;
+   function Priority(Msg : Message_Record) return System.Priority;
+   function Payload(Msg : Message_Record) return not null access constant Data_Array;
+
+
+
+
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
@@ -107,7 +122,7 @@ is
       Request_ID : Request_ID_Type;
       Message_Type : Universal_Message_Type;
       Payload_Size : Natural;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+      Priority   : System.Priority := System.Default_Priority) return Mutable_Message_Record
      with
        Global => null,
        Post=>
@@ -232,6 +247,15 @@ is
        Pre => (if Message.Receiver_Address.Domain_ID = Domain_ID then Module_Ready(Message.Receiver_Address.Module_ID));
 
 private
+   type Message_Record is tagged
+      record
+         Sender_Address : Message_Address;
+         Receiver_Address : Message_Address;
+         Request_ID : Request_ID_Type;
+         Message_Type : Universal_Message_Type;
+         Priority   : System.Priority;
+         Payload    : not null Data_Array_Owner;
+      end record;
 
    type Module_Mailbox is
       record
