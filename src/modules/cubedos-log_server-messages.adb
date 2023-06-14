@@ -34,8 +34,8 @@ package body CubedOS.Log_Server.Messages is
       if Status = Success then
          Ada.Text_IO.Put_Line
            (Level_Strings(Log_Level) &
-            " ("  & Domain_ID_Type'Image(Message.Sender_Address.Domain_ID) &
-            ","   & Module_ID_Type'Image(Message.Sender_Address.Module_ID) &
+            " ("  & Domain_ID_Type'Image(Sender_Address(Message).Domain_ID) &
+            ","   & Module_ID_Type'Image(Sender_Address(Message).Module_ID) &
             "): " & Text(1 .. Size));
       end if;
    end Handle_Log_Text;
@@ -70,5 +70,5 @@ package body CubedOS.Log_Server.Messages is
    end Message_Loop;
 
 begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Unchecked_Type);
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
 end CubedOS.Log_Server.Messages;

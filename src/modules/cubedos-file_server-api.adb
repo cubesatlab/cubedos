@@ -224,7 +224,7 @@ package body CubedOS.File_Server.API is
 
       -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Mode, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Mode, Last);
       Position := Last + 1;
       if Raw_Mode <= Mode_Type'Pos(Mode_Type'Last) then
          Mode := Mode_Type'Val(Raw_Mode);
@@ -232,14 +232,14 @@ package body CubedOS.File_Server.API is
          Decode_Status := Malformed;
          Mode := Mode_Type'First; -- appropriate?
       end if;
-      XDR.Decode(Message.Payload.all, Position, Raw_Name_Size, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Name_Size, Last);
       Position := Last + 1;
       if Raw_Name_Size <= XDR.XDR_Unsigned(Natural'Last) then
          Name_Size := Natural(Raw_Name_Size);
       else
          Name_Size := 0;
       end if;
-      XDR.Decode(Message.Payload.all, Position, Name(Name'First .. Name'First + (Name_Size - 1)), Last);
+      XDR.Decode(Payload(Message).all, Position, Name(Name'First .. Name'First + (Name_Size - 1)), Last);
    end Open_Request_Decode;
 
 
@@ -257,7 +257,7 @@ package body CubedOS.File_Server.API is
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       if Raw_Handle <= XDR.XDR_Unsigned(File_Handle_Type'Last)
       then
          Handle := File_Handle_Type(Raw_Handle);
@@ -287,7 +287,7 @@ package body CubedOS.File_Server.API is
 
       -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
@@ -297,7 +297,7 @@ package body CubedOS.File_Server.API is
          Decode_Status := Malformed;
          Handle := Valid_File_Handle_Type'First;
       end if;
-      XDR.Decode(Message.Payload.all, Position, Raw_Amount, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Read_Size_Type'First) ..
                        XDR.XDR_Unsigned(Read_Size_Type'Last)
       then
@@ -324,9 +324,9 @@ package body CubedOS.File_Server.API is
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Amount, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Amount, Last);
       Position := Last + 1;
       Data := (others => 0);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
@@ -335,7 +335,7 @@ package body CubedOS.File_Server.API is
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
          Amount := Read_Result_Size_Type(Raw_Amount);
-         XDR.Decode(Message.Payload.all, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
+         XDR.Decode(Payload(Message).all, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
          Decode_Status := Success;
       else
          Handle := Valid_File_Handle_Type'First;
@@ -364,7 +364,7 @@ package body CubedOS.File_Server.API is
 
       -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
       then
@@ -374,7 +374,7 @@ package body CubedOS.File_Server.API is
          Handle := Valid_File_Handle_Type'First; -- Is that what this should be?
       end if;
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Amount, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Write_Result_Size_Type'First + 1) ..
                        XDR.XDR_Unsigned(Write_Result_Size_Type'Last)
       then
@@ -384,7 +384,7 @@ package body CubedOS.File_Server.API is
       end if;
       Position := Last + 1;
       Data := (others => 0);
-      XDR.Decode(Message.Payload.all, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
+      XDR.Decode(Payload(Message).all, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
    end Write_Request_Decode;
 
 
@@ -402,9 +402,9 @@ package body CubedOS.File_Server.API is
       pragma Warnings
         (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Amount, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Amount, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
           XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
          Raw_Amount <= XDR.XDR_Unsigned(Write_Result_Size_Type'Last)
@@ -436,7 +436,7 @@ package body CubedOS.File_Server.API is
 
       -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Handle, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
       then

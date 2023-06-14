@@ -29,6 +29,7 @@ is
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
+      pragma Effective_Reads (False);
 
       -- Deposit the given message into THIS mailbox. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the returned status indicates this.
@@ -64,8 +65,6 @@ is
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
    Mailbox_Types   : array (Module_ID_Type) of Msg_Type_Array_Ptr;
    Inited          : array (Module_ID_Type) of Boolean := (others => False);
-
-   Unchecked_Type_Access : constant Msg_Type_Array_Ptr := new Message_Type_Array'(Unchecked_Type);
 
    function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
      (Inited (Module_ID));
@@ -162,6 +161,13 @@ is
    function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
    function Payload(Msg : Message_Record) return not null access constant Data_Array is (Msg.Payload);
 
+   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : not null access constant Message_Record) return not null access constant Data_Array is (Msg.Payload);
+
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
       Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
@@ -208,7 +214,7 @@ is
    end Get_Next_Request_ID;
 
    function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
-     is (if Mailbox_Types(Receiver.Module_ID) /= Unchecked_Type_Access then (for some T of Mailbox_Types(Receiver.Module_ID).all => T = Msg_Type));
+     is (Mailbox_Types(Receiver.Module_ID) /= null and then (for some T of Mailbox_Types(Receiver.Module_ID).all => T = Msg_Type));
 
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
@@ -303,11 +309,8 @@ is
    begin
       -- Create a new mailbox for the ID
       Message_Storage (Module_ID).Set_Msg_Array (Arr);
-      if Receives = Unchecked_Type then
-         Mailbox_Types (Module_ID) := Unchecked_Type_Access;
-      else
-         Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
-      end if;
+      -- Store what message types it may receive
+      Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
 
       Mailbox            := (Address => (Domain_ID, Module_ID));
       Inited (Module_ID) := True;

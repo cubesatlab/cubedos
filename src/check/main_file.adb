@@ -34,7 +34,7 @@ procedure Main_File is
    Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
    Status : Message_Manager.Message_Status_Type;
 begin
-   Register_Module(My_Module_ID, 8, My_Mailbox, Unchecked_Type);
+   Register_Module(My_Module_ID, 8, My_Mailbox, Empty_Type_Array);
 
    -- TEST : Open two files. Read from one file, and write to another file.
 
@@ -58,7 +58,7 @@ begin
       if Is_Open_Reply(Incoming_Message.all) then
          Put_Line
            ("RX : Open_Reply message (Request_ID = " &
-              Request_ID_Type'Image(Incoming_Message.Request_ID) & ")");
+              Request_ID_Type'Image(Request_ID(Incoming_Message)) & ")");
 
          Open_Reply_Decode(Incoming_Message.all, Handle, Status);
          if Status = Malformed then
@@ -68,7 +68,7 @@ begin
          else
             Put_Line("     +++ File opened successfully!");
 
-            case Incoming_Message.Request_ID is
+            case Request_ID(Incoming_Message) is
                when 1 =>
                   -- We got a reply to our open-for-reading request.
                   Read_Handle := Handle;
