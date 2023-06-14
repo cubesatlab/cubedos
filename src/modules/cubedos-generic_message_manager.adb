@@ -148,12 +148,26 @@ is
 
    end Sync_Mailbox;
 
+   ----------------------
+   -- Immutable Messages
+   ----------------------
+
+   function Immutable(Msg : Mutable_Message_Record) return Message_Record is
+      (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Msg.Payload);
+
+   function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : Message_Record) return not null access constant Data_Array is (Msg.Payload);
+
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
       Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
       Payload_Size : Natural;
       Priority       : System.Priority := System.Default_Priority)
-      return Message_Record
+      return Mutable_Message_Record
    is
       subtype Definite_Data_Array is Data_Array(0 .. Payload_Size - 1);
    begin

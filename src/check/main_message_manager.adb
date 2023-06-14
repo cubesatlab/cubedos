@@ -5,9 +5,13 @@ use Ada.Text_IO;
 use Message_Manager;
 
 procedure Main_Message_Manager is
+   Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Mutable_Message_Record
+     := Make_Empty_Message((1, 1), (1, 1), 0, (1, 1), 0);
 
-   Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Message_Manager.Msg_Owner
-     := new Message_Record'(Make_Empty_Message((1, 1), (1, 1), 0, (1, 1), 0));
+   -- This message stores received messages while they're printed
+   -- It's value can be discarded whenever.
+   Temp_Msg : Msg_Owner := null;
+
    Message_Type : constant Message_Manager.Universal_Message_Type := (1, 1);
    Message_Type_2 : constant Message_Manager.Universal_Message_Type := (1, 2);
    Message_Status : Message_Manager.Status_Type;
@@ -20,9 +24,9 @@ procedure Main_Message_Manager is
       Put_Line("+++++ FETCHING MESSAGES FOR RECIEVER ID = 1 +++++");
       New_Line;
       while Y < 9 loop
-         Message_Manager.Read_Next(Mailbox_1, Message);
+         Message_Manager.Read_Next(Mailbox_1, Temp_Msg);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
 
          Y := Y + 1;
@@ -37,9 +41,9 @@ procedure Main_Message_Manager is
       Put_Line("+++++ FETCHING MESSAGES FOR RECIEVER ID = 2 +++++");
       New_Line;
       while Y < 9 loop
-         Message_Manager.Read_Next(Mailbox_2, Message_5);
+         Message_Manager.Read_Next(Mailbox_2, Temp_Msg);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
 
          Y := Y + 1;
@@ -71,37 +75,37 @@ begin
    New_Line(2);
 
    -- Test Make_Empty_Message
-   Message_3 := new Message_Record'(Make_Empty_Message
+   Message_3 := Make_Empty_Message
      (Sender_Address   => (0, 2),
       Receiver_Address => (0, 1),
       Request_ID       => 4,
       Message_Type     => Message_Type,
       Payload_Size     => 0,
-      Priority         => 2));
+      Priority         => 2);
 
-   Message_4 := new Message_Record'(Make_Empty_Message
+   Message_4 := Make_Empty_Message
      (Sender_Address   => (1, 1),
       Receiver_Address => (1, 2),
       Request_ID       => 8,
       Message_Type       => Message_Type_2,
       Payload_Size     => 0,
-      Priority         => 5));
+      Priority         => 5);
 
-   Message_5 := new Message_Record'(Make_Empty_Message
+   Message_5 := Make_Empty_Message
      (Sender_Address   => (2, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_Type       => Message_Type,
       Payload_Size     => 0,
-      Priority         => 1));
+      Priority         => 1);
 
-   Message_6 := new Message_Record'(Make_Empty_Message
+   Message_6 := Make_Empty_Message
      (Sender_Address   => (1, 2),
       Receiver_Address => (1, 2),
       Request_ID       => 1,
       Message_Type       => Message_Type_2,
       Payload_Size     => 0,
-      Priority         => 4));
+      Priority         => 4);
 
 
    -- 20 messages should be attempted to be sent, only first eight should be sent
@@ -110,55 +114,55 @@ begin
    while X < 40 loop
       -- Ensure the Make_Empty_Message works properly
       if X = 12 or X = 31 then
-         Route_Message(Message => Message_3.all, Status => Message_Status);
+         Route_Message(Message => Immutable(Message_3), Status => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
          X := X + 1;
 
       elsif X = 15 or X = 22 then
-         Route_Message(Message => Message_4.all, Status  => Message_Status);
+         Route_Message(Message => Immutable(Message_4), Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
          X := X + 1;
 
       elsif X = 11 or X = 28 then
-         Route_Message(Message => Message_5.all, Status  => Message_Status);
+         Route_Message(Message => Immutable(Message_5), Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
          X := X + 1;
 
 
       elsif X = 4 or X = 23 then
          -- Test Route_Message without status parameter
-         Route_Message(Message => Message_2.all);
+         Route_Message(Message => Immutable(Message_2));
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Message.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
          New_Line;
          X := X + 1;
 
       else
          -- Testing Route_Message with Status parameter
          if X < 22 then
-            Route_Message(Message => Message.all, Status => Message_Status);
+            Route_Message(Message => Immutable(Message), Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line(Message_Manager.Stringify_Message(Message.all));
+            Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
             New_Line;
             X := X + 1;
          end if;
 
          if X > 20 then
-            Route_Message(Message => Message_6.all, Status => Message_Status);
+            Route_Message(Message => Immutable(Message_6), Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line(Message_Manager.Stringify_Message(Message.all));
+            Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
             New_Line;
             X := X + 1;
          end if;

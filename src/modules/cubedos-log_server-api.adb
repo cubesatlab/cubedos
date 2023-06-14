@@ -33,7 +33,7 @@ package body CubedOS.Log_Server.API is
       Text           : in String;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Sender_Address,
            Receiver_Address => Name_Resolver.Log_Server,
@@ -50,7 +50,7 @@ package body CubedOS.Log_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Text'Length), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Text, Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Log_Text_Encode;
 
 

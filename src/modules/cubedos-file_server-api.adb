@@ -23,7 +23,7 @@ package body CubedOS.File_Server.API is
       Name           : in String;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
@@ -40,7 +40,7 @@ package body CubedOS.File_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Name'Length), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Name, Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Open_Request_Encode;
 
 
@@ -51,7 +51,7 @@ package body CubedOS.File_Server.API is
       Handle           : in API.File_Handle_Type;
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
@@ -64,7 +64,7 @@ package body CubedOS.File_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Open_Reply_Encode;
 
 
@@ -75,7 +75,7 @@ package body CubedOS.File_Server.API is
       Amount         : in Read_Size_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
@@ -90,7 +90,7 @@ package body CubedOS.File_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Read_Request_Encode;
 
 
@@ -103,7 +103,7 @@ package body CubedOS.File_Server.API is
       Data             : in Octet_Array;
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
@@ -120,7 +120,7 @@ package body CubedOS.File_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Data(Data'First ..  Data'First + (Amount - 1)), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Read_Reply_Encode;
 
 
@@ -132,7 +132,7 @@ package body CubedOS.File_Server.API is
       Data           : in Octet_Array;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
@@ -149,7 +149,7 @@ package body CubedOS.File_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Data(Data'First .. Data'First + (Amount - 1)), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Write_Request_Encode;
 
 
@@ -161,7 +161,7 @@ package body CubedOS.File_Server.API is
       Amount           : in Write_Result_Size_Type;
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
@@ -176,7 +176,7 @@ package body CubedOS.File_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Write_Reply_Encode;
 
 
@@ -186,7 +186,7 @@ package body CubedOS.File_Server.API is
       Handle         : in Valid_File_Handle_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
@@ -199,7 +199,7 @@ package body CubedOS.File_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Close_Request_Encode;
 
    -- Decodes:

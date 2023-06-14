@@ -25,7 +25,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -42,7 +42,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Series_Type'Pos(Request_Type)), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Relative_Request_Encode;
 
 
@@ -53,7 +53,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -71,7 +71,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Seconds), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return message;
+      return Immutable(Message);
    end Absolute_Request_Encode;
 
 
@@ -82,7 +82,7 @@ package body CubedOS.Time_Server.API is
       Count            : in Series_Count_Type;
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Result : constant Message_Record := Make_Empty_Message
+      Result : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Name_Resolver.Time_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
@@ -99,7 +99,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Result.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Count), Result.Payload.all, Position, Last);
-      return Result;
+      return Immutable(Result);
    end Tick_Reply_Encode;
 
 
@@ -109,7 +109,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -121,7 +121,7 @@ package body CubedOS.Time_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return message;
+      return Immutable(Message);
    end Cancel_Request_Encode;
 
 
