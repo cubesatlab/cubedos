@@ -27,7 +27,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Open_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Open_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -55,7 +55,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(API.Open_Reply),
+         Message_Type => (This_Module, Message_Type'Pos(API.Open_Reply)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -79,7 +79,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Read_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Read_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -107,7 +107,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(API.Read_Reply),
+         Message_Type => (This_Module, Message_Type'Pos(API.Read_Reply)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -136,7 +136,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Write_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Write_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -165,7 +165,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Name_Resolver.File_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(API.Write_Reply),
+         Message_Type => (This_Module, Message_Type'Pos(API.Write_Reply)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -190,7 +190,7 @@ package body CubedOS.File_Server.API is
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.File_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Close_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Close_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 

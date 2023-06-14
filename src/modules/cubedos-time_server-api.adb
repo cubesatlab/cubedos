@@ -29,7 +29,7 @@ package body CubedOS.Time_Server.API is
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Relative_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Relative_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
       Position   : Data_Index_Type;
@@ -57,7 +57,7 @@ package body CubedOS.Time_Server.API is
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Absolute_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Absolute_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
       Position   : Data_Index_Type;
@@ -86,7 +86,7 @@ package body CubedOS.Time_Server.API is
         (Sender_Address   => Name_Resolver.Time_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Tick_Reply),
+         Message_Type => (This_Module, Message_Type'Pos(Tick_Reply)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
 
@@ -113,7 +113,7 @@ package body CubedOS.Time_Server.API is
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
-         Message_ID => Message_Type'Pos(Cancel_Request),
+         Message_Type => (This_Module, Message_Type'Pos(Cancel_Request)),
          Payload_Size => Message_Manager.Max_Message_Size,
          Priority   => Priority);
       Position   : Data_Index_Type;
