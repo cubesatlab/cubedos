@@ -219,5 +219,11 @@ package body CubedOS.File_Server.Messages is
    end Message_Loop;
 
 begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox);
+   Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox,
+                                   (
+                                    CubedOS.File_Server.API.Open_Request_Msg,
+                                    CubedOS.File_Server.API.Read_Request_Msg,
+                                    CubedOS.File_Server.API.Write_Request_Msg,
+                                    CubedOS.File_Server.API.Close_Request_Msg
+                                   ));
 end CubedOS.File_Server.Messages;
