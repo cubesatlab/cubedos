@@ -13,14 +13,13 @@ with System;
 
 package CubedOS.Log_Server.Messages is
 
+private
+   Mailbox : Message_Manager.Module_Mailbox;
+
    task Message_Loop
-     with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes))
+     with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes, Message_Manager.Mailbox_Metadata, Mailbox))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
-
-private
-   Mailbox : Message_Manager.Module_Mailbox;
-
 end CubedOS.Log_Server.Messages;
