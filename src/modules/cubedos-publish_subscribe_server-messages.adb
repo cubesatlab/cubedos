@@ -24,6 +24,11 @@ is
 
    Subscription_Map : Subscription_Map_Type := (others => (others => False));
 
+   procedure Initialize is
+   begin
+      Message_Manager.Register_Module(Name_Resolver.Publish_Subscribe_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
+   end Initialize;
+
    -------------------
    -- Message Handling
    -------------------
@@ -129,12 +134,12 @@ is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
    begin
+      Initialize;
+
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
          Process(Incoming_Message);
       end loop;
    end Message_Loop;
 
-begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
 end CubedOS.Publish_Subscribe_Server.Messages;

@@ -14,7 +14,7 @@ package body CubedOS.Interpreter.Messages is
 
    procedure Initialize is
    begin
-      null;
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
    end Initialize;
 
    -------------------
@@ -87,6 +87,4 @@ package body CubedOS.Interpreter.Messages is
       end loop;
    end Message_Loop;
 
-begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
 end CubedOS.Interpreter.Messages;

@@ -15,7 +15,7 @@ with Message_Manager;
 package CubedOS.Time_Server.Messages
   with
     Abstract_State => ((Tick_Database with External), Own_Mailbox),
-    Initializes => (Message_Loop, Tick_Database, Own_Mailbox)
+    Initializes => (Message_Loop, Tick_Database)
 is
 
    task Message_Loop
@@ -25,6 +25,5 @@ is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
-
 
 end CubedOS.Time_Server.Messages;
