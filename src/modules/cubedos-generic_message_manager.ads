@@ -12,6 +12,7 @@ pragma SPARK_Mode(On);
 with System;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib.XDR;
+with Ada.Finalization;
 
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
@@ -150,18 +151,18 @@ is
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
      with Global => (In_Out => Request_ID_Generator);
 
+   -- True if the module is ready to receive mail.
+   function Module_Ready(Module_ID : Module_ID_Type) return Boolean
+     with Global => (Input => Mailbox_Metadata);
+
    -- Error codes.
    type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
    type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
 
    -- Retrieves a message from the indicated mailbox. May block indefinitely.
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
-     with Global => (In_Out => Mailboxes);
-
-   -- True if the module is ready to receive mail.
-   function Module_Ready(Module_ID : Module_ID_Type) return Boolean
-     with Global => (Input => Mailbox_Metadata);
-
+     with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+       Pre => Module_Ready(Module);
 
    -- A mailbox used by modules to send and receive messages.
    -- This is the only way to receive messages sent to a module
@@ -214,8 +215,8 @@ is
                    Mailbox => Module_ID,
                    Mailbox_Metadata => +(Receives, Module_ID),
                   null => Msg_Queue_Size),
-       Pre => not Module_Ready(Module_ID),
-       Post => Module_Ready(Module_ID);
+       --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
+       Post => Module_Ready(Module_ID) and Address(Mailbox).Module_ID = Module_ID;
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.

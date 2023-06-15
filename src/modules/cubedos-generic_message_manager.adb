@@ -16,6 +16,8 @@ is
 
    procedure Free is new Ada.Unchecked_Deallocation
      (Object => Message_Record, Name => Msg_Owner);
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Object => Data_Array, Name => Data_Array_Owner);
 
    -- A protected object for generating request ID values.
    protected Request_ID_Gen is
@@ -44,7 +46,6 @@ is
                              and Next_Out in Messages'Range
                              and Mailbox_Size = Messages'Length
                                );
-
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -285,8 +286,7 @@ is
    is
       subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
    begin
-      return new Message_Record'(
-                                Sender_Address => Msg.Sender_Address,
+      return new Message_Record'(Sender_Address => Msg.Sender_Address,
                                 Receiver_Address => Msg.Receiver_Address,
                                 Request_ID => Msg.Request_ID,
                                 Message_Type => Msg.Message_Type,
