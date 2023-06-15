@@ -25,7 +25,7 @@ procedure Main_File is
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
    My_Mailbox : Module_Mailbox;
 
-   Incoming_Message : Message_Manager.Msg_Owner;
+   Incoming_Message : Message_Manager.Message_Record;
    Handle       : File_Handle_Type;
    Read_Handle  : File_Handle_Type;
    Write_Handle : File_Handle_Type;
@@ -51,16 +51,16 @@ begin
    loop
       Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
       Put_Line("+++ Fetch returned!");
-      Put_Line(Message_Manager.Stringify_Message(Incoming_Message.all));
+      Put_Line(Message_Manager.Stringify_Message(Incoming_Message));
       New_Line;
 
       -- Process open reply messages.
-      if Is_Open_Reply(Incoming_Message.all) then
+      if Is_Open_Reply(Incoming_Message) then
          Put_Line
            ("RX : Open_Reply message (Request_ID = " &
               Request_ID_Type'Image(Request_ID(Incoming_Message)) & ")");
 
-         Open_Reply_Decode(Incoming_Message.all, Handle, Status);
+         Open_Reply_Decode(Incoming_Message, Handle, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
          elsif Handle = Invalid_Handle then
@@ -87,10 +87,10 @@ begin
          end if;
 
       -- Process reply messages.
-      elsif Is_Read_Reply(Incoming_Message.all) then
+      elsif Is_Read_Reply(Incoming_Message) then
          Put_Line("RX : Read_Reply message");
 
-         Read_Reply_Decode(Incoming_Message.all, Handle, Amount_Read, Data, Status);
+         Read_Reply_Decode(Incoming_Message, Handle, Amount_Read, Data, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
             Message_Manager.Send_Message
@@ -128,10 +128,10 @@ begin
             end if;
          end if;
 
-      elsif Is_Write_Reply(Incoming_Message.all) then
+      elsif Is_Write_Reply(Incoming_Message) then
          Put_Line("RX : Write_Reply message");
 
-         Write_Reply_Decode(Incoming_Message.all, Handle, Amount_Write, Status);
+         Write_Reply_Decode(Incoming_Message, Handle, Amount_Write, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
             Message_Manager.Send_Message

@@ -10,7 +10,7 @@ procedure Main_Message_Manager is
 
    -- This message stores received messages while they're printed
    -- It's value can be discarded whenever.
-   Temp_Msg : Msg_Owner := null;
+   Temp_Msg : Message_Record := Immutable(Make_Empty_Message((1,1), (1,1), 0, (1, 1), 0));
 
    Message_Type : constant Message_Manager.Universal_Message_Type := (1, 1);
    Message_Type_2 : constant Message_Manager.Universal_Message_Type := (1, 2);
@@ -26,7 +26,7 @@ procedure Main_Message_Manager is
       while Y < 9 loop
          Message_Manager.Read_Next(Mailbox_1, Temp_Msg);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
 
          Y := Y + 1;
@@ -43,7 +43,7 @@ procedure Main_Message_Manager is
       while Y < 9 loop
          Message_Manager.Read_Next(Mailbox_2, Temp_Msg);
          Put_Line("Message " & Integer'Image(Y) & " fetched ");
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
 
          Y := Y + 1;
@@ -117,7 +117,7 @@ begin
          Route_Message(Message => Immutable(Message_3), Status => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
          X := X + 1;
 
@@ -125,7 +125,7 @@ begin
          Route_Message(Message => Immutable(Message_4), Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
          X := X + 1;
 
@@ -133,7 +133,7 @@ begin
          Route_Message(Message => Immutable(Message_5), Status  => Message_Status);
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
          X := X + 1;
 
@@ -143,7 +143,7 @@ begin
          Route_Message(Message => Immutable(Message_2));
          Put_Line("Message" & Integer'Image(X) & " routed");
          Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-         Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+         Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
          New_Line;
          X := X + 1;
 
@@ -153,7 +153,7 @@ begin
             Route_Message(Message => Immutable(Message), Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+            Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
             New_Line;
             X := X + 1;
          end if;
@@ -162,7 +162,7 @@ begin
             Route_Message(Message => Immutable(Message_6), Status => Message_Status);
             Put_Line("Message" & Integer'Image(X) & " routed");
             Put_Line("+++ Status      : " & Status_Type'Image(Message_Status));
-            Put_Line(Message_Manager.Stringify_Message(Temp_Msg.all));
+            Put_Line(Message_Manager.Stringify_Message(Temp_Msg));
             New_Line;
             X := X + 1;
          end if;
