@@ -77,13 +77,13 @@ package body CubedOS.Interpreter.Messages is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Msg_Owner;
+      Incoming_Message : Message_Manager.Message_Record;
    begin
       Initialize;
 
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.Interpreter.Module_ID, Incoming_Message);
-         Process(Incoming_Message.all);
+         Message_Manager.Read_Next(Mailbox, Incoming_Message);
+         Process(Incoming_Message);
       end loop;
    end Message_Loop;
 

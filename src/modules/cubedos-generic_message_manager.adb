@@ -11,7 +11,7 @@ with Ada.Unchecked_Deallocation;
 
 package body CubedOS.Generic_Message_Manager with
    Refined_State => (Mailboxes => (Message_Storage),
-    Mailbox_Init_Tracker => Inited, Receiver_Types => Mailbox_Types, Request_ID_Generator => Request_ID_Gen)
+    Mailbox_Metadata => (Inited, Mailbox_Types), Request_ID_Generator => Request_ID_Gen)
 is
 
    procedure Free is new Ada.Unchecked_Deallocation
@@ -27,47 +27,64 @@ is
    type Msg_Ptr_Array_Ptr is access Message_Ptr_Array;
    type Msg_Type_Array_Ptr is access Message_Type_Array;
 
+   Mailbox_Types   : array (Module_ID_Type) of Msg_Type_Array_Ptr;
+   Inited          : array (Module_ID_Type) of Boolean := (others => False);
+
+   type Message_Queue is
+      record
+         Messages        : Msg_Ptr_Array_Ptr  := null;
+         Count           : Message_Count_Type := 0;
+         Next_In         : Message_Index_Type := 1;
+         Next_Out        : Message_Index_Type := 1;
+         Mailbox_Size    : Positive           := 1;
+      end record
+     with Dynamic_Predicate => (if Messages /= null then
+                                  Count in 0..Messages'Length
+                             and Next_In in Messages'Range
+                             and Next_Out in Messages'Range
+                             and Mailbox_Size = Messages'Length
+                               );
+
+
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
-      pragma Effective_Reads (False);
 
       -- Deposit the given message into THIS mailbox. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the returned status indicates this.
       procedure Send
-        (Message : in out Msg_Owner; Status : out Status_Type) with
-         Pre => Module_Ready (Message.Receiver_Address.Module_ID);
+        (Message : in out Msg_Owner; Status : out Status_Type)
+        with Pre => Message /= null,
+        Post => Message = null;
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the message is lost.
-      procedure Unchecked_Send (Message : in out Msg_Owner) with
-         Pre => Module_Ready (Message.Receiver_Address.Module_ID);
+      procedure Unchecked_Send (Message : in out Msg_Owner)
+        with Pre => Message /= null,
+        Post => Message = null;
 
       -- Returns the number of messages in the mailbox.
       function Message_Count return Message_Count_Type;
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
-      entry Receive (Message : out Msg_Owner) with
-         Pre => Module_Ready (Message.Receiver_Address.Module_ID);
+      entry Receive (Message : out Message_Record);
 
       -- Change the array used to store messages.
-      procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr);
+      procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr)
+        with Pre => Arr /= null,
+          Post => Arr = null;
 
    private
-      Messages        : Msg_Ptr_Array_Ptr  := null;
-      Count           : Message_Count_Type := 0;
-      Next_In         : Message_Index_Type := 1;
-      Next_Out        : Message_Index_Type := 1;
-      Mailbox_Size    : Positive           := 1;
-      Message_Waiting : Boolean            := False;
+      Q : Message_Queue;
+      Message_Waiting : Boolean := False;
    end Sync_Mailbox;
 
    -- One mailbox for each module.
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
-   Mailbox_Types   : array (Module_ID_Type) of Msg_Type_Array_Ptr;
-   Inited          : array (Module_ID_Type) of Boolean := (others => False);
 
    function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
-     (Inited (Module_ID));
+     (Inited (Module_ID))
+       with Refined_Global => (Input => Inited),
+         Refined_Post => Module_Ready'Result = Inited(Module_ID);
 
    ------------------
    -- Implementations
@@ -87,61 +104,65 @@ is
 
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
-         if Count = Mailbox_Size then
+         if Q.Count = Q.Mailbox_Size then
             Status := Mailbox_Full;
+            Message := null;
          else
-            Messages (Next_In) := Message;
-            Message            := null;
-            if Next_In = Mailbox_Size then
-               Next_In := 1;
+            Q.Messages (Q.Next_In) := Message;
+            Message := null;
+            if Q.Next_In = Q.Mailbox_Size then
+               Q.Next_In := 1;
             else
-               Next_In := Next_In + 1;
+               Q.Next_In := Q.Next_In + 1;
             end if;
-            Count           := Count + 1;
+            Q.Count           := Q.Count + 1;
             Message_Waiting := True;
             Status          := Accepted;
          end if;
+
       end Send;
 
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
-         if Count /= Mailbox_Size then
-            Messages (Next_In) := Message;
-            Message            := null;
-            if Next_In = Mailbox_Size then
-               Next_In := 1;
+         if Q.Count /= Q.Mailbox_Size then
+            Q.Messages (Q.Next_In) := Message;
+            if Q.Next_In = Q.Mailbox_Size then
+               Q.Next_In := 1;
             else
-               Next_In := Next_In + 1;
+               Q.Next_In := Q.Next_In + 1;
             end if;
-            Count           := Count + 1;
+            Q.Count           := Q.Count + 1;
             Message_Waiting := True;
          end if;
+         Message := null;
       end Unchecked_Send;
 
       function Message_Count return Message_Count_Type is
       begin
-         return Count;
+         return Q.Count;
       end Message_Count;
 
-      entry Receive (Message : out Msg_Owner) when Message_Waiting is
+      entry Receive (Message : out Message_Record) when Message_Waiting is
+         Ptr : Msg_Owner := Q.Messages (Q.Next_Out);
       begin
-         Message             := Messages (Next_Out);
-         Messages (Next_Out) := null;
-         if Next_Out = Mailbox_Size then
-            Next_Out := 1;
+         Q.Messages (Q.Next_Out) := null;
+         Message := Ptr.all;
+         Free(Ptr);
+         if Q.Next_Out = Q.Mailbox_Size then
+            Q.Next_Out := 1;
          else
-            Next_Out := Next_Out + 1;
+            Q.Next_Out := Q.Next_Out + 1;
          end if;
-         Count := Count - 1;
-         if Count = 0 then
+         Q.Count := Q.Count - 1;
+         if Q.Count = 0 then
             Message_Waiting := False;
          end if;
       end Receive;
 
       procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr) is
       begin
-         Mailbox_Size := Arr'Length;
-         Messages     := Arr;
+         Q.Mailbox_Size := Arr'Length;
+         Q.Messages     := Arr;
          Arr          := null;
       end Set_Msg_Array;
 
@@ -151,22 +172,28 @@ is
    -- Immutable Messages
    ----------------------
 
+   function Is_Valid(Msg : Message_Record) return Boolean is
+      (Msg.Payload /= null);
+
    function Immutable(Msg : Mutable_Message_Record) return Message_Record is
-      (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Msg.Payload);
+      Payload_Copy : constant Data_Array_Owner := new Data_Array'(Msg.Payload.all);
+   begin
+      return (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Payload_Copy);
+   end Immutable;
 
    function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
    function Receiver_Address(Msg : Message_Record) return Message_Address is (Msg.Receiver_Address);
    function Request_ID(Msg : Message_Record) return Request_ID_Type is (Msg.Request_ID);
    function Message_Type(Msg : Message_Record) return Universal_Message_Type is (Msg.Message_Type);
    function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
-   function Payload(Msg : Message_Record) return not null access constant Data_Array is (Msg.Payload);
+   function Payload(Msg : Message_Record) return access constant Data_Array is (Msg.Payload);
 
    function Sender_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Sender_Address);
    function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Receiver_Address);
    function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type is (Msg.Request_ID);
    function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type is (Msg.Message_Type);
    function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
-   function Payload(Msg : not null access constant Message_Record) return not null access constant Data_Array is (Msg.Payload);
+   function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
 
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
@@ -198,12 +225,12 @@ is
         Module_ID_Type'Image (Message.Receiver_Address.Module_ID);
       Request_ID_String : constant String :=
         Request_ID_Type'Image (Message.Request_ID);
-      Message_ID_String : constant String :=
+      Message_Type_String : constant String :=
         Module_ID_Type'Image(Message.Message_Type.Module_ID) & Message_ID_Type'Image (Message.Message_Type.Message_ID);
       Message_Image : constant String :=
         Sender_Domain_String & "!" & Sender_Module_String & "!" &
         Receiver_Domain_String & "!" & Receiver_Module_String & "!" &
-        Request_ID_String & "!" & Message_ID_String & "!";
+        Request_ID_String & "!" & Message_Type_String & "!";
    begin
       return Message_Image;
    end Stringify_Message;
@@ -223,7 +250,6 @@ is
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
       Message_Storage (Message.Receiver_Address.Module_ID).Send
         (Message, Status);
-      Message := null;
    end Route_Message;
 
    procedure Route_Message (Message : in out Msg_Owner) is
@@ -235,7 +261,7 @@ is
       else
          Message_Storage (Message.Receiver_Address.Module_ID).Unchecked_Send
            (Message);
-         Message := null;
+         pragma Unused(Message);
       end if;
    end Route_Message;
 
@@ -243,6 +269,7 @@ is
       Ptr : Msg_Owner := Copy(Message);
    begin
       Route_Message (Ptr);
+      pragma Unused(Ptr);
    end Route_Message;
 
    procedure Route_Message
@@ -251,9 +278,10 @@ is
       Ptr : Msg_Owner := Copy(Message);
    begin
       Route_Message (Ptr, Status);
+      pragma Unused(Ptr);
    end Route_Message;
 
-   function Copy(Msg : Message_Record) return Msg_Owner
+   function Copy(Msg : Message_Record) return not null Msg_Owner
    is
       subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
    begin
@@ -269,7 +297,7 @@ is
 
 
    procedure Fetch_Message
-     (Module : in Module_ID_Type; Message : out Msg_Owner)
+     (Module : in Module_ID_Type; Message : out Message_Record)
    is
    begin
       Message_Storage (Module).Receive (Message);
@@ -279,10 +307,15 @@ is
    -- Mailbox
    -------------
 
+   function Address(Box : Module_Mailbox) return Message_Address is
+      (Box.Address);
+
    procedure Send_Message (Box : Module_Mailbox; Msg : Message_Record) is
       Ptr : Msg_Owner := Copy(Msg);
    begin
+      Ptr.Sender_Address := Box.Address;
       Route_Message (Ptr);
+      pragma Unused(Ptr);
    end Send_Message;
 
    procedure Send_Message
@@ -290,16 +323,20 @@ is
    is
       Ptr : Msg_Owner := Copy(Msg);
    begin
+      Ptr.Sender_Address := Box.Address;
       Route_Message (Ptr, Status);
+      pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Read_Next (Box : Module_Mailbox; Msg : out Msg_Owner) is
+   procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
    begin
       Fetch_Message (Box.Address.Module_ID, Msg);
    end Read_Next;
 
-   function Queue_Size(Box : Module_Mailbox) return Natural is
-      (Message_Storage (Box.Address.Module_ID).Message_Count);
+   procedure Queue_Size(Box : Module_Mailbox; Size : out Natural) is
+   begin
+      Size := Message_Storage (Box.Address.Module_ID).Message_Count;
+   end Queue_Size;
 
    procedure Register_Module
      (Module_ID : in     Module_ID_Type; Msg_Queue_Size : in Positive;
@@ -309,6 +346,7 @@ is
    begin
       -- Create a new mailbox for the ID
       Message_Storage (Module_ID).Set_Msg_Array (Arr);
+      pragma Unused(Arr);
       -- Store what message types it may receive
       Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
 
@@ -316,7 +354,9 @@ is
       Inited (Module_ID) := True;
    end Register_Module;
 
-   procedure Get_Message_Counts (Count_Array : out Message_Count_Array) is
+   procedure Get_Message_Counts (Count_Array : out Message_Count_Array)
+     with Refined_Global => (Proof_In => (Inited), In_Out => Message_Storage)
+   is
    begin
       for I in Module_ID_Type loop
          Count_Array (I) := Message_Storage (I).Message_Count;

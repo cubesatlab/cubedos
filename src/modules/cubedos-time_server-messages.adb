@@ -265,7 +265,7 @@ is
       Refined_Global => (Input => Ada.Real_Time.Clock_Time,
        In_Out => (Series_Database, Mailbox))
    is
-      Incoming_Message : Message_Manager.Msg_Owner;
+      Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
          Read_Next(Mailbox, Incoming_Message);
@@ -274,7 +274,7 @@ is
          -- We check that here because technically any module can
          -- send a message to and from anywhere.
          if Sender_Address(Incoming_Message) /= Name_Resolver.Time_Server then
-            Process (Incoming_Message.all);
+            Process (Incoming_Message);
          end if;
       end loop;
    end Message_Loop;

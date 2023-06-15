@@ -33,7 +33,12 @@ package body Check_Message_Passing is
 
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);
-      pragma Assert(Queue_Size(Receiver) = 1, "Acceptable message wasn't received.");
+      declare
+         Size : Natural;
+      begin
+         Queue_Size(Receiver, Size);
+         pragma Assert(Size = 1, "Acceptable message wasn't received.");
+      end;
 
       -- Check that unacceptable message throws an exception
       declare
