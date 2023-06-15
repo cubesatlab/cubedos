@@ -20,9 +20,8 @@ package body CubedOS.Log_Server.API is
       Log_Level      : in Log_Level_Type;
       Text           : in String)
    is
-      Ptr : Msg_Owner := new Message_Record'(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    begin
-      Message_Manager.Route_Message(Ptr);
+      Message_Manager.Route_Message(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    end Log_Message;
 
 
