@@ -25,7 +25,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -42,7 +42,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Series_Type'Pos(Request_Type)), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Relative_Request_Encode;
 
 
@@ -53,7 +53,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -71,7 +71,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Seconds), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return message;
+      return Immutable(Message);
    end Absolute_Request_Encode;
 
 
@@ -82,7 +82,7 @@ package body CubedOS.Time_Server.API is
       Count            : in Series_Count_Type;
       Priority         : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Result : constant Message_Record := Make_Empty_Message
+      Result : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Name_Resolver.Time_Server,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
@@ -99,7 +99,7 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Result.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Count), Result.Payload.all, Position, Last);
-      return Result;
+      return Immutable(Result);
    end Tick_Reply_Encode;
 
 
@@ -109,7 +109,7 @@ package body CubedOS.Time_Server.API is
       Series_ID      : in Series_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record := Make_Empty_Message
+      Message : constant Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -121,7 +121,7 @@ package body CubedOS.Time_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return message;
+      return Immutable(Message);
    end Cancel_Request_Encode;
 
 
@@ -143,7 +143,7 @@ package body CubedOS.Time_Server.API is
       Series_ID := Series_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Interval, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Interval, Last);
       Position := Last + 1;
 
       if Raw_Interval > XDR.XDR_Unsigned(Integer'Last) then
@@ -151,7 +151,7 @@ package body CubedOS.Time_Server.API is
       else
          Tick_Interval := Ada.Real_Time.Milliseconds(Integer(Raw_Interval));
 
-         XDR.Decode(Message.Payload.all, Position, Raw_Request_Type, Last);
+         XDR.Decode(Payload(Message).all, Position, Raw_Request_Type, Last);
          Position := Last + 1;
 
          if Raw_Request_Type > Series_Type'Pos(Series_Type'Last) then
@@ -159,7 +159,7 @@ package body CubedOS.Time_Server.API is
          else
             Request_Type := Series_Type'Val(Raw_Request_Type);
 
-            XDR.Decode(Message.Payload.all, Position, Raw_Series_ID, Last);
+            XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
 
             if Raw_Series_ID not in
               XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
@@ -189,13 +189,13 @@ package body CubedOS.Time_Server.API is
       Series_ID := Series_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Seconds, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Seconds, Last);
       Position := Last + 1;
 
       Seconds := Ada.Real_Time.Seconds_Count(Raw_Seconds);
       Tick_Time := Ada.Real_Time.Time_Of(Seconds, Ada.Real_Time.Time_Span_Zero);
 
-      XDR.Decode(Message.Payload.all, Position, Raw_Series_ID, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
       if Raw_Series_ID not in
         XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
       then
@@ -222,7 +222,7 @@ package body CubedOS.Time_Server.API is
       Count := 0;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Series_ID, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
       Position := Last + 1;
       if Raw_Series_ID not in
         XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
@@ -231,7 +231,7 @@ package body CubedOS.Time_Server.API is
       else
          Series_ID := Series_ID_Type(Raw_Series_ID);
 
-         XDR.Decode(Message.Payload.all, Position, Raw_Count, Last);
+         XDR.Decode(Payload(Message).all, Position, Raw_Count, Last);
          if Raw_Count > XDR.XDR_Unsigned(Natural'Last) then
             Decode_Status := Malformed;
          else
@@ -254,7 +254,7 @@ package body CubedOS.Time_Server.API is
       Series_ID := Series_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Series_ID, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
       if Raw_Series_ID not in
         XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last)
       then

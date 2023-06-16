@@ -23,7 +23,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel    : in Channel_ID_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
@@ -36,7 +36,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Channel), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Subscribe_Request_Encode;
 
 
@@ -47,7 +47,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status     : in Status_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
@@ -62,7 +62,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Channel), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Subscribe_Reply_Encode;
 
 
@@ -72,7 +72,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel        : in Channel_ID_Type;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
@@ -85,7 +85,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Channel), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Unsubscribe_Request_Encode;
 
 
@@ -96,7 +96,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status     : in Status_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
@@ -111,7 +111,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Channel), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Unsubscribe_Reply_Encode;
 
 
@@ -122,7 +122,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message_Data : in CubedOS.Lib.Octet_Array;
       Priority     : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address => Sender_Address,
            Receiver_Address => Name_Resolver.Publish_Subscribe_Server,
@@ -139,7 +139,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Message_Data'Length), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Message_Data, Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Publish_Request_Encode;
 
 
@@ -150,7 +150,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status     : in Status_Type;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
@@ -165,7 +165,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Channel), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Status_Type'Pos(Status)), Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Publish_Reply_Encode;
 
 
@@ -176,7 +176,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message_Data : in CubedOS.Lib.Octet_Array;
       Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address => Name_Resolver.Publish_Subscribe_Server,
            Receiver_Address => Receiver_Address,
@@ -193,7 +193,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Message_Data'Length), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Message_Data, Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Publish_Result_Encode;
 
 
@@ -209,7 +209,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel := Channel_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -237,9 +237,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -269,7 +269,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Channel := Channel_ID_Type'First;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -297,9 +297,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -334,9 +334,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Size := 0;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
       Position := Last + 1;
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
@@ -354,7 +354,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
                Size := 0;
             else
                XDR.Decode
-                 (Message.Payload.all,
+                 (Payload(Message).all,
                   Position,
                   Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
                   Last);
@@ -380,9 +380,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Status := Failure;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Status, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Status, Last);
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
          Raw_Channel > XDR_Unsigned(Channel_ID_Type'Last)
@@ -417,9 +417,9 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Size := 0;
 
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Channel, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Channel, Last);
       Position := Last + 1;
-      XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
       Position := Last + 1;
 
       if Raw_Channel < XDR_Unsigned(Channel_ID_Type'First) or
@@ -437,7 +437,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
                Size := 0;
             else
                XDR.Decode
-                 (Message.Payload.all,
+                 (Payload(Message).all,
                   Position,
                   Message_Data(Message_Data'First .. Message_Data'First + Size - 1),
                   Last);

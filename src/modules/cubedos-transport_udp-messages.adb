@@ -15,14 +15,14 @@ use  CubedOS.Lib;
 
 package body CubedOS.Transport_UDP.Messages is
 
-   function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
+   function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Mutible_Message_Record is
       Sender_Domain : Message_Manager.Domain_ID_Type;
       Sender_Module : Message_Manager.Module_ID_Type;
       Receiver_Domain : Message_Manager.Domain_ID_Type;
       Receiver_Module :Message_Manager. Module_ID_Type;
       Request_ID : Message_Manager.Request_ID_Type;
       Message_ID : Message_Manager.Message_ID_Type;
-      Message : Message_Manager.Message_Record;
+      Message : Message_Manager.Mutible_Message_Record;
    begin
 
       Sender_Domain := Message_Manager.Domain_ID_Type(Data(0));
@@ -61,7 +61,7 @@ package body CubedOS.Transport_UDP.Messages is
       loop
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
-            Message := new Message_Manager.Message_Record'(Read_Stream_Message(Data, Last));
+            Message := new Message_Manager.Mutible_Message_Record'(Read_Stream_Message(Data, Last));
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
             if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
                Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
@@ -76,7 +76,7 @@ package body CubedOS.Transport_UDP.Messages is
       end loop;
    end Server_Loop;
 
-   procedure Send_Network_Message(Message : in Message_Manager.Message_Record )is
+   procedure Send_Network_Message(Message : in Message_Manager.Mutible_Message_Record )is
       Address : Sock_Addr_Type;
       Socket : Socket_Type;
       Last : Ada.Streams.Stream_Element_Offset;
@@ -109,7 +109,7 @@ package body CubedOS.Transport_UDP.Messages is
       Send_Socket (Socket, Buffer, Last, Address);
    end Send_Network_Message;
 
-   procedure Process(Message : in Message_Manager.Message_Record) is
+   procedure Process(Message : in Message_Manager.Mutible_Message_Record) is
    begin
       -- should there be some check here?
       Send_Network_Message(Message);
@@ -121,11 +121,11 @@ package body CubedOS.Transport_UDP.Messages is
    end Network_Loop;
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Msg_Owner;
+      Incoming_Message : Message_Manager.Message_Record;
    begin
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Network_Server, Incoming_Message);
-         Process(Incoming_Message.all);
+         Process(Incoming_Message);
       end loop;
    end Message_Loop;
 

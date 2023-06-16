@@ -24,6 +24,11 @@ is
 
    Subscription_Map : Subscription_Map_Type := (others => (others => False));
 
+   procedure Initialize is
+   begin
+      Message_Manager.Register_Module(Name_Resolver.Publish_Subscribe_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
+   end Initialize;
+
    -------------------
    -- Message Handling
    -------------------
@@ -38,13 +43,13 @@ is
       if Status = Malformed then
          Message_Manager.Send_Message
            (Mailbox, API.Subscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
+              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
       else
          -- Should we have the Subscription_Map handle the entire Message Address?
-         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := True;
+         Subscription_Map(Sender_Address(Message).Module_ID, Channel) := True;
          Message_Manager.Send_Message
            (Mailbox, API.Subscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+              (Sender_Address(Message), Request_ID(Message), Channel, Success));
       end if;
    end Handle_Subscribe_Request;
 
@@ -59,15 +64,15 @@ is
       if Status = Malformed then
          Message_Manager.Send_Message
            (Mailbox, API.Unsubscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
+              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
       else
          -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
          -- The operation returns Success without comment.
          -- TODO: Is this appropriate?
-         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := False;
+         Subscription_Map(Sender_Address(Message).Module_ID, Channel) := False;
          Message_Manager.Send_Message
            (Mailbox, API.Unsubscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+              (Sender_Address(Message), Request_ID(Message), Channel, Success));
       end if;
    end Handle_Unsubscribe_Request;
 
@@ -76,7 +81,7 @@ is
      with Pre => Is_Publish_Request(Message)
    is
       Channel : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array(1 .. Message.Payload'Length - 8);
+      Message_Data : CubedOS.Lib.Octet_Array(1 .. Payload(Message)'Length - 8);
       Size    : CubedOS.Lib.Octet_Array_Count;
       Status  : Message_Status_Type;
    begin
@@ -84,11 +89,11 @@ is
       if Status = Malformed then
          Message_Manager.Send_Message
            (Mailbox, API.Publish_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
+              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
       else
          Message_Manager.Send_Message
            (Mailbox, API.Publish_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+              (Sender_Address(Message), Request_ID(Message), Channel, Success));
 
          -- Do the actual publishing.
          for I in Module_ID_Type loop
@@ -127,14 +132,14 @@ is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Msg_Owner;
+      Incoming_Message : Message_Manager.Message_Record;
    begin
+      Initialize;
+
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
-         Process(Incoming_Message.all);
+         Process(Incoming_Message);
       end loop;
    end Message_Loop;
 
-begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Unchecked_Type);
 end CubedOS.Publish_Subscribe_Server.Messages;

@@ -90,25 +90,25 @@ package CubedOS.Publish_Subscribe_Server.API is
 
 
    function Is_Subscribe_Request(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Subscribe_Request)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Subscribe_Request)));
 
    function Is_Subscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Subscribe_Reply)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Subscribe_Reply)));
 
    function Is_Unsubscribe_Request(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Unsubscribe_Request)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Unsubscribe_Request)));
 
    function Is_Unsubscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Unsubscribe_Reply)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Unsubscribe_Reply)));
 
    function Is_Publish_Request(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Publish_Request)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Request)));
 
    function Is_Publish_Reply(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Publish_Reply)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Reply)));
 
    function Is_Publish_Result(Message : in Message_Record) return Boolean is
-     (Message.Message_Type = (This_Module, Message_Type'Pos(Publish_Result)));
+     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Result)));
 
 
    procedure Subscribe_Request_Decode

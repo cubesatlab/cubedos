@@ -22,6 +22,17 @@ package body CubedOS.File_Server.Messages is
    use type API.File_Handle_Type;
    use type API.Mode_Type;
 
+   procedure Initialize is
+   begin
+      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox,
+                                      (
+                                       CubedOS.File_Server.API.Open_Request_Msg,
+                                       CubedOS.File_Server.API.Read_Request_Msg,
+                                       CubedOS.File_Server.API.Write_Request_Msg,
+                                       CubedOS.File_Server.API.Close_Request_Msg
+                                      ));
+   end Initialize;
+
    package Octet_IO is new Ada.Sequential_IO(Element_Type => CubedOS.Lib.Octet);
 
    type File_Record is
@@ -61,14 +72,14 @@ package body CubedOS.File_Server.Messages is
       if Handle = API.Invalid_Handle then
          Message_Manager.Send_Message
            (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Incoming_Message.Sender_Address,
-               Request_ID => Incoming_Message.Request_ID,
+              (Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
                Handle     => API.Invalid_Handle));
       elsif Status = Malformed then
          Message_Manager.Send_Message
            (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Incoming_Message.Sender_Address,
-               Request_ID => Incoming_Message.Request_ID,
+              (Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
                Handle     => API.Invalid_Handle));
       else
          case Mode is
@@ -83,8 +94,8 @@ package body CubedOS.File_Server.Messages is
 
          Message_Manager.Send_Message
            (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Incoming_Message.Sender_Address,
-               Request_ID => Incoming_Message.Request_ID,
+              (Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
                Handle     => Handle));
       end if;
 
@@ -93,8 +104,8 @@ package body CubedOS.File_Server.Messages is
          -- Open failed. Send back an invalid handle.
          Message_Manager.Send_Message
            (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Incoming_Message.Sender_Address,
-               Request_ID => Incoming_Message.Request_ID,
+              (Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
                Handle     => API.Invalid_Handle));
    end Process_Open_Request;
 
@@ -125,8 +136,8 @@ package body CubedOS.File_Server.Messages is
             -- Send what we have (could be zero octets!).
             Message_Manager.Send_Message
               (Mailbox, API.Read_Reply_Encode
-                 (Receiver_Address => Incoming_Message.Sender_Address,
-                  Request_ID => Incoming_Message.Request_ID,
+                 (Receiver_Address => Sender_Address(Incoming_Message),
+                  Request_ID => Request_ID(Incoming_Message),
                   Handle     => Handle,
                   Amount     => Size,
                   Data       => Data));
@@ -161,8 +172,8 @@ package body CubedOS.File_Server.Messages is
             end;
             Message_Manager.Send_Message
               (Mailbox, API.Write_Reply_Encode
-                 (Receiver_Address => Incoming_Message.Sender_Address,
-                  Request_ID => Incoming_Message.Request_ID,
+                 (Receiver_Address => Sender_Address(Incoming_Message),
+                  Request_ID => Request_ID(Incoming_Message),
                   Handle     => Handle,
                   Amount     => Size));
          end if;
@@ -210,20 +221,14 @@ package body CubedOS.File_Server.Messages is
 
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Msg_Owner;
+      Incoming_Message : Message_Manager.Message_Record;
    begin
+      Initialize;
+
       loop
          Message_Manager.Read_Next(Mailbox, Incoming_Message);
-         Process(Incoming_Message.all);
+         Process(Incoming_Message);
       end loop;
    end Message_Loop;
 
-begin
-   Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox,
-                                   (
-                                    CubedOS.File_Server.API.Open_Request_Msg,
-                                    CubedOS.File_Server.API.Read_Request_Msg,
-                                    CubedOS.File_Server.API.Write_Request_Msg,
-                                    CubedOS.File_Server.API.Close_Request_Msg
-                                   ));
 end CubedOS.File_Server.Messages;

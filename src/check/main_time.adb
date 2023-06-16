@@ -30,7 +30,7 @@ procedure Main_Time is
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
    My_Mailbox : Message_Manager.Module_Mailbox;
 
-   Incoming_Message  : Message_Manager.Msg_Owner;
+   Incoming_Message  : Message_Manager.Message_Record;
    Series_ID         : Series_ID_Type;
    Count             : Natural;
    Status            : Message_Status_Type;
@@ -43,7 +43,7 @@ procedure Main_Time is
    use Duration_IO;
 begin
    Start_Time := Ada.Real_Time.Clock;
-   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Unchecked_Type);
+   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Empty_Type_Array);
 
    -- Do some setup...
    Message_Manager.Send_Message
@@ -64,8 +64,8 @@ begin
       Relative_Time := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
       Absolute_Time := GNAT.Time_Stamp.Current_Time;
-      if Is_Tick_Reply(Incoming_Message.all) then
-         Tick_Reply_Decode(Incoming_Message.all, Series_ID, Count, Status);
+      if Is_Tick_Reply(Incoming_Message) then
+         Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
          if Status = Success then
             Put("Time Duration: "); Put(Relative_Duration); Put("     Time Stamp:      "); Put(Absolute_Time);
             Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;

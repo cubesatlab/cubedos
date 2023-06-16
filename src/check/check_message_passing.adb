@@ -19,21 +19,26 @@ package body Check_Message_Passing is
       Sender_Addr : constant Message_Address := (0, 1);
       Receiver_Addr : constant Message_Address := (0, 2);
 
-      Unacceptable_Msg : constant Message_Record := Make_Empty_Message
-        (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0);
-      Acceptable_Msg : constant Message_Record := Make_Empty_Message
-        (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0);
+      Unacceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+        (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
+      Acceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+        (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
       Sender : Module_Mailbox;
       Receiver : Module_Mailbox;
    begin
       -- Register mailboxes
-      Register_Module(Sender_Addr.Module_ID, 1, Sender, Unchecked_Type);
+      Register_Module(Sender_Addr.Module_ID, 1, Sender, Empty_Type_Array);
       Register_Module(Receiver_Addr.Module_ID, 1, Receiver, (0 => Acceptable_Type));
 
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);
-      pragma Assert(Queue_Size(Receiver) = 1, "Acceptable message wasn't received.");
+      declare
+         Size : Natural;
+      begin
+         Queue_Size(Receiver, Size);
+         pragma Assert(Size = 1, "Acceptable message wasn't received.");
+      end;
 
       -- Check that unacceptable message throws an exception
       declare

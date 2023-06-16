@@ -20,9 +20,8 @@ package body CubedOS.Log_Server.API is
       Log_Level      : in Log_Level_Type;
       Text           : in String)
    is
-      Ptr : Msg_Owner := new Message_Record'(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    begin
-      Message_Manager.Route_Message(Ptr);
+      Message_Manager.Route_Message(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    end Log_Message;
 
 
@@ -33,7 +32,7 @@ package body CubedOS.Log_Server.API is
       Text           : in String;
       Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
-      Message : constant Message_Record :=
+      Message : constant Mutable_Message_Record :=
         Make_Empty_Message
           (Sender_Address   => Sender_Address,
            Receiver_Address => Name_Resolver.Log_Server,
@@ -50,7 +49,7 @@ package body CubedOS.Log_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Text'Length), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(Text, Message.Payload.all, Position, Last);
-      return Message;
+      return Immutable(Message);
    end Log_Text_Encode;
 
 
@@ -69,7 +68,7 @@ package body CubedOS.Log_Server.API is
    begin
       Text := (others => ' ');
       Position := 0;
-      XDR.Decode(Message.Payload.all, Position, Raw_Log_Level, Last);
+      XDR.Decode(Payload(Message).all, Position, Raw_Log_Level, Last);
       Position := Last + 1;
       if Raw_Log_Level > Log_Level_Type'Pos(Log_Level_Type'Last) then
          Log_Level     := Critical;
@@ -77,7 +76,7 @@ package body CubedOS.Log_Server.API is
          Decode_Status := Malformed;
       else
          Log_Level := Log_Level_Type'Val(Raw_Log_Level);
-         XDR.Decode(Message.Payload.all, Position, Raw_Size, Last);
+         XDR.Decode(Payload(Message).all, Position, Raw_Size, Last);
          Position := Last + 1;
          if Raw_Size > Maximum_Log_Message_Size then
             Log_Level     := Critical;
@@ -89,7 +88,7 @@ package body CubedOS.Log_Server.API is
             pragma Warnings
               (Off, """Last"" is set by ""Decode"" but not used after the call",
                     Reason  => "The last value of Last is not needed");
-            XDR.Decode(Message.Payload.all, Position, Raw_Text(1 .. Size), Last);
+            XDR.Decode(Payload(Message).all, Position, Raw_Text(1 .. Size), Last);
             Text(Text'First .. (Text'First - 1) + Size) := Raw_Text(1 .. Size);
             Decode_Status := Success;
          end if;
