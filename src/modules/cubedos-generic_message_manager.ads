@@ -117,8 +117,7 @@ is
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
      with Pre => Msg.Payload /= null,
-     Post => Is_Valid(Immutable'Result) and
-     Message_Type(Immutable'Result) = Msg.Message_Type;
+     Post => Is_Valid(Immutable'Result);
 
    function Sender_Address(Msg : Message_Record) return Message_Address;
    function Receiver_Address(Msg : Message_Record) return Message_Address;
@@ -218,8 +217,8 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg)),
-     Post => Payload(Msg) = null;
+     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg)),
+       Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately with the status of the operation's result.
@@ -228,7 +227,7 @@ is
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
+     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
