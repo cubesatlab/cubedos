@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with CubedOS.Lib.XDR;
+with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
 
 use CubedOS.Lib;
 
@@ -17,43 +17,67 @@ package body CubedOS.Time_Server.API is
      (GNATprove, Off, """Last"" is set by ""Decode"" but not used",
       Reason  => "The last value of Last is not needed");
 
-   function Relative_Request_Encode
+   procedure Relative_Request_Encode
      (Sender_Address : in Message_Address;
+      Receiver_Address : in Message_Address;
       Request_ID     : in Request_ID_Type;
       Tick_Interval  : in Ada.Real_Time.Time_Span;
       Request_Type   : in Series_Type;
       Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+      Priority       : in System.Priority := System.Default_Priority;
+      Result : out Message_Record)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address   => Sender_Address,
-         Receiver_Address => Name_Resolver.Time_Server,
-         Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(Relative_Request)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
       Position   : Data_Index_Type;
       Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
       Interval   : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(1000*Interval), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(1000*Interval), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Series_Type'Pos(Request_Type)), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Series_Type'Pos(Request_Type)), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      XDR.Encode(XDR.XDR_Unsigned(Series_ID), Payload.all, Position, Last);
+      Make_Empty_Message
+        (Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Message_Type => Relative_Request_Msg,
+         Payload => Payload,
+         Priority   => Priority,
+         Result => Message);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Message, Payload);
    end Relative_Request_Encode;
 
+   procedure Send_Relative_Request
+     (Sender_Address : in Module_Mailbox;
+      Destination_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Tick_Interval  : in Ada.Real_Time.Time_Span;
+      Request_Type   : in Series_Type;
+      Series_ID : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority)
+   is
+      Msg : Message_Record;
+   begin
+      Relative_Request_Encode(Address(Sender_Address), Destination_Address, Request_ID, Tick_Interval, Request_Type, Series_ID, Priority, Msg);
+      Send_Message(Sender_Address, Msg);
+   end Send_Relative_Request;
 
-   function Absolute_Request_Encode
+   procedure Absolute_Request_Encode
      (Sender_Address : in Message_Address;
       Request_ID     : in Request_ID_Type;
       Tick_Time      : in Ada.Real_Time.Time;
       Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+      Priority       : in System.Priority := System.Default_Priority;
+     Result : out Message_Record)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
+      Message : Mutable_Message_Record := Make_Empty_Message
         (Sender_Address => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -71,19 +95,21 @@ package body CubedOS.Time_Server.API is
       XDR.Encode(XDR.XDR_Unsigned(Seconds), Message.Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Result := Immutable(Message);
    end Absolute_Request_Encode;
 
 
-   function Tick_Reply_Encode
-     (Receiver_Address : in Message_Address;
+   procedure Tick_Reply_Encode
+     (Sender_Address : in Message_Address;
+      Receiver_Address : in Message_Address;
       Request_ID       : in Request_ID_Type;
       Series_ID        : in Series_ID_Type;
       Count            : in Series_Count_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
+      Priority         : in System.Priority := System.Default_Priority;
+      Result: out Message_Record)
    is
-      Result : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address   => Name_Resolver.Time_Server,
+      Msg : Mutable_Message_Record := Make_Empty_Message
+        (Sender_Address   => Sender_Address,
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Message_Type => (This_Module, Message_Type'Pos(Tick_Reply)),
@@ -96,20 +122,37 @@ package body CubedOS.Time_Server.API is
       Position := 0;
 
       -- The only kind of messages coming from the tick generator are ticks.
-      XDR.Encode(XDR.XDR_Unsigned(Series_ID), Result.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Series_ID), Msg.Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Count), Result.Payload.all, Position, Last);
-      return Immutable(Result);
+      XDR.Encode(XDR.XDR_Unsigned(Count), Msg.Payload.all, Position, Last);
+      Result := Immutable(Msg);
+      Delete(Msg);
+      pragma Unused(Msg);
    end Tick_Reply_Encode;
 
+   procedure Send_Tick_Reply
+     (Sender_Address : in Module_Mailbox;
+      Destination_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Series_ID        : in     Series_ID_Type;
+      Count : in Series_Count_Type;
+      Priority         : in     System.Priority := System.Default_Priority)
+   is
+      Msg : Message_Record;
+   begin
+      Tick_Reply_Encode(Address(Sender_Address), Destination_Address, Request_ID, Series_ID, Count, Priority, Msg);
+      Send_Message(Sender_Address, Msg);
+   end Send_Tick_Reply;
 
-   function Cancel_Request_Encode
+
+   procedure Cancel_Request_Encode
      (Sender_Address : in Message_Address;
       Request_ID     : in Request_ID_Type;
       Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+      Priority       : in System.Priority := System.Default_Priority;
+      Result : out Message_Record)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
+      Message : Mutable_Message_Record := Make_Empty_Message
         (Sender_Address   => Sender_Address,
          Receiver_Address => Name_Resolver.Time_Server,
          Request_ID => Request_ID,
@@ -121,7 +164,7 @@ package body CubedOS.Time_Server.API is
    begin
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Result := Immutable(Message);
    end Cancel_Request_Encode;
 
 
