@@ -7,7 +7,7 @@
 -- from multiple tasks. If possible, make every subprogram here a pure function.
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode(On);
+pragma SPARK_Mode (On);
 
 with Ada.Real_Time;
 with Message_Manager;
@@ -18,7 +18,8 @@ use Message_Manager;
 
 package CubedOS.Time_Server.API is
 
-   This_Module : constant Module_ID_Type := Name_Resolver.Time_Server.Module_ID;
+   This_Module : constant Module_ID_Type :=
+     Name_Resolver.Time_Server.Module_ID;
 
    -- Specifies the kinds of messages that can be sent to or received from the tick generator.
    -- @value Relative_Request A request for a tick using a time relative to when the request
@@ -28,10 +29,13 @@ package CubedOS.Time_Server.API is
    -- @value Tick_Reply The message type used for tick messages returned to client modules.
    -- @value Cancel_Request A request to cancel a previously defined series.
    type Message_Type is
-     (Relative_Request,
-      Absolute_Request,
-      Tick_Reply,
-      Cancel_Request);
+     (Relative_Request, Absolute_Request, Tick_Reply, Cancel_Request);
+
+   -- Message types
+   Relative_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Relative_Request));
+   Absolute_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Absolute_Request));
+   Tick_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Tick_Reply));
+   Cancel_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Cancel_Request));
 
    -- Two types of tick "series" are supported.
    -- @value One_Shot A single Tick_Reply message will be sent. The series is automatically
@@ -54,110 +58,138 @@ package CubedOS.Time_Server.API is
    -- @param Request_Type Indicates if a One_Shot or Periodic series is requested.
    -- @param Series_ID The ID number for the series (selected by the caller and thus only
    --   meaningful to the requesting module).
-   function Relative_Request_Encode
+   procedure Relative_Request_Encode
      (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Tick_Interval  : in Ada.Real_Time.Time_Span;
-      Request_Type   : in Series_Type;
-      Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+      Request_Type   : in Series_Type; Series_ID : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority;
+      Result : out Message_Record)
+     with
+       Global => null,
+       Pre => Receiver_Address.Module_ID = Name_Resolver.Time_Server.Module_ID,
+       Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg and
+       Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   -- Return a message for requesting a single tick message at a specific, absolute time.
-   -- @param Tick_Time The time when the tick message is requested. Absolute requests are always
-   --   one shot requests so no Request_Type paramter is needed.
-   -- @param Series_ID The ID number of the series (selected by the caller and thus only
-   --   meaningful to the requesting module).
-   function Absolute_Request_Encode
+   procedure Send_Relative_Request
+     (Sender_Address : in Module_Mailbox;
+      Destination_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Tick_Interval  : in Ada.Real_Time.Time_Span;
+      Request_Type   : in Series_Type; Series_ID : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority)
+     with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+     Pre => Destination_Address.Module_ID = Name_Resolver.Time_Server.Module_ID
+     and then Receives(Destination_Address, Relative_Request_Msg);
+
+      -- Return a message for requesting a single tick message at a specific, absolute time.
+      -- @param Tick_Time The time when the tick message is requested. Absolute requests are always
+      --   one shot requests so no Request_Type paramter is needed.
+      -- @param Series_ID The ID number of the series (selected by the caller and thus only
+      --   meaningful to the requesting module).
+   procedure Absolute_Request_Encode
+     (Sender_Address : in Message_Address; Request_ID : in Request_ID_Type;
+      Tick_Time      : in Ada.Real_Time.Time; Series_ID : in Series_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority;
+      Result : out Message_Record)
+     with
+       Global => null;
+
+      -- The tick messages themselves.
+      -- @param Series_ID The ID number of the series to distinguish this tick message from those
+      --   of other series being sent to the same module.
+      -- @param Count The count for this tick reply. Counts start at one and increment for each
+      --   message sent. The counts are scoped by their series (i. e., every series has its own
+      --   count sequence). Should the count reach Series_Count_Type'Last, the series is canceled
+      --   after a Tick_Reply with that count is sent.
+   procedure Tick_Reply_Encode
      (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Tick_Time      : in Ada.Real_Time.Time;
+      Receiver_Address : in Message_Address; Request_ID : in Request_ID_Type;
+      Series_ID        : in     Series_ID_Type; Count : in Series_Count_Type;
+      Priority         : in     System.Priority := System.Default_Priority;
+      Result           :    out Message_Record)
+     with
+       Global => null,
+       Pre => Sender_Address.Module_ID = Name_Resolver.Time_Server.Module_ID,
+       Post => Message_Manager.Message_Type(Result) = Tick_Reply_Msg and
+       Message_Manager.Receiver_Address(Result) = Receiver_Address;
+
+   procedure Send_Tick_Reply
+     (Sender_Address : in Module_Mailbox;
+      Destination_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Series_ID        : in     Series_ID_Type;
+      Count : in Series_Count_Type;
+      Priority         : in     System.Priority := System.Default_Priority)
+     with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+     Pre => Address(Sender_Address).Module_ID = Name_Resolver.Time_Server.Module_ID
+     and then Receives(Destination_Address, Tick_Reply_Msg);
+
+      -- Return a message for canceling previous tick requests (of any kind).
+      -- @param Series_ID The ID number of the series being canceled. If the series does not
+      --   exist or has already been canceled or removed (due to being a one shot series that has
+      --   already fired), there is no effect.
+   procedure Cancel_Request_Encode
+     (Sender_Address : in Message_Address; Request_ID : in Request_ID_Type;
       Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+      Priority       : in System.Priority := System.Default_Priority;
+      Result : out Message_Record)
+     with
+       Global => null;
 
-   -- The tick messages themselves.
-   -- @param Series_ID The ID number of the series to distinguish this tick message from those
-   --   of other series being sent to the same module.
-   -- @param Count The count for this tick reply. Counts start at one and increment for each
-   --   message sent. The counts are scoped by their series (i. e., every series has its own
-   --   count sequence). Should the count reach Series_Count_Type'Last, the series is canceled
-   --   after a Tick_Reply with that count is sent.
-   function Tick_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Series_ID        : in Series_ID_Type;
-      Count            : in Series_Count_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record;
+   function Is_Relative_Request (Message : in Message_Record) return Boolean is
+     (Message_Manager.Message_Type (Message) =
+      (This_Module, Message_Type'Pos (Relative_Request)));
 
-   -- Return a message for canceling previous tick requests (of any kind).
-   -- @param Series_ID The ID number of the series being canceled. If the series does not
-   --   exist or has already been canceled or removed (due to being a one shot series that has
-   --   already fired), there is no effect.
-   function Cancel_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Series_ID      : in Series_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   function Is_Absolute_Request (Message : in Message_Record) return Boolean is
+     (Message_Manager.Message_Type (Message) =
+      (This_Module, Message_Type'Pos (Absolute_Request)));
 
-   function Is_Relative_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos (Relative_Request)));
+   function Is_Tick_Reply (Message : in Message_Record) return Boolean is
+     (Message_Manager.Message_Type (Message) =
+      (This_Module, Message_Type'Pos (Tick_Reply)));
 
-   function Is_Absolute_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos (Absolute_Request)));
-
-   function Is_Tick_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos (Tick_Reply)));
-
-   function Is_Cancel_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos (Cancel_Request)));
+   function Is_Cancel_Request (Message : in Message_Record) return Boolean is
+     (Message_Manager.Message_Type (Message) =
+      (This_Module, Message_Type'Pos (Cancel_Request)));
 
    -- Decode Relative_Request messages. See Relative_Request_Encode for information about the
    -- parameters.
    procedure Relative_Request_Decode
-     (Message       : in  Message_Record;
-      Tick_Interval : out Ada.Real_Time.Time_Span;
-      Request_Type  : out Series_Type;
-      Series_ID     : out Series_ID_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Relative_Request(Message),
-       Depends => ((Tick_Interval, Request_Type, Series_ID, Decode_Status) => Message);
+     (Message : in Message_Record; Tick_Interval : out Ada.Real_Time.Time_Span;
+      Request_Type  :    out Series_Type; Series_ID : out Series_ID_Type;
+      Decode_Status :    out Message_Status_Type) with
+      Global  => null,
+      Pre     => Is_Relative_Request (Message),
+      Depends =>
+      ((Tick_Interval, Request_Type, Series_ID, Decode_Status) => Message);
 
    -- Decode Absolute_Request messages. See Absolute_Request_Encode for information about the
    -- parameters.
    procedure Absolute_Request_Decode
-     (Message   : in  Message_Record;
-      Tick_Time : out Ada.Real_Time.Time;
-      Series_ID : out Series_ID_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Absolute_Request(Message),
-       Depends => ((Tick_Time, Series_ID, Decode_Status) => Message);
+     (Message       : in Message_Record; Tick_Time : out Ada.Real_Time.Time;
+      Series_ID     :    out Series_ID_Type;
+      Decode_Status :    out Message_Status_Type) with
+      Global  => null,
+      Pre     => Is_Absolute_Request (Message),
+      Depends => ((Tick_Time, Series_ID, Decode_Status) => Message);
 
    -- Decode Tick_Reply messages. See Tick_Reply_Encode for information about the parameters.
    procedure Tick_Reply_Decode
-     (Message   : in  Message_Record;
-      Series_ID : out Series_ID_Type;
-      Count     : out Natural;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Tick_Reply(Message),
-       Depends => ((Series_ID, Count, Decode_Status) => Message);
+     (Message : in     Message_Record; Series_ID : out Series_ID_Type;
+      Count   :    out Natural; Decode_Status : out Message_Status_Type) with
+      Global  => null,
+      Pre     => Is_Tick_Reply (Message),
+      Depends => ((Series_ID, Count, Decode_Status) => Message);
 
    -- Decode Cancel_Request messages. See Cancel_Request_Encode for information about the
    -- parameters.
    procedure Cancel_Request_Decode
-     (Message   : in  Message_Record;
-      Series_ID : out Series_ID_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Cancel_Request(Message),
-       Depends => ((Series_ID, Decode_Status) => Message);
+     (Message       : in     Message_Record; Series_ID : out Series_ID_Type;
+      Decode_Status :    out Message_Status_Type) with
+      Global  => null,
+      Pre     => Is_Cancel_Request (Message),
+      Depends => ((Series_ID, Decode_Status) => Message);
 
 end CubedOS.Time_Server.API;
