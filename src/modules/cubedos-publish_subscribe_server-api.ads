@@ -30,85 +30,240 @@ package CubedOS.Publish_Subscribe_Server.API is
       Publish_Reply,       -- Success/failure of a publish request.
       Publish_Result);     -- Delivery of data published to a channel.
 
-   function Subscribe_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Channel        : in Channel_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   Unsubscribe_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Unsubscribe_Request));
+   Unsubscribe_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Unsubscribe_Reply));
+   Subscribe_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Subscribe_Request));
+   Publish_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Publish_Request));
+   Publish_Result_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Publish_Result));
+   Publish_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Publish_Reply));
+   Subscribe_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Subscribe_Reply));
 
-   function Subscribe_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Channel          : in Channel_ID_Type;
-      Status           : in Status_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   procedure Subscribe_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+       Global => (Proof_In => Mailbox_Metadata),
+       Pre => true
+       and then Receiver_Address.Module_ID = This_Module
+       and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg),
+       Post => Message_Manager.Message_Type(Result) = Subscribe_Request_Msg
+       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Unsubscribe_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Channel        : in Channel_ID_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   procedure Send_Subscribe_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Receiver_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg)
+      ;
 
-   function Unsubscribe_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Channel          : in Channel_ID_Type;
-      Status           : in Status_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   procedure Subscribe_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Sender_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg),
+      Post => Message_Manager.Message_Type(Result) = Subscribe_Reply_Msg
+         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Publish_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Channel        : in Channel_ID_Type;
-      Message_Data   : in CubedOS.Lib.Octet_Array;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
-     with
-       Global => null,
-       Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
+   procedure Send_Subscribe_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Address(Sender).Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg)
+      ;
 
-   function Publish_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Channel          : in Channel_ID_Type;
-      Status           : in Status_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
-     with Global => null;
+   procedure Unsubscribe_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Receiver_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg),
+      Post => Message_Manager.Message_Type(Result) = Unsubscribe_Request_Msg
+         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Publish_Result_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Channel          : in Channel_ID_Type;
-      Message_Data     : in CubedOS.Lib.Octet_Array;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
-     with
-       Global => null,
-       Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
+   procedure Send_Unsubscribe_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Receiver_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg)
+      ;
 
+   procedure Unsubscribe_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Sender_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg),
+      Post => Message_Manager.Message_Type(Result) = Unsubscribe_Reply_Msg
+         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Is_Subscribe_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Subscribe_Request)));
+   procedure Send_Unsubscribe_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Address(Sender).Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg)
+      ;
 
-   function Is_Subscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Subscribe_Reply)));
+   procedure Publish_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Sender_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg),
+      Post => Message_Manager.Message_Type(Result) = Publish_Reply_Msg
+         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Is_Unsubscribe_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Unsubscribe_Request)));
+   procedure Send_Publish_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Status : Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Address(Sender).Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg)
+      ;
 
-   function Is_Unsubscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Unsubscribe_Reply)));
+   procedure Publish_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Message_Data : CubedOS.Lib.Octet_Array;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => Message_Data'Length <= Data_Size_Type'Last - 8
+         and then Receiver_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg),
+      Post => Message_Manager.Message_Type(Result) = Publish_Request_Msg
+       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Is_Publish_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Request)));
+   procedure Send_Publish_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Message_Data : CubedOS.Lib.Octet_Array;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => Message_Data'Length <= Data_Size_Type'Last - 8
+         and then Receiver_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg)
+      ;
 
-   function Is_Publish_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Reply)));
+   procedure Publish_Result_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Data : CubedOS.Lib.Octet_Array;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Sender_Address.Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg),
+      Post => Message_Manager.Message_Type(Result) = Publish_Result_Msg
+         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
-   function Is_Publish_Result(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Publish_Result)));
+   procedure Send_Publish_Result
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Channel : Channel_ID_Type;
+      Data : CubedOS.Lib.Octet_Array;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Pre => true
+         and then Address(Sender).Module_ID = This_Module
+         and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg)
+      ;
+
+   function Is_Subscribe_Request(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Subscribe_Request_Msg);
+
+   function Is_Subscribe_Reply(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Subscribe_Reply_Msg);
+
+   function Is_Unsubscribe_Request(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Unsubscribe_Request_Msg);
+
+   function Is_Unsubscribe_Reply(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Unsubscribe_Reply_Msg);
+
+   function Is_Publish_Request(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Publish_Request_Msg);
+
+   function Is_Publish_Reply(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Publish_Reply_Msg);
+
+   function Is_Publish_Result(Message : Message_Record) return Boolean is
+      (Message_Manager.Message_Type(Message) = Publish_Result_Msg);
 
 
    procedure Subscribe_Request_Decode

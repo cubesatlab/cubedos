@@ -169,12 +169,17 @@ is
 
    end Sync_Mailbox;
 
+   procedure Delete(Msg : in out Mutable_Message_Record) is
+   begin
+      Free(Msg.Payload);
+   end Delete;
+
    ----------------------
    -- Immutable Messages
    ----------------------
 
    function Is_Valid(Msg : Message_Record) return Boolean is
-      (Msg.Payload /= null);
+     (Msg.Payload /= null);
 
    function Immutable(Msg : Mutable_Message_Record) return Message_Record is
       Payload_Copy : constant Data_Array_Owner := new Data_Array'(Msg.Payload.all);
@@ -196,6 +201,11 @@ is
    function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
    function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
 
+   procedure Delete(Msg : in out Message_Record) is
+   begin
+      Free(Msg.Payload);
+   end Delete;
+
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
       Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
@@ -213,6 +223,24 @@ is
               Priority => Priority,
               Payload => new Definite_Data_Array'(others => 0)
              );
+   end Make_Empty_Message;
+
+   procedure Make_Empty_Message
+     (Sender_Address : Message_Address; Receiver_Address : Message_Address;
+      Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
+      Payload : in out Data_Array_Owner;
+      Priority       : System.Priority := System.Default_Priority;
+     Result : out Mutable_Message_Record)
+   is
+   begin
+      Result := (Sender_Address => Sender_Address,
+                 Receiver_Address => Receiver_Address,
+                 Request_ID => Request_ID,
+                 Message_Type => Message_Type,
+                 Priority => Priority,
+                 Payload => Payload
+                );
+      Payload := null;
    end Make_Empty_Message;
 
    function Stringify_Message (Message : in Message_Record) return String is
@@ -241,8 +269,16 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
-     is (Mailbox_Types(Receiver.Module_ID) /= null and then (for some T of Mailbox_Types(Receiver.Module_ID).all => T = Msg_Type));
+   function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
+     is (Mailbox_Types(Receiver) /= null and then (for some T of Mailbox_Types(Receiver).all => T = Msg_Type));
+
+   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
+   is
+   begin
+      -- TODO: Once we have dynamic arrays from the SPARKlib, make this functional
+      -- Mailbox_Types(Receiver)(0) := Msg_Type;
+      null;
+   end Declare_Accepts;
 
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
@@ -295,6 +331,18 @@ is
                                );
    end;
 
+   procedure Move(Msg : in out Message_Record; Result : out not null Msg_Owner)
+   is
+   begin
+      Result := new Message_Record'(Sender_Address => Msg.Sender_Address,
+                                    Receiver_Address => Msg.Receiver_Address,
+                                    Request_ID => Msg.Request_ID,
+                                    Message_Type => Msg.Message_Type,
+                                    Priority => Msg.Priority,
+                                    Payload => Msg.Payload
+                                   );
+      Msg.Payload := null;
+      end;
 
    procedure Fetch_Message
      (Module : in Module_ID_Type; Message : out Message_Record)
@@ -310,19 +358,23 @@ is
    function Address(Box : Module_Mailbox) return Message_Address is
       (Box.Address);
 
-   procedure Send_Message (Box : Module_Mailbox; Msg : Message_Record) is
-      Ptr : Msg_Owner := Copy(Msg);
+   procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record)
+     with Refined_Post => Msg.Payload = null
+   is
+      Ptr : Msg_Owner;
    begin
+      Move(Msg, Ptr);
       Ptr.Sender_Address := Box.Address;
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;
 
    procedure Send_Message
-     (Box : Module_Mailbox; Msg : Message_Record; Status : out Status_Type)
+     (Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
    is
-      Ptr : Msg_Owner := Copy(Msg);
+      Ptr : Msg_Owner;
    begin
+      Move(Msg, Ptr);
       Ptr.Sender_Address := Box.Address;
       Route_Message (Ptr, Status);
       pragma Unused(Ptr);
@@ -340,7 +392,7 @@ is
 
    procedure Register_Module
      (Module_ID : in     Module_ID_Type; Msg_Queue_Size : in Positive;
-      Mailbox   :    out Module_Mailbox; Receives : in Message_Type_Array)
+      Mailbox   :    out Module_Mailbox; Accepts : in Message_Type_Array)
    is
       Arr : Msg_Ptr_Array_Ptr := new Message_Ptr_Array (1 .. Msg_Queue_Size);
    begin
@@ -348,7 +400,7 @@ is
       Message_Storage (Module_ID).Set_Msg_Array (Arr);
       pragma Unused(Arr);
       -- Store what message types it may receive
-      Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
+      Mailbox_Types (Module_ID) := new Message_Type_Array'(Accepts);
 
       Mailbox            := (Address => (Domain_ID, Module_ID));
       Inited (Module_ID) := True;
@@ -362,5 +414,4 @@ is
          Count_Array (I) := Message_Storage (I).Message_Count;
       end loop;
    end Get_Message_Counts;
-
 end CubedOS.Generic_Message_Manager;

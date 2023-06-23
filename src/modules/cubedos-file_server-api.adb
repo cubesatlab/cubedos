@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with CubedOS.Lib.XDR;
+with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
 
 use CubedOS.Lib;
 
@@ -15,192 +15,378 @@ package body CubedOS.File_Server.API is
 
    -- Encodes:
 
-   -- Requester-side Use
-   function Open_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Mode           : in Mode_Type;
-      Name           : in String;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Open_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Mode : Mode_Type;
+      Name : String;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Sender_Address,
-         Receiver_Address => Name_Resolver.File_Server,
-         Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(Open_Request)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
-
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Mode_Type'Pos(Mode)), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Mode_Type'Pos(Mode)), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Name'Length), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Name'Length), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(Name, Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      XDR.Encode(Name, Payload.all, Position, Last);
+      Position := Last + 1;
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Open_Request_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Open_Request_Encode;
 
-
-   -- Server-side Use
-   function Open_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Handle           : in API.File_Handle_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Send_Open_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Mode : Mode_Type;
+      Name : String;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Name_Resolver.File_Server,
+      Message : Message_Record;
+   begin
+      Open_Request_Encode(
+         Sender_Address => Address(Sender),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(API.Open_Reply)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+         Mode => Mode,
+         Name => Name,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Open_Request;
 
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Open_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : File_Handle_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      XDR.Encode(XDR.XDR_Unsigned(Handle), Payload.all, Position, Last);
+      Position := Last + 1;
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Open_Reply_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Open_Reply_Encode;
 
-
-   function Read_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Handle         : in Valid_File_Handle_Type;
-      Amount         : in Read_Size_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Send_Open_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : File_Handle_Type;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Sender_Address,
-         Receiver_Address => Name_Resolver.File_Server,
+      Message : Message_Record;
+   begin
+      Open_Reply_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(Read_Request)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+         Handle => Handle,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Open_Reply;
 
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Read_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Size_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Amount), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Read_Request_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Read_Request_Encode;
 
-
-   -- Server-side use.
-   function Read_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Handle           : in Valid_File_Handle_Type;
-      Amount           : in Read_Result_Size_Type;
-      Data             : in Octet_Array;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Send_Read_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Size_Type;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Name_Resolver.File_Server,
+      Message : Message_Record;
+   begin
+      Read_Request_Encode(
+         Sender_Address => Address(Sender),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(API.Read_Reply)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+         Handle => Handle,
+         Amount => Amount,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Read_Request;
 
-      Position : Data_Index_Type;
-      Last : Data_Extended_Index_Type;
+
+   -- Server-side use.
+   procedure Read_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Result_Size_TYpe;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      Position := Last + 1;
-      XDR.Encode(Data(Data'First ..  Data'First + (Amount - 1)), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Read_Reply_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Read_Reply_Encode;
 
-
-   function Write_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Handle         : in Valid_File_Handle_Type;
-      Amount         : in Write_Size_Type;
-      Data           : in Octet_Array;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Send_Read_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Result_Size_TYpe;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Sender_Address,
-         Receiver_Address => Name_Resolver.File_Server,
-         Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(Write_Request)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
-
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+      Message : Message_Record;
    begin
-      Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      Position := Last + 1;
-      XDR.Encode(Data(Data'First .. Data'First + (Amount - 1)), Message.Payload.all, Position, Last);
-      return Immutable(Message);
-   end Write_Request_Encode;
-
-
-   -- Server-side use.
-   function Write_Reply_Encode
-     (Receiver_Address : in Message_Address;
-      Request_ID       : in Request_ID_Type;
-      Handle           : in Valid_File_Handle_Type;
-      Amount           : in Write_Result_Size_Type;
-      Priority         : in System.Priority := System.Default_Priority) return Message_Record
-   is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Name_Resolver.File_Server,
+      Read_Reply_Encode(
+         Sender_Address => Address(Sender),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(API.Write_Reply)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+         Handle => Handle,
+         Amount => Amount,
+         File_Data => File_Data,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Read_Reply;
 
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Write_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Size_Type;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
+      XDR.Encode(XDR.XDR_Unsigned(Amount), Payload.all, Position, Last);
       Position := Last + 1;
-      XDR.Encode(XDR.XDR_Unsigned(Amount), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Write_Request_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
+   end Write_Request_Encode;
+
+   procedure Send_Write_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Size_Type;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Write_Request_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Handle => Handle,
+         Amount => Amount,
+         File_Data => File_Data,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Write_Request;
+
+   procedure Write_Reply_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Result_Size_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
+   begin
+      Position := 0;
+      XDR.Encode(XDR.XDR_Unsigned(Amount), Payload.all, Position, Last);
+      Position := Last + 1;
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Write_Reply_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Write_Reply_Encode;
 
-
-   function Close_Request_Encode
-     (Sender_Address : in Message_Address;
-      Request_ID     : in Request_ID_Type;
-      Handle         : in Valid_File_Handle_Type;
-      Priority       : in System.Priority := System.Default_Priority) return Message_Record
+   procedure Send_Write_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Result_Size_Type;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Message : constant Mutable_Message_Record := Make_Empty_Message
-        (Sender_Address => Sender_Address,
-         Receiver_Address => Name_Resolver.File_Server,
+      Message : Message_Record;
+   begin
+      Write_Reply_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
-         Message_Type => (This_Module, Message_Type'Pos(Close_Request)),
-         Payload_Size => Message_Manager.Max_Message_Size,
-         Priority   => Priority);
+         Handle => Handle,
+         Amount => Amount,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Write_Reply;
 
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+   procedure Close_Request_Encode
+      (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Result : out Message_Record;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
+      Position   : Data_Index_Type;
+      Last       : Data_Index_Type;
+      subtype Definite_Data_Array is Data_Array(Data_Index_Type);
+      Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
+      Message : Mutable_Message_Record;
    begin
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Handle), Message.Payload.all, Position, Last);
-      return Immutable(Message);
+      Make_Empty_Message (
+         Sender_Address   => Sender_Address,
+         Receiver_Address => Receiver_Address,
+         Request_ID   => Request_ID,
+         Message_Type => Close_Request_Msg,
+         Payload => Payload,
+         Result => Message,
+         Priority   => Priority);
+      Result := Immutable(Message);
+      Delete(Message);
+      pragma Unused(Last, Payload, Position, Message);
    end Close_Request_Encode;
+
+   procedure Send_Close_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Close_Request_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Handle => Handle,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Close_Request;
 
    -- Decodes:
 

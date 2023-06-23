@@ -12,7 +12,6 @@ pragma SPARK_Mode(On);
 with System;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib.XDR;
-with Ada.Finalization;
 
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
@@ -79,10 +78,15 @@ is
       end record;
 
    -- True if the given receiving address can be sent the given message type.
-   function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
+   function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Global => (Input => Mailbox_Metadata),
      Depends => (Receives'Result => (Mailbox_Metadata, Receiver, Msg_Type)),
-       Pre => Module_Ready(Receiver.Module_ID);
+     Pre => Module_Ready(Receiver);
+
+   -- Declare that the given module is able to accept the given message type.
+   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
+     with Global => (In_Out => Mailbox_Metadata),
+     Post => Receives(Receiver, Msg_Type);
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -96,8 +100,13 @@ is
          Request_ID : Request_ID_Type;
          Message_Type : Universal_Message_Type;
          Priority   : System.Priority;
-         Payload    : not null Data_Array_Owner;
+         Payload    : Data_Array_Owner;
       end record;
+
+   -- Frees any dynamically allocated memory the message references.
+   procedure Delete(Msg : in out Mutable_Message_Record)
+     with Pre => Msg.Payload /= null,
+     Post => Msg.Payload = null;
 
    -- Immutible version of message record
    type Message_Record is private;
@@ -107,7 +116,9 @@ is
 
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
-     with Post => Is_Valid(Immutable'Result);
+     with Pre => Msg.Payload /= null,
+     Post => Is_Valid(Immutable'Result) and
+     Message_Type(Immutable'Result) = Msg.Message_Type;
 
    function Sender_Address(Msg : Message_Record) return Message_Address;
    function Receiver_Address(Msg : Message_Record) return Message_Address;
@@ -123,6 +134,11 @@ is
    function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type;
    function Priority(Msg : not null access constant Message_Record) return System.Priority;
    function Payload(Msg : not null access constant Message_Record) return access constant Data_Array;
+
+   -- Frees any dynamically allocated memory the message references.
+   procedure Delete(Msg : in out Message_Record)
+     with Pre => Payload(Msg) /= null,
+     Post => Payload(Msg) = null;
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
@@ -143,6 +159,27 @@ is
          Make_Empty_Message'Result.Payload'Length = Payload_Size and
          Make_Empty_Message'Result.Priority   = Priority;
 
+   procedure Make_Empty_Message
+     (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Message_Type : Universal_Message_Type;
+      Payload : in out Data_Array_Owner;
+      Priority   : System.Priority := System.Default_Priority;
+      Result : out Mutable_Message_Record)
+     with
+       Global => null,
+       Pre => Payload /= null,
+       Post =>
+         Result.Sender_Address   = Sender_Address   and
+         Result.Receiver_Address = Receiver_Address and
+         Result.Request_ID = Request_ID and
+         Result.Message_Type = Message_Type and
+         Result.Payload.all = Data_Array(Payload.all)'Old and
+         Result.Payload /= null and
+         Payload = null and
+         Result.Priority   = Priority;
+
    -- Convenience function to stringify messages
    function Stringify_Message (Message : in Message_Record) return String;
 
@@ -152,6 +189,7 @@ is
      with Global => (In_Out => Request_ID_Generator);
 
    -- True if the module is ready to receive mail.
+   -- This refers to a module in the current domain.
    function Module_Ready(Module_ID : Module_ID_Type) return Boolean
      with Global => (Input => Mailbox_Metadata);
 
@@ -174,24 +212,29 @@ is
    function Address(Box : Module_Mailbox) return Message_Address;
 
    -- Sends the given message to the given address from this mailbox's address.
-   -- Returns immediately.
-   procedure Send_Message(Box : Module_Mailbox; Msg : Message_Record)
+   -- Returns immediately. Moves the message's payload making it inaccessible
+   -- after the call.
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
-     Depends => (Mailboxes => +(Box, Msg)),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg));
+     Depends => (Mailboxes => +(Box, Msg),
+                 Msg => null),
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg)),
+     Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately with the status of the operation's result.
-   procedure Send_Message(Box : Module_Mailbox; Msg : Message_Record; Status : out Status_Type)
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
-                 Status => (Box, Msg, Mailboxes)),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg));
+                 Status => (Box, Msg, Mailboxes),
+                 Msg => null),
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
    procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
-     with Pre => Module_Ready (Address(Box).Module_ID);
+     with Pre => Module_Ready (Address(Box).Module_ID),
+       Post => Payload(Msg) /= null;
 
    -- Count the number of messages in the mailbox waiting
    -- to be read. This is a procedure and not a function because
@@ -209,13 +252,14 @@ is
    procedure Register_Module(Module_ID : in Module_ID_Type;
                              Msg_Queue_Size : in Positive;
                              Mailbox : out Module_Mailbox;
-                             Receives : in Message_Type_Array)
+                             Accepts : in Message_Type_Array)
      with Global => (In_Out => (Mailboxes, Mailbox_Metadata)),
        Depends => (Mailboxes => +(Module_ID),
                    Mailbox => Module_ID,
-                   Mailbox_Metadata => +(Receives, Module_ID),
+                   Mailbox_Metadata => +(Accepts, Module_ID),
                   null => Msg_Queue_Size),
-       --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
+   --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
+     Pre => (for all T of Accepts => Receives(Module_ID, T)),
        Post => Module_Ready(Module_ID) and Address(Mailbox).Module_ID = Module_ID;
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
@@ -244,7 +288,7 @@ is
      with Global => (In_Out => (Mailboxes), Proof_In => Mailbox_Metadata),
      Pre => Message /= null
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message)),
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message)),
      Post => Message = null;
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
@@ -255,16 +299,16 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => Message /= null
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
 
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
 
 private
    type Message_Record is
@@ -285,5 +329,11 @@ private
    -- Create a copy of the given message on the heap,
    -- also making a copy of the payload content.
    function Copy(Msg : Message_Record) return not null Msg_Owner;
+
+   -- Create a copy of the given message on the heap,
+   -- moving the payload content.
+   procedure Move(Msg : in out Message_Record; Result : out not null Msg_Owner)
+     with Pre => Msg.Payload /= null,
+       Post => Msg.Payload = null and Payload(Result) /= null;
 
 end CubedOS.Generic_Message_Manager;
