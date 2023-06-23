@@ -19,17 +19,22 @@ package body Check_Message_Passing is
       Sender_Addr : constant Message_Address := (0, 1);
       Receiver_Addr : constant Message_Address := (0, 2);
 
-      Unacceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+      Unacceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
-      Acceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+      Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
       Sender : Module_Mailbox;
       Receiver : Module_Mailbox;
    begin
+      -- Declare what mailboxes accept what message types
+      -- This is normally done in API files
+      Declare_Accepts(Receiver_Addr.Module_ID, Acceptable_Type);
+
       -- Register mailboxes
       Register_Module(Sender_Addr.Module_ID, 1, Sender, Empty_Type_Array);
       Register_Module(Receiver_Addr.Module_ID, 1, Receiver, (0 => Acceptable_Type));
+
 
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);

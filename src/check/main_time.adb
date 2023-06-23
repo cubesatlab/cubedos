@@ -32,7 +32,7 @@ procedure Main_Time is
 
    Incoming_Message  : Message_Manager.Message_Record;
    Series_ID         : Series_ID_Type;
-   Count             : Natural;
+   Count             : Series_Count_Type;
    Status            : Message_Status_Type;
    Start_Time        : Ada.Real_Time.Time;
    Relative_Time     : Ada.Real_Time.Time_Span;
@@ -46,12 +46,10 @@ begin
    Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Empty_Type_Array);
 
    -- Do some setup...
-   Message_Manager.Send_Message
-     (My_Mailbox, Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1));
+   Send_Relative_Request(My_Mailbox,(Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
    Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
 
-   Message_Manager.Send_Message
-     (My_Mailbox, Relative_Request_Encode((Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2));
+   Send_Relative_Request(My_Mailbox, (Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2);
    Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
 
    loop
@@ -68,12 +66,12 @@ begin
          Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
          if Status = Success then
             Put("Time Duration: "); Put(Relative_Duration); Put("     Time Stamp:      "); Put(Absolute_Time);
-            Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
+            Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Natural(Count)); New_Line;
 
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then
-               Message_Manager.Send_Message
-                 (My_Mailbox, Cancel_Request_Encode((Domain_ID, My_Module_ID), 1, Series_ID => 1));
+
+               Send_Cancel_Request(My_Mailbox, (Domain_ID, My_Module_ID), 1, Series_ID => 1);
                Put_Line("TX : Cancel_Request message sent for Series_ID = 1");
             end if;
 

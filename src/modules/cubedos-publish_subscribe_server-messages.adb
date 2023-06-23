@@ -40,17 +40,12 @@ is
       Status  : Message_Status_Type;
    begin
       Subscribe_Request_Decode(Message, Channel, Status);
-      if Status = Malformed then
-         Message_Manager.Send_Message
-           (Mailbox, API.Subscribe_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
-      else
+      if Status = Success then
          -- Should we have the Subscription_Map handle the entire Message Address?
          Subscription_Map(Sender_Address(Message).Module_ID, Channel) := True;
-         Message_Manager.Send_Message
-           (Mailbox, API.Subscribe_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Success));
       end if;
+        API.Send_Subscribe_Reply
+           (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, (if Status=Success then Success else Failure));
    end Handle_Subscribe_Request;
 
 
@@ -61,19 +56,16 @@ is
       Status  : Message_Status_Type;
    begin
       Unsubscribe_Request_Decode(Message, Channel, Status);
-      if Status = Malformed then
-         Message_Manager.Send_Message
-           (Mailbox, API.Unsubscribe_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
-      else
+      if Status = Success then
          -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
          -- The operation returns Success without comment.
          -- TODO: Is this appropriate?
          Subscription_Map(Sender_Address(Message).Module_ID, Channel) := False;
-         Message_Manager.Send_Message
-           (Mailbox, API.Unsubscribe_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Success));
       end if;
+
+      API.Send_Unsubscribe_Reply
+        (Mailbox, Sender_Address(Message), Request_ID(Message), Channel,
+        (if Status = Success then Success else Failure));
    end Handle_Unsubscribe_Request;
 
 
@@ -87,23 +79,21 @@ is
    begin
       Publish_Request_Decode(Message, Channel, Message_Data, Size, Status);
       if Status = Malformed then
-         Message_Manager.Send_Message
-           (Mailbox, API.Publish_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Failure));
+         API.Send_Publish_Reply
+              (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, Failure);
       else
-         Message_Manager.Send_Message
-           (Mailbox, API.Publish_Reply_Encode
-              (Sender_Address(Message), Request_ID(Message), Channel, Success));
+         API.Send_Publish_Reply
+              (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, Success);
 
          -- Do the actual publishing.
          for I in Module_ID_Type loop
             if Subscription_Map(I, Channel) then
-               Message_Manager.Send_Message
-                 (Mailbox, API.Publish_Result_Encode
-                    ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
-                     0,
-                     Channel,
-                     Message_Data(1 .. Size)));
+               API.Send_Publish_Result
+                 (Mailbox,
+                  (Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
+                  0,
+                  Channel,
+                  Message_Data(1 .. Size));
             end if;
          end loop;
       end if;

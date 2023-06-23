@@ -61,7 +61,7 @@ is
 
          -- Send tick message(s) to the core logic as required.
       procedure Next_Ticks with
-         Global => (Input => Ada.Real_Time.Clock_Time, In_Out => Mailboxes);
+         Global => (Input => (Ada.Real_Time.Clock_Time, Mailbox), In_Out => Mailboxes, Proof_In => Mailbox_Metadata);
 
    private
       Series_Array : Series_Array_Type;
@@ -136,11 +136,12 @@ is
                if Current_Series.Is_Used
                  and then Current_Series.Next <= Current_Time
                then
-                  Message_Manager.Send_Message
-                    (Mailbox, Tick_Reply_Encode
-                       (Receiver_Address => Current_Series.Address,
-                        Request_ID       => 0, Series_ID => Current_Series.ID,
-                        Count            => Current_Series.Count));
+
+                  Send_Tick_Reply
+                    (Sender => Mailbox,
+                     Receiver_Address => Current_Series.Address,
+                     Request_ID       => 0, Series_ID => Current_Series.ID,
+                     Count            => Current_Series.Count);
 
                   -- Update the current record.
                   case Current_Series.Kind is
@@ -178,7 +179,7 @@ is
 
    procedure Initialize is
    begin
-      Message_Manager.Register_Module(Name_Resolver.Time_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
+      Message_Manager.Register_Module(This_Module, 8, Mailbox, Empty_Type_Array);
    end Initialize;
 
    -----------------------------------
@@ -270,7 +271,7 @@ is
       Refined_Global => (Input => Ada.Real_Time.Clock_Time,
        In_Out => (Series_Database, Mailbox))
    is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
       Initialize;
 
@@ -283,6 +284,8 @@ is
          if Sender_Address(Incoming_Message) /= Name_Resolver.Time_Server then
             Process (Incoming_Message);
          end if;
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 
