@@ -68,7 +68,7 @@ package CubedOS.File_Server.API is
       Pre => true
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Request_Msg),
+         and then Receives(Receiver_Address, Open_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Open_Request_Msg
        and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -84,7 +84,7 @@ package CubedOS.File_Server.API is
       Pre => true
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Request_Msg)
+         and then Receives(Receiver_Address, Open_Request_Msg)
       ;
 
    procedure Open_Reply_Encode
@@ -98,7 +98,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg),
+         and then Receives(Receiver_Address, Open_Reply_Msg),
       Post => Message_Manager.Message_Type(Result) = Open_Reply_Msg
        and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -112,7 +112,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg)
+         and then Receives(Receiver_Address, Open_Reply_Msg)
       ;
 
    procedure Read_Request_Encode
@@ -127,7 +127,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Request_Msg),
+         and then Receives(Receiver_Address, Read_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Read_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -142,7 +142,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Request_Msg)
+         and then Receives(Receiver_Address, Read_Request_Msg)
       ;
 
    procedure Read_Reply_Encode
@@ -158,7 +158,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg),
+         and then Receives(Receiver_Address, Read_Reply_Msg),
       Post => Message_Manager.Message_Type(Result) = Read_Reply_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -174,7 +174,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Address(Sender).Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg)
+         and then Receives(Receiver_Address, Read_Reply_Msg)
       ;
 
    procedure Write_Request_Encode
@@ -190,7 +190,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Request_Msg),
+         and then Receives(Receiver_Address, Write_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Write_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -206,7 +206,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Request_Msg)
+         and then Receives(Receiver_Address, Write_Request_Msg)
       ;
 
    procedure Write_Reply_Encode
@@ -221,7 +221,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg),
+         and then Receives(Receiver_Address, Write_Reply_Msg),
       Post => Message_Manager.Message_Type(Result) = Write_Reply_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -236,7 +236,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg)
+         and then Receives(Receiver_Address, Write_Reply_Msg)
       ;
 
    procedure Close_Request_Encode
@@ -250,7 +250,7 @@ package CubedOS.File_Server.API is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Close_Request_Msg),
+         and then Receives(Receiver_Address, Close_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Close_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -264,7 +264,7 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Close_Request_Msg)
+         and then Receives(Receiver_Address, Close_Request_Msg)
       ;
 
 
