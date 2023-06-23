@@ -1,0 +1,8 @@
+name = "cubedos"
+description = "Software framework for CubSat space missions."
+version = "0.1.0-dev"
+
+authors = ["Vermont Technical College"]
+maintainers = ["Vermont Technical College <example@example.com>"]
+maintainers-logins = ["cubesatlab"]
+
