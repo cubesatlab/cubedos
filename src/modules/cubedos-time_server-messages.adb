@@ -138,8 +138,8 @@ is
                then
 
                   Send_Tick_Reply
-                    (Sender_Address => Mailbox,
-                     Destination_Address => Current_Series.Address,
+                    (Sender => Mailbox,
+                     Receiver_Address => Current_Series.Address,
                      Request_ID       => 0, Series_ID => Current_Series.ID,
                      Count            => Current_Series.Count);
 

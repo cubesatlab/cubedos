@@ -358,7 +358,9 @@ is
    function Address(Box : Module_Mailbox) return Message_Address is
       (Box.Address);
 
-   procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record) is
+   procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record)
+     with Refined_Post => Msg.Payload = null
+   is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
