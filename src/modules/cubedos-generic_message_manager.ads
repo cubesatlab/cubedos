@@ -218,7 +218,7 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg)),
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg)),
      Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
@@ -228,7 +228,7 @@ is
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg));
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.

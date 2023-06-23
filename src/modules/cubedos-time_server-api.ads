@@ -25,17 +25,18 @@ is
 
    This_Module : constant Module_ID_Type := Name_Resolver.Time_Server.Module_ID;
    type Message_Type is
-      (Cancel_Request, 
-      Tick_Reply, 
-      Relative_Request, 
+      (Cancel_Request,
+      Tick_Reply,
+      Relative_Request,
       Absolute_Request);
 
    Cancel_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Cancel_Request));
    Tick_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Tick_Reply));
    Relative_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Relative_Request));
    Absolute_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Absolute_Request));
+
    type Series_Type is
-      (One_Shot, 
+      (One_Shot,
       Periodic);
 
    type Series_ID_Type is new Lib.Quadruple_Octet;
@@ -55,7 +56,7 @@ is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Relative_Request_Msg),
+         and then Receives(Receiver_Address.Module_ID, Relative_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -71,7 +72,7 @@ is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Relative_Request_Msg)
+         and then Receives(Receiver_Address.Module_ID, Relative_Request_Msg)
       ;
 
    function Is_Relative_Request(Message : Message_Record) return Boolean is
@@ -100,7 +101,7 @@ is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Absolute_Request_Msg),
+         and then Receives(Receiver_Address.Module_ID, Absolute_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -115,7 +116,7 @@ is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Absolute_Request_Msg)
+         and then Receives(Receiver_Address.Module_ID, Absolute_Request_Msg)
       ;
 
    function Is_Absolute_Request(Message : Message_Record) return Boolean is
@@ -143,7 +144,7 @@ is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Tick_Reply_Msg),
+         and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg),
       Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -158,7 +159,7 @@ is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
-         and then Receives(Receiver_Address, Tick_Reply_Msg)
+         and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg)
       ;
 
    function Is_Tick_Reply(Message : Message_Record) return Boolean is
@@ -185,7 +186,7 @@ is
       Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Cancel_Request_Msg),
+         and then Receives(Receiver_Address.Module_ID, Cancel_Request_Msg),
       Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg
          and Message_Manager.Receiver_Address(Result) = Receiver_Address;
 
@@ -199,7 +200,7 @@ is
       Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address, Cancel_Request_Msg)
+         and then Receives(Receiver_Address.Module_ID, Cancel_Request_Msg)
       ;
 
    function Is_Cancel_Request(Message : Message_Record) return Boolean is
