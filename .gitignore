@@ -2,6 +2,8 @@ build
 src/library/obj
 src/library/lib
 src/library/doc
+obj
+alire
 
 # LaTeX build artifacts
 *.aux
