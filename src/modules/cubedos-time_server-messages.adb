@@ -138,8 +138,8 @@ is
                then
 
                   Send_Tick_Reply
-                    (Sender_Address => Mailbox,
-                     Destination_Address => Current_Series.Address,
+                    (Sender => Mailbox,
+                     Receiver_Address => Current_Series.Address,
                      Request_ID       => 0, Series_ID => Current_Series.ID,
                      Count            => Current_Series.Count);
 
@@ -179,7 +179,7 @@ is
 
    procedure Initialize is
    begin
-      Message_Manager.Register_Module(Name_Resolver.Time_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
+      Message_Manager.Register_Module(This_Module, 8, Mailbox, Empty_Type_Array);
    end Initialize;
 
    -----------------------------------

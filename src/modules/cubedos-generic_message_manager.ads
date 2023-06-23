@@ -12,7 +12,6 @@ pragma SPARK_Mode(On);
 with System;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib.XDR;
-with Ada.Finalization;
 
 generic
    Domain_Number : Positive;  -- The domain ID of this message manager.
@@ -113,7 +112,8 @@ is
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
      with Pre => Msg.Payload /= null,
-     Post => Is_Valid(Immutable'Result);
+     Post => Is_Valid(Immutable'Result) and
+     Message_Type(Immutable'Result) = Msg.Message_Type;
 
    function Sender_Address(Msg : Message_Record) return Message_Address;
    function Receiver_Address(Msg : Message_Record) return Message_Address;
@@ -213,7 +213,7 @@ is
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => null),
      Pre => Receives(Receiver_Address(Msg), Message_Type(Msg)),
-       Post => Payload(Msg) = null;
+     Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately with the status of the operation's result.
