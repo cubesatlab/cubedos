@@ -11,10 +11,13 @@ abstract project Cubedos_Config is
    Ada_Compiler_Switches := External_As_List ("ADAFLAGS", " ");
    Ada_Compiler_Switches := Ada_Compiler_Switches &
           (
-            "-fstack-check",
-            "-gnatwa",
-            "-gnata",
-            "-g"
+            "-Og" -- Optimize for debug
+           ,"-ffunction-sections" -- Separate ELF section for each function
+           ,"-fdata-sections" -- Separate ELF section for each variable
+           ,"-g" -- Generate debug info
+           ,"-gnatwa" -- Enable all warnings
+           ,"-gnatw.X" -- Disable warnings for No_Exception_Propagation
+           ,"-gnatVa" -- All validity checks
           );
 
    type Build_Profile_Kind is ("release", "validation", "development");
