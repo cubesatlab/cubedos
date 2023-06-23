@@ -78,10 +78,15 @@ is
       end record;
 
    -- True if the given receiving address can be sent the given message type.
-   function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
+   function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Global => (Input => Mailbox_Metadata),
      Depends => (Receives'Result => (Mailbox_Metadata, Receiver, Msg_Type)),
-       Pre => Module_Ready(Receiver.Module_ID);
+     Pre => Module_Ready(Receiver);
+
+   -- Declare that the given module is able to accept the given message type.
+   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
+     with Global => (In_Out => Mailbox_Metadata),
+     Post => Receives(Receiver, Msg_Type);
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -184,6 +189,7 @@ is
      with Global => (In_Out => Request_ID_Generator);
 
    -- True if the module is ready to receive mail.
+   -- This refers to a module in the current domain.
    function Module_Ready(Module_ID : Module_ID_Type) return Boolean
      with Global => (Input => Mailbox_Metadata);
 
@@ -212,7 +218,7 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg)),
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg)),
      Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
@@ -222,7 +228,7 @@ is
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
                  Msg => null),
-     Pre => Receives(Receiver_Address(Msg), Message_Type(Msg));
+     Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
@@ -246,13 +252,14 @@ is
    procedure Register_Module(Module_ID : in Module_ID_Type;
                              Msg_Queue_Size : in Positive;
                              Mailbox : out Module_Mailbox;
-                             Receives : in Message_Type_Array)
+                             Accepts : in Message_Type_Array)
      with Global => (In_Out => (Mailboxes, Mailbox_Metadata)),
        Depends => (Mailboxes => +(Module_ID),
                    Mailbox => Module_ID,
-                   Mailbox_Metadata => +(Receives, Module_ID),
+                   Mailbox_Metadata => +(Accepts, Module_ID),
                   null => Msg_Queue_Size),
-       --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
+   --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
+     Pre => (for all T of Accepts => Receives(Module_ID, T)),
        Post => Module_Ready(Module_ID) and Address(Mailbox).Module_ID = Module_ID;
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
@@ -281,7 +288,7 @@ is
      with Global => (In_Out => (Mailboxes), Proof_In => Mailbox_Metadata),
      Pre => Message /= null
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message)),
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message)),
      Post => Message = null;
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
@@ -292,16 +299,16 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => Message /= null
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
 
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Receives(Receiver_Address(Message), Message_Type(Message));
+     and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message));
 
 private
    type Message_Record is

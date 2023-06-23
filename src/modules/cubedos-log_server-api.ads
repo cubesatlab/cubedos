@@ -35,6 +35,8 @@ package CubedOS.Log_Server.API is
    type Message_Type is
      (Log_Text);
 
+   Log_Text_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Log_Text));
+
    -- Convenience procedure that creates and sends a log message.
    procedure Log_Message
      (Sender_Address : in Message_Address;
@@ -55,7 +57,7 @@ package CubedOS.Log_Server.API is
 
 
    function Is_A_Log_Text(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Log_Text)));
+     (Message_Manager.Message_Type(Message) = Log_Text_Msg);
 
 
    procedure Log_Text_Decode
