@@ -70,17 +70,17 @@ package body CubedOS.File_Server.Messages is
 
       -- Don't even bother if there are no available handles.
       if Handle = API.Invalid_Handle then
-         Message_Manager.Send_Message
-           (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Sender_Address(Incoming_Message),
-               Request_ID => Request_ID(Incoming_Message),
-               Handle     => API.Invalid_Handle));
+         API.Send_Open_Reply
+           (Sender => Mailbox,
+            Receiver_Address => Sender_Address(Incoming_Message),
+            Request_ID => Request_ID(Incoming_Message),
+            Handle     => API.Invalid_Handle);
       elsif Status = Malformed then
-         Message_Manager.Send_Message
-           (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Sender_Address(Incoming_Message),
-               Request_ID => Request_ID(Incoming_Message),
-               Handle     => API.Invalid_Handle));
+         API.Send_Open_Reply
+           (Sender => Mailbox,
+            Receiver_Address => Sender_Address(Incoming_Message),
+            Request_ID => Request_ID(Incoming_Message),
+            Handle     => API.Invalid_Handle);
       else
          case Mode is
             when API.Read =>
@@ -92,21 +92,21 @@ package body CubedOS.File_Server.Messages is
                Octet_IO.Create(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
          end case;
 
-         Message_Manager.Send_Message
-           (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Sender_Address(Incoming_Message),
-               Request_ID => Request_ID(Incoming_Message),
-               Handle     => Handle));
+         API.Send_Open_Reply
+           (Sender => Mailbox,
+            Receiver_Address => Sender_Address(Incoming_Message),
+            Request_ID => Request_ID(Incoming_Message),
+            Handle     => Handle);
       end if;
 
    exception
       when others =>
          -- Open failed. Send back an invalid handle.
-         Message_Manager.Send_Message
-           (Mailbox, API.Open_Reply_Encode
-              (Receiver_Address => Sender_Address(Incoming_Message),
-               Request_ID => Request_ID(Incoming_Message),
-               Handle     => API.Invalid_Handle));
+         API.Send_Open_Reply
+           (Sender => Mailbox,
+            Receiver_Address => Sender_Address(Incoming_Message),
+            Request_ID => Request_ID(Incoming_Message),
+            Handle     => API.Invalid_Handle);
    end Process_Open_Request;
 
 
@@ -134,13 +134,13 @@ package body CubedOS.File_Server.Messages is
                   null;
             end;
             -- Send what we have (could be zero octets!).
-            Message_Manager.Send_Message
-              (Mailbox, API.Read_Reply_Encode
-                 (Receiver_Address => Sender_Address(Incoming_Message),
-                  Request_ID => Request_ID(Incoming_Message),
-                  Handle     => Handle,
-                  Amount     => Size,
-                  Data       => Data));
+            API.Send_Read_Reply
+              (Sender => Mailbox,
+               Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
+               Handle     => Handle,
+               Amount     => Size,
+               File_Data       => Data);
          end if;
       end if;
    end Process_Read_Request;
@@ -170,12 +170,12 @@ package body CubedOS.File_Server.Messages is
                when Octet_IO.End_Error =>
                   null;
             end;
-            Message_Manager.Send_Message
-              (Mailbox, API.Write_Reply_Encode
-                 (Receiver_Address => Sender_Address(Incoming_Message),
-                  Request_ID => Request_ID(Incoming_Message),
-                  Handle     => Handle,
-                  Amount     => Size));
+            API.Send_Write_Reply
+              (Sender => Mailbox,
+               Receiver_Address => Sender_Address(Incoming_Message),
+               Request_ID => Request_ID(Incoming_Message),
+               Handle     => Handle,
+               Amount     => Size);
          end if;
       end if;
    end Process_Write_Request;

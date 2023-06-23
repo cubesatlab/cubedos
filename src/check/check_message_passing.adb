@@ -19,9 +19,9 @@ package body Check_Message_Passing is
       Sender_Addr : constant Message_Address := (0, 1);
       Receiver_Addr : constant Message_Address := (0, 2);
 
-      Unacceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+      Unacceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
-      Acceptable_Msg : constant Message_Record := Immutable(Make_Empty_Message
+      Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
       Sender : Module_Mailbox;
