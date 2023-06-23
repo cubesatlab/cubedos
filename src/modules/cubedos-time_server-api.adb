@@ -386,6 +386,8 @@ package body CubedOS.Time_Server.API is
          end if;
       end if;
    end Cancel_Request_Decode;
-
-
+begin
+   Declare_Accepts(This_Module, Cancel_Request_Msg);
+   Declare_Accepts(This_Module, Relative_Request_Msg);
+   Declare_Accepts(This_Module, Absolute_Request_Msg);
 end CubedOS.Time_Server.API;

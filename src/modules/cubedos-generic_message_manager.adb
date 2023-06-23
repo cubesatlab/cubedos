@@ -269,8 +269,16 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : Message_Address; Msg_Type : Universal_Message_Type) return Boolean
-     is (Mailbox_Types(Receiver.Module_ID) /= null and then (for some T of Mailbox_Types(Receiver.Module_ID).all => T = Msg_Type));
+   function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
+     is (Mailbox_Types(Receiver) /= null and then (for some T of Mailbox_Types(Receiver).all => T = Msg_Type));
+
+   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
+   is
+   begin
+      -- TODO: Once we have dynamic arrays from the SPARKlib, make this functional
+      -- Mailbox_Types(Receiver)(0) := Msg_Type;
+      null;
+   end Declare_Accepts;
 
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
@@ -384,7 +392,7 @@ is
 
    procedure Register_Module
      (Module_ID : in     Module_ID_Type; Msg_Queue_Size : in Positive;
-      Mailbox   :    out Module_Mailbox; Receives : in Message_Type_Array)
+      Mailbox   :    out Module_Mailbox; Accepts : in Message_Type_Array)
    is
       Arr : Msg_Ptr_Array_Ptr := new Message_Ptr_Array (1 .. Msg_Queue_Size);
    begin
@@ -392,7 +400,7 @@ is
       Message_Storage (Module_ID).Set_Msg_Array (Arr);
       pragma Unused(Arr);
       -- Store what message types it may receive
-      Mailbox_Types (Module_ID) := new Message_Type_Array'(Receives);
+      Mailbox_Types (Module_ID) := new Message_Type_Array'(Accepts);
 
       Mailbox            := (Address => (Domain_ID, Module_ID));
       Inited (Module_ID) := True;
@@ -406,5 +414,4 @@ is
          Count_Array (I) := Message_Storage (I).Message_Count;
       end loop;
    end Get_Message_Counts;
-
 end CubedOS.Generic_Message_Manager;
