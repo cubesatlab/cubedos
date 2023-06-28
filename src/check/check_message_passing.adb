@@ -27,9 +27,6 @@ package body Check_Message_Passing is
       Sender : Module_Mailbox;
       Receiver : Module_Mailbox;
    begin
-      -- Declare what mailboxes accept what message types
-      -- This is normally done in API files
-      Declare_Accepts(Receiver_Addr.Module_ID, Acceptable_Type);
 
       -- Register mailboxes
       Register_Module(Sender_Addr.Module_ID, 1, Sender, Empty_Type_Array);
