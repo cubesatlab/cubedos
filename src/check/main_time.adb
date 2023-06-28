@@ -42,6 +42,8 @@ procedure Main_Time is
    package Duration_IO is new Fixed_IO(Duration);
    use Duration_IO;
 begin
+   CubedOS.Time_Server.Messages.Init;
+
    Start_Time := Ada.Real_Time.Clock;
    Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Empty_Type_Array);
 
