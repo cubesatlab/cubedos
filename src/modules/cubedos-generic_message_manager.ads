@@ -18,8 +18,12 @@ generic
    Module_Count  : Positive;  -- Number of modules in the system.
 package CubedOS.Generic_Message_Manager
   with
-    Abstract_State => ((Mailboxes with External), Mailbox_Metadata, (Request_ID_Generator with External)),
-    Initializes => (Mailboxes, Request_ID_Generator, Mailbox_Metadata)
+Abstract_State =>
+  ((Mailboxes with External),
+   (Mailbox_Metadata with Ghost, External => (Async_Writers => False, Async_Readers => True, Effective_Reads => False)),
+   (Request_ID_Generator with External)),
+  Initializes => (Mailboxes, Request_ID_Generator, Mailbox_Metadata),
+  Initial_Condition => (for all M in 1..Module_Count-1 => not Module_Ready(M))
 is
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
@@ -79,14 +83,10 @@ is
 
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
-     with Global => (Input => Mailbox_Metadata),
+     with Ghost,
+     Global => (Input => Mailbox_Metadata),
      Depends => (Receives'Result => (Mailbox_Metadata, Receiver, Msg_Type)),
      Pre => Module_Ready(Receiver);
-
-   -- Declare that the given module is able to accept the given message type.
-   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
-     with Global => (In_Out => Mailbox_Metadata),
-     Post => Receives(Receiver, Msg_Type);
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -109,10 +109,12 @@ is
      Post => Msg.Payload = null;
 
    -- Immutible version of message record
-   type Message_Record is private;
+   type Message_Record is private
+     with Default_Initial_Condition => Payload(Message_Record) = null;
    type Msg_Owner is access Message_Record;
 
-   function Is_Valid(Msg : Message_Record) return Boolean;
+   function Is_Valid(Msg : Message_Record) return Boolean
+     with Post => (if Is_Valid'Result then Payload(Msg) /= null);
 
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
@@ -191,7 +193,8 @@ is
    -- True if the module is ready to receive mail.
    -- This refers to a module in the current domain.
    function Module_Ready(Module_ID : Module_ID_Type) return Boolean
-     with Global => (Input => Mailbox_Metadata);
+     with Ghost,
+     Global => (Input => Mailbox_Metadata);
 
    -- Error codes.
    type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
@@ -207,7 +210,7 @@ is
    -- and the only intended way to send messages from it.
    -- Modules should keep their instance of this object invisible
    -- to outside modules.
-   type Module_Mailbox is limited private;
+   type Module_Mailbox is private;
 
    function Address(Box : Module_Mailbox) return Message_Address;
 
@@ -217,7 +220,7 @@ is
    procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
-                 Msg => null),
+                 Msg => Msg),
      Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg)),
      Post => Payload(Msg) = null;
 
@@ -227,14 +230,14 @@ is
      with Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
-                 Msg => null),
+                 Msg => Msg),
      Pre => Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
    procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
      with Pre => Module_Ready (Address(Box).Module_ID),
-       Post => Payload(Msg) /= null;
+       Post => Is_Valid(Msg);
 
    -- Count the number of messages in the mailbox waiting
    -- to be read. This is a procedure and not a function because
@@ -258,9 +261,9 @@ is
                    Mailbox => Module_ID,
                    Mailbox_Metadata => +(Accepts, Module_ID),
                   null => Msg_Queue_Size),
-   --Pre => not Module_Ready(Module_ID), --TODO: Stop modules from re-registering themselves
-     Pre => (for all T of Accepts => Receives(Module_ID, T)),
-       Post => Module_Ready(Module_ID) and Address(Mailbox).Module_ID = Module_ID;
+     Pre => not Module_Ready(Module_ID),
+     Post => Module_Ready(Module_ID) and Address(Mailbox).Module_ID = Module_ID
+     and (for all T of Accepts => Receives(Module_ID, T));
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.
@@ -320,6 +323,20 @@ private
          Priority   : System.Priority;
          Payload    : Data_Array_Owner;
       end record;
+
+   function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : Message_Record) return access constant Data_Array is (Msg.Payload);
+
+   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
 
    type Module_Mailbox is
       record

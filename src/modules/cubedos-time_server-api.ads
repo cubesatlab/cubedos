@@ -16,12 +16,7 @@ with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with System;
 
-package CubedOS.Time_Server.API
-with Initial_Condition =>
-  (Receives(This_Module, Cancel_Request_Msg)
-   and Receives(This_Module, Relative_Request_Msg)
-   and Receives(This_Module, Absolute_Request_Msg))
-is
+package CubedOS.Time_Server.API is
 
    This_Module : constant Module_ID_Type := Name_Resolver.Time_Server.Module_ID;
    type Message_Type is

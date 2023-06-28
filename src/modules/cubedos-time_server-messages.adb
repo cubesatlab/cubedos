@@ -7,18 +7,30 @@
 pragma SPARK_Mode (On);
 
 with Name_Resolver;
-with CubedOS.Time_Server.API;
-use CubedOS.Time_Server.API;
 
 package body CubedOS.Time_Server.Messages with
-   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages), Own_Mailbox => Mailbox)
+   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages), Own_Mailbox => Mailbox_Holder)
 is
 
-   use Message_Manager;
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
 
-   Mailbox : Message_Manager.Module_Mailbox;
+   protected Mailbox_Holder is
+      entry Get(Box : out Module_Mailbox)
+      with Post =>
+        Address(Box).Module_ID = This_Module
+        and then Module_Ready(This_Module);
+        --and then (for all T of This_Receives => Receives(This_Module, T))
+      procedure Make
+        with Global => (In_Out => (Mailbox_Metadata, Mailboxes)),
+          Pre => not Module_Ready(This_Module),
+          Post =>
+          Module_Ready(This_Module)
+          and then (for all T of This_Receives => Receives(This_Module, T));
+   private
+      Mailbox : Module_Mailbox;
+      Inited : Boolean := False;
+   end Mailbox_Holder;
 
    -- Stores all persistent info about a series.
    type Series_Record is record
@@ -60,8 +72,9 @@ is
          Global => null;
 
          -- Send tick message(s) to the core logic as required.
-      procedure Next_Ticks with
-         Global => (Input => (Ada.Real_Time.Clock_Time, Mailbox), In_Out => Mailboxes, Proof_In => Mailbox_Metadata);
+      procedure Next_Ticks(Mailbox : Module_Mailbox) with
+        Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+        Pre => Address(Mailbox).Module_ID = This_Module;
 
    private
       Series_Array : Series_Array_Type;
@@ -69,7 +82,8 @@ is
    end Series_Database;
 
    -- This must be declared before the body of Series_Database.
-   task Send_Tick_Messages;
+   task Send_Tick_Messages
+     with Global => (In_Out => (Mailboxes, Series_Database, Mailbox_Holder), Input => Ada.Real_Time.Clock_Time, Proof_In => Mailbox_Metadata);
 
    protected body Series_Database is
 
@@ -124,9 +138,10 @@ is
          end if;
       end Remove_Series_Record;
 
-      procedure Next_Ticks is
+      procedure Next_Ticks (Mailbox : Module_Mailbox) is
          Current_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
       begin
+
          -- Iterate through the array to see who needs a tick message.
          for I in Series_Array'Range loop
             declare
@@ -167,20 +182,41 @@ is
 
    end Series_Database;
 
+   protected body Mailbox_Holder is
+      entry Get(Box : out Module_Mailbox) when Inited
+      is
+      begin
+         Box := Mailbox;
+      end Get;
+      procedure Make is
+      begin
+         Message_Manager.Register_Module(This_Module, 8, Mailbox, This_Receives);
+         Inited := True;
+      end Make;
+   end Mailbox_Holder;
+
    task body Send_Tick_Messages is
       Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock;
+      Mailbox : Module_Mailbox;
    begin
+      Mailbox_Holder.Get(Mailbox);
+
       loop
          delay until Next_Release;
          Next_Release := Next_Release + Release_Interval;
-         Series_Database.Next_Ticks;
+         Series_Database.Next_Ticks(Mailbox);
       end loop;
    end Send_Tick_Messages;
 
-   procedure Initialize is
+   procedure Init
+     with
+       Refined_Global => (In_Out => (Mailboxes, Mailbox_Metadata, Mailbox_Holder))
+   is
+      Mailbox : Module_Mailbox;
    begin
-      Message_Manager.Register_Module(This_Module, 8, Mailbox, Empty_Type_Array);
-   end Initialize;
+      Mailbox_Holder.Make;
+      pragma Unused(Mailbox);
+   end Init;
 
    -----------------------------------
    -- Message Decoding and Dispatching
@@ -188,7 +224,9 @@ is
 
    procedure Process_Relative_Request
      (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Relative_Request (Incoming_Message)
+     Pre => API.Is_Relative_Request (Incoming_Message)
+     and Is_Valid(Incoming_Message),
+     Post => Is_Valid(Incoming_Message)
    is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type  : Series_Type;
@@ -211,7 +249,9 @@ is
 
    procedure Process_Absolute_Request
      (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Absolute_Request (Incoming_Message)
+     Pre => API.Is_Absolute_Request (Incoming_Message)
+     and Is_Valid(Incoming_Message),
+     Post => Is_Valid(Incoming_Message)
    is
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : API.Series_ID_Type;
@@ -232,7 +272,9 @@ is
    end Process_Absolute_Request;
 
    procedure Process_Cancel_Request (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Cancel_Request (Incoming_Message)
+     Pre => API.Is_Cancel_Request (Incoming_Message)
+     and Is_Valid(Incoming_Message),
+     Post => Is_Valid(Incoming_Message)
    is
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
@@ -248,7 +290,9 @@ is
    procedure Process (Incoming_Message : in Message_Record) with
       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => Series_Database),
       Depends =>
-      (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message))
+       (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message)),
+       Pre => Is_Valid(Incoming_Message),
+       Post => Is_Valid(Incoming_Message)
    is
    begin
       if API.Is_Relative_Request (Incoming_Message) then
@@ -268,12 +312,13 @@ is
    ---------------
 
    task body Message_Loop with
-      Refined_Global => (Input => Ada.Real_Time.Clock_Time,
-       In_Out => (Series_Database, Mailbox))
+      Refined_Global => (Input => (Ada.Real_Time.Clock_Time),
+       In_Out => (Series_Database, Mailbox_Holder, Mailboxes), Proof_In => Mailbox_Metadata)
    is
+      Mailbox : Module_Mailbox;
       Incoming_Message : Message_Record;
    begin
-      Initialize;
+      Mailbox_Holder.Get(Mailbox);
 
       loop
          Read_Next(Mailbox, Incoming_Message);

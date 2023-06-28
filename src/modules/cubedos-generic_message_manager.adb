@@ -29,8 +29,11 @@ is
    type Msg_Ptr_Array_Ptr is access Message_Ptr_Array;
    type Msg_Type_Array_Ptr is access Message_Type_Array;
 
-   Mailbox_Types   : array (Module_ID_Type) of Msg_Type_Array_Ptr;
-   Inited          : array (Module_ID_Type) of Boolean := (others => False);
+   type Mailbox_Types_Array is array (Module_ID_Type) of Msg_Type_Array_Ptr;
+   type Mailbox_Inited_Array is array (Module_ID_Type) of Boolean;
+
+   Mailbox_Types   : Mailbox_Types_Array with Ghost;
+   Inited          : Mailbox_Inited_Array := (others => False) with Ghost;
 
    type Message_Queue is
       record
@@ -81,6 +84,7 @@ is
 
    -- One mailbox for each module.
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
+
 
    function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
      (Inited (Module_ID))
@@ -187,20 +191,6 @@ is
       return (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Payload_Copy);
    end Immutable;
 
-   function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
-   function Receiver_Address(Msg : Message_Record) return Message_Address is (Msg.Receiver_Address);
-   function Request_ID(Msg : Message_Record) return Request_ID_Type is (Msg.Request_ID);
-   function Message_Type(Msg : Message_Record) return Universal_Message_Type is (Msg.Message_Type);
-   function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
-   function Payload(Msg : Message_Record) return access constant Data_Array is (Msg.Payload);
-
-   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Sender_Address);
-   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Receiver_Address);
-   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type is (Msg.Request_ID);
-   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type is (Msg.Message_Type);
-   function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
-   function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
-
    procedure Delete(Msg : in out Message_Record) is
    begin
       Free(Msg.Payload);
@@ -270,15 +260,7 @@ is
    end Get_Next_Request_ID;
 
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
-     is (Mailbox_Types(Receiver) /= null and then (for some T of Mailbox_Types(Receiver).all => T = Msg_Type));
-
-   procedure Declare_Accepts(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type)
-   is
-   begin
-      -- TODO: Once we have dynamic arrays from the SPARKlib, make this functional
-      -- Mailbox_Types(Receiver)(0) := Msg_Type;
-      null;
-   end Declare_Accepts;
+   is (for some T of Mailbox_Types(Receiver).all => T = Msg_Type);
 
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
