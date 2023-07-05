@@ -28,7 +28,7 @@ procedure Main_Time is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
-   My_Mailbox : Message_Manager.Module_Mailbox;
+   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Empty_Type_Array_Ptr'Access);
 
    Incoming_Message  : Message_Manager.Message_Record;
    Series_ID         : Series_ID_Type;
@@ -45,7 +45,7 @@ begin
    CubedOS.Time_Server.Messages.Init;
 
    Start_Time := Ada.Real_Time.Clock;
-   Message_Manager.Register_Module(My_Module_ID, 8, My_Mailbox, Message_Manager.Empty_Type_Array);
+   Message_Manager.Register_Module(My_Mailbox, 8);
 
    -- Do some setup...
    Send_Relative_Request(My_Mailbox,(Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);

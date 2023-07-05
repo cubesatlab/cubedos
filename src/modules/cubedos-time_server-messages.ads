@@ -15,23 +15,29 @@ with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
 
 package CubedOS.Time_Server.Messages
   with
-    Abstract_State => ((Tick_Database with External), (Own_Mailbox with External)),
-  Initializes => (Tick_Database, Message_Loop)
+    Abstract_State => ((Tick_Database with External)),
+  Initializes => (Tick_Database, Message_Loop, Public),
+  Initial_Condition => (
+                        Public /= null
+                          and then (for all T of This_Receives => Receives(Public, T)))
 is
 
-   This_Receives: constant Message_Type_Array := (Relative_Request_Msg,
+   pragma Elaborate_Body;
+
+   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
+
+   This_Receives: aliased constant Message_Type_Array := (Relative_Request_Msg,
                                              Absolute_Request_Msg,
                                              Cancel_Request_Msg);
 
    procedure Init
-     with Global => (In_Out => (Mailboxes, Mailbox_Metadata, Own_Mailbox)),
+     with Global => (In_Out => (Mailboxes, Lock)),
      Pre => not Module_Ready(This_Module),
-     Post => Module_Ready(This_Module)
-     and then (for all T of This_Receives => Receives(This_Module, T));
+     Post => Module_Ready(This_Module);
 
    task Message_Loop
      with
-       Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => (Tick_Database, Own_Mailbox, Mailboxes), Proof_In => Mailbox_Metadata)
+       Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => (Tick_Database, Lock, Mailboxes))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
