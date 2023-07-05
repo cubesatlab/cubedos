@@ -9,28 +9,14 @@ pragma SPARK_Mode (On);
 with Name_Resolver;
 
 package body CubedOS.Time_Server.Messages with
-   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages), Own_Mailbox => Mailbox_Holder)
+   Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))
 is
 
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
 
-   protected Mailbox_Holder is
-      entry Get(Box : out Module_Mailbox)
-      with Post =>
-        Address(Box).Module_ID = This_Module
-        and then Module_Ready(This_Module);
-        --and then (for all T of This_Receives => Receives(This_Module, T))
-      procedure Make
-        with Global => (In_Out => (Mailbox_Metadata, Mailboxes)),
-          Pre => not Module_Ready(This_Module),
-          Post =>
-          Module_Ready(This_Module)
-          and then (for all T of This_Receives => Receives(This_Module, T));
-   private
-      Mailbox : Module_Mailbox;
-      Inited : Boolean := False;
-   end Mailbox_Holder;
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+
 
    -- Stores all persistent info about a series.
    type Series_Record is record
@@ -72,9 +58,9 @@ is
          Global => null;
 
          -- Send tick message(s) to the core logic as required.
-      procedure Next_Ticks(Mailbox : Module_Mailbox) with
-        Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
-        Pre => Address(Mailbox).Module_ID = This_Module;
+      procedure Next_Ticks with
+        Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => Mailboxes),
+        Pre => Messaging_Ready;
 
    private
       Series_Array : Series_Array_Type;
@@ -83,7 +69,7 @@ is
 
    -- This must be declared before the body of Series_Database.
    task Send_Tick_Messages
-     with Global => (In_Out => (Mailboxes, Series_Database, Mailbox_Holder), Input => Ada.Real_Time.Clock_Time, Proof_In => Mailbox_Metadata);
+     with Global => (In_Out => (Mailboxes, Series_Database, Lock), Input => (Ada.Real_Time.Clock_Time));
 
    protected body Series_Database is
 
@@ -138,7 +124,7 @@ is
          end if;
       end Remove_Series_Record;
 
-      procedure Next_Ticks (Mailbox : Module_Mailbox) is
+      procedure Next_Ticks is
          Current_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
       begin
 
@@ -182,40 +168,22 @@ is
 
    end Series_Database;
 
-   protected body Mailbox_Holder is
-      entry Get(Box : out Module_Mailbox) when Inited
-      is
-      begin
-         Box := Mailbox;
-      end Get;
-      procedure Make is
-      begin
-         Message_Manager.Register_Module(This_Module, 8, Mailbox, This_Receives);
-         Inited := True;
-      end Make;
-   end Mailbox_Holder;
-
    task body Send_Tick_Messages is
       Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock;
-      Mailbox : Module_Mailbox;
    begin
-      Mailbox_Holder.Get(Mailbox);
+      Message_Manager.Wait;
 
       loop
          delay until Next_Release;
          Next_Release := Next_Release + Release_Interval;
-         Series_Database.Next_Ticks(Mailbox);
+         Series_Database.Next_Ticks;
       end loop;
    end Send_Tick_Messages;
 
    procedure Init
-     with
-       Refined_Global => (In_Out => (Mailboxes, Mailbox_Metadata, Mailbox_Holder))
    is
-      Mailbox : Module_Mailbox;
    begin
-      Mailbox_Holder.Make;
-      pragma Unused(Mailbox);
+      Register_Module(Mailbox, 8);
    end Init;
 
    -----------------------------------
@@ -313,12 +281,11 @@ is
 
    task body Message_Loop with
       Refined_Global => (Input => (Ada.Real_Time.Clock_Time),
-       In_Out => (Series_Database, Mailbox_Holder, Mailboxes), Proof_In => Mailbox_Metadata)
+       In_Out => (Series_Database, Mailboxes, Lock))
    is
-      Mailbox : Module_Mailbox;
       Incoming_Message : Message_Record;
    begin
-      Mailbox_Holder.Get(Mailbox);
+      Message_Manager.Wait;
 
       loop
          Read_Next(Mailbox, Incoming_Message);
@@ -334,4 +301,6 @@ is
       end loop;
    end Message_Loop;
 
+begin
+   Public := Mailbox'Access;
 end CubedOS.Time_Server.Messages;
