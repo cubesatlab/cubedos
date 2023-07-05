@@ -13,10 +13,11 @@ with Message_Manager;  use Message_Manager;
 with Name_Resolver;
 
 with System;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package CubedOS.Interpreter.API is
 
-   This_Module : constant Module_ID_Type := Name_Resolver.Interpreter.Module_ID;
+   This_Module : constant Module_ID_Type := Name_Resolver.Interpreter;
 
    type Status_Type is (Success, Failure);
 
@@ -26,6 +27,12 @@ package CubedOS.Interpreter.API is
       Set_Reply,      -- Indicates if replacement was successful. Failure => insufficient space.
       Add_Request,    -- Adds incoming command set to the pending commands.
       Add_Reply);     -- Indicates if the addition was successful. Failure => insufficient space.
+
+   Clear_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Clear_Request));
+   Set_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Set_Request));
+   Set_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Set_Reply));
+   Add_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Add_Request));
+   Add_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Add_Reply));
 
    function Clear_Request_Encode
      (Sender_Address : in Message_Address;
@@ -60,19 +67,19 @@ package CubedOS.Interpreter.API is
    with Global => null;
 
    function Is_Clear_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Clear_Request)));
+     (Message_Manager.Message_Type(Message) = Clear_Request_Msg);
 
    function Is_Set_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Set_Request)));
+     (Message_Manager.Message_Type(Message) = Set_Request_Msg);
 
    function Is_Set_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Set_Reply)));
+     (Message_Manager.Message_Type(Message) = Set_Reply_Msg);
 
    function Is_Add_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Add_Request)));
+     (Message_Manager.Message_Type(Message) = Add_Request_Msg);
 
    function Is_Add_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = (This_Module, Message_Type'Pos(Add_Reply)));
+     (Message_Manager.Message_Type(Message) = Add_Reply_Msg);
 
    procedure Clear_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type)
      with

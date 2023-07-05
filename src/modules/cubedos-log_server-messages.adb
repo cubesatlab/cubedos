@@ -5,12 +5,10 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
-with CubedOS.Log_Server.API;
-with Name_Resolver;
 
 package body CubedOS.Log_Server.Messages is
-   use Message_Manager;
 
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
 
@@ -25,7 +23,8 @@ package body CubedOS.Log_Server.Messages is
    -------------------
 
    procedure Handle_Log_Text(Message : in Message_Record)
-     with Pre => Log_Server.API.Is_A_Log_Text(Message)
+     with Pre => Log_Server.API.Is_Log_Text(Message)
+       and Is_Valid(Message)
    is
       Log_Level : Log_Server.API.Log_Level_Type;
       Text      : Log_Server.API.Log_Message_Type;
@@ -53,9 +52,11 @@ package body CubedOS.Log_Server.Messages is
    -----------------------------------
 
    -- This procedure processes exactly one message.
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with Pre => Is_Valid(Message)
+   is
    begin
-      if Log_Server.API.Is_A_Log_Text(Message) then
+      if Log_Server.API.Is_Log_Text(Message) then
          Handle_Log_Text(Message);
       else
          -- An unknown message type has been received. What should be done about that?

@@ -11,19 +11,19 @@ with Ada.Text_IO;
 with CubedOS.Lib;
 with CubedOS.File_Server.API;
 with CubedOS.File_Server.Messages;
-pragma Unreferenced(CubedOS.File_Server.Messages);
 with Message_Manager;
 
 use Ada.Text_IO;
 use CubedOS;
 use CubedOS.File_Server.API;
 use Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 procedure Main_File is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
-   My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
-   My_Mailbox : Module_Mailbox;
+   My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
+   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Empty_Type_Array'Access);
 
    Incoming_Message : Message_Manager.Message_Record;
    Handle       : File_Handle_Type;
@@ -34,7 +34,8 @@ procedure Main_File is
    Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
    Status : Message_Manager.Message_Status_Type;
 begin
-   Register_Module(My_Module_ID, 8, My_Mailbox, Empty_Type_Array);
+   CubedOS.File_Server.Messages.Init;
+   Register_Module(My_Mailbox, 8);
 
    -- TEST : Open two files. Read from one file, and write to another file.
 

@@ -15,10 +15,11 @@ with Name_Resolver;
 with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with System;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package CubedOS.Time_Server.API is
 
-   This_Module : constant Module_ID_Type := Name_Resolver.Time_Server.Module_ID;
+   This_Module : constant Module_ID_Type := Name_Resolver.Time_Server;
    type Message_Type is
       (Cancel_Request,
       Tick_Reply,

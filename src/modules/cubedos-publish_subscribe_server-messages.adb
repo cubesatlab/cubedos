@@ -8,15 +8,14 @@ pragma SPARK_Mode(On);
 
 with CubedOS.Lib;
 with CubedOS.Publish_Subscribe_Server.API;
-with Message_Manager;
-with Name_Resolver;
 use  CubedOS.Publish_Subscribe_Server.API;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body CubedOS.Publish_Subscribe_Server.Messages
-  with Refined_State => (Database => Subscription_Map, Own_Mailbox => Mailbox)
+  with Refined_State => (Database => Subscription_Map)
 is
-   use Message_Manager;
-   Mailbox : Message_Manager.Module_Mailbox;
+
+   Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
 
    -- If this is really packed, the memory cost is minimal.
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean
@@ -24,17 +23,17 @@ is
 
    Subscription_Map : Subscription_Map_Type := (others => (others => False));
 
-   procedure Initialize is
+   procedure Init is
    begin
-      Message_Manager.Register_Module(Name_Resolver.Publish_Subscribe_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
-   end Initialize;
+      Message_Manager.Register_Module(Mailbox, 8);
+   end Init;
 
    -------------------
    -- Message Handling
    -------------------
 
    procedure Handle_Subscribe_Request(Message : in Message_Record)
-     with Pre => Is_Subscribe_Request(Message)
+     with Pre => Is_Subscribe_Request(Message) and Is_Valid(Message)
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
@@ -50,7 +49,7 @@ is
 
 
    procedure Handle_Unsubscribe_Request(Message : in Message_Record)
-     with Pre => Is_Unsubscribe_Request(Message)
+     with Pre => Is_Unsubscribe_Request(Message) and Is_Valid(Message)
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
@@ -70,7 +69,7 @@ is
 
 
    procedure Handle_Publish_Request(Message : in Message_Record)
-     with Pre => Is_Publish_Request(Message)
+     with Pre => Is_Publish_Request(Message) and Is_Valid(Message)
    is
       Channel : Channel_ID_Type;
       Message_Data : CubedOS.Lib.Octet_Array(1 .. Payload(Message)'Length - 8);
@@ -90,7 +89,8 @@ is
             if Subscription_Map(I, Channel) then
                API.Send_Publish_Result
                  (Mailbox,
-                  (Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
+                  --TODO: Record the domain of subscribers
+                  (0, I),
                   0,
                   Channel,
                   Message_Data(1 .. Size));
@@ -103,7 +103,9 @@ is
    -- Message Decoding and Dispatching
    -----------------------------------
 
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with Pre => Is_Valid(Message)
+   is
    begin
       if Is_Subscribe_Request(Message) then
          Handle_Subscribe_Request(Message);
@@ -124,11 +126,13 @@ is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
    begin
-      Initialize;
+      Message_Manager.Wait;
 
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
+         Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 

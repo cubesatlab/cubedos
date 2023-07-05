@@ -9,15 +9,29 @@ pragma Profile(Jorvik);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with System;
+with Message_Manager;
+with CubedOS.File_Server.API;
 
 package CubedOS.File_Server.Messages is
+   use Message_Manager;
+   use CubedOS.File_Server.API;
+
+   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
+
+   This_Receives: aliased constant Message_Type_Array := (Open_Request_Msg,
+                                       Read_Request_Msg,
+                                       Write_Request_Msg,
+                                       Close_Request_Msg
+                                      );
+   -- Prepare to receive messages
+   procedure Init
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Ready(This_Module),
+     Post => Module_Ready(This_Module);
 
    task Message_Loop is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
    end Message_Loop;
-
-private
-   Mailbox : Message_Manager.Module_Mailbox;
 
 end CubedOS.File_Server.Messages;

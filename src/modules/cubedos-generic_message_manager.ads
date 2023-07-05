@@ -12,10 +12,10 @@ pragma SPARK_Mode(On);
 with System;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib.XDR;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 generic
-   Domain_Number : Positive;  -- The domain ID of this message manager.
-   Module_Count  : Positive;  -- Number of modules in the system.
+   This_Domain : Domain_Declaration;  -- The domain of this message manager.
 package CubedOS.Generic_Message_Manager
   with
 Abstract_State =>
@@ -24,15 +24,8 @@ Abstract_State =>
    (Request_ID_Generator with External)),
   Initializes => (Mailboxes, Request_ID_Generator, Lock)
 is
-   pragma Elaborate_Body;
-   -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
-   -- There is a limit to the number of domains that can be used. Make this a generic parameter?
-   Maximum_Domain_Count : constant := 256;
-   subtype Domain_ID_Type is Natural range 0 .. Maximum_Domain_Count;
-   Domain_ID : constant Domain_ID_Type := Domain_Number;
 
-   -- Definition of module ID numbers. Full IDs are qualified by the domain ID.
-   subtype Module_ID_Type is Positive range 1 .. Module_Count;
+   Domain_ID : constant Domain_ID_Type := This_Domain.Domain_ID;
 
    -- Definition of message IDs. Full IDs are qualified by the module ID.
    -- There is a limit to how many messages a module can define. Make this a generic parameter?
@@ -82,7 +75,7 @@ is
       end record;
 
    type Message_Type_Array is array (Natural range <>) of Universal_Message_Type;
-   Empty_Type_Array : aliased constant Message_Type_Array(1 .. 0) := (others => (1, 1));
+   Empty_Type_Array : aliased constant Message_Type_Array := (0 => (1, 1));
    type Msg_Type_Array_Ptr is access Message_Type_Array;
    type Const_Msg_Type_Array_Ptr is access constant Message_Type_Array;
    Empty_Type_Array_Ptr : aliased constant Message_Type_Array := (0 => (1,1));
@@ -281,7 +274,9 @@ is
    -- Blocks until a message is available.
    procedure Read_Next(Box : Module_Mailbox'Class; Msg : out Message_Record)
      with Pre => Messaging_Ready,
-       Post => Is_Valid(Msg) and Payload(Msg) /= null;
+     Post => Is_Valid(Msg)
+     and Payload(Msg) /= null
+     and Receives(Box, Message_Type(Msg));
 
    -- Count the number of messages in the mailbox waiting
    -- to be read. This is a procedure and not a function because
