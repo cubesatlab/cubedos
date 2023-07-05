@@ -18,7 +18,6 @@
 -- IDs "compactly" (with no gaps in the numbering) so that you can create a
 -- Message_Manager instantiation with the minimum number of mailboxes.
 --------------------------------------------------------------------------------
-
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is
@@ -42,8 +41,8 @@ package Name_Resolver is
    -- Table_Server             : constant Module_ID_Type := 8;
    Interpreter              : constant Module_ID_Type := 9;
 
-   Domain : constant Domain_Declaration := (5, 0,
-                                            (Log_Server,
+
+   Domain : constant Domain_Declaration := (5, 0, (Log_Server,
                                             Publish_Subscribe_Server,
                                             Time_Server,
                                             File_Server,

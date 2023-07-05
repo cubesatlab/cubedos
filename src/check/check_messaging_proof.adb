@@ -13,11 +13,12 @@ pragma SPARK_Mode (On);
 
 with Message_Manager;
 use Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 procedure Check_Messaging_Proof is
 
    Module_ID_1 : constant Module_ID_Type := 1;
-   Mailbox_1 : Module_Mailbox;
+   Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(Module_ID_1, Empty_Type_Array'Access);
    Message : Message_Record;
 begin
 
@@ -25,7 +26,7 @@ begin
    Message_Manager.Fetch_Message(Module_ID_1, Message);
 
    -- Register mailbox 1
-   Register_Module(Module_ID_1, 1, Mailbox_1, Empty_Type_Array);
+   Register_Module(Mailbox_1, 1);
 
    -- Now reading is ok
    Message_Manager.Fetch_Message(Module_ID_1, Message);

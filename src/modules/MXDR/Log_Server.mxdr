@@ -1,0 +1,15 @@
+// FILE: CubedOS-Log_Server.mxdr
+//
+// The interface definition of the core CubedOS log module.
+
+enum Log_Level_Type { Debug, Informational, Warning, Error, Critical };
+
+//const Maximum_Log_Message_Size = 128;
+//typedef unsigned int Log_Message_Size_Type range 0 .. Maximum_Log_Message_Size;
+//typedef unsigned int Log_Message_Index_Type 1 .. Maximum_Log_Message_Size'Last;
+//typedef string Log_Message_Type;
+
+message struct -> Log_Text {
+    Log_Level_Type Level
+    string Msg_Content;    // The message to log
+};

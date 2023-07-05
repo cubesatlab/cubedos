@@ -293,7 +293,7 @@ is
          -- This module should never receive a message from itself.
          -- We check that here because technically any module can
          -- send a message to and from anywhere.
-         if Sender_Address(Incoming_Message) /= Name_Resolver.Time_Server then
+         if Sender_Address(Incoming_Message).Module_ID /= Name_Resolver.Time_Server then
             Process (Incoming_Message);
          end if;
          Delete(Incoming_Message);

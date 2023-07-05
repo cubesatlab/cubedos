@@ -11,27 +11,20 @@ with Ada.Exceptions;
 with Ada.Text_IO;
 
 with Ada.Sequential_IO;
-with CubedOS.File_Server.API;
 with CubedOS.Lib;
-with Name_Resolver;
 
 use Ada.Text_IO;
 
 package body CubedOS.File_Server.Messages is
-   use Message_Manager;
    use type API.File_Handle_Type;
    use type API.Mode_Type;
 
-   procedure Initialize is
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+
+   procedure Init is
    begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox,
-                                      (
-                                       CubedOS.File_Server.API.Open_Request_Msg,
-                                       CubedOS.File_Server.API.Read_Request_Msg,
-                                       CubedOS.File_Server.API.Write_Request_Msg,
-                                       CubedOS.File_Server.API.Close_Request_Msg
-                                      ));
-   end Initialize;
+      Register_Module(Mailbox, 8);
+   end Init;
 
    package Octet_IO is new Ada.Sequential_IO(Element_Type => CubedOS.Lib.Octet);
 
@@ -223,11 +216,13 @@ package body CubedOS.File_Server.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
    begin
-      Initialize;
+      Message_Manager.Wait;
 
       loop
          Message_Manager.Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 

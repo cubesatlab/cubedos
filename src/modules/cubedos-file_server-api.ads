@@ -15,10 +15,11 @@ with System;
 with Name_Resolver;
 use Message_Manager;
 with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package CubedOS.File_Server.API is
 
-   This_Module : constant Module_ID_Type := Name_Resolver.File_Server.Module_ID;
+   This_Module : constant Module_ID_Type := Name_Resolver.File_Server;
 
    type Message_Type is
      (Open_Request,
@@ -64,7 +65,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
@@ -80,7 +80,7 @@ package CubedOS.File_Server.API is
       Name : String;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
@@ -95,7 +95,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg),
@@ -109,7 +108,7 @@ package CubedOS.File_Server.API is
       Handle : File_Handle_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg)
@@ -124,7 +123,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Request_Msg),
@@ -139,7 +137,7 @@ package CubedOS.File_Server.API is
       Amount : Read_Size_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Request_Msg)
@@ -155,7 +153,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg),
@@ -171,7 +168,7 @@ package CubedOS.File_Server.API is
       File_Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => Amount <= File_Data'Length
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg)
@@ -187,7 +184,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Request_Msg),
@@ -203,7 +199,7 @@ package CubedOS.File_Server.API is
       File_Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Request_Msg)
@@ -218,7 +214,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg),
@@ -233,7 +228,7 @@ package CubedOS.File_Server.API is
       Amount : Write_Result_Size_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg)
@@ -247,7 +242,6 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Close_Request_Msg),
@@ -261,7 +255,7 @@ package CubedOS.File_Server.API is
       Handle : Valid_File_Handle_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Close_Request_Msg)

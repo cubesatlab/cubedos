@@ -13,6 +13,8 @@ with System;
 with CubedOS.Log_Server.API; use CubedOS.Log_Server.API;
 
 package CubedOS.Log_Server.Messages is
+   pragma Elaborate_Body;
+
    use Message_Manager;
 
    Public : Public_Mailbox_Owner with Constant_After_Elaboration;
