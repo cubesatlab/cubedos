@@ -18,6 +18,7 @@
 -- IDs "compactly" (with no gaps in the numbering) so that you can create a
 -- Message_Manager instantiation with the minimum number of mailboxes.
 --------------------------------------------------------------------------------
+
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is

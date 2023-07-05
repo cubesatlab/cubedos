@@ -279,6 +279,28 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Tick_Reply;
+
+   procedure Send_Tick_Reply
+      (Sender : Module_Mailbox;
+      Receiver : not null access constant Public_Mailbox'Class;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Count : Series_Count_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Tick_Reply_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => Address(Receiver.all),
+         Request_ID => Request_ID,
+         Series_ID => Series_ID,
+         Count => Count,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Tick_Reply;
+
    procedure Tick_Reply_Decode
       (Message : in  Message_Record;
       Series_ID : out Series_ID_Type;

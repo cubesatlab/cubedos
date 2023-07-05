@@ -5,19 +5,24 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-pragma Profile(Ravenscar);
+pragma Profile(Jorvik);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with Ada.Text_IO;
 with System;
+with CubedOS.Log_Server.API; use CubedOS.Log_Server.API;
 
 package CubedOS.Log_Server.Messages is
+   use Message_Manager;
 
-private
-   Mailbox : Message_Manager.Module_Mailbox;
+   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
+
+   This_Receives: aliased constant Message_Type_Array := (0 => Log_Text_Msg);
+
+   procedure Initialize;
 
    task Message_Loop
-     with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes, Message_Manager.Mailbox_Metadata, Mailbox))
+     with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes, Message_Manager.Lock))
    is
       -- pragma Storage_Size(4 * 1024);
       pragma Priority(System.Default_Priority);
