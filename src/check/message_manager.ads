@@ -11,7 +11,8 @@ pragma Partition_Elaboration_Policy(Sequential);
 with CubedOS.Generic_Message_Manager;
 pragma Elaborate_All(CubedOS.Generic_Message_Manager);
 
+with Name_Resolver;
+
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
-    (Domain_Number =>  1,
-     Module_Count  => 16);
+    (Name_Resolver.Domain);

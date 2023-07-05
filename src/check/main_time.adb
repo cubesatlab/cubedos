@@ -22,12 +22,13 @@ use Ada.Text_IO;
 use CubedOS.Time_Server;
 use CubedOS.Time_Server.API;
 use Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 procedure Main_Time is
    use type Ada.Real_Time.Time;
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
-   My_Module_ID : constant Message_Manager.Module_ID_Type := Module_ID_Type'Last;
+   My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Empty_Type_Array_Ptr'Access);
 
    Incoming_Message  : Message_Manager.Message_Record;

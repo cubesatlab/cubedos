@@ -159,6 +159,7 @@ is
             Message_Waiting := True;
          end if;
          Delete(Message.all);
+         Free(Message);
          pragma Unused(Message);
       end Unchecked_Send;
 

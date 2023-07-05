@@ -12,16 +12,32 @@ pragma Partition_Elaboration_Policy(Sequential);
 pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
 pragma Queuing_Policy(FIFO_Queuing);
 
+with Message_Manager;
+with CubedOS.Publish_Subscribe_Server.API;
+
 with System;
 
 package CubedOS.Publish_Subscribe_Server.Messages
   with
-    Abstract_State => (Database, Own_Mailbox),
-    Initializes => Database
+    Abstract_State => (Database),
+    Initializes => (Database, Public)
 is
+   use Message_Manager;
+   use CubedOS.Publish_Subscribe_Server.API;
+
+   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
+
+   This_Receives: aliased constant Message_Type_Array := (Unsubscribe_Request_Msg,
+                                             Subscribe_Request_Msg,
+                                             Publish_Request_Msg);
+
+   procedure Init
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Ready(This_Module),
+     Post => Module_Ready(This_Module);
 
    task type Message_Loop
-     with Global => (In_Out => (Database, Own_Mailbox)),
+     with Global => (In_Out => (Database)),
         Priority => System.Default_Priority
    is
       -- pragma Storage_Size(4 * 1024);

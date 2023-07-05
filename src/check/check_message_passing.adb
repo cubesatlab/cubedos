@@ -8,13 +8,17 @@ with Message_Manager; use Message_Manager;
 
 package body Check_Message_Passing is
 
+   Unnacceptable_Type : constant Universal_Message_Type := (1, 0);
+   Acceptable_Type : constant Universal_Message_Type := (1, 1);
+
+   Receiver_Receive_Types : aliased constant Message_Type_Array := (0 => Acceptable_Type);
+
    -- Modules declare what message types they are allowed to receive.
    -- Test that sending a message to a module that doesn't support it
    -- throws an exception before the message reaches the module,
    -- but an acceptable message reaches its destination.
    procedure Test_Msg_Type_Checking is
-      Unnacceptable_Type : constant Universal_Message_Type := (1, 0);
-      Acceptable_Type : constant Universal_Message_Type := (1, 1);
+
 
       Sender_Addr : constant Message_Address := (0, 1);
       Receiver_Addr : constant Message_Address := (0, 2);
@@ -24,13 +28,13 @@ package body Check_Message_Passing is
       Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
-      Sender : Module_Mailbox;
-      Receiver : Module_Mailbox;
+      Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, Empty_Type_Array'Access);
+      Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, Receiver_Receive_Types'Access);
    begin
 
       -- Register mailboxes
-      Register_Module(Sender_Addr.Module_ID, 1, Sender, Empty_Type_Array);
-      Register_Module(Receiver_Addr.Module_ID, 1, Receiver, (0 => Acceptable_Type));
+      Register_Module(Sender, 1);
+      Register_Module(Receiver, 1);
 
 
       -- Check that acceptable message reaches receiver

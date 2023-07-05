@@ -6,16 +6,14 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with CubedOS.Interpreter.API;  -- Needed so that the types in the API can be used here.
-with Name_Resolver;
-
 package body CubedOS.Interpreter.Messages is
-   use Message_Manager;
 
-   procedure Initialize is
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+
+   procedure Init is
    begin
-      Message_Manager.Register_Module(Name_Resolver.File_Server.Module_ID, 8, Mailbox, Empty_Type_Array);
-   end Initialize;
+      Register_Module(Mailbox, 8);
+   end Init;
 
    -------------------
    -- Message Handling
@@ -79,12 +77,16 @@ package body CubedOS.Interpreter.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Manager.Message_Record;
    begin
-      Initialize;
+      Message_Manager.Wait;
 
       loop
          Message_Manager.Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 
+begin
+   Public := Mailbox'Access;
 end CubedOS.Interpreter.Messages;

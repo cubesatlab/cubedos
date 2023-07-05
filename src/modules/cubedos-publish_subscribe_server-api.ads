@@ -13,10 +13,11 @@ with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with Name_Resolver;
 with System;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package CubedOS.Publish_Subscribe_Server.API is
 
-   This_Module : constant Module_ID_Type := Name_Resolver.Publish_Subscribe_Server.Module_ID;
+   This_Module : constant Module_ID_Type := Name_Resolver.Publish_Subscribe_Server;
 
    type Status_Type is (Success, Failure);
    type Channel_ID_Type is range 1 .. 16;
@@ -46,7 +47,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-       Global => (Proof_In => Mailbox_Metadata),
        Pre => true
        and then Receiver_Address.Module_ID = This_Module
        and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg),
@@ -60,7 +60,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Channel : Channel_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg)
@@ -75,7 +75,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg),
@@ -90,7 +89,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Status : Status_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg)
@@ -104,7 +103,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg),
@@ -118,7 +116,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Channel : Channel_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg)
@@ -133,7 +131,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg),
@@ -148,7 +145,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Status : Status_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg)
@@ -163,7 +160,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg),
@@ -178,7 +174,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Status : Status_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg)
@@ -193,7 +189,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => Message_Data'Length <= Data_Size_Type'Last - 8
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg),
@@ -208,7 +203,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Message_Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => Message_Data'Length <= Data_Size_Type'Last - 8
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg)
@@ -223,7 +218,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (Proof_In => Mailbox_Metadata),
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg),
@@ -238,7 +232,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Mailbox_Metadata),
+      Global => (In_Out => Mailboxes),
       Pre => true
          and then Address(Sender).Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg)
@@ -273,7 +267,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
      Global => null,
      Depends => ((Channel, Decode_Status) => Message),
-     Pre => Is_Subscribe_Request(Message);
+     Pre => Is_Subscribe_Request(Message) and Payload(Message) /= null;
 
    procedure Subscribe_Reply_Decode
      (Message : in  Message_Record;
@@ -283,7 +277,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
      Global => null,
      Depends => ((Channel, Status, Decode_Status) => Message),
-     Pre => Is_Subscribe_Reply(Message);
+     Pre => Is_Subscribe_Reply(Message) and Payload(Message) /= null;
 
    procedure Unsubscribe_Request_Decode
      (Message : in  Message_Record;
@@ -292,7 +286,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
      Global => null,
      Depends => ((Channel, Decode_Status) => Message),
-     Pre => Is_Unsubscribe_Request(Message);
+     Pre => Is_Unsubscribe_Request(Message) and Payload(Message) /= null;
 
    procedure Unsubscribe_Reply_Decode
      (Message : in  Message_Record;
@@ -302,7 +296,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
      Global => null,
      Depends => ((Channel, Status, Decode_Status) => Message),
-     Pre => Is_Unsubscribe_Reply(Message);
+     Pre => Is_Unsubscribe_Reply(Message) and Payload(Message) /= null;
 
    procedure Publish_Request_Decode
      (Message : in  Message_Record;
@@ -316,7 +310,7 @@ package CubedOS.Publish_Subscribe_Server.API is
        (Channel => Message,
         Size    => (Message, Message_Data),
         (Message_Data, Decode_Status) => (Message, Message_Data)),
-     Pre => Is_Publish_Request(Message),
+     Pre => Is_Publish_Request(Message) and Payload(Message) /= null,
      Post => Size <= Message_Data'Length;
 
    procedure Publish_Reply_Decode
@@ -327,7 +321,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
      Global => null,
      Depends => ((Channel, Status, Decode_Status) => Message),
-     Pre => Is_Publish_Reply(Message);
+     Pre => Is_Publish_Reply(Message) and Payload(Message) /= null;
 
    procedure Publish_Result_Decode
      (Message : in  Message_Record;
@@ -341,7 +335,7 @@ package CubedOS.Publish_Subscribe_Server.API is
        (Channel => Message,
         Size => (Message, Message_Data),
         (Message_Data, Decode_Status) => (Message, Message_Data)),
-     Pre => Is_Publish_Result(Message),
+     Pre => Is_Publish_Result(Message) and Payload(Message) /= null,
      Post => Size <= Message_Data'Length;
 
 end CubedOS.Publish_Subscribe_Server.API;
