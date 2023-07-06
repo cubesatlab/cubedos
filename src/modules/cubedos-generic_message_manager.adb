@@ -41,7 +41,7 @@ is
       Locked : Boolean := True;
    end Init_Lock;
 
-   package Message_Queues is new CubedOS.Lib.Bounded_Queues(Message_Record);
+   package Message_Queues is new CubedOS.Lib.Bounded_Queues(Message_Record, Msg_Owner);
    type Message_Queue is new Message_Queues.Bounded_Queue;
    type Message_Queue_Owner is access Message_Queue;
 
@@ -52,13 +52,13 @@ is
       -- message to be received. If the mailbox is full the returned status indicates this.
       procedure Send
         (Message : in out Msg_Owner; Status : out Status_Type)
-        with Pre => Message /= null,
+        with Pre => Message /= null and then Payload(Message) /= null,
         Post => Message = null;
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the message is lost.
       procedure Unchecked_Send (Message : in out Msg_Owner)
-        with Pre => Message /= null,
+        with Pre => Message /= null and then Payload(Message) /= null,
         Post => Message = null;
 
       -- Returns the number of messages in the mailbox.
@@ -69,7 +69,7 @@ is
         with Post => Is_Valid(Message);
 
       -- Change the array used to store messages.
-      procedure Set_Msg_Array (Size : in Natural);
+      procedure Set_Queue_Size (Size : in Natural);
 
    private
       Q : Message_Queue_Owner := null;
@@ -116,7 +116,7 @@ is
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
 
-         if Q = null or else Count(Q.all) = Size(Q.all) then
+         if Q = null or else Is_Full(Q.all) then
             Status := Mailbox_Full;
             Delete(Message.all);
             return;
@@ -131,11 +131,12 @@ is
 
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
-         if Count(Q) = Size(Q) then
+         if Q = null or else Is_Full(Q.all) then
+            Delete(Message.all);
             return;
          end if;
 
-         Put(Q, Message);
+         Put(Q.all, Message);
          Message_Waiting := True;
 
          pragma Unused(Message);
@@ -143,25 +144,25 @@ is
 
       function Message_Count return Message_Count_Type is
       begin
-         return Count(Q);
+         return (if Q = null then 0 else Count(Q.all));
       end Message_Count;
 
       entry Receive (Message : out Message_Record) when Message_Waiting is
          Ptr : Msg_Owner;
       begin
-         Next(Q, Ptr);
+         Next(Q.all, Ptr);
          Message := Ptr.all;
          Free(Ptr);
 
-         if Count(Q) = 0 then
+         if Is_Empty(Q.all) then
             Message_Waiting := False;
          end if;
       end Receive;
 
-      procedure Set_Msg_Array (Size : in Natural) is
+      procedure Set_Queue_Size (Size : in Natural) is
       begin
          Q := new Message_Queue(Size);
-      end Set_Msg_Array;
+      end Set_Queue_Size;
 
    end Sync_Mailbox;
 
@@ -397,11 +398,9 @@ is
    procedure Register_Module(Mailbox : in Module_Mailbox'Class;
                              Msg_Queue_Size : in Positive)
    is
-      Arr : Msg_Ptr_Array_Ptr := new Message_Ptr_Array (1 .. Msg_Queue_Size);
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Address(Mailbox).Module_ID).Set_Msg_Array (Arr);
-      pragma Unused(Arr);
+      Message_Storage (Address(Mailbox).Module_ID).Set_Queue_Size (Msg_Queue_Size);
 
       Init_Lock.Unlock(Address(Mailbox).Module_ID);
    end Register_Module;
