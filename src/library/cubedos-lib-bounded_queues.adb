@@ -54,7 +54,7 @@ package body CubedOS.Lib.Bounded_Queues is
    is (
        Q.Next_In in Q.Storage'Range
        and then Q.Next_Out in Q.Storage'Range
-       and then (Q.Storage(Q.Next_In) = null or Q.Num_Items = Q.Max_Index + 1)
+       and then (Q.Storage(Q.Next_In) = null or Q.Num_Items - 1 = Q.Max_Index)
        and then (Q.Storage(Q.Next_Out) /= null or Q.Num_Items = 0)
        and then Q.Max_Index < Natural'Last - 1
       );
