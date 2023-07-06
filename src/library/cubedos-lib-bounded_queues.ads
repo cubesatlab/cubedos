@@ -32,6 +32,14 @@ package CubedOS.Lib.Bounded_Queues is
    function Size (Q: in Bounded_Queue) return Count_Type
      with Pre => Valid(Q);
 
+   function Is_Empty (Q: in Bounded_Queue) return Boolean
+     with Pre => Valid(Q),
+       Post => Is_Empty'Result = (Count(Q) = 0);
+
+   function Is_Full (Q: in Bounded_Queue) return Boolean
+     with Pre => Valid(Q),
+       Post => Is_Full'Result = (Count(Q) = Size(Q));
+
    -- Takes the next item off the queue.
    procedure Next(Q: in out Bounded_Queue; Item : in out Data_Owner)
      -- Mention Valid the first time so that Count can pass, the second time
