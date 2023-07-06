@@ -9,10 +9,10 @@ pragma SPARK_Mode(On);
 
 generic
    type Data is private;
+   type Data_Owner is access Data;
 package CubedOS.Lib.Bounded_Queues is
 
    subtype Count_Type is Natural;
-   type Data_Owner is access Data;
 
    type Bounded_Queue (Max_Index : Natural) is private;
 
@@ -31,6 +31,14 @@ package CubedOS.Lib.Bounded_Queues is
    -- Return the total capacity of the queue
    function Size (Q: in Bounded_Queue) return Count_Type
      with Pre => Valid(Q);
+
+   function Is_Empty (Q: in Bounded_Queue) return Boolean
+     with Pre => Valid(Q),
+       Post => Is_Empty'Result = (Count(Q) = 0);
+
+   function Is_Full (Q: in Bounded_Queue) return Boolean
+     with Pre => Valid(Q),
+       Post => Is_Full'Result = (Count(Q) = Size(Q));
 
    -- Takes the next item off the queue.
    procedure Next(Q: in out Bounded_Queue; Item : in out Data_Owner)
