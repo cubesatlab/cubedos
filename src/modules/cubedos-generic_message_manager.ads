@@ -327,7 +327,7 @@ is
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes)),
      Pre => Message /= null
-       and then Is_Valid(Message.all)
+     and then Is_Valid(Message.all)
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
      and then Module_Ready(Receiver_Address(Message).Module_ID),
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
@@ -339,10 +339,9 @@ is
    -- Depreciated: Use Mailboxes to send messages
    procedure Route_Message(Message : in out Msg_Owner)
      with Global => (In_Out => Mailboxes),
-     Pre => Message /= null
-     and then Messaging_Ready
+     Pre => Message /= null and then Is_Valid(Message.all)
+     and then Messaging_Ready,
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     and then Is_Valid(Message.all),
      Post => Message = null;
 
    procedure Route_Message(Message : in Message_Record)
@@ -365,12 +364,12 @@ is
 private
    type Message_Record is
       record
-         Sender_Address : Message_Address;
-         Receiver_Address : Message_Address;
-         Request_ID : Request_ID_Type;
-         Message_Type : Universal_Message_Type;
-         Priority   : System.Priority;
-         Payload    : Data_Array_Owner;
+         Sender_Address : Message_Address := (1,1);
+         Receiver_Address : Message_Address := (1,1);
+         Request_ID : Request_ID_Type := 1;
+         Message_Type : Universal_Message_Type := (1,1);
+         Priority   : System.Priority := 1;
+         Payload    : Data_Array_Owner := null;
       end record;
 
    function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
