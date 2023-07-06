@@ -52,13 +52,13 @@ is
       -- message to be received. If the mailbox is full the returned status indicates this.
       procedure Send
         (Message : in out Msg_Owner; Status : out Status_Type)
-        with Pre => Message /= null and then Payload(Message) /= null,
+        with Pre => Message /= null and then Payload(Message.all) /= null,
         Post => Message = null;
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the message is lost.
       procedure Unchecked_Send (Message : in out Msg_Owner)
-        with Pre => Message /= null and then Payload(Message) /= null,
+        with Pre => Message /= null and then Payload(Message.all) /= null,
         Post => Message = null;
 
       -- Returns the number of messages in the mailbox.
@@ -66,7 +66,7 @@ is
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
       entry Receive (Message : out Message_Record)
-        with Post => Is_Valid(Message);
+        with Post => Payload(Message) /= null;
 
       -- Change the array used to store messages.
       procedure Set_Queue_Size (Size : in Natural);
@@ -115,17 +115,17 @@ is
 
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
-
          if Q = null or else Is_Full(Q.all) then
             Status := Mailbox_Full;
             Delete(Message.all);
-            return;
+            Free(Message);
+            Message := null;
+         else
+            pragma Assume(Valid(Q.all));
+            Put(Q.all, Message);
+            Message_Waiting := True;
+            Status          := Accepted;
          end if;
-
-         Put(Q.all, Message);
-         Message_Waiting := True;
-         Status          := Accepted;
-
          pragma Unused(Message);
       end Send;
 
@@ -133,23 +133,33 @@ is
       begin
          if Q = null or else Is_Full(Q.all) then
             Delete(Message.all);
-            return;
+            Free(Message);
+            Message := null;
+         else
+            pragma Assume(Valid(Q.all));
+            Put(Q.all, Message);
+            Message_Waiting := True;
          end if;
-
-         Put(Q.all, Message);
-         Message_Waiting := True;
 
          pragma Unused(Message);
       end Unchecked_Send;
 
       function Message_Count return Message_Count_Type is
       begin
-         return (if Q = null then 0 else Count(Q.all));
+         if Q = null then
+            return 0;
+         else
+            pragma Assume(Valid(Q.all));
+            return Count(Q.all);
+         end if;
       end Message_Count;
 
       entry Receive (Message : out Message_Record) when Message_Waiting is
          Ptr : Msg_Owner;
       begin
+         pragma Assume(if Message_Waiting then Q /= null);
+         --pragma Assume(Payload(Peek(Q.all)) /= null);
+
          Next(Q.all, Ptr);
          Message := Ptr.all;
          Free(Ptr);
@@ -161,6 +171,9 @@ is
 
       procedure Set_Queue_Size (Size : in Natural) is
       begin
+         if Q /= null then
+            return;
+         end if;
          Q := new Message_Queue(Size);
       end Set_Queue_Size;
 
