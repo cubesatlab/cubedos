@@ -46,7 +46,7 @@ package CubedOS.Lib.Bounded_Queues is
      -- to let spark now that Count(Q) > 0.
      with Pre =>
        Valid(Q)
-       and then Count(Q) > 0
+       and then not Is_Empty(Q)
        and then Valid(Q)
        and then Item = null,
        Post => Item /= null and Valid(Q);
@@ -54,7 +54,7 @@ package CubedOS.Lib.Bounded_Queues is
    -- Adds an item to the queue.
    procedure Put(Q: in out Bounded_Queue; Item : in out Data_Owner)
      with Pre => Valid(Q)
-     and then Count(Q) < Q.Max_Index + 1
+     and then not Is_Full(Q)
      and then Item /= null,
      Post => Item = null and Valid(Q);
 
