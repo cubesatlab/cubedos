@@ -32,7 +32,13 @@ package body CubedOS.Lib.Bounded_Queues is
      with Refined_Post => Count'Result = Q.Num_Items;
 
    function Size (Q: in Bounded_Queue) return Count_Type is
-      (Q.Max_Index + 1);
+     (Q.Max_Index + 1);
+
+   function Is_Empty (Q: in Bounded_Queue) return Boolean
+     is (Q.Num_Items = 0);
+
+   function Is_Full (Q: in Bounded_Queue) return Boolean
+     is (Q.Num_Items = Q.Max_Index + 1);
 
    -- Takes the next item off the queue.
    procedure Next(Q: in out Bounded_Queue; Item : in out Data_Owner) is
@@ -54,7 +60,7 @@ package body CubedOS.Lib.Bounded_Queues is
    is (
        Q.Next_In in Q.Storage'Range
        and then Q.Next_Out in Q.Storage'Range
-       and then (Q.Storage(Q.Next_In) = null or Q.Num_Items = Q.Max_Index + 1)
+       and then (Q.Storage(Q.Next_In) = null or Q.Num_Items - 1 = Q.Max_Index)
        and then (Q.Storage(Q.Next_Out) /= null or Q.Num_Items = 0)
        and then Q.Max_Index < Natural'Last - 1
       );
