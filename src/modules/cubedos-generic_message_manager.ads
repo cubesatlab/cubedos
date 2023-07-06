@@ -25,7 +25,7 @@ Abstract_State =>
   Initializes => (Mailboxes, Request_ID_Generator, Lock)
 is
 
-   Domain_ID : constant Domain_ID_Type := This_Domain.Domain_ID;
+   Domain_ID : constant Domain_ID_Type := This_Domain.ID;
 
    -- Definition of message IDs. Full IDs are qualified by the module ID.
    -- There is a limit to how many messages a module can define. Make this a generic parameter?
