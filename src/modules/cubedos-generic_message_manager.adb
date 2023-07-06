@@ -9,6 +9,8 @@ with Ada.Unchecked_Deallocation;
 
 -- with Name_Resolver;
 
+with CubedOS.Lib.Bounded_Queues;
+
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
                   Lock => Init_Lock,
@@ -39,22 +41,9 @@ is
       Locked : Boolean := True;
    end Init_Lock;
 
-   type Message_Queue is
-      record
-         Messages        : Msg_Ptr_Array_Ptr  := null;
-         Count           : Message_Count_Type := 0;
-         Next_In         : Message_Index_Type := 1;
-         Next_Out        : Message_Index_Type := 1;
-         Mailbox_Size    : Positive           := 1;
-      end record;
-     --  with Dynamic_Predicate => (if Messages /= null then
-     --                               Count in 0..Messages'Length
-     --                             and Next_In in Messages'Range
-     --                             and Next_Out in Messages'Range
-     --                             and Mailbox_Size = Messages'Length
-     --                             and Messages(Next_Out) /= null
-     --                             and Messages(Next_In) = null
-     --                            );
+   package Message_Queues is new CubedOS.Lib.Bounded_Queues(Message_Record);
+   type Message_Queue is new Message_Queues.Bounded_Queue;
+   type Message_Queue_Owner is access Message_Queue;
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -80,12 +69,10 @@ is
         with Post => Is_Valid(Message);
 
       -- Change the array used to store messages.
-      procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr)
-        with Pre => Arr /= null,
-          Post => Arr = null;
+      procedure Set_Msg_Array (Size : in Natural);
 
    private
-      Q : Message_Queue;
+      Q : Message_Queue_Owner := null;
       Message_Waiting : Boolean := False;
    end Sync_Mailbox;
 
@@ -128,68 +115,52 @@ is
 
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
-         if Q.Count = Q.Mailbox_Size then
+
+         if Q = null or else Count(Q.all) = Size(Q.all) then
             Status := Mailbox_Full;
             Delete(Message.all);
-         else
-            Q.Messages (Q.Next_In) := Message;
-            Message := null;
-            if Q.Next_In = Q.Mailbox_Size then
-               Q.Next_In := 1;
-            else
-               Q.Next_In := Q.Next_In + 1;
-            end if;
-            Q.Count           := Q.Count + 1;
-            Message_Waiting := True;
-            Status          := Accepted;
+            return;
          end if;
+
+         Put(Q.all, Message);
+         Message_Waiting := True;
+         Status          := Accepted;
+
          pragma Unused(Message);
       end Send;
 
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
-         if Q.Count /= Q.Mailbox_Size then
-            Q.Messages (Q.Next_In) := Message;
-            if Q.Next_In = Q.Mailbox_Size then
-               Q.Next_In := 1;
-            else
-               Q.Next_In := Q.Next_In + 1;
-            end if;
-            Q.Count           := Q.Count + 1;
-            Message_Waiting := True;
+         if Count(Q) = Size(Q) then
+            return;
          end if;
-         Delete(Message.all);
-         Free(Message);
+
+         Put(Q, Message);
+         Message_Waiting := True;
+
          pragma Unused(Message);
       end Unchecked_Send;
 
       function Message_Count return Message_Count_Type is
       begin
-         return Q.Count;
+         return Count(Q);
       end Message_Count;
 
       entry Receive (Message : out Message_Record) when Message_Waiting is
-         Ptr : Msg_Owner := Q.Messages (Q.Next_Out);
+         Ptr : Msg_Owner;
       begin
-         Q.Messages (Q.Next_Out) := null;
+         Next(Q, Ptr);
          Message := Ptr.all;
          Free(Ptr);
-         if Q.Next_Out = Q.Mailbox_Size then
-            Q.Next_Out := 1;
-         else
-            Q.Next_Out := Q.Next_Out + 1;
-         end if;
-         Q.Count := Q.Count - 1;
-         if Q.Count = 0 then
+
+         if Count(Q) = 0 then
             Message_Waiting := False;
          end if;
       end Receive;
 
-      procedure Set_Msg_Array (Arr : in out Msg_Ptr_Array_Ptr) is
+      procedure Set_Msg_Array (Size : in Natural) is
       begin
-         Q.Mailbox_Size := Arr'Length;
-         Q.Messages     := Arr;
-         Arr          := null;
+         Q := new Message_Queue(Size);
       end Set_Msg_Array;
 
    end Sync_Mailbox;
