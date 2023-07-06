@@ -9,10 +9,10 @@ pragma SPARK_Mode(On);
 
 generic
    type Data is private;
+   type Data_Owner is access Data;
 package CubedOS.Lib.Bounded_Queues is
 
    subtype Count_Type is Natural;
-   type Data_Owner is access Data;
 
    type Bounded_Queue (Max_Index : Natural) is private;
 
