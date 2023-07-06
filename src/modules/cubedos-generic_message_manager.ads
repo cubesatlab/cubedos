@@ -127,7 +127,7 @@ is
    type Msg_Owner is access Message_Record;
 
    function Is_Valid(Msg : Message_Record) return Boolean
-     with Post => (if Is_Valid'Result then Payload(Msg) /= null);
+     with Post => Is_Valid'Result = (Payload(Msg) /= null);
 
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
@@ -221,7 +221,7 @@ is
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready,
-     Post => Is_Valid(Message);
+     Post => Is_Valid(Message) and Payload(Message) /= null;
 
    -- A mailbox used by modules to send and receive messages.
    -- This is the only way to receive messages sent to a module
@@ -297,9 +297,8 @@ is
    procedure Register_Module(Mailbox : in Module_Mailbox'Class;
                              Msg_Queue_Size : in Positive)
      with Global => (In_Out => (Mailboxes, Lock)),
-     Depends => (Mailboxes => +(Mailbox),
-                 Lock => +Mailbox,
-                 null => (Msg_Queue_Size)),
+     Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
+                 Lock => +Mailbox),
      --Pre => not Module_Ready(Address(Mailbox).Module_ID),
      Post => Module_Ready(Address(Mailbox).Module_ID);
 
@@ -328,10 +327,10 @@ is
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes)),
      Pre => Message /= null
+       and then Is_Valid(Message.all)
      and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Module_Ready(Receiver_Address(Message).Module_ID)
+     and then Module_Ready(Receiver_Address(Message).Module_ID),
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     and then Is_Valid(Message.all),
      Post => Message = null;
 
    -- Send the indicated message to the right mailbox. This might cross domains. This procedure
@@ -371,7 +370,7 @@ private
          Request_ID : Request_ID_Type;
          Message_Type : Universal_Message_Type;
          Priority   : System.Priority;
-         Payload    : Data_Array_Owner := null;
+         Payload    : Data_Array_Owner;
       end record;
 
    function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
