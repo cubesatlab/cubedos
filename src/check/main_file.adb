@@ -38,6 +38,8 @@ begin
    CubedOS.File_Server.Messages.Init;
    Register_Module(My_Mailbox, 8);
 
+   Message_Manager.Wait;
+
    -- TEST : Open two files. Read from one file, and write to another file.
 
    -- Try to open a file to read.
