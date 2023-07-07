@@ -9,6 +9,8 @@ with Ada.Unchecked_Deallocation;
 
 -- with Name_Resolver;
 
+with Ada.Text_IO;
+
 with CubedOS.Lib.Bounded_Queues;
 
 package body CubedOS.Generic_Message_Manager with
@@ -35,6 +37,7 @@ is
 
    protected Init_Lock is
       entry Wait;
+      function Is_Locked return Boolean;
       procedure Unlock (Module : Module_ID_Type);
    private
       Inited : Mailbox_Inited_Array := (others => False);
@@ -83,7 +86,15 @@ is
    function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
      (True);
 
-   function Messaging_Ready return Boolean is (True);
+   function Messaging_Ready return Boolean
+     with SPARK_Mode => Off
+     -- We hide this from SPARK because Init_Lock.Is_Locked doesn't have
+     -- any meaningful interferences.
+   is
+   begin
+      return not Init_Lock.Is_Locked;
+   end Messaging_Ready;
+
 
    ------------------
    -- Implementations
@@ -101,11 +112,14 @@ is
 
    protected body Init_Lock is
       entry Wait when not Locked is
-         begin null; end Wait;
+      begin null; end Wait;
+      function Is_Locked return Boolean
+        is (Locked);
       procedure Unlock (Module : Module_ID_Type) is
       begin
          Inited(Module) := True;
          if (for all I of Inited => I) then
+            Ada.Text_IO.Put_Line("Unlocking");
             Locked := False;
          end if;
       end Unlock;
