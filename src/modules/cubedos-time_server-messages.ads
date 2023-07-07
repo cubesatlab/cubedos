@@ -19,7 +19,7 @@ package CubedOS.Time_Server.Messages
   Initializes => (Tick_Database, Message_Loop, Public),
   Initial_Condition => (
                         Public /= null
-                          and then (for all T of This_Receives => Receives(Public, T)))
+                        and then (for all T of This_Receives => Receives(Public, T)))
 is
 
    pragma Elaborate_Body;
