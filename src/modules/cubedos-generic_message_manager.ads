@@ -26,6 +26,7 @@ Abstract_State =>
 is
 
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
+   Module_Count : constant Natural := This_Domain.Module_Count;
 
    -- Definition of Request IDs. Normally requests are given unique ID values that are echoed in
    -- replies. This allows a module to associate a reply with a particular request. The request
@@ -191,7 +192,7 @@ is
                  null => Module_ID);
 
    function Messaging_Ready return Boolean
-     with Ghost;
+     with Global => null;
 
    -- Error codes.
    type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
