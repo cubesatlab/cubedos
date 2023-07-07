@@ -1,8 +1,10 @@
 --------------------------------------------------------------------------------
 with Ada.Text_IO;
 with Message_Manager;
+with CubedOS.Message_Types;
 use Ada.Text_IO;
 use Message_Manager;
+use CubedOS.Message_Types;
 
 procedure Main_Message_Manager is
    Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Mutable_Message_Record
@@ -12,8 +14,8 @@ procedure Main_Message_Manager is
    -- It's value can be discarded whenever.
    Temp_Msg : Message_Record := Immutable(Make_Empty_Message((1,1), (1,1), 0, (1, 1), 0));
 
-   Message_Type : constant Message_Manager.Universal_Message_Type := (1, 1);
-   Message_Type_2 : constant Message_Manager.Universal_Message_Type := (1, 2);
+   Message_Type : constant Universal_Message_Type := (1, 1);
+   Message_Type_2 : constant Universal_Message_Type := (1, 2);
    Message_Status : Message_Manager.Status_Type;
    X : Integer := 1;
    Mailbox_1, Mailbox_2 : Message_Manager.Module_Mailbox;
