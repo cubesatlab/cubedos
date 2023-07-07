@@ -274,6 +274,12 @@ is
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
    is (True);
 
+   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
+     is (for some T of Receiver.Receive_Types.all => T = Msg_Type);
+
+   function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
+     is (This_Module, This_Receives);
+
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
    is
@@ -360,6 +366,22 @@ is
    function Receive_Types(Box : Module_Mailbox) return Const_Msg_Type_Array_Ptr
      is (Box.Types);
 
+   procedure Send_Message(Box : Module_Mailbox'Class;
+                          Msg : in out Message_Record;
+                          Target_Module : not null access constant Module_Metadata;
+                          Target_Domain : not null access constant Domain_Declaration := This_Domain
+                         )
+     with Refined_Post => Msg.Payload = null
+   is
+      Ptr : Msg_Owner;
+   begin
+      Move(Msg, Ptr);
+      Ptr.Sender_Address := Box.Address;
+      Ptr.Receiver_Address := (Target_Domain.ID, Target_Module.Module_ID);
+      Route_Message (Ptr);
+      pragma Unused(Ptr);
+   end Send_Message;
+
    procedure Send_Message (Box : Module_Mailbox'Class; Msg : in out Message_Record)
      with Refined_Post => Msg.Payload = null
    is
@@ -367,18 +389,6 @@ is
    begin
       Move(Msg, Ptr);
       Ptr.Sender_Address := Box.Address;
-      Route_Message (Ptr);
-      pragma Unused(Ptr);
-   end Send_Message;
-
-   procedure Send_Message(Box : Module_Mailbox'Class; Dest : access constant Public_Mailbox'Class; Msg : in out Message_Record)
-     with Refined_Post => Msg.Payload = null
-   is
-      Ptr : Msg_Owner;
-   begin
-      Move(Msg, Ptr);
-      Ptr.Sender_Address := Box.Address;
-      Ptr.Receiver_Address := Address(Dest.all);
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;

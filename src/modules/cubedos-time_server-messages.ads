@@ -16,19 +16,8 @@ with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
 package CubedOS.Time_Server.Messages
   with
     Abstract_State => ((Tick_Database with External)),
-  Initializes => (Tick_Database, Message_Loop, Public),
-  Initial_Condition => (
-                        Public /= null
-                        and then (for all T of This_Receives => Receives(Public, T)))
+  Initializes => (Tick_Database, Message_Loop)
 is
-
-   pragma Elaborate_Body;
-
-   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
-
-   This_Receives: aliased constant Message_Type_Array := (Relative_Request_Msg,
-                                             Absolute_Request_Msg,
-                                             Cancel_Request_Msg);
 
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),

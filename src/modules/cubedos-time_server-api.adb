@@ -80,6 +80,30 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Relative_Request;
+
+   procedure Send_Relative_Request
+      (Sender : Module_Mailbox;
+       Receiving_Module : not null access constant Module_Metadata;
+       Receiving_Domain : not null access constant Domain_Declaration;
+      Request_ID : Request_ID_Type;
+      Tick_Interval : Ada.Real_Time.Time_Span;
+      Request_Type : Series_Type;
+      Series_ID : Series_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Relative_Request_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Tick_Interval => Tick_Interval,
+         Request_Type => Request_Type,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain);
+   end Send_Relative_Request;
    procedure Relative_Request_Decode
       (Message : in  Message_Record;
       Tick_Interval : out Ada.Real_Time.Time_Span;
@@ -187,6 +211,29 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Absolute_Request;
+
+   procedure Send_Absolute_Request
+      (Sender : Module_Mailbox;
+       Receiving_Module : not null access constant Module_Metadata;
+       Receiving_Domain : not null access constant Domain_Declaration;
+      Request_ID : Request_ID_Type;
+      Tick_Time : Ada.Real_Time.Time;
+      Series_ID : Series_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Absolute_Request_Encode(
+         Sender_Address => Address(Sender),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Tick_Time => Tick_Time,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain);
+   end Send_Absolute_Request;
+
    procedure Absolute_Request_Decode
       (Message : in  Message_Record;
       Tick_Time : out Ada.Real_Time.Time;
@@ -282,7 +329,8 @@ package body CubedOS.Time_Server.API is
 
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
-      Receiver : not null access constant Public_Mailbox'Class;
+       Receiving_Module : not null access constant Module_Metadata;
+       Receiving_Domain : not null access constant Domain_Declaration;
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
       Count : Series_Count_Type;
@@ -292,7 +340,7 @@ package body CubedOS.Time_Server.API is
    begin
       Tick_Reply_Encode(
          Sender_Address => Address(Sender),
-         Receiver_Address => Address(Receiver.all),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Series_ID => Series_ID,
          Count => Count,
