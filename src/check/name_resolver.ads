@@ -18,6 +18,7 @@
 -- IDs "compactly" (with no gaps in the numbering) so that you can create a
 -- Message_Manager instantiation with the minimum number of mailboxes.
 --------------------------------------------------------------------------------
+pragma SPARK_Mode (On);
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is
@@ -35,19 +36,18 @@ package Name_Resolver is
    Log_Server               : constant Module_ID_Type := 3;
    Publish_Subscribe_Server : constant Module_ID_Type := 4;
    Time_Server              : constant Module_ID_Type := 5;
-   --Time_Server              : constant Module_ID_Type := 5;
    -- Event_Server             : constant Module_ID_Type := 6;
    File_Server              : constant Module_ID_Type := 7;
    -- Table_Server             : constant Module_ID_Type := 8;
    Interpreter              : constant Module_ID_Type := 9;
 
 
-   Domain : aliased constant Domain_Declaration := (5, 0, (Log_Server,
-                                            Publish_Subscribe_Server,
-                                            Time_Server,
-                                            File_Server,
-                                            Interpreter));
-
+   Domain : aliased constant Domain_Declaration := Declare_Domain(5, 0, (Log_Server,
+                                                                  Publish_Subscribe_Server,
+                                                                  Time_Server,
+                                                                  File_Server,
+                                                                  Interpreter));
+   pragma Assert(Has_Module(Domain, Time_Server));
 
    -- Application-Specific Modules.
    -- Make up names as you see fit (typically the same as your module's top level package).

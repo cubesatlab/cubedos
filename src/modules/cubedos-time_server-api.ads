@@ -37,7 +37,6 @@ package CubedOS.Time_Server.API is
 
    Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
 
-
    type Series_Type is
       (One_Shot,
       Periodic);
@@ -80,8 +79,8 @@ package CubedOS.Time_Server.API is
 
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
-       Receiving_Module : not null access constant Module_Metadata;
-       Receiving_Domain : not null access constant Domain_Declaration;
+       Receiving_Module : Module_Metadata;
+       Receiving_Domain : Domain_Declaration;
       Request_ID : Request_ID_Type;
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type : Series_Type;
@@ -92,8 +91,8 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
-         and then Receives(Receiving_Module.all, Tick_Reply_Msg)
-         and then Has_Module(Receiving_Domain.all, Receiving_Module.Module_ID)
+         and then Receives(Receiving_Module, Relative_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
       ;
 
    function Is_Relative_Request(Message : Message_Record) return Boolean is
@@ -143,8 +142,8 @@ package CubedOS.Time_Server.API is
 
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
-       Receiving_Module : not null access constant Module_Metadata;
-       Receiving_Domain : not null access constant Domain_Declaration;
+       Receiving_Module : Module_Metadata;
+       Receiving_Domain : Domain_Declaration;
       Request_ID : Request_ID_Type;
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : Series_ID_Type;
@@ -154,8 +153,8 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
-         and then Receives(Receiving_Module.all, Tick_Reply_Msg)
-         and then Has_Module(Receiving_Domain.all, Receiving_Module.Module_ID)
+         and then Receives(Receiving_Module, Absolute_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
       ;
 
 

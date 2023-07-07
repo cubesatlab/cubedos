@@ -360,16 +360,17 @@ is
    -- Mailbox
    -------------
 
+   --TODO: Remove domain
    function Address(Box : Module_Mailbox) return Message_Address is
-     (Box.Address);
+     (Domain_ID, Box.Spec.Module_ID);
 
    function Receive_Types(Box : Module_Mailbox) return Const_Msg_Type_Array_Ptr
-     is (Box.Types);
+     is (Box.Spec.Receive_Types);
 
    procedure Send_Message(Box : Module_Mailbox'Class;
                           Msg : in out Message_Record;
-                          Target_Module : not null access constant Module_Metadata;
-                          Target_Domain : not null access constant Domain_Declaration := This_Domain
+                          Target_Module : Module_Metadata;
+                          Target_Domain : Domain_Declaration := This_Domain
                          )
      with Refined_Post => Msg.Payload = null
    is
@@ -415,8 +416,8 @@ is
    end Queue_Size;
 
    function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
-                                Accepts : not null Const_Msg_Type_Array_Ptr) return Module_Mailbox
-   is ((Domain_ID, Module_ID), Const_Msg_Type_Array_Ptr(Accepts));
+                                Spec : Module_Metadata) return Module_Mailbox
+   is (Module_ID, Spec);
 
    procedure Register_Module(Mailbox : in Module_Mailbox'Class;
                              Msg_Queue_Size : in Positive)

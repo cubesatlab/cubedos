@@ -16,13 +16,6 @@ package CubedOS.File_Server.Messages is
    use Message_Manager;
    use CubedOS.File_Server.API;
 
-   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
-
-   This_Receives: aliased constant Message_Type_Array := (Open_Request_Msg,
-                                       Read_Request_Msg,
-                                       Write_Request_Msg,
-                                       Close_Request_Msg
-                                      );
    -- Prepare to receive messages
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),

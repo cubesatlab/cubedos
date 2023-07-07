@@ -15,12 +15,6 @@ package CubedOS.Interpreter.Messages is
    use Message_Manager;
    use CubedOS.Interpreter.API;
 
-   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
-
-   This_Receives: aliased constant Message_Type_Array := (Clear_Request_Msg,
-                                                          Set_Request_Msg,
-                                                          Add_Request_Msg);
-
    procedure Init;
 
    task Message_Loop is

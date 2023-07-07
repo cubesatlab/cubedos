@@ -19,7 +19,7 @@ package body CubedOS.File_Server.Messages is
    use type API.File_Handle_Type;
    use type API.Mode_Type;
 
-   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    procedure Init is
    begin

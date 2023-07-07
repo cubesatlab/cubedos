@@ -39,6 +39,11 @@ package CubedOS.Log_Server.API is
       (Log_Text);
 
    Log_Text_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Log_Text));
+
+   This_Receives: aliased constant Message_Type_Array := (0 => Log_Text_Msg);
+
+   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+
    procedure Log_Text_Encode
       (Sender_Address : Message_Address;
       Receiver_Address : Message_Address;
