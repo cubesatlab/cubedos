@@ -274,12 +274,6 @@ is
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
    is (True);
 
-   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
-     is (for some T of Receiver.Receive_Types.all => T = Msg_Type);
-
-   function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
-     is (This_Module, This_Receives);
-
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
    is

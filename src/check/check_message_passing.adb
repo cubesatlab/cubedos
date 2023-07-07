@@ -5,6 +5,7 @@
 --
 ---------------------------------------------------------------------------
 with Message_Manager; use Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body Check_Message_Passing is
 

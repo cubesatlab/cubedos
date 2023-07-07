@@ -27,11 +27,6 @@ is
 
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
 
-   -- Definition of message IDs. Full IDs are qualified by the module ID.
-   -- There is a limit to how many messages a module can define. Make this a generic parameter?
-   Maximum_Message_Count : constant := 256;
-   type Message_ID_Type is range 0 .. Maximum_Message_Count - 1;
-
    -- Definition of Request IDs. Normally requests are given unique ID values that are echoed in
    -- replies. This allows a module to associate a reply with a particular request. The request
    -- ID of zero i special; it is used in cases where no such request/reply matching is needed
@@ -58,26 +53,8 @@ is
    -- with actual message sizes and this constant should be removed.
    Max_Message_Size : constant Positive := 1024;
 
-   -- Message Addresses hold the Domain_ID and Module_ID for Modules in a CubedOS Application
-   type Message_Address is
-      record
-         Domain_ID : Domain_ID_Type := 0;
-         Module_ID : Module_ID_Type := 1;
-      end record;
 
-   -- The union of a module ID and message ID. Forms a
-   -- unique identifier for this type of message across
-   -- all domains in this project.
-   type Universal_Message_Type is
-      record
-         Module_ID : Module_ID_Type;
-         Message_ID : Message_ID_Type;
-      end record;
-
-   type Message_Type_Array is array (Natural range <>) of Universal_Message_Type;
    Empty_Type_Array : aliased constant Message_Type_Array := (0 => (1, 1));
-   type Msg_Type_Array_Ptr is access Message_Type_Array;
-   type Const_Msg_Type_Array_Ptr is access constant Message_Type_Array;
    Empty_Type_Array_Ptr : aliased constant Message_Type_Array := (0 => (1,1));
 
    type Public_Mailbox is interface;
@@ -98,20 +75,6 @@ is
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Ghost;
-
-   type Module_Metadata is
-      record
-         Module_ID : Module_ID_Type;
-         Receive_Types : Const_Msg_Type_Array_Ptr;
-      end record;
-
-   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost;
-
-   function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
-     with Pre => This_Receives /= null,
-     Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T))
-     and Declare_Receives'Result.Module_ID = This_Module;
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
