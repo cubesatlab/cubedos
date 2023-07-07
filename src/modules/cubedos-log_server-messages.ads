@@ -17,10 +17,6 @@ package CubedOS.Log_Server.Messages is
 
    use Message_Manager;
 
-   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
-
-   This_Receives: aliased constant Message_Type_Array := (0 => Log_Text_Msg);
-
    procedure Initialize;
 
    task Message_Loop

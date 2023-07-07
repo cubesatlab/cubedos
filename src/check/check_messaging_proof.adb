@@ -18,7 +18,8 @@ with CubedOS.Message_Types; use CubedOS.Message_Types;
 procedure Check_Messaging_Proof is
 
    Module_ID_1 : constant Module_ID_Type := 1;
-   Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(Module_ID_1, Empty_Type_Array'Access);
+   Metadata : constant Module_Metadata := Declare_Receives(Module_ID_1, Empty_Type_Array_Ptr'Access);
+   Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(Module_ID_1, Metadata);
    Message : Message_Record;
 begin
 

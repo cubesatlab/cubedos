@@ -30,7 +30,8 @@ procedure Main_Time is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
-   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Empty_Type_Array_Ptr'Access);
+   Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
+   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
    Incoming_Message  : Message_Manager.Message_Record;
    Series_ID         : Series_ID_Type;
@@ -50,18 +51,19 @@ begin
    Message_Manager.Register_Module(My_Mailbox, 8);
 
    -- Do some setup...
-   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target'Access, Name_Resolver.Domain'Access, 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
+   Message_Manager.Wait;
+   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target, Name_Resolver.Domain, 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
    Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
 
-   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target'Access, Name_Resolver.Domain'Access, 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2);
+   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target, Name_Resolver.Domain, 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2);
    Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
 
    loop
       Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
-      -- Put_Line("+++ Fetch returned!");
-      -- Put("+++ Sender    : "); Put(Incoming_Message.all.Sender); New_Line;
-      -- Put("+++ Receiver  : "); Put(Incoming_Message.all.Receiver); New_Line;
-      -- Put("+++ Message_ID: "); Put(Integer(Incoming_Message.all.Message_ID)); New_Line(2);
+       --  Put_Line("+++ Fetch returned!");
+       --  Put("+++ Sender    : "); Put(Incoming_Message.all.Sender); New_Line;
+       --  Put("+++ Receiver  : "); Put(Incoming_Message.all.Receiver); New_Line;
+       --  Put("+++ Message_ID: "); Put(Integer(Incoming_Message.all.Message_ID)); New_Line(2);
 
       Relative_Time := Ada.Real_Time.Clock - Start_Time;
       Relative_Duration := Ada.Real_Time.To_Duration(Relative_Time);
