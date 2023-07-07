@@ -82,7 +82,7 @@ package CubedOS.Time_Server.API is
    with
       Global => null,
       Pre => Is_Relative_Request(Message) and Payload(Message) /= null,
-      Depends => ((Tick_Interval, Request_Type, Series_ID, Decode_Status) => Message);
+     Depends => ((Tick_Interval, Request_Type, Series_ID, Decode_Status) => Message);
 
 
    procedure Absolute_Request_Encode
@@ -125,7 +125,8 @@ package CubedOS.Time_Server.API is
    with
       Global => null,
       Pre => Is_Absolute_Request(Message) and Payload(Message) /= null,
-      Depends => ((Tick_Time, Series_ID, Decode_Status) => Message);
+     Depends => ((Tick_Time, Series_ID, Decode_Status) => Message),
+       Post => Receives(Sender_Address(Message).Module_ID, Tick_Reply_Msg);
 
 
    procedure Tick_Reply_Encode
