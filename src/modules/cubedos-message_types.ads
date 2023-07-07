@@ -23,4 +23,12 @@ package CubedOS.Message_Types is
          ID : Domain_ID_Type;
          Module_IDs : Module_ID_Set(1 .. Module_Count);
       end record;
+   type Domain_Observer is not null access constant Domain_Declaration;
+
+   function Has_Module(Domain : Domain_Declaration; Module_ID : Module_ID_Type) return Boolean;
+
+private
+   function Has_Module(Domain : Domain_Declaration; Module_ID : Module_ID_Type) return Boolean
+     is (for some M of Domain.Module_IDs => M = Module_ID);
+
 end CubedOS.Message_Types;
