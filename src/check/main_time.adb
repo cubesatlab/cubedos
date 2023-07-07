@@ -23,6 +23,7 @@ use CubedOS.Time_Server;
 use CubedOS.Time_Server.API;
 use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with Name_Resolver;
 
 procedure Main_Time is
    use type Ada.Real_Time.Time;
@@ -49,10 +50,10 @@ begin
    Message_Manager.Register_Module(My_Mailbox, 8);
 
    -- Do some setup...
-   Send_Relative_Request(My_Mailbox,(Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
+   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target'Access, Name_Resolver.Domain'Access, 1, Ada.Real_Time.Milliseconds(3000), Periodic, 1);
    Put_Line("TX : Relative_Request message sent for 3 second periodic ticks; Series_ID = 1");
 
-   Send_Relative_Request(My_Mailbox, (Domain_ID, My_Module_ID), 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2);
+   Send_Relative_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target'Access, Name_Resolver.Domain'Access, 1, Ada.Real_Time.Milliseconds(10000), One_Shot, 2);
    Put_Line("TX : Relative_Request message sent for 10 second one shot; Series_ID = 2");
 
    loop

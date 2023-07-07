@@ -15,7 +15,7 @@ use  CubedOS.Lib.XDR;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 generic
-   This_Domain : Domain_Declaration;  -- The domain of this message manager.
+   This_Domain : Domain_Observer;  -- The domain of this message manager.
 package CubedOS.Generic_Message_Manager
   with
 Abstract_State =>
@@ -95,11 +95,23 @@ is
      with Ghost,
      Depends => (Receives'Result => (Receiver, Msg_Type));
 
-
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Ghost;
-     --Pre => Module_Ready(Receiver);
+   --Pre => Module_Ready(Receiver);
+
+   type Module_Metadata is
+      record
+         Module_ID : Module_ID_Type;
+         Receive_Types : not null Const_Msg_Type_Array_Ptr;
+      end record;
+
+   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
+     with Ghost;
+
+   function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
+     with Pre => This_Receives /= null,
+       Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T));
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -133,7 +145,12 @@ is
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
      with Pre => Msg.Payload /= null,
      Post => Is_Valid(Immutable'Result) and
-     Message_Type(Immutable'Result) = Msg.Message_Type;
+     Message_Type(Immutable'Result) = Msg.Message_Type and
+     Receiver_Address(Immutable'Result) = Msg.Receiver_Address and
+     Sender_Address(Immutable'Result) = Msg.Sender_Address and
+     Request_ID(Immutable'Result) = Msg.Request_ID and
+     Priority(Immutable'Result) = Msg.Priority and
+     Payload(Immutable'Result).all = Msg.Payload.all;
 
    function Sender_Address(Msg : Message_Record) return Message_Address;
    function Receiver_Address(Msg : Message_Record) return Message_Address;
@@ -238,6 +255,17 @@ is
    overriding
    function Receive_Types(Box : Module_Mailbox) return Const_Msg_Type_Array_Ptr;
 
+   procedure Send_Message(Box : Module_Mailbox'Class;
+                          Msg : in out Message_Record;
+                          Target_Module : not null access constant Module_Metadata;
+                          Target_Domain : not null access constant Domain_Declaration := This_Domain)
+     with Global => (In_Out => Mailboxes),
+     Pre => Messaging_Ready
+     and then Is_Valid(Msg)
+     and then Receives(Target_Module.all, Message_Type(Msg))
+     and then Has_Module(Target_Domain.all, Target_Module.Module_ID),
+     Post => Payload(Msg) = null;
+
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately. Moves the message's payload making it inaccessible
    -- after the call.
@@ -247,16 +275,6 @@ is
                  Msg => Msg),
      Pre => Messaging_Ready
      --and then Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg))
-     and then Is_Valid(Msg),
-     Post => Payload(Msg) = null;
-
-   procedure Send_Message(Box : Module_Mailbox'Class; Dest : access constant Public_Mailbox'Class; Msg : in out Message_Record)
-     with Global => (In_Out => Mailboxes),
-     Depends => (Mailboxes => +(Box, Msg, Dest),
-                 Msg => Msg),
-     Pre => Messaging_Ready
-     and then Dest /= null
-     and then Receives(Dest, Message_Type(Msg))
      and then Is_Valid(Msg),
      Post => Payload(Msg) = null;
 
@@ -290,7 +308,8 @@ is
                                 Accepts : not null Const_Msg_Type_Array_Ptr) return Module_Mailbox
      with
        Post => Address(Make_Module_Mailbox'Result).Module_ID = Module_ID
-       and (for all T of Accepts.all => Receives(Make_Module_Mailbox'Result, T));
+       and (for all T of Accepts.all => Receives(Make_Module_Mailbox'Result, T))
+       and Address(Make_Module_Mailbox'Result).Domain_ID = Domain_ID;
 
    -- Register a module with the mail system.
    -- Gets an observer for that module's mailbox.

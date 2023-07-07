@@ -15,4 +15,4 @@ with Name_Resolver;
 
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
-    (Name_Resolver.Domain);
+    (Name_Resolver.Domain'Access);

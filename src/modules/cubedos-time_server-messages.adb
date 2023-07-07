@@ -301,6 +301,4 @@ is
       end loop;
    end Message_Loop;
 
-begin
-   Public := Mailbox'Access;
 end CubedOS.Time_Server.Messages;
