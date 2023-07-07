@@ -8,7 +8,7 @@ pragma SPARK_Mode(On);
 
 package body CubedOS.Interpreter.Messages is
 
-   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    procedure Init is
    begin
@@ -87,6 +87,4 @@ package body CubedOS.Interpreter.Messages is
       end loop;
    end Message_Loop;
 
-begin
-   Public := Mailbox'Access;
 end CubedOS.Interpreter.Messages;

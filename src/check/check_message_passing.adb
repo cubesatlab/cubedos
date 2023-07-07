@@ -28,8 +28,8 @@ package body Check_Message_Passing is
       Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
-      Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, Empty_Type_Array'Access);
-      Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, Receiver_Receive_Types'Access);
+      Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array_Ptr'Access));
+      Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, (Receiver_Addr.Module_ID, Receiver_Receive_Types'Access));
    begin
 
       -- Register mailboxes

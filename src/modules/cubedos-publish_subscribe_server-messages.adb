@@ -15,7 +15,7 @@ package body CubedOS.Publish_Subscribe_Server.Messages
   with Refined_State => (Database => Subscription_Map)
 is
 
-   Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+   Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    -- If this is really packed, the memory cost is minimal.
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean

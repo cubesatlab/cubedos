@@ -20,16 +20,10 @@ with System;
 package CubedOS.Publish_Subscribe_Server.Messages
   with
     Abstract_State => (Database),
-    Initializes => (Database, Public)
+    Initializes => (Database)
 is
    use Message_Manager;
    use CubedOS.Publish_Subscribe_Server.API;
-
-   Public : Public_Mailbox_Owner with Constant_After_Elaboration;
-
-   This_Receives: aliased constant Message_Type_Array := (Unsubscribe_Request_Msg,
-                                             Subscribe_Request_Msg,
-                                             Publish_Request_Msg);
 
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),

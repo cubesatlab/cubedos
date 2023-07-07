@@ -23,7 +23,8 @@ procedure Main_File is
 
    -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
    My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
-   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Empty_Type_Array'Access);
+   Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
+   My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
    Incoming_Message : Message_Manager.Message_Record;
    Handle       : File_Handle_Type;

@@ -39,6 +39,12 @@ package CubedOS.Publish_Subscribe_Server.API is
    Publish_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Publish_Reply));
    Subscribe_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Subscribe_Reply));
 
+   This_Receives: aliased constant Message_Type_Array := (Unsubscribe_Request_Msg,
+                                             Subscribe_Request_Msg,
+                                                          Publish_Request_Msg);
+
+   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+
    procedure Subscribe_Request_Encode
       (Sender_Address : Message_Address;
       Receiver_Address : Message_Address;

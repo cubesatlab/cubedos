@@ -83,8 +83,8 @@ package body CubedOS.Time_Server.API is
 
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
-       Receiving_Module : not null access constant Module_Metadata;
-       Receiving_Domain : not null access constant Domain_Declaration;
+       Receiving_Module : Module_Metadata;
+       Receiving_Domain : Domain_Declaration;
       Request_ID : Request_ID_Type;
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type : Series_Type;
@@ -214,8 +214,8 @@ package body CubedOS.Time_Server.API is
 
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
-       Receiving_Module : not null access constant Module_Metadata;
-       Receiving_Domain : not null access constant Domain_Declaration;
+       Receiving_Module : Module_Metadata;
+       Receiving_Domain : Domain_Declaration;
       Request_ID : Request_ID_Type;
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : Series_ID_Type;

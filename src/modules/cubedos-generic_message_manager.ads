@@ -15,7 +15,7 @@ use  CubedOS.Lib.XDR;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 generic
-   This_Domain : Domain_Observer;  -- The domain of this message manager.
+   This_Domain : Domain_Declaration;  -- The domain of this message manager.
 package CubedOS.Generic_Message_Manager
   with
 Abstract_State =>
@@ -98,12 +98,11 @@ is
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Ghost;
-   --Pre => Module_Ready(Receiver);
 
    type Module_Metadata is
       record
          Module_ID : Module_ID_Type;
-         Receive_Types : not null Const_Msg_Type_Array_Ptr;
+         Receive_Types : Const_Msg_Type_Array_Ptr;
       end record;
 
    function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
@@ -111,7 +110,8 @@ is
 
    function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
      with Pre => This_Receives /= null,
-       Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T));
+     Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T))
+     and Declare_Receives'Result.Module_ID = This_Module;
 
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
@@ -257,13 +257,13 @@ is
 
    procedure Send_Message(Box : Module_Mailbox'Class;
                           Msg : in out Message_Record;
-                          Target_Module : not null access constant Module_Metadata;
-                          Target_Domain : not null access constant Domain_Declaration := This_Domain)
+                          Target_Module : Module_Metadata;
+                          Target_Domain : Domain_Declaration := This_Domain)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
      and then Is_Valid(Msg)
-     and then Receives(Target_Module.all, Message_Type(Msg))
-     and then Has_Module(Target_Domain.all, Target_Module.Module_ID),
+     and then Receives(Target_Module, Message_Type(Msg))
+     and then Has_Module(Target_Domain, Target_Module.Module_ID),
      Post => Payload(Msg) = null;
 
    -- Sends the given message to the given address from this mailbox's address.
@@ -305,10 +305,10 @@ is
      with Global => (In_Out => Mailboxes);
 
    function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
-                                Accepts : not null Const_Msg_Type_Array_Ptr) return Module_Mailbox
+                                Spec : Module_Metadata) return Module_Mailbox
      with
        Post => Address(Make_Module_Mailbox'Result).Module_ID = Module_ID
-       and (for all T of Accepts.all => Receives(Make_Module_Mailbox'Result, T))
+       and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T))
        and Address(Make_Module_Mailbox'Result).Domain_ID = Domain_ID;
 
    -- Register a module with the mail system.
@@ -407,12 +407,12 @@ private
 
    type Module_Mailbox is new Public_Mailbox with
       record
-         Address : Message_Address;
-         Types : Const_Msg_Type_Array_Ptr;
+         Module_ID : Module_ID_Type;
+         Spec : Module_Metadata;
       end record;
 
    function Valid(Box : Module_Mailbox) return Boolean
-   is (Box.Types /= null);
+   is (Box.Spec.Receive_Types /= null);
 
    -- Create a copy of the given message on the heap,
    -- also making a copy of the payload content.

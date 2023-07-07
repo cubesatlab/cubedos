@@ -15,7 +15,7 @@ is
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
 
-   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
 
    -- Stores all persistent info about a series.

@@ -34,6 +34,12 @@ package CubedOS.Interpreter.API is
    Add_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Add_Request));
    Add_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Add_Reply));
 
+   This_Receives: aliased constant Message_Type_Array := (Clear_Request_Msg,
+                                                          Set_Request_Msg,
+                                                          Add_Request_Msg);
+
+   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+
    function Clear_Request_Encode
      (Sender_Address : in Message_Address;
       Request_ID     : in Request_ID_Type;

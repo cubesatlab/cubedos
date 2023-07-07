@@ -39,6 +39,13 @@ package CubedOS.File_Server.API is
    Write_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Write_Reply));
    Close_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Close_Request));
 
+   This_Receives: aliased constant Message_Type_Array := (Open_Request_Msg,
+                                       Read_Request_Msg,
+                                       Write_Request_Msg,
+                                       Close_Request_Msg
+                                      );
+   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+
    type Mode_Type is (Read, Write);
    type File_Handle_Type is range 0 .. 64;
    subtype Valid_File_Handle_Type is File_Handle_Type range 1 .. File_Handle_Type'Last;

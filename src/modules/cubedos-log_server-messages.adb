@@ -10,7 +10,7 @@ with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body CubedOS.Log_Server.Messages is
 
-   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, This_Receives'Access);
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    procedure Initialize
    is
@@ -82,6 +82,4 @@ package body CubedOS.Log_Server.Messages is
       end loop;
    end Message_Loop;
 
-begin
-   Public := Mailbox'Access;
 end CubedOS.Log_Server.Messages;
