@@ -74,7 +74,8 @@ package CubedOS.Message_Types is
       end record;
 
    function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost;
+     with Ghost,
+       Pre => Receiver.Receive_Types /= null;
 
    function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
      with Pre => This_Receives /= null,
