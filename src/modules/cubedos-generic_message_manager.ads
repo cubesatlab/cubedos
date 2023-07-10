@@ -282,6 +282,7 @@ is
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
+     Pre => (for some M of This_Domain.Module_IDs => M = Address(Mailbox).Module_ID),
      --Pre => not Module_Ready(Address(Mailbox).Module_ID),
      Post => Module_Ready(Address(Mailbox).Module_ID);
 
