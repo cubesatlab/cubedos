@@ -76,8 +76,8 @@ package CubedOS.File_Server.API is
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Open_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Open_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Open_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
@@ -105,8 +105,8 @@ package CubedOS.File_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Open_Reply_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Open_Reply_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
@@ -133,8 +133,8 @@ package CubedOS.File_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Read_Request_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Read_Request_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
@@ -163,8 +163,8 @@ package CubedOS.File_Server.API is
       Pre => Amount <= File_Data'Length
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Read_Reply_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Read_Reply_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
@@ -194,8 +194,8 @@ package CubedOS.File_Server.API is
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Write_Request_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Write_Request_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
@@ -224,8 +224,8 @@ package CubedOS.File_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Write_Reply_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Write_Reply_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
@@ -252,8 +252,8 @@ package CubedOS.File_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Close_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Close_Request_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Close_Request_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
@@ -271,25 +271,25 @@ package CubedOS.File_Server.API is
 
 
    function Is_Open_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Open_Request_Msg);
+      (Message_Types.Message_Type(Message) = Open_Request_Msg);
 
    function Is_Open_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Open_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Open_Reply_Msg);
 
    function Is_Read_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Read_Request_Msg);
+      (Message_Types.Message_Type(Message) = Read_Request_Msg);
 
    function Is_Read_Reply(Message : Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Read_Reply_Msg);
+     (Message_Types.Message_Type(Message) = Read_Reply_Msg);
 
    function Is_Write_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Write_Request_Msg);
+      (Message_Types.Message_Type(Message) = Write_Request_Msg);
 
    function Is_Write_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Write_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Write_Reply_Msg);
 
       function Is_Close_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Close_Request_Msg);
+      (Message_Types.Message_Type(Message) = Close_Request_Msg);
 
 
 

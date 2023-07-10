@@ -6,6 +6,8 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+with CubedOS.Message_Types; use CubedOS.Message_Types;
+
 package body CubedOS.Interpreter.Messages is
 
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
@@ -75,7 +77,7 @@ package body CubedOS.Interpreter.Messages is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
       Message_Manager.Wait;
 

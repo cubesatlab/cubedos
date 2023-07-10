@@ -73,19 +73,19 @@ package CubedOS.Interpreter.API is
    with Global => null;
 
    function Is_Clear_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Clear_Request_Msg);
+     (Message_Types.Message_Type(Message) = Clear_Request_Msg);
 
    function Is_Set_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Set_Request_Msg);
+     (Message_Types.Message_Type(Message) = Set_Request_Msg);
 
    function Is_Set_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Set_Reply_Msg);
+     (Message_Types.Message_Type(Message) = Set_Reply_Msg);
 
    function Is_Add_Request(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Add_Request_Msg);
+     (Message_Types.Message_Type(Message) = Add_Request_Msg);
 
    function Is_Add_Reply(Message : in Message_Record) return Boolean is
-     (Message_Manager.Message_Type(Message) = Add_Reply_Msg);
+     (Message_Types.Message_Type(Message) = Add_Reply_Msg);
 
    procedure Clear_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type)
      with

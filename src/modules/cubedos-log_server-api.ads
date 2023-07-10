@@ -57,8 +57,8 @@ package CubedOS.Log_Server.API is
          and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Log_Text_Msg),
-      Post => Message_Manager.Message_Type(Result) = Log_Text_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Log_Text_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
@@ -76,7 +76,7 @@ package CubedOS.Log_Server.API is
       ;
 
    function Is_Log_Text(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Log_Text_Msg);
+      (Message_Types.Message_Type(Message) = Log_Text_Msg);
    procedure Log_Text_Decode
       (Message : in  Message_Record;
       Level : out Log_Level_Type;

@@ -56,8 +56,8 @@ package CubedOS.Publish_Subscribe_Server.API is
        Pre => true
        and then Receiver_Address.Module_ID = This_Module
        and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg),
-       Post => Message_Manager.Message_Type(Result) = Subscribe_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+       Post => Message_Types.Message_Type(Result) = Subscribe_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Subscribe_Request
       (Sender : Module_Mailbox;
@@ -84,8 +84,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Subscribe_Reply_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Subscribe_Reply_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Subscribe_Reply
       (Sender : Module_Mailbox;
@@ -112,8 +112,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Unsubscribe_Request_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Unsubscribe_Request_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Unsubscribe_Request
       (Sender : Module_Mailbox;
@@ -140,8 +140,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Unsubscribe_Reply_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Unsubscribe_Reply_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Unsubscribe_Reply
       (Sender : Module_Mailbox;
@@ -169,8 +169,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Publish_Reply_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Publish_Reply_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Publish_Reply
       (Sender : Module_Mailbox;
@@ -198,8 +198,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => Message_Data'Length <= Data_Size_Type'Last - 8
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Publish_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Publish_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Publish_Request
       (Sender : Module_Mailbox;
@@ -227,8 +227,8 @@ package CubedOS.Publish_Subscribe_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg),
-      Post => Message_Manager.Message_Type(Result) = Publish_Result_Msg
-         and Message_Manager.Receiver_Address(Result) = Receiver_Address;
+      Post => Message_Types.Message_Type(Result) = Publish_Result_Msg
+         and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Publish_Result
       (Sender : Module_Mailbox;
@@ -245,25 +245,25 @@ package CubedOS.Publish_Subscribe_Server.API is
       ;
 
    function Is_Subscribe_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Subscribe_Request_Msg);
+      (Message_Types.Message_Type(Message) = Subscribe_Request_Msg);
 
    function Is_Subscribe_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Subscribe_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Subscribe_Reply_Msg);
 
    function Is_Unsubscribe_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Unsubscribe_Request_Msg);
+      (Message_Types.Message_Type(Message) = Unsubscribe_Request_Msg);
 
    function Is_Unsubscribe_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Unsubscribe_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Unsubscribe_Reply_Msg);
 
    function Is_Publish_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Publish_Request_Msg);
+      (Message_Types.Message_Type(Message) = Publish_Request_Msg);
 
    function Is_Publish_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Publish_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Publish_Reply_Msg);
 
    function Is_Publish_Result(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Publish_Result_Msg);
+      (Message_Types.Message_Type(Message) = Publish_Result_Msg);
 
 
    procedure Subscribe_Request_Decode
