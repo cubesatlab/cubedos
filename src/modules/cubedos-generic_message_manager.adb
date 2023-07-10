@@ -14,16 +14,14 @@ with Ada.Text_IO;
 with CubedOS.Lib.Bounded_Queues;
 with Ada.Containers.Formal_Hashed_Maps;
 
+with CubedOS.Message_Types;
+private with CubedOS.Message_Types; use CubedOS.Message_Types;
+
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
                   Lock => Init_Lock,
                   Request_ID_Generator => Request_ID_Gen)
 is
-
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Object => Message_Record, Name => Msg_Owner);
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Object => Data_Array, Name => Data_Array_Owner);
 
    -- A protected object for generating request ID values.
    protected Request_ID_Gen is
@@ -72,8 +70,7 @@ is
       function Message_Count return Message_Count_Type;
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
-      entry Receive (Message : out Message_Record)
-        with Post => Payload(Message) /= null;
+      entry Receive (Message : out Message_Record);
 
       -- Change the array used to store messages.
       procedure Set_Queue_Size (Size : in Natural);
@@ -150,8 +147,7 @@ is
       begin
          if Q = null or else Is_Full(Q.all) then
             Status := Mailbox_Full;
-            Delete(Message.all);
-            Free(Message);
+            Delete(Message);
             Message := null;
          else
             pragma Assume(Valid(Q.all));
@@ -165,8 +161,7 @@ is
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
-            Delete(Message.all);
-            Free(Message);
+            Delete(Message);
             Message := null;
          else
             pragma Assume(Valid(Q.all));
@@ -195,7 +190,7 @@ is
 
          Next(Q.all, Ptr);
          Message := Ptr.all;
-         Free(Ptr);
+         Delete(Ptr);
 
          if Is_Empty(Q.all) then
             Message_Waiting := False;
@@ -211,95 +206,6 @@ is
       end Set_Queue_Size;
 
    end Sync_Mailbox;
-
-   procedure Delete(Msg : in out Mutable_Message_Record)
-     with SPARK_Mode => Off
-   is
-   begin
-      -- We lie to SPARK here to hide the fact
-      -- that technically Free is a blocking function.
-      Free(Msg.Payload);
-   end Delete;
-
-   ----------------------
-   -- Immutable Messages
-   ----------------------
-
-   function Is_Valid(Msg : Message_Record) return Boolean is
-     (Msg.Payload /= null);
-
-   function Immutable(Msg : Mutable_Message_Record) return Message_Record is
-      Payload_Copy : constant Data_Array_Owner := new Data_Array'(Msg.Payload.all);
-   begin
-      return (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Payload_Copy);
-   end Immutable;
-
-   procedure Delete(Msg : in out Message_Record)
-     with SPARK_Mode => Off
-   is
-   begin
-      -- We lie to spark about this because Free shouldn't be
-      -- considered a blocking function.
-      Free(Msg.Payload);
-   end Delete;
-
-   function Make_Empty_Message
-     (Sender_Address : Message_Address; Receiver_Address : Message_Address;
-      Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
-      Payload_Size : Natural;
-      Priority       : System.Priority := System.Default_Priority)
-      return Mutable_Message_Record
-   is
-      subtype Definite_Data_Array is Data_Array(0 .. Payload_Size - 1);
-   begin
-      return (
-              Sender_Address => Sender_Address,
-              Receiver_Address => Receiver_Address,
-              Request_ID => Request_ID,
-              Message_Type => Message_Type,
-              Priority => Priority,
-              Payload => new Definite_Data_Array'(others => 0)
-             );
-   end Make_Empty_Message;
-
-   procedure Make_Empty_Message
-     (Sender_Address : Message_Address; Receiver_Address : Message_Address;
-      Request_ID     : Request_ID_Type; Message_Type : Universal_Message_Type;
-      Payload : in out Data_Array_Owner;
-      Priority       : System.Priority := System.Default_Priority;
-     Result : out Mutable_Message_Record)
-   is
-   begin
-      Result := (Sender_Address => Sender_Address,
-                 Receiver_Address => Receiver_Address,
-                 Request_ID => Request_ID,
-                 Message_Type => Message_Type,
-                 Priority => Priority,
-                 Payload => Payload
-                );
-      Payload := null;
-   end Make_Empty_Message;
-
-   function Stringify_Message (Message : in Message_Record) return String is
-      Sender_Domain_String : constant String :=
-        Domain_ID_Type'Image (Message.Sender_Address.Domain_ID);
-      Sender_Module_String : constant String :=
-        Module_ID_Type'Image (Message.Sender_Address.Module_ID);
-      Receiver_Domain_String : constant String :=
-        Domain_ID_Type'Image (Message.Receiver_Address.Domain_ID);
-      Receiver_Module_String : constant String :=
-        Module_ID_Type'Image (Message.Receiver_Address.Module_ID);
-      Request_ID_String : constant String :=
-        Request_ID_Type'Image (Message.Request_ID);
-      Message_Type_String : constant String :=
-        Module_ID_Type'Image(Message.Message_Type.Module_ID) & Message_ID_Type'Image (Message.Message_Type.Message_ID);
-      Message_Image : constant String :=
-        Sender_Domain_String & "!" & Sender_Module_String & "!" &
-        Receiver_Domain_String & "!" & Receiver_Module_String & "!" &
-        Request_ID_String & "!" & Message_Type_String & "!";
-   begin
-      return Message_Image;
-   end Stringify_Message;
 
    procedure Get_Next_Request_ID (Request_ID : out Request_ID_Type) is
    begin
@@ -320,18 +226,18 @@ is
    is
    begin
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
-      Message_Storage (Message.Receiver_Address.Module_ID).Send
+      Message_Storage (Receiver_Address(Message).Module_ID).Send
         (Message, Status);
    end Route_Message;
 
    procedure Route_Message (Message : in out Msg_Owner) is
    begin
-      if Message.Receiver_Address.Domain_ID /= Domain_ID then
+      if Receiver_Address(Message).Domain_ID /= Domain_ID then
          -- Circular Dependency with Name_Resolver so resorting to hardcoding
          -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
          Message_Storage (2).Unchecked_Send (Message);
       else
-         Message_Storage (Message.Receiver_Address.Module_ID).Unchecked_Send
+         Message_Storage (Receiver_Address(Message).Module_ID).Unchecked_Send
            (Message);
          pragma Unused(Message);
       end if;
@@ -358,32 +264,6 @@ is
       Init_Lock.Wait;
    end Wait;
 
-   function Copy(Msg : Message_Record) return not null Msg_Owner
-   is
-      subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
-   begin
-      return new Message_Record'(Sender_Address => Msg.Sender_Address,
-                                Receiver_Address => Msg.Receiver_Address,
-                                Request_ID => Msg.Request_ID,
-                                Message_Type => Msg.Message_Type,
-                                Priority => Msg.Priority,
-                                Payload => new Definite_Data_Array'(Msg.Payload.all)
-                               );
-   end;
-
-   procedure Move(Msg : in out Message_Record; Result : out not null Msg_Owner)
-   is
-   begin
-      Result := new Message_Record'(Sender_Address => Msg.Sender_Address,
-                                    Receiver_Address => Msg.Receiver_Address,
-                                    Request_ID => Msg.Request_ID,
-                                    Message_Type => Msg.Message_Type,
-                                    Priority => Msg.Priority,
-                                    Payload => Msg.Payload
-                                   );
-      Msg.Payload := null;
-      end;
-
    procedure Fetch_Message
      (Module : in Module_ID_Type; Message : out Message_Record)
    is
@@ -403,24 +283,19 @@ is
                           Target_Module : Module_Metadata;
                           Target_Domain : Domain_Declaration := This_Domain
                          )
-     with Refined_Post => Msg.Payload = null
    is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
-      Ptr.Receiver_Address := (Target_Domain.ID, Target_Module.Module_ID);
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;
 
    procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record)
-     with Refined_Post => Msg.Payload = null
    is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;
@@ -431,7 +306,6 @@ is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
       Route_Message (Ptr, Status);
       pragma Unused(Ptr);
    end Send_Message;
@@ -459,6 +333,12 @@ is
 
       Init_Lock.Unlock(Address(Mailbox));
    end Register_Module;
+
+   -- Gives a message received from a foreign domain to the message system.
+   procedure Handle_Received(Msg : in out Msg_Owner) is
+   begin
+      Route_Message(Msg);
+   end Handle_Received;
 
    procedure Get_Message_Counts (Count_Array : out Message_Count_Array)
      with Refined_Global => (In_Out => Message_Storage)

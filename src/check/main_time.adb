@@ -33,7 +33,7 @@ procedure Main_Time is
    Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
-   Incoming_Message  : Message_Manager.Message_Record;
+   Incoming_Message  : Message_Record;
    Series_ID         : Series_ID_Type;
    Count             : Series_Count_Type;
    Status            : Message_Status_Type;

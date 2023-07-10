@@ -26,7 +26,7 @@ procedure Main_File is
    Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
-   Incoming_Message : Message_Manager.Message_Record;
+   Incoming_Message : Message_Record;
    Handle       : File_Handle_Type;
    Read_Handle  : File_Handle_Type;
    Write_Handle : File_Handle_Type;
@@ -55,7 +55,7 @@ begin
    loop
       Message_Manager.Read_Next(My_Mailbox, Incoming_Message);
       Put_Line("+++ Fetch returned!");
-      Put_Line(Message_Manager.Stringify_Message(Incoming_Message));
+      Put_Line(Stringify_Message(Incoming_Message));
       New_Line;
 
       -- Process open reply messages.

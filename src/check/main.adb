@@ -21,15 +21,8 @@ with CubedOS.Log_Server.Messages;
 with CubedOS.Publish_Subscribe_Server.Messages;
 with CubedOS.Time_Server.Messages;
 with CubedOS.Transport_UDP.Messages;
-with CubedOS.Message_System;
-with CubedOS.Message_System.Modules;
-with Test_Module;
-with Test_Module.API;
-
---pragma Unreferenced(CubedOS.Transport_UDP.Messages);
 
 procedure Main is
-
    pragma Priority(System.Priority'First);
    use type Ada.Real_Time.Time;
    Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds(1000);
@@ -39,6 +32,7 @@ begin
    CubedOS.Publish_Subscribe_Server.Messages.Init;
    CubedOS.File_Server.Messages.Init;
    CubedOS.Time_Server.Messages.Init;
+   CubedOS.Transport_UDP.Messages.Init;
 
    -- This loop does nothing at the lowest priority. It spends most of its time sleeping.
    loop
