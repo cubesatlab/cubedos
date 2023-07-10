@@ -9,9 +9,6 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with System;
-with CubedOS.Lib.XDR;
-use  CubedOS.Lib.XDR;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 generic
