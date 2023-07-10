@@ -168,32 +168,6 @@ is
      with Global => (In_Out => Mailboxes),
        Pre => Messaging_Ready;
 
-
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once with a status of Accepted if the message was definitely delivered. A status
-   -- of Mailbox_Full indicates that delivery did not occur.
-   --
-   -- Depreciated: Use Mailboxes to send messages
-   procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
-     with Global => (In_Out => (Mailboxes)),
-     Pre => Message /= null
-     and then Is_Valid(Message.all)
-     and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Module_Ready(Receiver_Address(Message).Module_ID),
-     --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     Post => Message = null;
-
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once. If the message could not be delivered it is lost with no indication.
-   --
-   -- Depreciated: Use Mailboxes to send messages
-   procedure Route_Message(Message : in out Msg_Owner)
-     with Global => (In_Out => Mailboxes),
-     Pre => Message /= null and then Is_Valid(Message.all)
-     and then Messaging_Ready,
-     --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     Post => Message = null;
-
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => Mailboxes),
      Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
@@ -224,5 +198,20 @@ private
      is (Box.Spec);
    function Valid(Box : Module_Mailbox) return Boolean
    is (Box.Spec.Receive_Types /= null);
+
+
+   procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
+     with Global => (In_Out => (Mailboxes)),
+     Pre => Message /= null
+     and then Is_Valid(Message.all)
+     and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
+     and then Module_Ready(Receiver_Address(Message).Module_ID),
+     Post => Message = null;
+
+   procedure Route_Message(Message : in out Msg_Owner)
+     with Global => (In_Out => Mailboxes),
+     Pre => Message /= null and then Is_Valid(Message.all)
+     and then Messaging_Ready,
+     Post => Message = null;
 
 end CubedOS.Generic_Message_Manager;
