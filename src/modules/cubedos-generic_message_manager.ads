@@ -58,21 +58,6 @@ is
    Empty_Type_Array : aliased constant Message_Type_Array := (0 => (1, 1));
    Empty_Type_Array_Ptr : aliased constant Message_Type_Array := (0 => (1,1));
 
-   type Public_Mailbox is interface;
-   type Public_Mailbox_Owner is access constant Public_Mailbox'Class;
-
-   function Receive_Types(Box : Public_Mailbox) return Const_Msg_Type_Array_Ptr is abstract;
-   function Address(Box : Public_Mailbox) return Message_Address is abstract;
-
-   function Receives(Receiver : access constant Public_Mailbox'Class; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost,
-     Pre => Receiver /= null,
-     Depends => (Receives'Result => (Receiver, Msg_Type));
-
-   function Receives(Receiver : Public_Mailbox'Class; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost,
-     Depends => (Receives'Result => (Receiver, Msg_Type));
-
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
      with Ghost;
@@ -209,17 +194,22 @@ is
    -- and the only intended way to send messages from it.
    -- Modules should keep their instance of this object invisible
    -- to outside modules.
-   type Module_Mailbox is new Public_Mailbox with private;
+   type Module_Mailbox is private;
 
+   function Spec(Box : Module_Mailbox) return Module_Metadata;
    function Valid(Box : Module_Mailbox) return Boolean;
+   function Address(Box : Module_Mailbox) return Module_ID_Type;
 
-   overriding
-   function Address(Box : Module_Mailbox) return Message_Address;
+   function Receives(Receiver : access constant Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+     with Ghost,
+     Pre => Receiver /= null,
+     Depends => (Receives'Result => (Receiver, Msg_Type));
 
-   overriding
-   function Receive_Types(Box : Module_Mailbox) return Const_Msg_Type_Array_Ptr;
+   function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+     with Ghost,
+     Depends => (Receives'Result => (Receiver, Msg_Type));
 
-   procedure Send_Message(Box : Module_Mailbox'Class;
+   procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
                           Target_Domain : Domain_Declaration := This_Domain)
@@ -233,7 +223,7 @@ is
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately. Moves the message's payload making it inaccessible
    -- after the call.
-   procedure Send_Message(Box : Module_Mailbox'Class; Msg : in out Message_Record)
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
      with Global => (In_Out => Mailboxes),
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => Msg),
@@ -244,7 +234,7 @@ is
 
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately with the status of the operation's result.
-   procedure Send_Message(Box : Module_Mailbox'Class; Msg : in out Message_Record; Status : out Status_Type)
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
@@ -254,37 +244,36 @@ is
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
-   procedure Read_Next(Box : Module_Mailbox'Class; Msg : out Message_Record)
+   procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
      with Pre => Messaging_Ready,
      Post => Is_Valid(Msg)
      and Payload(Msg) /= null
-     and Receives(Box, Message_Type(Msg));
+     and Receives(Spec(Box), Message_Type(Msg));
 
    -- Count the number of messages in the mailbox waiting
    -- to be read. This is a procedure and not a function because
    -- the mailboxes are volatile. Theoretically, it may be possible
    -- to make this a function, but the SPARK manual is
    -- beyond me on this subject.
-   procedure Queue_Size(Box : Module_Mailbox'Class; Size : out Natural)
+   procedure Queue_Size(Box : Module_Mailbox; Size : out Natural)
      with Global => (In_Out => Mailboxes);
 
    function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
                                 Spec : Module_Metadata) return Module_Mailbox
      with
-       Post => Address(Make_Module_Mailbox'Result).Module_ID = Module_ID
-       and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T))
-       and Address(Make_Module_Mailbox'Result).Domain_ID = Domain_ID;
+       Post => Address(Make_Module_Mailbox'Result) = Module_ID
+       and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
 
    -- Register a module with the mail system.
    -- Gets an observer for that module's mailbox.
-   procedure Register_Module(Mailbox : in Module_Mailbox'Class;
+   procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
-     Pre => (for some M of This_Domain.Module_IDs => M = Address(Mailbox).Module_ID),
+     Pre => (for some M of This_Domain.Module_IDs => M = Address(Mailbox)),
      --Pre => not Module_Ready(Address(Mailbox).Module_ID),
-     Post => Module_Ready(Address(Mailbox).Module_ID);
+     Post => Module_Ready(Address(Mailbox));
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.
@@ -370,12 +359,14 @@ private
    function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
    function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
 
-   type Module_Mailbox is new Public_Mailbox with
+   type Module_Mailbox is
       record
          Module_ID : Module_ID_Type;
          Spec : Module_Metadata;
       end record;
 
+   function Spec(Box : Module_Mailbox) return Module_Metadata
+     is (Box.Spec);
    function Valid(Box : Module_Mailbox) return Boolean
    is (Box.Spec.Receive_Types /= null);
 

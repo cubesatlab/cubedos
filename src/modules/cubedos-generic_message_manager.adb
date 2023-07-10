@@ -298,11 +298,11 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : access constant Public_Mailbox'Class; Msg_Type : Universal_Message_Type) return Boolean
+   function Receives(Receiver : access constant Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
      is (Receives(Receiver.all, Msg_Type));
 
-   function Receives(Receiver : Public_Mailbox'Class; Msg_Type : Universal_Message_Type) return Boolean
-     is (for some T of Receive_Types(Receiver).all => T = Msg_Type);
+   function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+     is (for some T of Receiver.Spec.Receive_Types.all => T = Msg_Type);
 
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
    is (True);
@@ -387,14 +387,10 @@ is
    -- Mailbox
    -------------
 
-   --TODO: Remove domain
-   function Address(Box : Module_Mailbox) return Message_Address is
-     (Domain_ID, Box.Spec.Module_ID);
+   function Address(Box : Module_Mailbox) return Module_ID_Type is
+     (Box.Spec.Module_ID);
 
-   function Receive_Types(Box : Module_Mailbox) return Const_Msg_Type_Array_Ptr
-     is (Box.Spec.Receive_Types);
-
-   procedure Send_Message(Box : Module_Mailbox'Class;
+   procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
                           Target_Domain : Domain_Declaration := This_Domain
@@ -404,56 +400,56 @@ is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := Box.Address;
+      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
       Ptr.Receiver_Address := (Target_Domain.ID, Target_Module.Module_ID);
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Send_Message (Box : Module_Mailbox'Class; Msg : in out Message_Record)
+   procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record)
      with Refined_Post => Msg.Payload = null
    is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := Box.Address;
+      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
       Route_Message (Ptr);
       pragma Unused(Ptr);
    end Send_Message;
 
    procedure Send_Message
-     (Box : Module_Mailbox'Class; Msg : in out Message_Record; Status : out Status_Type)
+     (Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
    is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Ptr.Sender_Address := Box.Address;
+      Ptr.Sender_Address := (Domain_ID, Box.Spec.Module_ID);
       Route_Message (Ptr, Status);
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Read_Next (Box : Module_Mailbox'Class; Msg : out Message_Record) is
+   procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
    begin
-      Fetch_Message (Box.Address.Module_ID, Msg);
+      Fetch_Message (Box.Spec.Module_ID, Msg);
    end Read_Next;
 
-   procedure Queue_Size(Box : Module_Mailbox'Class; Size : out Natural) is
+   procedure Queue_Size(Box : Module_Mailbox; Size : out Natural) is
    begin
-      Size := Message_Storage (Box.Address.Module_ID).Message_Count;
+      Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
    end Queue_Size;
 
    function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
                                 Spec : Module_Metadata) return Module_Mailbox
    is (Module_ID, Spec);
 
-   procedure Register_Module(Mailbox : in Module_Mailbox'Class;
+   procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
    is
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Address(Mailbox).Module_ID).Set_Queue_Size (Msg_Queue_Size);
+      Message_Storage (Address(Mailbox)).Set_Queue_Size (Msg_Queue_Size);
 
-      Init_Lock.Unlock(Address(Mailbox).Module_ID);
+      Init_Lock.Unlock(Address(Mailbox));
    end Register_Module;
 
    procedure Get_Message_Counts (Count_Array : out Message_Count_Array)

@@ -199,7 +199,7 @@ package CubedOS.Time_Server.API is
       Global => (In_Out => Mailboxes),
        Pre => true
          and then Messaging_Ready
-         and then Address(Sender).Module_ID = This_Module
+         and then Address(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg)
       ;
 
@@ -215,7 +215,7 @@ package CubedOS.Time_Server.API is
       Global => (In_Out => Mailboxes),
        Pre => true
          and then Messaging_Ready
-         and then Address(Sender).Module_ID = This_Module
+         and then Address(Sender) = This_Module
          and then Receives(Receiving_Module.all, Tick_Reply_Msg)
          and then Has_Module(Receiving_Domain.all, Receiving_Module.Module_ID)
       ;
