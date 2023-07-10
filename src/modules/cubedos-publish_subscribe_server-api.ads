@@ -97,7 +97,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg)
       ;
 
@@ -153,7 +153,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg)
       ;
 
@@ -182,7 +182,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg)
       ;
 
@@ -240,7 +240,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg)
       ;
 

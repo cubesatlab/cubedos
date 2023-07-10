@@ -273,7 +273,7 @@ is
    -- Mailbox
    -------------
 
-   function Address(Box : Module_Mailbox) return Module_ID_Type is
+   function Module_ID(Box : Module_Mailbox) return Module_ID_Type is
      (Box.Spec.Module_ID);
 
    procedure Send_Message(Box : Module_Mailbox;
@@ -318,18 +318,18 @@ is
       Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
    end Queue_Size;
 
-   function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
+   function Make_Module_Mailbox(ID : in Module_ID_Type;
                                 Spec : Module_Metadata) return Module_Mailbox
-   is (Module_ID, Spec);
+   is (ID, Spec);
 
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
    is
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Address(Mailbox)).Set_Queue_Size (Msg_Queue_Size);
+      Message_Storage (Module_ID(Mailbox)).Set_Queue_Size (Msg_Queue_Size);
 
-      Init_Lock.Unlock(Address(Mailbox));
+      Init_Lock.Unlock(Module_ID(Mailbox));
    end Register_Module;
 
    -- Gives a message received from a foreign domain to the message system.
