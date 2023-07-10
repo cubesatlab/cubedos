@@ -54,8 +54,6 @@ is
    -- with actual message sizes and this constant should be removed.
    Max_Message_Size : constant Positive := 1024;
 
-
-   Empty_Type_Array : aliased constant Message_Type_Array := (0 => (1, 1));
    Empty_Type_Array_Ptr : aliased constant Message_Type_Array := (0 => (1,1));
 
    -- True if the given receiving address can be sent the given message type.
@@ -228,7 +226,6 @@ is
      Depends => (Mailboxes => +(Box, Msg),
                  Msg => Msg),
      Pre => Messaging_Ready
-     --and then Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg))
      and then Is_Valid(Msg),
      Post => Payload(Msg) = null;
 
@@ -330,7 +327,8 @@ is
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
      and then Is_Valid(Message);
 
-   -- Waits until the message system is initialized
+   -- Blocks until all modules in the domain have intitialized
+   -- their mailbox and are ready to receive messages.
    procedure Wait
      with Post => Messaging_Ready;
 
