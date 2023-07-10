@@ -31,7 +31,7 @@ procedure Main is
    Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock + Ada.Real_Time.Milliseconds(1000);
 begin
    CubedOS.Interpreter.Messages.Init;
-   CubedOS.Log_Server.Messages.Initialize;
+   CubedOS.Log_Server.Messages.Init;
    CubedOS.Publish_Subscribe_Server.Messages.Init;
    CubedOS.File_Server.Messages.Init;
    CubedOS.Time_Server.Messages.Init;

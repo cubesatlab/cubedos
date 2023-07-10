@@ -17,7 +17,7 @@ package CubedOS.Log_Server.Messages is
 
    use Message_Manager;
 
-   procedure Initialize;
+   procedure Init;
 
    task Message_Loop
      with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes, Message_Manager.Lock))
