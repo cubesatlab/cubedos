@@ -61,7 +61,7 @@ package body CubedOS.Log_Server.API is
       Message : Message_Record;
    begin
       Log_Text_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Level => Level,

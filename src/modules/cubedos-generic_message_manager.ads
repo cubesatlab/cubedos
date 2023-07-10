@@ -69,7 +69,7 @@ is
 
    function Spec(Box : Module_Mailbox) return Module_Metadata;
    function Valid(Box : Module_Mailbox) return Boolean;
-   function Address(Box : Module_Mailbox) return Module_ID_Type;
+   function Module_ID(Box : Module_Mailbox) return Module_ID_Type;
 
    function Receives(Receiver : access constant Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
      with Ghost,
@@ -138,10 +138,10 @@ is
    procedure Queue_Size(Box : Module_Mailbox; Size : out Natural)
      with Global => (In_Out => Mailboxes);
 
-   function Make_Module_Mailbox(Module_ID : in Module_ID_Type;
+   function Make_Module_Mailbox(ID : in Module_ID_Type;
                                 Spec : Module_Metadata) return Module_Mailbox
      with
-       Post => Address(Make_Module_Mailbox'Result) = Module_ID
+       Post => Module_ID(Make_Module_Mailbox'Result) = ID
        and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
 
    -- Register a module with the mail system.
@@ -151,9 +151,9 @@ is
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
-     Pre => (for some M of This_Domain.Module_IDs => M = Address(Mailbox)),
+     Pre => (for some M of This_Domain.Module_IDs => M = Module_ID(Mailbox)),
      --Pre => not Module_Ready(Address(Mailbox).Module_ID),
-     Post => Module_Ready(Address(Mailbox));
+     Post => Module_Ready(Module_ID(Mailbox));
 
    -- Gives a message received from a foreign domain to the message system.
    procedure Handle_Received(Msg : in out Msg_Owner);

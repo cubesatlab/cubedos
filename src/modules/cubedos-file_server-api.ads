@@ -117,7 +117,7 @@ package CubedOS.File_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg)
       ;
 
@@ -177,7 +177,7 @@ package CubedOS.File_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => Amount <= File_Data'Length
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg)
       ;
 
@@ -237,7 +237,7 @@ package CubedOS.File_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Address(Sender) = This_Module
+         and then Module_ID(Sender) = This_Module
          and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg)
       ;
 
