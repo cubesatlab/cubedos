@@ -5,17 +5,9 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
-with Ada.Unchecked_Deallocation;
-
--- with Name_Resolver;
-
-with Ada.Text_IO;
 
 with CubedOS.Lib.Bounded_Queues;
 with Ada.Containers.Formal_Hashed_Maps;
-
-with CubedOS.Message_Types;
-private with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -126,16 +118,13 @@ is
                Position : Boolean_Maps.Cursor;
                Inserted : Boolean;
             begin
-               Ada.Text_IO.Put_Line("Adding Line " & Module_ID_Type'Image(I));
                Insert(Inited.all, I, False, Position, Inserted);
                pragma Unused(Position, Inserted);
             end;
          end loop;
 
-         Ada.Text_IO.Put_Line("Activating " & Module_ID_Type'Image(Module));
          Replace(Inited.all, Module, True);
          if (for all I of Inited.all => Element(Inited.all, I)) then
-            Ada.Text_IO.Put_Line("Unlocking");
             Locked := False;
          end if;
       end Unlock;
@@ -286,6 +275,7 @@ is
    begin
       Move(Msg, Ptr);
       Route_Message (Ptr);
+      pragma Unreferenced(Box, Target_Module, Target_Domain);
       pragma Unused(Ptr);
    end Send_Message;
 
@@ -295,6 +285,7 @@ is
    begin
       Move(Msg, Ptr);
       Route_Message (Ptr);
+      pragma Unreferenced(Box);
       pragma Unused(Ptr);
    end Send_Message;
 
@@ -305,6 +296,7 @@ is
    begin
       Move(Msg, Ptr);
       Route_Message (Ptr, Status);
+      pragma Unreferenced(Box);
       pragma Unused(Ptr);
    end Send_Message;
 
