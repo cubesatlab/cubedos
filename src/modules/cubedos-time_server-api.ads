@@ -57,8 +57,8 @@ package CubedOS.Time_Server.API is
    with
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
-      Post => Message_Manager.Message_Type(Result) = Relative_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address
+      Post => Message_Types.Message_Type(Result) = Relative_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Is_Valid(Result);
 
    procedure Send_Relative_Request
@@ -96,7 +96,7 @@ package CubedOS.Time_Server.API is
       ;
 
    function Is_Relative_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Relative_Request_Msg);
+      (Message_Types.Message_Type(Message) = Relative_Request_Msg);
    procedure Relative_Request_Decode
       (Message : in  Message_Record;
       Tick_Interval : out Ada.Real_Time.Time_Span;
@@ -121,8 +121,8 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Absolute_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Absolute_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address
+      Post => Message_Types.Message_Type(Result) = Absolute_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Is_Valid(Result);
 
    procedure Send_Absolute_Request
@@ -159,7 +159,7 @@ package CubedOS.Time_Server.API is
 
 
    function Is_Absolute_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Absolute_Request_Msg);
+      (Message_Types.Message_Type(Message) = Absolute_Request_Msg);
    procedure Absolute_Request_Decode
       (Message : in  Message_Record;
       Tick_Time : out Ada.Real_Time.Time;
@@ -184,8 +184,8 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg),
-      Post => Message_Manager.Message_Type(Result) = Tick_Reply_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address
+      Post => Message_Types.Message_Type(Result) = Tick_Reply_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Is_Valid(Result);
 
    procedure Send_Tick_Reply
@@ -221,7 +221,7 @@ package CubedOS.Time_Server.API is
       ;
 
    function Is_Tick_Reply(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Tick_Reply_Msg);
+      (Message_Types.Message_Type(Message) = Tick_Reply_Msg);
    procedure Tick_Reply_Decode
       (Message : in  Message_Record;
       Series_ID : out Series_ID_Type;
@@ -244,8 +244,8 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
          and then Receives(Receiver_Address.Module_ID, Cancel_Request_Msg),
-      Post => Message_Manager.Message_Type(Result) = Cancel_Request_Msg
-       and Message_Manager.Receiver_Address(Result) = Receiver_Address
+      Post => Message_Types.Message_Type(Result) = Cancel_Request_Msg
+       and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Is_Valid(Result);
 
    procedure Send_Cancel_Request
@@ -263,7 +263,7 @@ package CubedOS.Time_Server.API is
       ;
 
    function Is_Cancel_Request(Message : Message_Record) return Boolean is
-      (Message_Manager.Message_Type(Message) = Cancel_Request_Msg);
+      (Message_Types.Message_Type(Message) = Cancel_Request_Msg);
    procedure Cancel_Request_Decode
       (Message : in  Message_Record;
       Series_ID : out Series_ID_Type;

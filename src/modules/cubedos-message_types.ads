@@ -7,7 +7,11 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
+with System;
+with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
+
 package CubedOS.Message_Types is
+
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
    Maximum_Domain_Count : constant := 256;
@@ -77,6 +81,153 @@ package CubedOS.Message_Types is
      Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T))
      and Declare_Receives'Result.Module_ID = This_Module;
 
+
+   -- Definition of a CubedOS message. Messages are stored in XDR_Arrays.
+
+   -- Starting the index type at 0 is convenient when expressing "multiple of four" assertions.
+   -- The 'extended' index type provides an extra value before the first allowed index. This is
+   -- used by the XDR Octet_Array and String encoders so they can return a correct 'Last' when
+   -- given zero length values to encode. Support for encoding zero length arrays and strings is
+   -- useful.
+   --
+   subtype Data_Index_Type is XDR_Index_Type;
+   subtype Data_Extended_Index_Type is XDR_Extended_Index_Type;
+   subtype Data_Size_Type is XDR_Size_Type;
+   subtype Data_Array is XDR_Array;
+   type Data_Array_Owner is access Data_Array;
+
+   -- TODO: All references to this value by API packages should be replaced
+   -- with actual message sizes and this constant should be removed.
+   Max_Message_Size : constant Positive := 1024;
+
+   --  type Domain_ID_List is array (Natural range <>) of Domain_ID_Type;
+   --  type Transport_Module_ID is new Positive range 1..32;
+   --  type Transport_Identifier (Domain_Count : Natural) is
+   --     record
+   --        ID : Transport_Module_ID;
+   --        Takes_Domains : Domain_ID_List(1 .. Domain_Count);
+   --     end record;
+
+   -- Messages currently have a priority field that is not used. The intention is to allow high
+   -- priority messages to be processed earlier and without interruption. SPARK does not support
+   -- dynamic task priorities, however, so the usefulness of this idea is questionable. We could
+   -- still sort mailboxes by message priority (not currently done) which might be a little
+   -- useful.
+   type Mutable_Message_Record is
+      record
+         Sender_Address : Message_Address;
+         Receiver_Address : Message_Address;
+         Request_ID : Request_ID_Type;
+         Message_Type : Universal_Message_Type;
+         Priority   : System.Priority;
+         Payload    : Data_Array_Owner;
+      end record;
+
+   -- Immutible version of message record
+   type Message_Record is private
+     with Default_Initial_Condition => Payload(Message_Record) = null;
+   type Msg_Owner is access Message_Record;
+
+   function Is_Valid(Msg : Message_Record) return Boolean
+     with Post => Is_Valid'Result = (Payload(Msg) /= null);
+
+   -- Creates an immutible copy of the given message
+   function Immutable(Msg : Mutable_Message_Record) return Message_Record
+     with Pre => Msg.Payload /= null,
+     Post => Is_Valid(Immutable'Result) and
+     Message_Type(Immutable'Result) = Msg.Message_Type and
+     Receiver_Address(Immutable'Result) = Msg.Receiver_Address and
+     Sender_Address(Immutable'Result) = Msg.Sender_Address and
+     Request_ID(Immutable'Result) = Msg.Request_ID and
+     Priority(Immutable'Result) = Msg.Priority and
+     Payload(Immutable'Result).all = Msg.Payload.all;
+
+   function Sender_Address(Msg : Message_Record) return Message_Address;
+   function Receiver_Address(Msg : Message_Record) return Message_Address;
+   function Request_ID(Msg : Message_Record) return Request_ID_Type;
+   function Message_Type(Msg : Message_Record) return Universal_Message_Type;
+   function Priority(Msg : Message_Record) return System.Priority;
+   function Payload(Msg : Message_Record) return access constant Data_Array;
+
+   -- Adding duplicates for pointers cuts down on Ada's disgusting syntax
+   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address;
+   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address;
+   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type;
+   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type;
+   function Priority(Msg : not null access constant Message_Record) return System.Priority;
+   function Payload(Msg : not null access constant Message_Record) return access constant Data_Array;
+
+   -- Convenience constructor function for messages. This is used by encoding functions.
+   function Make_Empty_Message
+     (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Message_Type : Universal_Message_Type;
+      Payload_Size : Natural;
+      Priority   : System.Priority := System.Default_Priority) return Mutable_Message_Record
+     with
+       Global => null,
+       Post=>
+         Make_Empty_Message'Result.Sender_Address   = Sender_Address   and
+         Make_Empty_Message'Result.Receiver_Address = Receiver_Address and
+         Make_Empty_Message'Result.Request_ID = Request_ID and
+         Make_Empty_Message'Result.Message_Type = Message_Type and
+         Make_Empty_Message'Result.Payload /= null and
+         Make_Empty_Message'Result.Payload'Length = Payload_Size and
+         Make_Empty_Message'Result.Priority   = Priority;
+
+   procedure Make_Empty_Message
+     (Sender_Address : Message_Address;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Message_Type : Universal_Message_Type;
+      Payload : in out Data_Array_Owner;
+      Priority   : System.Priority := System.Default_Priority;
+      Result : out Mutable_Message_Record)
+     with
+       Global => null,
+       Pre => Payload /= null,
+       Post =>
+         Result.Sender_Address   = Sender_Address   and
+         Result.Receiver_Address = Receiver_Address and
+         Result.Request_ID = Request_ID and
+         Result.Message_Type = Message_Type and
+         Result.Payload.all = Payload.all'Old and
+         Result.Payload /= null and
+         Payload = null and
+         Result.Priority   = Priority;
+
+   -- Convenience function to stringify messages
+   function Stringify_Message (Message : in Message_Record) return String;
+
+   -- Frees any dynamically allocated memory the message references.
+   procedure Delete(Msg : in out Mutable_Message_Record)
+     with Pre => Msg.Payload /= null,
+     Post => Msg.Payload = null;
+
+   -- Frees any dynamically allocated memory the message references.
+   procedure Delete(Msg : in out Message_Record)
+     with Pre => Payload(Msg) /= null,
+     Post => Payload(Msg) = null;
+
+   -- Frees the message pointed to. If the message has
+   -- an allocated payload, free that also.
+   procedure Delete(Msg : in out Msg_Owner)
+     with Pre => Msg /= null,
+     Post => Msg = null;
+
+   -- Create a copy of the given message on the heap,
+   -- also making a copy of the payload content.
+   function Copy(Msg : Message_Record) return not null Msg_Owner
+     with Pre => Is_Valid(Msg),
+     Post => Is_Valid(Copy'Result.all);
+
+   -- Create a copy of the given message on the heap,
+   -- moving the payload content.
+   procedure Move(Msg : in out Message_Record; Result : out not null Msg_Owner)
+     with Pre => Is_Valid(Msg),
+     Post => not Is_Valid(Msg) and Is_Valid(Result.all);
+
 private
    function Declare_Domain(Module_Count : Natural; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
      is (Module_Count, Domain_ID, Module_IDs);
@@ -89,5 +240,29 @@ private
 
    function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
      is (for some T of Receiver.Receive_Types.all => T = Msg_Type);
+
+   type Message_Record is
+      record
+         Sender_Address : Message_Address := (1,1);
+         Receiver_Address : Message_Address := (1,1);
+         Request_ID : Request_ID_Type := 1;
+         Message_Type : Universal_Message_Type := (1,1);
+         Priority   : System.Priority := 1;
+         Payload    : Data_Array_Owner := null;
+      end record;
+
+   function Sender_Address(Msg : Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : Message_Record) return access constant Data_Array is (Msg.Payload);
+
+   function Sender_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Sender_Address);
+   function Receiver_Address(Msg : not null access constant Message_Record) return Message_Address is (Msg.Receiver_Address);
+   function Request_ID(Msg : not null access constant Message_Record) return Request_ID_Type is (Msg.Request_ID);
+   function Message_Type(Msg : not null access constant Message_Record) return Universal_Message_Type is (Msg.Message_Type);
+   function Priority(Msg : not null access constant Message_Record) return System.Priority is (Msg.Priority);
+   function Payload(Msg : not null access constant Message_Record) return access constant Data_Array is (Msg.Payload);
 
 end CubedOS.Message_Types;

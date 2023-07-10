@@ -12,7 +12,8 @@ with CubedOS.Generic_Message_Manager;
 pragma Elaborate_All(CubedOS.Generic_Message_Manager);
 
 with Name_Resolver;
+with Domain_Config;
 
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
-    (Name_Resolver.Domain);
+    (Name_Resolver.Domain, Domain_Config.Send);

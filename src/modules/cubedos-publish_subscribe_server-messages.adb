@@ -124,7 +124,7 @@ is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
       Message_Manager.Wait;
 
