@@ -50,7 +50,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Subscribe_Request_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Result => Message, Priority => Priority);
       Message_Manager.Send_Message (Sender, Message);
@@ -95,7 +95,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Subscribe_Reply_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Status => Status, Result => Message,
          Priority => Priority);
@@ -136,7 +136,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Unsubscribe_Request_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Result => Message, Priority => Priority);
       Message_Manager.Send_Message (Sender, Message);
@@ -181,7 +181,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Unsubscribe_Reply_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Status => Status, Result => Message,
          Priority => Priority);
@@ -223,7 +223,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Publish_Request_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Message_Data => Message_Data,
          Result => Message, Priority => Priority);
@@ -269,7 +269,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Publish_Reply_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Status => Status, Result => Message,
          Priority => Priority);
@@ -315,7 +315,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Message : Message_Record;
    begin
       Publish_Result_Encode
-        (Sender_Address => Address (Sender),
+        (Sender_Address => (Message_Manager.Domain_ID, Address (Sender)),
          Receiver_Address => Receiver_Address, Request_ID => Request_ID,
          Channel => Channel, Data => Data, Result => Message,
          Priority => Priority);
