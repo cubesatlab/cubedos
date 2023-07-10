@@ -12,6 +12,7 @@ with Ada.Unchecked_Deallocation;
 with Ada.Text_IO;
 
 with CubedOS.Lib.Bounded_Queues;
+with Ada.Containers.Formal_Hashed_Maps;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -31,16 +32,19 @@ is
       Next_Request_ID : Request_ID_Type := 1;
    end Request_ID_Gen;
 
-   type Msg_Ptr_Array_Ptr is access Message_Ptr_Array;
-
-   type Mailbox_Inited_Array is array (Module_ID_Type) of Boolean;
+   function Equivalent_Key (Left, Right : Module_ID_Type) return Boolean is (Left = Right);
+   function Hash_Func(Key : Module_ID_Type) return Ada.Containers.Hash_Type is (Ada.Containers.Hash_Type(Key));
+   package Boolean_Maps is new Ada.Containers.Formal_Hashed_Maps(Module_ID_Type, Boolean, Hash_Func, Equivalent_Key, Standard."=");
+   type Boolean_Map is new Boolean_Maps.Map(Ada.Containers.Count_Type(Module_Count), Ada.Containers.Hash_Type(Module_ID_Type'Last));
+   type Boolean_Map_Owner is access Boolean_Map;
 
    protected Init_Lock is
       entry Wait;
       function Is_Locked return Boolean;
-      procedure Unlock (Module : Module_ID_Type);
+      procedure Unlock (Module : Module_ID_Type)
+        with Pre => (for some M of This_Domain.Module_IDs => M = Module);
    private
-      Inited : Mailbox_Inited_Array := (others => False);
+      Inited : Boolean_Map_Owner := new Boolean_Map;
       Locked : Boolean := True;
    end Init_Lock;
 
@@ -117,8 +121,23 @@ is
         is (Locked);
       procedure Unlock (Module : Module_ID_Type) is
       begin
-         Inited(Module) := True;
-         if (for all I of Inited => I) then
+         -- Make sure all modules have a check
+         for I of This_Domain.Module_IDs loop
+            -- If an id is already in the map, this function
+            -- won't override it.
+            declare
+               Position : Boolean_Maps.Cursor;
+               Inserted : Boolean;
+            begin
+               Ada.Text_IO.Put_Line("Adding Line " & Module_ID_Type'Image(I));
+               Insert(Inited.all, I, False, Position, Inserted);
+               pragma Unused(Position, Inserted);
+            end;
+         end loop;
+
+         Ada.Text_IO.Put_Line("Activating " & Module_ID_Type'Image(Module));
+         Replace(Inited.all, Module, True);
+         if (for all I of Inited.all => Element(Inited.all, I)) then
             Ada.Text_IO.Put_Line("Unlocking");
             Locked := False;
          end if;
@@ -259,7 +278,7 @@ is
       Sender_Module_String : constant String :=
         Module_ID_Type'Image (Message.Sender_Address.Module_ID);
       Receiver_Domain_String : constant String :=
-        Module_ID_Type'Image (Message.Receiver_Address.Domain_ID);
+        Domain_ID_Type'Image (Message.Receiver_Address.Domain_ID);
       Receiver_Module_String : constant String :=
         Module_ID_Type'Image (Message.Receiver_Address.Module_ID);
       Request_ID_String : constant String :=

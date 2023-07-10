@@ -11,10 +11,10 @@ package CubedOS.Message_Types is
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
    Maximum_Domain_Count : constant := 256;
-   subtype Domain_ID_Type is Natural range 0 .. Maximum_Domain_Count;
+   type Domain_ID_Type is new Natural range 0 .. Maximum_Domain_Count;
 
    -- Definition of module ID numbers. Full IDs are qualified by the domain ID.
-   subtype Module_ID_Type is Positive range 1 .. 256;
+   type Module_ID_Type is new Positive range 1 .. 256;
 
    -- Definition of message IDs. Full IDs are qualified by the module ID.
    -- There is a limit to how many messages a module can define. Make this a generic parameter?
