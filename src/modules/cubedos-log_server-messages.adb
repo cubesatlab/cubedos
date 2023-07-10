@@ -12,11 +12,11 @@ package body CubedOS.Log_Server.Messages is
 
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
-   procedure Initialize
+   procedure Init
    is
    begin
       Message_Manager.Register_Module(Mailbox, 8);
-   end Initialize;
+   end Init;
 
    -------------------
    -- Message Handling
