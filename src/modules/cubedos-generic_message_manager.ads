@@ -80,6 +80,9 @@ is
      with Ghost,
      Depends => (Receives'Result => (Receiver, Msg_Type));
 
+   -- Sends the given message to the given address from this mailbox's address.
+   -- Returns immediately. Moves the message's payload making it inaccessible
+   -- after the call.
    procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
@@ -107,13 +110,16 @@ is
 
    -- Sends the given message to the given address from this mailbox's address.
    -- Returns immediately with the status of the operation's result.
+   -- The destination domain must be this domain in order to get a status.
+   -- If the destination domain is external, use a different Send_Message procedure.
    procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Depends => (Mailboxes => +(Box, Msg),
                  Status => (Box, Msg, Mailboxes),
                  Msg => Msg),
      Pre => Messaging_Ready
-     and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID);
+     and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
+     and then Receiver_Address(Msg).Domain_ID = Domain_ID;
      --and then Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
 
    -- Reads the next message, removing it from the message queue.

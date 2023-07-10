@@ -233,9 +233,7 @@ is
    procedure Route_Message (Message : in out Msg_Owner) is
    begin
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
-         -- Circular Dependency with Name_Resolver so resorting to hardcoding
-         -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
-         Message_Storage (2).Unchecked_Send (Message);
+         Send_Outgoing_Message(Message);
       else
          Message_Storage (Receiver_Address(Message).Module_ID).Unchecked_Send
            (Message);
