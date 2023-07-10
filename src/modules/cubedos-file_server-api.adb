@@ -62,7 +62,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Open_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Mode => Mode,
@@ -113,7 +113,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Open_Reply_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,
@@ -165,7 +165,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Read_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,
@@ -220,7 +220,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Read_Reply_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,
@@ -276,7 +276,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Write_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,
@@ -330,7 +330,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Write_Reply_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,
@@ -379,7 +379,7 @@ package body CubedOS.File_Server.API is
       Message : Message_Record;
    begin
       Close_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Handle => Handle,

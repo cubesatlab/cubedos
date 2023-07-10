@@ -70,7 +70,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Relative_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Tick_Interval => Tick_Interval,
@@ -94,7 +94,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Relative_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Tick_Interval => Tick_Interval,
@@ -202,7 +202,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Absolute_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Tick_Time => Tick_Time,
@@ -224,7 +224,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Absolute_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Tick_Time => Tick_Time,
@@ -317,7 +317,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Tick_Reply_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Series_ID => Series_ID,
@@ -339,7 +339,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Tick_Reply_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Series_ID => Series_ID,
@@ -426,7 +426,7 @@ package body CubedOS.Time_Server.API is
       Message : Message_Record;
    begin
       Cancel_Request_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Address(Sender)),
+         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
          Request_ID => Request_ID,
          Series_ID => Series_ID,
