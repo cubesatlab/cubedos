@@ -28,14 +28,6 @@ is
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
    Module_Count : constant Natural := This_Domain.Module_Count;
 
-   -- Definition of Request IDs. Normally requests are given unique ID values that are echoed in
-   -- replies. This allows a module to associate a reply with a particular request. The request
-   -- ID of zero i special; it is used in cases where no such request/reply matching is needed
-   -- or sensible.
-   type Request_ID_Type is mod 2**32;
-
-   -- Note: A fully qualified message address is the triple (Domain_ID, Module_ID, Message_ID).
-
    -- Definition of a CubedOS message. Messages are stored in XDR_Arrays.
 
    -- Starting the index type at 0 is convenient when expressing "multiple of four" assertions.

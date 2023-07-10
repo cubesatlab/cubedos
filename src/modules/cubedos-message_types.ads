@@ -28,6 +28,12 @@ package CubedOS.Message_Types is
          Module_ID : Module_ID_Type := 1;
       end record;
 
+   -- Definition of Request IDs. Normally requests are given unique ID values that are echoed in
+   -- replies. This allows a module to associate a reply with a particular request. The request
+   -- ID of zero i special; it is used in cases where no such request/reply matching is needed
+   -- or sensible.
+   type Request_ID_Type is mod 2**32;
+
    type Module_ID_Set is array (Natural range <>) of Module_ID_Type;
 
    -- Describes a domain

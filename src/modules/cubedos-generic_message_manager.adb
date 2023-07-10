@@ -212,8 +212,12 @@ is
 
    end Sync_Mailbox;
 
-   procedure Delete(Msg : in out Mutable_Message_Record) is
+   procedure Delete(Msg : in out Mutable_Message_Record)
+     with SPARK_Mode => Off
+   is
    begin
+      -- We lie to SPARK here to hide the fact
+      -- that technically Free is a blocking function.
       Free(Msg.Payload);
    end Delete;
 
@@ -230,8 +234,12 @@ is
       return (Msg.Sender_Address, Msg.Receiver_Address, Msg.Request_ID, Msg.Message_Type, Msg.Priority, Payload_Copy);
    end Immutable;
 
-   procedure Delete(Msg : in out Message_Record) is
+   procedure Delete(Msg : in out Message_Record)
+     with SPARK_Mode => Off
+   is
    begin
+      -- We lie to spark about this because Free shouldn't be
+      -- considered a blocking function.
       Free(Msg.Payload);
    end Delete;
 
