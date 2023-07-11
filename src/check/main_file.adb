@@ -18,11 +18,12 @@ use CubedOS;
 use CubedOS.File_Server.API;
 use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with Name_Resolver;
 
 procedure Main_File is
 
-   -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
-   My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
+   -- Use the time server's module id because it isn't needed in this check
+   My_Module_ID : constant Module_ID_Type := Name_Resolver.Time_Server;
    Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
@@ -38,18 +39,20 @@ begin
    CubedOS.File_Server.Messages.Init;
    Register_Module(My_Mailbox, 8);
 
+   Message_Manager.Skip_Mailbox_Initialization;
+
    Message_Manager.Wait;
 
    -- TEST : Open two files. Read from one file, and write to another file.
 
    -- Try to open a file to read.
    Send_Open_Request
-     (My_Mailbox, (Domain_ID, My_Module_ID), 1, Read, "example.txt");
+     (My_Mailbox, (Domain_ID, Name_Resolver.File_Server), 1, Read, "example.txt");
    Put_Line("TX : Open_Request message sent for reading 'example.txt'");
 
    -- Try to open file for writing
    Send_Open_Request
-     (My_Mailbox, (Domain_ID, My_Module_ID), 2, Write, "write_test.txt");
+     (My_Mailbox, (Domain_ID, Name_Resolver.File_Server), 2, Write, "write_test.txt");
    Put_Line("TX : Open_Request message sent for writing 'write_test.txt'");
 
    loop

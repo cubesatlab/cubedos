@@ -99,11 +99,11 @@ package body CubedOS.Message_Types is
       Request_ID_String : constant String :=
         Request_ID_Type'Image (Message.Request_ID);
       Message_Type_String : constant String :=
-        Module_ID_Type'Image(Message.Message_Type.Module_ID) & Message_ID_Type'Image (Message.Message_Type.Message_ID);
+        "(M:" & Module_ID_Type'Image(Message.Message_Type.Module_ID) & ", ID:"& Message_ID_Type'Image (Message.Message_Type.Message_ID) & ")";
       Message_Image : constant String :=
-        Sender_Domain_String & "!" & Sender_Module_String & "!" &
-        Receiver_Domain_String & "!" & Receiver_Module_String & "!" &
-        Request_ID_String & "!" & Message_Type_String & "!";
+        "Src (D:" & Sender_Domain_String & ", M:" & Sender_Module_String & ") Dest (D:" &
+        Receiver_Domain_String & ", M:" & Receiver_Module_String & ") Req_ID: " &
+        Request_ID_String & " Msg_Type: " & Message_Type_String;
    begin
       return Message_Image;
    end Stringify_Message;
