@@ -30,7 +30,9 @@ is
 
    -- True if the given receiving address can be sent the given message type.
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost;
+     with Ghost,
+     Depends => (Receives'Result => null,
+                 null => (Receiver, Msg_Type));
 
    -- Returns an arbitrary, domain-unique request ID. Probably these IDs should also be unique
    -- across domains, but that is not yet implemented.
@@ -70,7 +72,8 @@ is
    -- to outside modules.
    type Module_Mailbox is private;
 
-   function Spec(Box : Module_Mailbox) return Module_Metadata;
+   function Spec(Box : Module_Mailbox) return Module_Metadata
+     with Post => Spec'Result.Receive_Types /= null;
    function Valid(Box : Module_Mailbox) return Boolean;
    function Module_ID(Box : Module_Mailbox) return Module_ID_Type;
 
@@ -104,8 +107,9 @@ is
    -- after the call.
    procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
      with Global => (In_Out => Mailboxes),
-     Depends => (Mailboxes => +(Box, Msg),
-                 Msg => Msg),
+     Depends => (Mailboxes => +(Msg),
+                 Msg => Msg,
+                 null => Box),
      Pre => Messaging_Ready
      and then Is_Valid(Msg)
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID),
@@ -117,13 +121,14 @@ is
    -- If the destination domain is external, use a different Send_Message procedure.
    procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
-     Depends => (Mailboxes => +(Box, Msg),
-                 Status => (Box, Msg, Mailboxes),
-                 Msg => Msg),
+     Depends => (Mailboxes => +(Msg),
+                 Status => (Msg, Mailboxes),
+                 Msg => Msg,
+                 null => Box),
      Pre => Messaging_Ready
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
-     and then Receiver_Address(Msg).Domain_ID = Domain_ID;
-     --and then Receives(Receiver_Address(Msg).Module_ID, Message_Type(Msg));
+     and then Receiver_Address(Msg).Domain_ID = Domain_ID
+     and then Is_Valid(Msg);
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
@@ -154,10 +159,14 @@ is
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
-     Pre => (for some M of This_Domain.Module_IDs => M = Module_ID(Mailbox));
+     Pre => Has_Module(This_Domain, Module_ID(Mailbox));
 
    -- Gives a message received from a foreign domain to the message system.
-   procedure Handle_Received(Msg : in out Msg_Owner);
+   procedure Handle_Received(Msg : in out Msg_Owner)
+     with Pre => Msg /= null
+     and then Is_Valid(Msg.all)
+     and then Messaging_Ready,
+     Post => Msg = null;
 
    -- Definition of the array type used to hold messages in a mailbox. This needs to be here
    -- rather than in the body because Message_Count_Type is used below.
@@ -199,10 +208,16 @@ private
          Spec : Module_Metadata;
       end record;
 
+   function Make_Module_Mailbox(ID : in Module_ID_Type;
+                                Spec : Module_Metadata) return Module_Mailbox
+     is (ID, Spec);
+
    function Spec(Box : Module_Mailbox) return Module_Metadata
      is (Box.Spec);
    function Valid(Box : Module_Mailbox) return Boolean
-   is (Box.Spec.Receive_Types /= null);
+     is (Box.Spec.Receive_Types /= null);
+   function Module_ID(Box : Module_Mailbox) return Module_ID_Type
+     is (Box.Spec.Module_ID);
 
 
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
