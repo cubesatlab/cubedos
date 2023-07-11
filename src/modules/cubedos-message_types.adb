@@ -10,9 +10,9 @@ with Ada.Unchecked_Deallocation;
 
 package body CubedOS.Message_Types is
 
-   procedure Free is new Ada.Unchecked_Deallocation
+   procedure Private_Free is new Ada.Unchecked_Deallocation
      (Object => Message_Record, Name => Msg_Owner);
-   procedure Free is new Ada.Unchecked_Deallocation
+   procedure Private_Free is new Ada.Unchecked_Deallocation
      (Object => Data_Array, Name => Data_Array_Owner);
 
    function Is_Valid(Msg : Message_Record) return Boolean is
@@ -30,7 +30,7 @@ package body CubedOS.Message_Types is
    begin
       -- We lie to SPARK here to hide the fact
       -- that technically Free is a blocking function.
-      Free(Msg.Payload);
+      Private_Free(Msg.Payload);
    end Delete;
 
    procedure Delete(Msg : in out Message_Record)
@@ -39,7 +39,7 @@ package body CubedOS.Message_Types is
    begin
       -- We lie to spark about this because Free shouldn't be
       -- considered a blocking function.
-      Free(Msg.Payload);
+      Private_Free(Msg.Payload);
    end Delete;
 
    procedure Delete(Msg : in out Msg_Owner) is
@@ -47,8 +47,18 @@ package body CubedOS.Message_Types is
       if Msg.Payload /= null then
          Delete(Msg.all);
       end if;
-      Free(Msg);
+      Private_Free(Msg);
    end Delete;
+
+   procedure Free(Msg : in out Msg_Owner) is
+   begin
+      Private_Free(Msg);
+   end Free;
+
+   procedure Clear_Payload(Msg : in out Message_Record) is
+   begin
+      Msg.Payload := null;
+   end Clear_Payload;
 
    function Make_Empty_Message
      (Sender_Address : Message_Address; Receiver_Address : Message_Address;
