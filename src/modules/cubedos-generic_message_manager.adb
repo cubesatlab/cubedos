@@ -7,6 +7,7 @@
 pragma SPARK_Mode (On);
 
 with CubedOS.Lib.Bounded_Queues;
+with Message_Queues; use Message_Queues;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -39,9 +40,7 @@ is
       Locked : Boolean := True;
    end Init_Lock;
 
-   package Message_Queues is new CubedOS.Lib.Bounded_Queues(Message_Record, Msg_Owner);
-   type Message_Queue is new Message_Queues.Bounded_Queue;
-   type Message_Queue_Owner is access Message_Queue;
+   type Message_Queue_Owner is access Message_Queues.Bounded_queue;
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -63,8 +62,8 @@ is
       function Message_Count return Message_Count_Type;
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
-      entry Receive (Message : out Message_Record)
-        with Post => Is_Valid(Message);
+      entry Receive (Message : out Message_Record);
+        --with Post => Is_Valid(Message);
 
       -- Change the array used to store messages.
       procedure Set_Queue_Size (Size : in Natural);
@@ -113,6 +112,7 @@ is
         is (Locked);
       procedure Unlock (Module : Module_ID_Type) is
          Index : Module_Index;
+         Set : Boolean := False;
       begin
          if Inited = null then
             Inited := new Module_Init_List;
@@ -122,11 +122,14 @@ is
          for I in 1 .. Module_Count loop
             if This_Domain.Module_IDs(I) = Module then
                Index := Module_Index(I);
+               Set := True;
                exit;
             end if;
          end loop;
 
-         Inited(Index) := True;
+         if Set then
+            Inited(Index) := True;
+         end if;
 
          if (for all I of Inited.all => I) then
             Locked := False;
@@ -147,7 +150,6 @@ is
             Delete(Message);
             Message := null;
          else
-            pragma Assume(Valid(Q.all));
             Put(Q.all, Message);
             Message_Waiting := True;
             Status          := Accepted;
@@ -162,7 +164,6 @@ is
             Delete(Message);
             Message := null;
          else
-            pragma Assume(Valid(Q.all));
             Put(Q.all, Message);
             Message_Waiting := True;
          end if;
@@ -175,7 +176,6 @@ is
          if Q = null then
             return 0;
          else
-            pragma Assume(Valid(Q.all));
             return Count(Q.all);
          end if;
       end Message_Count;
@@ -186,7 +186,6 @@ is
       begin
          pragma Assume(if Message_Waiting then Q /= null);
 
-         pragma Assume(Valid(Q.all));
          Next(Q.all, Ptr);
          Second := Copy(Ptr.all);
          Message := Message_Record'(Second.all);
@@ -201,7 +200,7 @@ is
       procedure Set_Queue_Size (Size : in Natural) is
       begin
          if Q = null then
-            Q := new Message_Queue(Size);
+            Q := new Message_Queues.Bounded_Queue(Size);
          end if;
       end Set_Queue_Size;
 

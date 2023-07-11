@@ -67,10 +67,13 @@ package CubedOS.Message_Types is
    type Msg_Type_Array_Ptr is access Message_Type_Array;
    type Const_Msg_Type_Array_Ptr is access constant Message_Type_Array;
 
+   -- TODO: Replace this with a zero width array instead of having an arbitrary value
+   Empty_Type_Array : aliased constant Message_Type_Array := (0 => (1,1));
+
    type Module_Metadata is
       record
          Module_ID : Module_ID_Type;
-         Receive_Types : not null Const_Msg_Type_Array_Ptr;
+         Receive_Types : not null Const_Msg_Type_Array_Ptr := Empty_Type_Array'Access;
       end record;
 
    function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
