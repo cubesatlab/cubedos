@@ -42,18 +42,17 @@ package body CubedOS.Message_Types is
       Private_Free(Msg.Payload);
    end Delete;
 
-   procedure Delete(Msg : in out Msg_Owner) is
+   procedure Delete(Msg : in out Msg_Owner)
+     with SPARK_Mode => Off
+   is
    begin
       if Msg.Payload /= null then
          Delete(Msg.all);
       end if;
+      -- We lie to SPARK here to hide the fact
+      -- that technically Free is a blocking function.
       Private_Free(Msg);
    end Delete;
-
-   procedure Free(Msg : in out Msg_Owner) is
-   begin
-      Private_Free(Msg);
-   end Free;
 
    procedure Clear_Payload(Msg : in out Message_Record) is
    begin

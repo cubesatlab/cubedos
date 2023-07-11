@@ -70,12 +70,11 @@ package CubedOS.Message_Types is
    type Module_Metadata is
       record
          Module_ID : Module_ID_Type;
-         Receive_Types : Const_Msg_Type_Array_Ptr;
+         Receive_Types : not null Const_Msg_Type_Array_Ptr;
       end record;
 
    function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
-     with Ghost,
-       Pre => Receiver.Receive_Types /= null;
+     with Pre => Receiver.Receive_Types /= null;
 
    function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
      with Pre => This_Receives /= null,
@@ -217,12 +216,6 @@ package CubedOS.Message_Types is
    procedure Delete(Msg : in out Msg_Owner)
      with Pre => Msg /= null,
      Post => Msg = null;
-
-   -- Frees the memory. Doesn't free the payload
-   -- if the message has one.
-   procedure Free(Msg : in out Msg_Owner)
-     with Pre => Msg /= null,
-       Post => Msg = null;
 
    -- Create a copy of the given message on the heap,
    -- also making a copy of the payload content.

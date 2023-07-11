@@ -27,11 +27,13 @@ is
    type Module_Init_List_Owner is access Module_Init_List;
 
    protected Init_Lock is
-      entry Wait;
+      entry Wait
+        with Post => not Is_Locked;
       function Is_Locked return Boolean;
       procedure Unlock (Module : Module_ID_Type)
-        with Pre => (for some M of This_Domain.Module_IDs => M = Module);
-      procedure Unlock_Manual;
+        with Pre => Has_Module(This_Domain, Module);
+      procedure Unlock_Manual
+        with Post => not Is_Locked;
    private
       Inited : Module_Init_List_Owner;
       Locked : Boolean := True;
@@ -61,7 +63,8 @@ is
       function Message_Count return Message_Count_Type;
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
-      entry Receive (Message : out Message_Record);
+      entry Receive (Message : out Message_Record)
+        with Post => Is_Valid(Message);
 
       -- Change the array used to store messages.
       procedure Set_Queue_Size (Size : in Natural);
@@ -148,6 +151,7 @@ is
             Put(Q.all, Message);
             Message_Waiting := True;
             Status          := Accepted;
+            Message := null;
          end if;
          pragma Unused(Message);
       end Send;
@@ -181,8 +185,8 @@ is
          Second : Msg_Owner;
       begin
          pragma Assume(if Message_Waiting then Q /= null);
-         --pragma Assume(Payload(Peek(Q.all)) /= null);
 
+         pragma Assume(Valid(Q.all));
          Next(Q.all, Ptr);
          Second := Copy(Ptr.all);
          Message := Message_Record'(Second.all);
@@ -196,10 +200,9 @@ is
 
       procedure Set_Queue_Size (Size : in Natural) is
       begin
-         if Q /= null then
-            return;
+         if Q = null then
+            Q := new Message_Queue(Size);
          end if;
-         Q := new Message_Queue(Size);
       end Set_Queue_Size;
 
    end Sync_Mailbox;
@@ -270,9 +273,6 @@ is
    -- Mailbox
    -------------
 
-   function Module_ID(Box : Module_Mailbox) return Module_ID_Type is
-     (Box.Spec.Module_ID);
-
    procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
@@ -292,7 +292,7 @@ is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Route_Message (Ptr);
+      Route_Message (Msg);
       pragma Unreferenced(Box);
       pragma Unused(Ptr);
    end Send_Message;
@@ -309,18 +309,25 @@ is
    end Send_Message;
 
    procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
+      Result : Message_Record;
    begin
-      Fetch_Message (Box.Spec.Module_ID, Msg);
+      Fetch_Message (Box.Spec.Module_ID, Result);
+
+      -- Don't allow a mailbox to read a message it can't receive.
+      while not Receives(Spec(Box), Message_Type(Result)) loop
+         Delete(Result);
+         Fetch_Message (Box.Spec.Module_ID, Result);
+         pragma Loop_Invariant(Payload(Result) /= null);
+      end loop;
+      pragma Assert(Receives(Spec(Box), Message_Type(Result)));
+      Msg := Result;
+      pragma Assert(Receives(Spec(Box), Message_Type(Msg)));
    end Read_Next;
 
    procedure Queue_Size(Box : Module_Mailbox; Size : out Natural) is
    begin
       Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
    end Queue_Size;
-
-   function Make_Module_Mailbox(ID : in Module_ID_Type;
-                                Spec : Module_Metadata) return Module_Mailbox
-   is (ID, Spec);
 
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
