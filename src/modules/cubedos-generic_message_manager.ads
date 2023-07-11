@@ -47,6 +47,19 @@ is
    function Messaging_Ready return Boolean
      with Global => null;
 
+   -- By default, Message Manager will not allow
+   -- any messages to send until all modules declared
+   -- in the domain declaration have been registered.
+   -- This function may be used to skip the initialization
+   -- process for any modules which haven't registered
+   -- a mailbox.
+   -- Doing this removes the gaurantee that all
+   -- modules are prepared to receive messages and
+   -- should be used only in development contexts.
+   procedure Skip_Mailbox_Initialization
+     with Global => (In_Out => Lock),
+       Post => Messaging_Ready;
+
    -- Error codes.
    type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
    type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
