@@ -16,59 +16,58 @@ package CubedOS.Lib.Bounded_Queues is
 
    type Bounded_Queue (Max_Index : Natural) is private;
 
-   function Valid(Q : Bounded_Queue) return Boolean
-     with Ghost;
-
    -- Creates a new queue.
    function Make (Capacity : Positive) return Bounded_Queue
-     with Pre => Capacity < Natural'Last - 1,
-     Post => Valid(Make'Result);
+     with Pre => Capacity < Natural'Last - 1;
 
    -- Return the number of items currently in the queue.
-   function Count (Q: in Bounded_Queue) return Count_Type
-     with Pre => Valid(Q);
+   function Count (Q: in Bounded_Queue) return Count_Type;
 
    -- Return the total capacity of the queue
-   function Size (Q: in Bounded_Queue) return Count_Type
-     with Pre => Valid(Q);
+   function Size (Q: in Bounded_Queue) return Count_Type;
 
    function Is_Empty (Q: in Bounded_Queue) return Boolean
-     with Pre => Valid(Q),
-       Post => Is_Empty'Result = (Count(Q) = 0);
+     with Post => Is_Empty'Result = (Count(Q) = 0);
 
    function Is_Full (Q: in Bounded_Queue) return Boolean
-     with Pre => Valid(Q),
-       Post => Is_Full'Result = (Count(Q) = Size(Q));
+     with Post => Is_Full'Result = (Count(Q) = Size(Q));
 
    -- Takes the next item off the queue.
    procedure Next(Q: in out Bounded_Queue; Item : in out Data_Owner)
      -- Mention Valid the first time so that Count can pass, the second time
      -- to let spark now that Count(Q) > 0.
-     with Pre =>
-       Valid(Q)
-       and then not Is_Empty(Q)
-       and then Valid(Q)
+     with Pre => not Is_Empty(Q)
        and then Item = null,
-       Post => Item /= null and Valid(Q);
+       Post => Item /= null;
 
    -- Adds an item to the queue.
    procedure Put(Q: in out Bounded_Queue; Item : in out Data_Owner)
-     with Pre => Valid(Q)
-     and then not Is_Full(Q)
+     with Pre => not Is_Full(Q)
      and then Item /= null,
-     Post => Item = null and Valid(Q);
+     Post => Item = null;
 
 private
    subtype Index is Natural;
    type Data_Array is array (Natural range <>) of Data_Owner;
+   function Valid(Q : Bounded_Queue) return Boolean
+     with Ghost;
 
    type Bounded_Queue (Max_Index : Natural) is
       record
-         Storage : Data_Array(0 .. Max_Index);
-         Next_In : Index := 1;
-         Next_Out : Index := 1;
+         Storage : Data_Array(0 .. Max_Index) := (others => null);
+         Next_In : Index := 0;
+         Next_Out : Index := 0;
          Num_Items : Count_Type := 0;
-      end record;
-   -- Not using a type invariant because SPARK doesn't support them in this situation
+      end record
+     with Type_Invariant => Valid(Bounded_Queue);
+
+   function Valid(Q : Bounded_Queue) return Boolean
+    is (
+        Q.Next_In in Q.Storage'Range
+        and then Q.Next_Out in Q.Storage'Range
+        and then (Q.Storage(Q.Next_In) = null or Q.Num_Items - 1 = Q.Max_Index)
+        and then (Q.Storage(Q.Next_Out) /= null or Q.Num_Items = 0)
+        and then Q.Max_Index < Natural'Last - 1
+       );
 
 end CubedOS.Lib.Bounded_Queues;
