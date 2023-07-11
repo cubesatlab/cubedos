@@ -7,7 +7,6 @@
 pragma SPARK_Mode (On);
 
 with CubedOS.Lib.Bounded_Queues;
-with Ada.Containers.Formal_Hashed_Maps;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -22,11 +21,10 @@ is
       Next_Request_ID : Request_ID_Type := 1;
    end Request_ID_Gen;
 
-   function Equivalent_Key (Left, Right : Module_ID_Type) return Boolean is (Left = Right);
-   function Hash_Func(Key : Module_ID_Type) return Ada.Containers.Hash_Type is (Ada.Containers.Hash_Type(Key));
-   package Boolean_Maps is new Ada.Containers.Formal_Hashed_Maps(Module_ID_Type, Boolean, Hash_Func, Equivalent_Key, Standard."=");
-   type Boolean_Map is new Boolean_Maps.Map(Ada.Containers.Count_Type(Module_Count), Ada.Containers.Hash_Type(Module_ID_Type'Last));
-   type Boolean_Map_Owner is access Boolean_Map;
+   type Module_Index is new Positive range 1 .. Module_Count;
+   type Module_Init_List is array (Module_Index) of Boolean
+     with Default_Component_Value => False;
+   type Module_Init_List_Owner is access Module_Init_List;
 
    protected Init_Lock is
       entry Wait;
@@ -35,7 +33,7 @@ is
         with Pre => (for some M of This_Domain.Module_IDs => M = Module);
       procedure Unlock_Manual;
    private
-      Inited : Boolean_Map_Owner := new Boolean_Map;
+      Inited : Module_Init_List_Owner;
       Locked : Boolean := True;
    end Init_Lock;
 
@@ -111,22 +109,23 @@ is
       function Is_Locked return Boolean
         is (Locked);
       procedure Unlock (Module : Module_ID_Type) is
+         Index : Module_Index;
       begin
-         -- Make sure all modules have a check
-         for I of This_Domain.Module_IDs loop
-            -- If an id is already in the map, this function
-            -- won't override it.
-            declare
-               Position : Boolean_Maps.Cursor;
-               Inserted : Boolean;
-            begin
-               Insert(Inited.all, I, False, Position, Inserted);
-               pragma Unused(Position, Inserted);
-            end;
+         if Inited = null then
+            Inited := new Module_Init_List;
+         end if;
+
+         -- Get index of given module
+         for I in 1 .. Module_Count loop
+            if This_Domain.Module_IDs(I) = Module then
+               Index := Module_Index(I);
+               exit;
+            end if;
          end loop;
 
-         Replace(Inited.all, Module, True);
-         if (for all I of Inited.all => Element(Inited.all, I)) then
+         Inited(Index) := True;
+
+         if (for all I of Inited.all => I) then
             Locked := False;
          end if;
       end Unlock;
@@ -179,12 +178,15 @@ is
 
       entry Receive (Message : out Message_Record) when Message_Waiting is
          Ptr : Msg_Owner;
+         Second : Msg_Owner;
       begin
          pragma Assume(if Message_Waiting then Q /= null);
          --pragma Assume(Payload(Peek(Q.all)) /= null);
 
          Next(Q.all, Ptr);
-         Message := Ptr.all;
+         Second := Copy(Ptr.all);
+         Message := Message_Record'(Second.all);
+         Clear_Payload(Ptr.all);
          Delete(Ptr);
 
          if Is_Empty(Q.all) then

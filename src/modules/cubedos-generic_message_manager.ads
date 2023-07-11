@@ -24,7 +24,7 @@ Abstract_State =>
 is
 
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
-   Module_Count : constant Natural := This_Domain.Module_Count;
+   Module_Count : constant Positive := This_Domain.Module_Count;
 
    Empty_Type_Array_Ptr : aliased constant Message_Type_Array := (0 => (1,1));
 

@@ -41,13 +41,13 @@ package CubedOS.Message_Types is
    type Module_ID_Set is array (Natural range <>) of Module_ID_Type;
 
    -- Describes a domain
-   type Domain_Declaration(Module_Count : Natural) is
+   type Domain_Declaration(Module_Count : Positive) is
       record
          ID : Domain_ID_Type;
          Module_IDs : Module_ID_Set(1 .. Module_Count);
       end record;
 
-   function Declare_Domain(Module_Count : Natural; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
+   function Declare_Domain(Module_Count : Positive; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
      with Pre => Module_Count = Module_IDs'Length,
        Post => (for all M of Module_IDs => Has_Module(Declare_Domain'Result, M));
 
@@ -157,6 +157,8 @@ package CubedOS.Message_Types is
    function Priority(Msg : not null access constant Message_Record) return System.Priority;
    function Payload(Msg : not null access constant Message_Record) return access constant Data_Array;
 
+   procedure Clear_Payload(Msg : in out Message_Record);
+
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
      (Sender_Address : Message_Address;
@@ -216,6 +218,12 @@ package CubedOS.Message_Types is
      with Pre => Msg /= null,
      Post => Msg = null;
 
+   -- Frees the memory. Doesn't free the payload
+   -- if the message has one.
+   procedure Free(Msg : in out Msg_Owner)
+     with Pre => Msg /= null,
+       Post => Msg = null;
+
    -- Create a copy of the given message on the heap,
    -- also making a copy of the payload content.
    function Copy(Msg : Message_Record) return not null Msg_Owner
@@ -229,7 +237,7 @@ package CubedOS.Message_Types is
      Post => not Is_Valid(Msg) and Is_Valid(Result.all);
 
 private
-   function Declare_Domain(Module_Count : Natural; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
+   function Declare_Domain(Module_Count : Positive; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
      is (Module_Count, Domain_ID, Module_IDs);
 
    function Declare_Receives(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
