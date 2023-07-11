@@ -28,8 +28,8 @@ with Name_Resolver;
 procedure Main_Time is
    use type Ada.Real_Time.Time;
 
-   -- Be sure this module ID doesn't conflict with any of the CubedOS core modules.
-   My_Module_ID : constant Module_ID_Type := Module_ID_Type'Last;
+   -- Take the module ID of the file server because it isn't included in this test
+   My_Module_ID : constant Module_ID_Type := Name_Resolver.File_Server;
    Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
@@ -49,6 +49,8 @@ begin
 
    Start_Time := Ada.Real_Time.Clock;
    Message_Manager.Register_Module(My_Mailbox, 8);
+
+   Message_Manager.Skip_Mailbox_Initialization;
 
    -- Do some setup...
    Message_Manager.Wait;

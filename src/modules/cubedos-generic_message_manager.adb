@@ -33,6 +33,7 @@ is
       function Is_Locked return Boolean;
       procedure Unlock (Module : Module_ID_Type)
         with Pre => (for some M of This_Domain.Module_IDs => M = Module);
+      procedure Unlock_Manual;
    private
       Inited : Boolean_Map_Owner := new Boolean_Map;
       Locked : Boolean := True;
@@ -88,6 +89,11 @@ is
       return not Init_Lock.Is_Locked;
    end Messaging_Ready;
 
+   procedure Skip_Mailbox_Initialization is
+   begin
+      Init_Lock.Unlock_Manual;
+   end Skip_Mailbox_Initialization;
+
 
    ------------------
    -- Implementations
@@ -128,6 +134,10 @@ is
             Locked := False;
          end if;
       end Unlock;
+      procedure Unlock_Manual is
+      begin
+         Locked := False;
+      end Unlock_Manual;
    end Init_Lock;
 
    protected body Sync_Mailbox is
