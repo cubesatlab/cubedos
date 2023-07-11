@@ -76,10 +76,6 @@ is
    -- One mailbox for each module.
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
 
-
-   function Module_Ready (Module_ID : Module_ID_Type) return Boolean is
-     (True);
-
    function Messaging_Ready return Boolean
      with SPARK_Mode => Off
      -- We hide this from SPARK because Init_Lock.Is_Locked doesn't have
