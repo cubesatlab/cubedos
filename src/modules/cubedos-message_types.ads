@@ -82,7 +82,6 @@ package CubedOS.Message_Types is
      Post => (for all T of This_Receives.all => Receives(Declare_Receives'Result, T))
      and Declare_Receives'Result.Module_ID = This_Module;
 
-
    -- Definition of a CubedOS message. Messages are stored in XDR_Arrays.
 
    -- Starting the index type at 0 is convenient when expressing "multiple of four" assertions.
