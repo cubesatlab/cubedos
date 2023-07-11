@@ -37,13 +37,6 @@ is
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
      with Global => (In_Out => Request_ID_Generator);
 
-   -- True if the module is ready to receive mail.
-   -- This refers to a module in the current domain.
-   function Module_Ready(Module_ID : Module_ID_Type) return Boolean
-     with Ghost,
-     Depends => (Module_Ready'Result => null,
-                 null => Module_ID);
-
    function Messaging_Ready return Boolean
      with Global => null;
 
@@ -161,9 +154,7 @@ is
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
-     Pre => (for some M of This_Domain.Module_IDs => M = Module_ID(Mailbox)),
-     --Pre => not Module_Ready(Address(Mailbox).Module_ID),
-     Post => Module_Ready(Module_ID(Mailbox));
+     Pre => (for some M of This_Domain.Module_IDs => M = Module_ID(Mailbox));
 
    -- Gives a message received from a foreign domain to the message system.
    procedure Handle_Received(Msg : in out Msg_Owner);
@@ -186,14 +177,12 @@ is
 
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => Mailboxes),
-     Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Messaging_Ready
+     Pre => Messaging_Ready
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
      and then Is_Valid(Message);
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
-     Pre => (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Messaging_Ready
+     Pre => Messaging_Ready
      --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
      and then Is_Valid(Message);
 
@@ -220,8 +209,7 @@ private
      with Global => (In_Out => (Mailboxes)),
      Pre => Message /= null
      and then Is_Valid(Message.all)
-     and then (if Receiver_Address(Message).Domain_ID = Domain_ID then Module_Ready(Receiver_Address(Message).Module_ID))
-     and then Module_Ready(Receiver_Address(Message).Module_ID),
+     and then Messaging_Ready,
      Post => Message = null;
 
    procedure Route_Message(Message : in out Msg_Owner)

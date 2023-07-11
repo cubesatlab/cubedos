@@ -20,9 +20,7 @@ package CubedOS.Time_Server.Messages
 is
 
    procedure Init
-     with Global => (In_Out => (Mailboxes, Lock)),
-     Pre => not Module_Ready(This_Module),
-     Post => Module_Ready(This_Module);
+     with Global => (In_Out => (Mailboxes, Lock));
 
    task Message_Loop
      with
