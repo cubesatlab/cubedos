@@ -27,8 +27,7 @@ is
    type Module_Init_List_Owner is access Module_Init_List;
 
    protected Init_Lock is
-      entry Wait
-        with Post => not Is_Locked;
+      entry Wait;
       function Is_Locked return Boolean;
       procedure Unlock (Module : Module_ID_Type)
         with Pre => Has_Module(This_Domain, Module);
