@@ -10,5 +10,6 @@ gnatprove = "^12.1.1"
 
 [build-switches]
 "*".style_checks = "No"
+development.optimization = ["-gnata", "-gnatwa", "-g", "-gnatVa", "-fstack-check"]
 [[depends-on]]
 aunit = "^23.0.0"
