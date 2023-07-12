@@ -7,13 +7,11 @@
 pragma SPARK_Mode(On);
 
 with System;
-with CubedOS.Interpreter.API;
 
 package CubedOS.Interpreter.Messages is
    pragma Elaborate_Body;
 
    use Message_Manager;
-   use CubedOS.Interpreter.API;
 
    procedure Init;
 

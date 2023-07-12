@@ -7,6 +7,7 @@
 pragma SPARK_Mode(On);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Interpreter.API; use CubedOS.Interpreter.API;
 
 package body CubedOS.Interpreter.Messages is
 
