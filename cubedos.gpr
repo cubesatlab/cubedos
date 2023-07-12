@@ -1,5 +1,4 @@
 with "config/cubedos_config.gpr";
-with "aunit.gpr";
 with "src/library/cubedlib.gpr";
 project Cubedos is
 
