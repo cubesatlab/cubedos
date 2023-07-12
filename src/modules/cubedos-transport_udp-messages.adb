@@ -12,6 +12,8 @@ with Network_Configuration;
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib;
 
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
+
 package body CubedOS.Transport_UDP.Messages is
 
    procedure Init is

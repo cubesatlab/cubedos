@@ -16,6 +16,7 @@ with Name_Resolver;
 use Message_Manager;
 with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package CubedOS.File_Server.API is
 
@@ -44,7 +45,7 @@ package CubedOS.File_Server.API is
                                        Write_Request_Msg,
                                        Close_Request_Msg
                                       );
-   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
    type Mode_Type is (Read, Write);
    type File_Handle_Type is range 0 .. 64;
@@ -73,9 +74,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Request_Msg),
+         and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12),
       Post => Message_Types.Message_Type(Result) = Open_Request_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -91,7 +90,6 @@ package CubedOS.File_Server.API is
       Pre => true
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Request_Msg)
       ;
 
    procedure Open_Reply_Encode
@@ -103,8 +101,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Open_Reply_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -118,7 +115,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Open_Reply_Msg)
       ;
 
    procedure Read_Request_Encode
@@ -131,8 +127,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Read_Request_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -147,7 +142,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Request_Msg)
       ;
 
    procedure Read_Reply_Encode
@@ -161,8 +155,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => Amount <= File_Data'Length
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Read_Reply_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -178,7 +171,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => Amount <= File_Data'Length
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Read_Reply_Msg)
       ;
 
    procedure Write_Request_Encode
@@ -192,8 +184,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => Amount <= File_Data'Length
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Write_Request_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -209,7 +200,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => Amount <= File_Data'Length
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Request_Msg)
       ;
 
    procedure Write_Reply_Encode
@@ -222,8 +212,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Write_Reply_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -238,7 +227,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Write_Reply_Msg)
       ;
 
    procedure Close_Request_Encode
@@ -250,8 +238,7 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Close_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Close_Request_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -265,7 +252,6 @@ package CubedOS.File_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Close_Request_Msg)
       ;
 
 

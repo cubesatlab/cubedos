@@ -15,6 +15,7 @@ with Message_Manager;  use Message_Manager;
 with System;
 with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package CubedOS.Log_Server.API is
 
@@ -42,7 +43,7 @@ package CubedOS.Log_Server.API is
 
    This_Receives: aliased constant Message_Type_Array := (0 => Log_Text_Msg);
 
-   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
    procedure Log_Text_Encode
       (Sender_Address : Message_Address;
@@ -54,9 +55,7 @@ package CubedOS.Log_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Log_Text_Msg),
+         and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12),
       Post => Message_Types.Message_Type(Result) = Log_Text_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -72,7 +71,6 @@ package CubedOS.Log_Server.API is
       Pre => true
          and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Log_Text_Msg)
       ;
 
    function Is_Log_Text(Message : Message_Record) return Boolean is

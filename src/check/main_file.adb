@@ -18,13 +18,14 @@ use CubedOS;
 use CubedOS.File_Server.API;
 use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+
 with Name_Resolver;
 
 procedure Main_File is
 
    -- Use the time server's module id because it isn't needed in this check
    My_Module_ID : constant Module_ID_Type := Name_Resolver.Time_Server;
-   Metadata : constant Module_Metadata := Declare_Receives(My_Module_ID, Empty_Type_Array_Ptr'Access);
+   Metadata : constant Module_Metadata := Define_Module(My_Module_ID, Empty_Type_Array'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
    Incoming_Message : Message_Record;
@@ -34,7 +35,7 @@ procedure Main_File is
    Amount_Read  : Read_Result_Size_Type;
    Amount_Write : Write_Result_Size_Type;
    Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
-   Status : Message_Manager.Message_Status_Type;
+   Status : Message_Status_Type;
 begin
    CubedOS.File_Server.Messages.Init;
    Register_Module(My_Mailbox, 8);

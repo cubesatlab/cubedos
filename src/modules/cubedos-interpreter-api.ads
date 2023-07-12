@@ -14,6 +14,7 @@ with Name_Resolver;
 
 with System;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package CubedOS.Interpreter.API is
 
@@ -38,7 +39,7 @@ package CubedOS.Interpreter.API is
                                                           Set_Request_Msg,
                                                           Add_Request_Msg);
 
-   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
    function Clear_Request_Encode
      (Sender_Address : in Message_Address;
