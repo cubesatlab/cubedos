@@ -194,8 +194,8 @@ is
    procedure Process_Relative_Request
      (Incoming_Message : in Message_Record) with
      Pre => API.Is_Relative_Request (Incoming_Message)
-     and Is_Valid(Incoming_Message),
-     Post => Is_Valid(Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type  : Series_Type;
@@ -219,8 +219,8 @@ is
    procedure Process_Absolute_Request
      (Incoming_Message : in Message_Record) with
      Pre => API.Is_Absolute_Request (Incoming_Message)
-     and Is_Valid(Incoming_Message),
-     Post => Is_Valid(Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : API.Series_ID_Type;
@@ -242,8 +242,8 @@ is
 
    procedure Process_Cancel_Request (Incoming_Message : in Message_Record) with
      Pre => API.Is_Cancel_Request (Incoming_Message)
-     and Is_Valid(Incoming_Message),
-     Post => Is_Valid(Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
@@ -260,8 +260,8 @@ is
       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => Series_Database),
       Depends =>
        (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message)),
-       Pre => Is_Valid(Incoming_Message),
-       Post => Is_Valid(Incoming_Message)
+       Pre => Payload(Incoming_Message) /= null,
+       Post => Payload(Incoming_Message) /= null
    is
    begin
       if API.Is_Relative_Request (Incoming_Message) then

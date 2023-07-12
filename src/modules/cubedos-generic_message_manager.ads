@@ -63,7 +63,7 @@ is
    procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready,
-     Post => Is_Valid(Message) and Payload(Message) /= null;
+     Post => Payload(Message) /= null;
 
    -- A mailbox used by modules to send and receive messages.
    -- This is the only way to receive messages sent to a module
@@ -95,7 +95,7 @@ is
                           Target_Domain : Domain_Declaration := This_Domain)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
-     and then Is_Valid(Msg)
+     and then Payload(Msg) /= null
      and then Receives(Target_Module, Message_Type(Msg))
      and then Has_Module(Target_Domain, Target_Module.Module_ID)
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
@@ -111,7 +111,7 @@ is
                  Msg => Msg,
                  null => Box),
      Pre => Messaging_Ready
-     and then Is_Valid(Msg)
+     and then Payload(Msg) /= null
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID),
      Post => Payload(Msg) = null;
 
@@ -128,13 +128,13 @@ is
      Pre => Messaging_Ready
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
      and then Receiver_Address(Msg).Domain_ID = Domain_ID
-     and then Is_Valid(Msg);
+     and then Payload(Msg) /= null;
 
    -- Reads the next message, removing it from the message queue.
    -- Blocks until a message is available.
    procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
      with Pre => Messaging_Ready,
-     Post => Is_Valid(Msg)
+     Post => Payload(Msg) /= null
      and Payload(Msg) /= null
      and Receives(Spec(Box), Message_Type(Msg));
 
@@ -164,7 +164,7 @@ is
    -- Gives a message received from a foreign domain to the message system.
    procedure Handle_Received(Msg : in out Msg_Owner)
      with Pre => Msg /= null
-     and then Is_Valid(Msg.all)
+     and then Payload(Msg) /= null
      and then Messaging_Ready,
      Post => Msg = null;
 
@@ -187,13 +187,11 @@ is
    procedure Route_Message(Message : in Message_Record)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
-     --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     and then Is_Valid(Message);
+     and then Payload(Message) /= null;
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
-     --and then Receives(Receiver_Address(Message).Module_ID, Message_Type(Message))
-     and then Is_Valid(Message);
+     and then Payload(Message) /= null;
 
    -- Blocks until all modules in the domain have intitialized
    -- their mailbox and are ready to receive messages.
@@ -223,13 +221,14 @@ private
    procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
      with Global => (In_Out => (Mailboxes)),
      Pre => Message /= null
-     and then Is_Valid(Message.all)
+     and then Payload(Message) /= null
      and then Messaging_Ready,
      Post => Message = null;
 
    procedure Route_Message(Message : in out Msg_Owner)
      with Global => (In_Out => Mailboxes),
-     Pre => Message /= null and then Is_Valid(Message.all)
+     Pre => Message /= null
+     and then Payload(Message) /= null
      and then Messaging_Ready,
      Post => Message = null;
 

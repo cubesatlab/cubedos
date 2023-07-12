@@ -24,7 +24,7 @@ package body CubedOS.Log_Server.Messages is
 
    procedure Handle_Log_Text(Message : in Message_Record)
      with Pre => Log_Server.API.Is_Log_Text(Message)
-       and Is_Valid(Message)
+       and Payload(Message) /= null
    is
       Log_Level : Log_Server.API.Log_Level_Type;
       Text      : Log_Server.API.Log_Message_Type;
@@ -53,7 +53,7 @@ package body CubedOS.Log_Server.Messages is
 
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record)
-     with Pre => Is_Valid(Message)
+     with Pre => Payload(Message) /= null
    is
    begin
       if Log_Server.API.Is_Log_Text(Message) then
