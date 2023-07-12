@@ -15,9 +15,6 @@ package body CubedOS.Message_Types is
    procedure Private_Free is new Ada.Unchecked_Deallocation
      (Object => Data_Array, Name => Data_Array_Owner);
 
-   function Is_Valid(Msg : Message_Record) return Boolean is
-     (Msg.Payload /= null);
-
    function Immutable(Msg : Mutable_Message_Record) return Message_Record is
       Payload_Copy : constant Data_Array_Owner := new Data_Array'(Msg.Payload.all);
    begin

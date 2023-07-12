@@ -33,7 +33,7 @@ is
    -------------------
 
    procedure Handle_Subscribe_Request(Message : in Message_Record)
-     with Pre => Is_Subscribe_Request(Message) and Is_Valid(Message)
+     with Pre => Is_Subscribe_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
@@ -49,7 +49,7 @@ is
 
 
    procedure Handle_Unsubscribe_Request(Message : in Message_Record)
-     with Pre => Is_Unsubscribe_Request(Message) and Is_Valid(Message)
+     with Pre => Is_Unsubscribe_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
@@ -69,7 +69,7 @@ is
 
 
    procedure Handle_Publish_Request(Message : in Message_Record)
-     with Pre => Is_Publish_Request(Message) and Is_Valid(Message)
+     with Pre => Is_Publish_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
       Message_Data : CubedOS.Lib.Octet_Array(1 .. Payload(Message)'Length - 8);
@@ -104,7 +104,7 @@ is
    -----------------------------------
 
    procedure Process(Message : in Message_Record)
-     with Pre => Is_Valid(Message)
+     with Pre => Payload(Message) /= null
    is
    begin
       if Is_Subscribe_Request(Message) then

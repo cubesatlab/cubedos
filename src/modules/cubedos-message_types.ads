@@ -130,13 +130,10 @@ package CubedOS.Message_Types is
      with Default_Initial_Condition => Payload(Message_Record) = null;
    type Msg_Owner is access Message_Record;
 
-   function Is_Valid(Msg : Message_Record) return Boolean
-     with Post => Is_Valid'Result = (Payload(Msg) /= null);
-
    -- Creates an immutible copy of the given message
    function Immutable(Msg : Mutable_Message_Record) return Message_Record
      with Pre => Msg.Payload /= null,
-     Post => Is_Valid(Immutable'Result) and
+     Post => Payload(Immutable'Result) /= null and
      Message_Type(Immutable'Result) = Msg.Message_Type and
      Receiver_Address(Immutable'Result) = Msg.Receiver_Address and
      Sender_Address(Immutable'Result) = Msg.Sender_Address and
@@ -223,14 +220,14 @@ package CubedOS.Message_Types is
    -- Create a copy of the given message on the heap,
    -- also making a copy of the payload content.
    function Copy(Msg : Message_Record) return not null Msg_Owner
-     with Pre => Is_Valid(Msg),
-     Post => Is_Valid(Copy'Result.all);
+     with Pre => Payload(Msg) /=  null,
+     Post => Payload(Copy'Result) /= null;
 
    -- Create a copy of the given message on the heap,
    -- moving the payload content.
    procedure Move(Msg : in out Message_Record; Result : out not null Msg_Owner)
-     with Pre => Is_Valid(Msg),
-     Post => not Is_Valid(Msg) and Is_Valid(Result.all);
+     with Pre => Payload(Msg) /= null,
+     Post => Payload(Msg) = null and Payload(Result) /= null;
 
 private
    function Declare_Domain(Module_Count : Positive; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Declaration
