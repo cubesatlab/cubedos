@@ -22,17 +22,21 @@ procedure Check_Messaging_Proof is
    Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(Module_ID_1, Metadata);
    Message : Message_Record;
 begin
+   pragma Assert(Payload(Message) = null);
 
-   -- Reading from a mailbox before it is registered is illegal
-   Message_Manager.Read_Next(Mailbox_1, Message);
+   -- Reading from a mailbox before the messaging system is ready is illegal
+   Read_Next(Mailbox_1, Message);
+   Delete(Message);
 
+   pragma Assume(Has_Module(Message_Manager.This_Domain, Module_ID(Mailbox_1)));
    -- Register mailbox 1
    Register_Module(Mailbox_1, 1);
 
-   -- Now reading is ok
-   Message_Manager.Read_Next(Mailbox_1, Message);
+   Message_Manager.Skip_Mailbox_Initialization;
 
-   -- But we should really be reading with the mailbox
+   -- Now reading is ok
    Read_Next(Mailbox_1, Message);
+   Delete(Message);
+   pragma Unused(Message);
 
 end Check_Messaging_Proof;

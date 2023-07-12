@@ -14,7 +14,7 @@ with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 generic
    -- The domain of this message manager.
-   This_Domain : Domain_Metadata;
+   Domain : Domain_Metadata;
    with procedure Send_Outgoing_Message(Msg : in out Msg_Owner);
 package CubedOS.Generic_Message_Manager
   with
@@ -24,6 +24,7 @@ Abstract_State =>
    (Request_ID_Generator with External)),
   Initializes => (Mailboxes, Request_ID_Generator, Lock)
 is
+   This_Domain : Domain_Metadata := Domain;
    -- The ID of this domain.
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
    -- The number of modules in this domain.
