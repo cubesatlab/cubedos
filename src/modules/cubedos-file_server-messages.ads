@@ -10,11 +10,9 @@ pragma Partition_Elaboration_Policy(Sequential);
 
 with System;
 with Message_Manager;
-with CubedOS.File_Server.API;
 
 package CubedOS.File_Server.Messages is
    use Message_Manager;
-   use CubedOS.File_Server.API;
 
    -- Prepare to receive messages
    procedure Init
