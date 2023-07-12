@@ -11,4 +11,4 @@ gnatprove = "^12.1.1"
 [build-switches]
 "*".style_checks = "No"
 [[depends-on]]
-spark_unbound = "~0.2.1"
+aunit = "^23.0.0"
