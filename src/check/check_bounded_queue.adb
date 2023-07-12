@@ -9,8 +9,8 @@ with AUnit.Assertions; use AUnit.Assertions;
 with CubedOS.Lib.Bounded_Queues;
 
 -- Show that we can instantate a queue
-with Message_Queues;
-pragma Unreferenced(Message_Queues);
+with CubedOS.Message_Types.Message_Queues;
+pragma Unreferenced(CubedOS.Message_Types.Message_Queues);
 
 package body Check_Bounded_Queue is
 

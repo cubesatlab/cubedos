@@ -14,6 +14,7 @@ with Message_Manager;  use Message_Manager;
 with Name_Resolver;
 with System;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package CubedOS.Publish_Subscribe_Server.API is
 
@@ -43,7 +44,7 @@ package CubedOS.Publish_Subscribe_Server.API is
                                              Subscribe_Request_Msg,
                                                           Publish_Request_Msg);
 
-   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
    procedure Subscribe_Request_Encode
       (Sender_Address : Message_Address;
@@ -54,8 +55,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
        Pre => true
-       and then Receiver_Address.Module_ID = This_Module
-       and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg),
+       and then Receiver_Address.Module_ID = This_Module,
        Post => Message_Types.Message_Type(Result) = Subscribe_Request_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -69,7 +69,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Subscribe_Request_Msg)
       ;
 
    procedure Subscribe_Reply_Encode
@@ -82,8 +81,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Subscribe_Reply_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -97,9 +95,7 @@ package CubedOS.Publish_Subscribe_Server.API is
    with
       Global => (In_Out => Mailboxes),
       Pre => true
-         and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Subscribe_Reply_Msg)
-      ;
+         and then Module_ID(Sender) = This_Module      ;
 
    procedure Unsubscribe_Request_Encode
       (Sender_Address : Message_Address;
@@ -110,8 +106,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Unsubscribe_Request_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -125,7 +120,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Request_Msg)
       ;
 
    procedure Unsubscribe_Reply_Encode
@@ -138,8 +132,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Unsubscribe_Reply_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -154,7 +147,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Unsubscribe_Reply_Msg)
       ;
 
    procedure Publish_Reply_Encode
@@ -167,8 +159,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Publish_Reply_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -183,7 +174,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Reply_Msg)
       ;
 
    procedure Publish_Request_Encode
@@ -196,8 +186,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => Message_Data'Length <= Data_Size_Type'Last - 8
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Publish_Request_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -212,7 +201,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => Message_Data'Length <= Data_Size_Type'Last - 8
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Request_Msg)
       ;
 
    procedure Publish_Result_Encode
@@ -225,8 +213,7 @@ package CubedOS.Publish_Subscribe_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Publish_Result_Msg
          and Message_Types.Receiver_Address(Result) = Receiver_Address;
 
@@ -241,7 +228,6 @@ package CubedOS.Publish_Subscribe_Server.API is
       Global => (In_Out => Mailboxes),
       Pre => true
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Publish_Result_Msg)
       ;
 
    function Is_Subscribe_Request(Message : Message_Record) return Boolean is

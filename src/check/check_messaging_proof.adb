@@ -18,19 +18,19 @@ with CubedOS.Message_Types; use CubedOS.Message_Types;
 procedure Check_Messaging_Proof is
 
    Module_ID_1 : constant Module_ID_Type := 1;
-   Metadata : constant Module_Metadata := Declare_Receives(Module_ID_1, Empty_Type_Array_Ptr'Access);
+   Metadata : constant Module_Metadata := Define_Module(Module_ID_1, Empty_Type_Array'Access);
    Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(Module_ID_1, Metadata);
    Message : Message_Record;
 begin
 
    -- Reading from a mailbox before it is registered is illegal
-   Message_Manager.Fetch_Message(Module_ID_1, Message);
+   Message_Manager.Read_Next(Mailbox_1, Message);
 
    -- Register mailbox 1
    Register_Module(Mailbox_1, 1);
 
    -- Now reading is ok
-   Message_Manager.Fetch_Message(Module_ID_1, Message);
+   Message_Manager.Read_Next(Mailbox_1, Message);
 
    -- But we should really be reading with the mailbox
    Read_Next(Mailbox_1, Message);
