@@ -6,17 +6,27 @@
 --------------------------------------------------------------------------------
 with System;
 
+with Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
+
+
 package CubedOS.Transport_UDP.Messages is
 
-	task Network_Loop is
-		pragma Priority(System.Default_Priority);
-	end Network_Loop;
+   procedure Init;
 
-   task Message_Loop
+   procedure Send(Msg : in out Msg_Owner)
+     with Pre => Msg /= null and then Payload(Msg) /= null,
+     Post => Msg = null;
+
+	task Outgoing_Loop is
+		pragma Priority(System.Default_Priority);
+	end Outgoing_Loop;
+
+   task Incoming_Loop
 	 with Global => (In_Out => Message_Manager.Mailboxes)
    is
 	  -- pragma Storage_Size(4 * 1024);
 	  pragma Priority(System.Default_Priority);
-   end Message_Loop;
+   end Incoming_Loop;
 
 end CubedOS.Transport_UDP.Messages;
