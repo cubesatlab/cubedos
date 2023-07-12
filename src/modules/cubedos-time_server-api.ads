@@ -16,6 +16,7 @@ with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with System;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package CubedOS.Time_Server.API is
 
@@ -35,7 +36,7 @@ package CubedOS.Time_Server.API is
                                              Absolute_Request_Msg,
                                              Cancel_Request_Msg);
 
-   Mail_Target : aliased constant Module_Metadata := Declare_Receives(This_Module, This_Receives'Access);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
    type Series_Type is
       (One_Shot,
@@ -74,13 +75,12 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Relative_Request_Msg)
       ;
 
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
        Receiving_Module : Module_Metadata;
-       Receiving_Domain : Domain_Declaration;
+       Receiving_Domain : Domain_Metadata;
       Request_ID : Request_ID_Type;
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type : Series_Type;
@@ -119,8 +119,7 @@ package CubedOS.Time_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Absolute_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Absolute_Request_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Payload(Result) /= null;
@@ -137,13 +136,12 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Absolute_Request_Msg)
       ;
 
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
        Receiving_Module : Module_Metadata;
-       Receiving_Domain : Domain_Declaration;
+       Receiving_Domain : Domain_Metadata;
       Request_ID : Request_ID_Type;
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : Series_ID_Type;
@@ -168,8 +166,7 @@ package CubedOS.Time_Server.API is
    with
       Global => null,
       Pre => Is_Absolute_Request(Message) and Payload(Message) /= null,
-     Depends => ((Tick_Time, Series_ID, Decode_Status) => Message),
-       Post => Receives(Sender_Address(Message).Module_ID, Tick_Reply_Msg);
+     Depends => ((Tick_Time, Series_ID, Decode_Status) => Message);
 
 
    procedure Tick_Reply_Encode
@@ -182,8 +179,7 @@ package CubedOS.Time_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Sender_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg),
+         and then Sender_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Tick_Reply_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Payload(Result) /= null;
@@ -200,13 +196,12 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Module_ID(Sender) = This_Module
-         and then Receives(Receiver_Address.Module_ID, Tick_Reply_Msg)
       ;
 
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
        Receiving_Module : not null access constant Module_Metadata;
-       Receiving_Domain : not null access constant Domain_Declaration;
+       Receiving_Domain : not null access constant Domain_Metadata;
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
       Count : Series_Count_Type;
@@ -242,8 +237,7 @@ package CubedOS.Time_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Cancel_Request_Msg),
+         and then Receiver_Address.Module_ID = This_Module,
       Post => Message_Types.Message_Type(Result) = Cancel_Request_Msg
        and Message_Types.Receiver_Address(Result) = Receiver_Address
        and Payload(Result) /= null;
@@ -259,7 +253,6 @@ package CubedOS.Time_Server.API is
        Pre => true
          and then Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receives(Receiver_Address.Module_ID, Cancel_Request_Msg)
       ;
 
    function Is_Cancel_Request(Message : Message_Record) return Boolean is

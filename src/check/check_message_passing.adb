@@ -6,6 +6,7 @@
 ---------------------------------------------------------------------------
 with Message_Manager; use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package body Check_Message_Passing is
 
@@ -29,7 +30,7 @@ package body Check_Message_Passing is
       Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
         (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
-      Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array_Ptr'Access));
+      Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array'Access));
       Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, (Receiver_Addr.Module_ID, Receiver_Receive_Types'Access));
    begin
 
@@ -43,7 +44,7 @@ package body Check_Message_Passing is
       declare
          Size : Natural;
       begin
-         Queue_Size(Receiver, Size);
+         Pending_Messages(Receiver, Size);
          pragma Assert(Size = 1, "Acceptable message wasn't received.");
       end;
 

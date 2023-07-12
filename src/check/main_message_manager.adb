@@ -2,9 +2,11 @@
 with Ada.Text_IO;
 with Message_Manager;
 with CubedOS.Message_Types;
+with CubedOS.Message_Types.Mutable;
 use Ada.Text_IO;
 use Message_Manager;
 use CubedOS.Message_Types;
+use CubedOS.Message_Types.Mutable;
 
 procedure Main_Message_Manager is
    Message, Message_2, Message_3, Message_4, Message_5, Message_6 : Mutable_Message_Record

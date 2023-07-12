@@ -6,8 +6,7 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
-with CubedOS.Lib.Bounded_Queues;
-with Message_Queues; use Message_Queues;
+with CubedOS.Message_Types.Message_Queues; use CubedOS.Message_Types.Message_Queues;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -41,6 +40,8 @@ is
    end Init_Lock;
 
    type Message_Queue_Owner is access Message_Queues.Bounded_queue;
+
+   subtype Message_Count_Type is Natural;
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -189,7 +190,6 @@ is
          Next(Q.all, Ptr);
          Second := Copy(Ptr.all);
          Message := Message_Record'(Second.all);
-         Clear_Payload(Ptr.all);
          Delete(Ptr);
 
          if Is_Empty(Q.all) then
@@ -211,17 +211,20 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : access constant Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
-     is (Receives(Receiver.all, Msg_Type));
-
    function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
      is (for some T of Receiver.Spec.Receive_Types.all => T = Msg_Type);
 
    function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
    is (True);
 
+
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
+     with
+       Pre => Message /= null
+       and then Payload(Message) /= null
+       and then Messaging_Ready,
+       Post => Message = null
    is
    begin
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
@@ -229,7 +232,13 @@ is
         (Message, Status);
    end Route_Message;
 
-   procedure Route_Message (Message : in out Msg_Owner) is
+   procedure Route_Message (Message : in out Msg_Owner)
+     with
+       Pre => Message /= null
+       and then Payload(Message) /= null
+       and then Messaging_Ready,
+       Post => Message = null
+   is
    begin
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Send_Outgoing_Message(Message);
@@ -261,13 +270,6 @@ is
       Init_Lock.Wait;
    end Wait;
 
-   procedure Fetch_Message
-     (Module : in Module_ID_Type; Message : out Message_Record)
-   is
-   begin
-      Message_Storage (Module).Receive (Message);
-   end Fetch_Message;
-
    -------------
    -- Mailbox
    -------------
@@ -275,7 +277,7 @@ is
    procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
-                          Target_Domain : Domain_Declaration := This_Domain
+                          Target_Domain : Domain_Metadata := This_Domain
                          )
    is
       Ptr : Msg_Owner;
@@ -310,12 +312,12 @@ is
    procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
       Result : Message_Record;
    begin
-      Fetch_Message (Box.Spec.Module_ID, Result);
+      Message_Storage (Box.Spec.Module_ID).Receive (Result);
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) loop
          Delete(Result);
-         Fetch_Message (Box.Spec.Module_ID, Result);
+         Message_Storage (Box.Spec.Module_ID).Receive (Result);
          pragma Loop_Invariant(Payload(Result) /= null);
       end loop;
       pragma Assert(Receives(Spec(Box), Message_Type(Result)));
@@ -323,10 +325,10 @@ is
       pragma Assert(Receives(Spec(Box), Message_Type(Msg)));
    end Read_Next;
 
-   procedure Queue_Size(Box : Module_Mailbox; Size : out Natural) is
+   procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural) is
    begin
       Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
-   end Queue_Size;
+   end Pending_Messages;
 
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
@@ -344,12 +346,4 @@ is
       Route_Message(Msg);
    end Handle_Received;
 
-   procedure Get_Message_Counts (Count_Array : out Message_Count_Array)
-     with Refined_Global => (In_Out => Message_Storage)
-   is
-   begin
-      for I in Module_ID_Type loop
-         Count_Array (I) := Message_Storage (I).Message_Count;
-      end loop;
-   end Get_Message_Counts;
 end CubedOS.Generic_Message_Manager;
