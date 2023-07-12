@@ -13,6 +13,7 @@ with Ada.Text_IO;
 with Ada.Sequential_IO;
 with CubedOS.Lib;
 with CubedOS.Message_Types;
+with CubedOS.File_Server.API;
 
 use Ada.Text_IO;
 
@@ -20,6 +21,7 @@ package body CubedOS.File_Server.Messages is
    use type API.File_Handle_Type;
    use type API.Mode_Type;
    use CubedOS.Message_Types;
+   use CubedOS.File_Server.API;
 
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
