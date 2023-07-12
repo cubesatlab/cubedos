@@ -38,7 +38,8 @@ is
    -- At runtime, no messages are allowed to be sent until
    -- every module in this domain has registered its mailbox.
    function Messaging_Ready return Boolean
-     with Global => null;
+     with Global => null,
+       Depends => (Messaging_Ready'Result => null);
 
    -- This function blocks until all modules in the domain have
    -- intitialized their mailbox and messaging can be done safetly.
@@ -78,7 +79,7 @@ is
    -- of this Message_Manager.
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
-     with Global => (In_Out => (Mailboxes, Lock)),
+     with Global => (In_Out => (Mailboxes, Lock), Proof_In => This_Domain),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
      Pre => Has_Module(This_Domain, Module_ID(Mailbox));
