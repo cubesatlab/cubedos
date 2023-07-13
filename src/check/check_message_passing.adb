@@ -4,9 +4,11 @@
 -- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
 --
 ---------------------------------------------------------------------------
+
 with Message_Manager; use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
+with AUnit.Assertions; use AUnit.Assertions;
 
 package body Check_Message_Passing is
 
@@ -19,7 +21,7 @@ package body Check_Message_Passing is
    -- Test that sending a message to a module that doesn't support it
    -- throws an exception before the message reaches the module,
    -- but an acceptable message reaches its destination.
-   procedure Test_Msg_Type_Checking is
+   procedure Test_Msg_Type_Checking(T : in out AUnit.Test_Cases.Test_Case'Class) is
 
 
       Sender_Addr : constant Message_Address := (0, 1);
@@ -58,9 +60,18 @@ package body Check_Message_Passing is
       end;
    end Test_Msg_Type_Checking;
 
-   procedure Run_Tests is
+
+
+   procedure Register_Tests(T : in out Message_Passing_Test) is
    begin
-      Test_Msg_Type_Checking;
-   end Run_Tests;
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Msg_Type_Checking'Access, "Nothing Test");
+   end Register_Tests;
+
+
+   function Name(T : in Message_Passing_Test) return AUnit.Message_String is
+      pragma Unreferenced(T);
+   begin
+      return AUnit.Format("Msg Passing");
+   end Name;
 
 end Check_Message_Passing;

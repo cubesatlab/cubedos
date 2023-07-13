@@ -20,7 +20,6 @@ with CubedOS.Interpreter.Messages;
 with CubedOS.Log_Server.Messages;
 with CubedOS.Publish_Subscribe_Server.Messages;
 with CubedOS.Time_Server.Messages;
---with CubedOS.Transport_UDP.Messages;
 with Message_Manager;
 
 with Ada.Text_IO;
@@ -32,7 +31,6 @@ begin
    CubedOS.Publish_Subscribe_Server.Messages.Init;
    CubedOS.File_Server.Messages.Init;
    CubedOS.Time_Server.Messages.Init;
-   --CubedOS.Transport_UDP.Messages.Init;
 
    Message_Manager.Wait;
 

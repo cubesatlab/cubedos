@@ -20,7 +20,10 @@ procedure Main_Message_Manager is
    Message_Type_2 : constant Universal_Message_Type := (1, 2);
    Message_Status : Message_Manager.Status_Type;
    X : Integer := 1;
-   Mailbox_1, Mailbox_2 : Message_Manager.Module_Mailbox;
+
+   -- Use two arbitrary unused module IDs from the domain
+   Mailbox_1 : constant Module_Mailbox := Make_Module_Mailbox(3, Define_Module(3, Empty_Type_Array'Access));
+   Mailbox_2 : constant Module_Mailbox := Make_Module_Mailbox(4, Define_Module(4, Empty_Type_Array'Access));
 
    procedure Fetch is
       Y : Integer := 1;
@@ -58,10 +61,10 @@ procedure Main_Message_Manager is
 
 begin
    -- Register receiving mailboxes
-   --Mailbox_1 := Make_Module_Mailbox(1, (0 => ));
-   --Mailbox_2 := Make_Module_Mailbox(2, Empty_Type_Array_Ptr);
    Message_Manager.Register_Module(Mailbox_1, 8);
    Message_Manager.Register_Module(Mailbox_2, 8);
+
+   Message_Manager.Skip_Mailbox_Initialization;
 
    -- Test Get_Next_Request_ID
    Put_Line("Testing Get_Next_Request_ID");
@@ -81,6 +84,7 @@ begin
    New_Line(2);
 
    -- Test Make_Empty_Message
+   -- These messages won't be used
    Message_3 := Make_Empty_Message
      (Sender_Address   => (0, 2),
       Receiver_Address => (0, 1),
