@@ -12,6 +12,7 @@ with CubedOS.Lib;
 with CubedOS.File_Server.API;
 with CubedOS.File_Server.Messages;
 with Message_Manager;
+with Test_Constants;
 
 use Ada.Text_IO;
 use CubedOS;
@@ -25,7 +26,7 @@ procedure Main_File is
 
    -- Use the time server's module id because it isn't needed in this check
    My_Module_ID : constant Module_ID_Type := Name_Resolver.Time_Server;
-   Metadata : constant Module_Metadata := Define_Module(My_Module_ID, Empty_Type_Array'Access);
+   Metadata : constant Module_Metadata := Define_Module(My_Module_ID, Test_Constants.Receives_File_Messages'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
    Incoming_Message : Message_Record;
