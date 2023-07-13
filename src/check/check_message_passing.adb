@@ -31,6 +31,20 @@ package body Check_Message_Passing is
    Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array'Access));
    Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, Receiver_Metadata);
 
+   function Pending_Messages(Box : Module_Mailbox) return Natural is
+      Number : Natural;
+   begin
+      Message_Manager.Pending_Messages(Box, Number);
+      return Number;
+   end Pending_Messages;
+
+   procedure Discard_Next(Box : Module_Mailbox) is
+     Msg : Message_Record;
+   begin
+      Read_Next(Box, Msg);
+      Delete(Msg);
+   end;
+
    procedure Send_Unacceptable_Message_With_Safe_Procedure is
    begin
       Send_Message(Sender, Unacceptable_Msg, Receiver_Metadata, This_Domain);
@@ -47,31 +61,15 @@ package body Check_Message_Passing is
 
       Message_Manager.Skip_Mailbox_Initialization;
 
-
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);
-      declare
-         Size : Natural;
-      begin
-         Pending_Messages(Receiver, Size);
-         Assert(Size = 1, "Acceptable message wasn't received.");
-      end;
+      Assert(Pending_Messages(Receiver) = 1, "Acceptable message wasn't received.");
 
       -- Read that message out
-      declare
-         Msg : Message_Record;
-      begin
-         Read_Next(Receiver, Msg);
-         pragma Unused(Msg);
-      end;
+      Discard_Next(Receiver);
 
       -- Confirm that the message was removed from the mailbox
-      declare
-         Size : Natural;
-      begin
-         Pending_Messages(Receiver, Size);
-         Assert(Size = 0, "Read message wasn't wasn't removed from mailbox.");
-      end;
+      Assert(Pending_Messages(Receiver) = 0, "Read message wasn't wasn't removed from mailbox.");
 
       -- Check that unacceptable message can't be sent by the safe send procedure
       Assert_Exception(Send_Unacceptable_Message_With_Safe_Procedure'Access, "Safe send procedure didn't prevent sending unsafe message");
@@ -80,15 +78,8 @@ package body Check_Message_Passing is
       Send_Message(Sender, Unacceptable_Msg_2);
 
       -- Verify that the message wasn't deposited in the destination mailbox
-      declare
-         Size : Natural;
-      begin
-         Pending_Messages(Receiver, Size);
-         Assert(Size = 0, "Unacceptable message was desposited in the destination mailbox.");
-      end;
-
+      Assert(Pending_Messages(Receiver) = 0, "Unacceptable message was desposited in the destination mailbox.");
    end Test_Msg_Type_Checking;
-
 
 
    procedure Register_Tests(T : in out Message_Passing_Test) is
