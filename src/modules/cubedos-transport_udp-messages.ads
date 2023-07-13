@@ -4,6 +4,7 @@
 -- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
+pragma SPARK_Mode(On);
 with System;
 
 with Message_Manager;
@@ -23,7 +24,7 @@ package CubedOS.Transport_UDP.Messages is
 	end Outgoing_Loop;
 
    task Incoming_Loop
-	 with Global => (In_Out => Message_Manager.Mailboxes)
+	 with Global => (In_Out => (Message_Manager.Mailboxes, Message_Manager.Lock))
    is
 	  -- pragma Storage_Size(4 * 1024);
 	  pragma Priority(System.Default_Priority);

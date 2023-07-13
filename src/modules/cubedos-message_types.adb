@@ -16,7 +16,7 @@ package body CubedOS.Message_Types is
      (Object => Data_Array, Name => Data_Array_Owner);
 
    procedure Delete(Msg : in out Message_Record)
-     with SPARK_Mode => Off
+     --with SPARK_Mode => Off
    is
    begin
       -- We lie to spark about this because Free shouldn't be
@@ -25,7 +25,7 @@ package body CubedOS.Message_Types is
    end Delete;
 
    procedure Delete(Msg : in out Msg_Owner)
-     with SPARK_Mode => Off
+     --with SPARK_Mode => Off
    is
    begin
       if Msg.Payload /= null then
@@ -64,6 +64,19 @@ package body CubedOS.Message_Types is
       subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
    begin
       return new Message_Record'(Sender_Address => Msg.Sender_Address,
+                                Receiver_Address => Msg.Receiver_Address,
+                                Request_ID => Msg.Request_ID,
+                                Message_Type => Msg.Message_Type,
+                                Priority => Msg.Priority,
+                                Payload => new Definite_Data_Array'(Msg.Payload.all)
+                               );
+   end;
+
+   procedure Copy(Msg : Message_Record; Result : out Message_Record)
+   is
+      subtype Definite_Data_Array is Data_Array(Msg.Payload'Range);
+   begin
+      Result := (Sender_Address => Msg.Sender_Address,
                                 Receiver_Address => Msg.Receiver_Address,
                                 Request_ID => Msg.Request_ID,
                                 Message_Type => Msg.Message_Type,

@@ -133,7 +133,7 @@ package CubedOS.Message_Types is
    -- Domains
    ---------------
 
-   type Module_ID_Set is array (Natural range <>) of Module_ID_Type;
+   type Module_ID_Set is array (Positive range <>) of Module_ID_Type;
 
    -- Describes a domain, assigning it an ID and a set of modules which
    -- it will include.
@@ -171,6 +171,10 @@ package CubedOS.Message_Types is
    function Copy(Msg : Message_Record) return not null Msg_Owner
      with Pre => Payload(Msg) /=  null,
      Post => Payload(Copy'Result) /= null;
+
+   procedure Copy(Msg : Message_Record; Result : out Message_Record)
+     with Pre => Payload(Msg) /= null,
+       Post => Payload(Msg) /= null and Payload(Result) /= null;
 
    -- Create a copy of the given message on the heap,
    -- moving the payload content. Returns access to the new message.

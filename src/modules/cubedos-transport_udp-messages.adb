@@ -21,9 +21,15 @@ package body CubedOS.Transport_UDP.Messages is
       null;
    end Init;
 
-   protected Send_Queue is
-      procedure Add(Msg : in out Msg_Owner);
-      entry Take(Msg : in out Msg_Owner);
+   protected Send_Queue
+     with SPARK_Mode
+   is
+      procedure Add(Msg : in out Msg_Owner)
+        with Pre => Msg /= null,
+        Post => Msg = null;
+      entry Take(Msg : in out Msg_Owner)
+        with Pre => Msg = null,
+        Post => Msg /= null;
    private
       Queued : Msg_Owner;
       Waiting : Boolean := False;
@@ -34,19 +40,23 @@ package body CubedOS.Transport_UDP.Messages is
       Send_Queue.Add(Msg);
    end Send;
 
-   protected body Send_Queue is
+   protected body Send_Queue
+     with SPARK_Mode
+   is
       procedure Add(Msg : in out Msg_Owner) is
       begin
          if Queued = null then
             Queued := Msg;
             Waiting := True;
          else
-            Delete(Msg.all);
+            Delete(Msg);
+            pragma Unused(Msg);
          end if;
          Msg := null;
       end Add;
       entry Take(Msg : in out Msg_Owner) when Waiting is
       begin
+         pragma Assert(if Waiting then Queued /= null);
          Msg := Queued;
          Queued := null;
          Waiting := False;
@@ -84,7 +94,8 @@ package body CubedOS.Transport_UDP.Messages is
       return Immutable(Message);
    end Read_Stream_Message;
 
-   procedure Server_Loop is
+   procedure Server_Loop
+   is
       Server        : Socket_Type;
       Address, From : Sock_Addr_Type;
       Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Data_Index_Type'Last + 6)));
@@ -148,13 +159,17 @@ package body CubedOS.Transport_UDP.Messages is
       Send_Socket (Socket, Buffer, Last, Address);
    end Send_Network_Message;
 
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with SPARK_Mode
+   is
    begin
       -- should there be some check here?
       Send_Network_Message(Message);
    end Process;
 
-   task body Incoming_Loop is
+   task body Incoming_Loop
+     with SPARK_Mode
+   is
    begin
       Message_Manager.Wait;
       Server_Loop;

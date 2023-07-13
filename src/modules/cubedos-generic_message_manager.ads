@@ -24,7 +24,7 @@ Abstract_State =>
    (Request_ID_Generator with External)),
   Initializes => (Mailboxes, Request_ID_Generator, Lock)
 is
-   This_Domain : Domain_Metadata := Domain;
+   This_Domain : constant Domain_Metadata := Domain;
    -- The ID of this domain.
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
    -- The number of modules in this domain.
@@ -39,7 +39,8 @@ is
    -- every module in this domain has registered its mailbox.
    function Messaging_Ready return Boolean
      with Global => null,
-       Depends => (Messaging_Ready'Result => null);
+     Depends => (Messaging_Ready'Result => null);
+
 
    -- This function blocks until all modules in the domain have
    -- intitialized their mailbox and messaging can be done safetly.
@@ -70,6 +71,7 @@ is
    function Make_Module_Mailbox(ID : in Module_ID_Type;
                                 Spec : Module_Metadata) return Module_Mailbox
      with
+       Pre => ID = Spec.Module_ID,
        Post => Module_ID(Make_Module_Mailbox'Result) = ID
        and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
 
@@ -79,7 +81,7 @@ is
    -- of this Message_Manager.
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
-     with Global => (In_Out => (Mailboxes, Lock), Proof_In => This_Domain),
+     with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
      Pre => Has_Module(This_Domain, Module_ID(Mailbox));
@@ -229,6 +231,6 @@ private
    function Valid(Box : Module_Mailbox) return Boolean
      is (Box.Spec.Receive_Types /= null);
    function Module_ID(Box : Module_Mailbox) return Module_ID_Type
-     is (Box.Spec.Module_ID);
+     is (Box.Module_ID);
 
 end CubedOS.Generic_Message_Manager;

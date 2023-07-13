@@ -27,8 +27,8 @@ is
    type Module_Init_List_Owner is access Module_Init_List;
 
    protected Init_Lock is
-      entry Wait;
       function Is_Locked return Boolean;
+      entry Wait;
       procedure Unlock (Module : Module_ID_Type)
         with Pre => Has_Module(This_Domain, Module);
       procedure Unlock_Manual
@@ -77,17 +77,16 @@ is
    Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
 
    function Messaging_Ready return Boolean
-     with SPARK_Mode => Off
+   is (not Init_Lock.Is_Locked)
+     with SPARK_Mode => Off,
      -- We hide this from SPARK because Init_Lock.Is_Locked doesn't have
      -- any meaningful interferences.
-   is
-   begin
-      return not Init_Lock.Is_Locked;
-   end Messaging_Ready;
+     Refined_Post => Messaging_Ready'Result = not Init_Lock.Is_Locked;
 
    procedure Skip_Mailbox_Initialization is
    begin
       Init_Lock.Unlock_Manual;
+      pragma Assert(Messaging_Ready);
    end Skip_Mailbox_Initialization;
 
 
@@ -106,12 +105,14 @@ is
    end Request_ID_Gen;
 
    protected body Init_Lock is
-      entry Wait when not Locked is
-      begin null; end Wait;
       function Is_Locked return Boolean
         is (Locked);
+      entry Wait when not Locked is
+      begin
+         null;
+      end Wait;
       procedure Unlock (Module : Module_ID_Type) is
-         Index : Module_Index;
+         Index : Module_Index with Relaxed_Initialization;
          Set : Boolean := False;
       begin
          if Inited = null then
@@ -182,14 +183,14 @@ is
 
       entry Receive (Message : out Message_Record) when Message_Waiting is
          Ptr : Msg_Owner;
-         Second : Msg_Owner;
       begin
          pragma Assume(if Message_Waiting then Q /= null);
+         pragma Assume(if Message_Waiting then not Is_Empty(Q.all));
 
          Next(Q.all, Ptr);
-         Second := Copy(Ptr.all);
-         Message := Message_Record'(Second.all);
+         Copy(Ptr.all, Message);
          Delete(Ptr);
+         pragma Unused(Ptr);
 
          if Is_Empty(Q.all) then
             Message_Waiting := False;
@@ -211,11 +212,7 @@ is
    end Get_Next_Request_ID;
 
    function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
-     is (for some T of Receiver.Spec.Receive_Types.all => T = Msg_Type);
-
-   function Receives(Receiver : Module_ID_Type; Msg_Type : Universal_Message_Type) return Boolean
-   is (True);
-
+     is (Receives(Spec(Receiver), Msg_Type));
 
    procedure Route_Message
      (Message : in out Msg_Owner; Status : out Status_Type)
@@ -267,6 +264,7 @@ is
    procedure Wait is
    begin
       Init_Lock.Wait;
+      pragma Assert(Messaging_Ready);
    end Wait;
 
    -------------
@@ -314,7 +312,7 @@ is
       Message_Storage (Box.Spec.Module_ID).Receive (Result);
 
       -- Don't allow a mailbox to read a message it can't receive.
-      while not Receives(Spec(Box), Message_Type(Result)) loop
+      while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
          Delete(Result);
          Message_Storage (Box.Spec.Module_ID).Receive (Result);
          pragma Loop_Invariant(Payload(Result) /= null);

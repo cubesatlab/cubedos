@@ -11,7 +11,6 @@ pragma Partition_Elaboration_Policy(Sequential);
 with Ada.Real_Time;
 with System;
 with Message_Manager; use Message_Manager;
-with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
 
 package CubedOS.Time_Server.Messages
   with
