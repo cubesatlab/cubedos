@@ -297,7 +297,7 @@ is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Route_Message (Msg);
+      Route_Message (Ptr);
       pragma Unreferenced(Box);
       pragma Unused(Ptr);
    end Send_Message;

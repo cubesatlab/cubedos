@@ -323,7 +323,7 @@ package body CubedOS.Time_Server.API is
          Series_ID => Series_ID,
          Count => Count,
          Result => Message,
-         Priority => Priority);
+                        Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Tick_Reply;
 

@@ -33,11 +33,13 @@ package Domain_Config is
      with Global => null;
 
    -- Called when a message is read from the mailbox of the receiver.
-   procedure On_Message_Read(Receiver : in Module_Metadata; Msg : in Message_Record);
+   procedure On_Message_Read(Receiver : in Module_Metadata; Msg : in Message_Record)
+     with Global => null;
 
    -- Called when a message from the given mailbox is discarded because the
    -- receiver hasn't declared that it may receive the message type.
-   procedure On_Message_Discarded(Receiver : in Module_Metadata; Msg : in Message_Record);
+   procedure On_Message_Discarded(Receiver : in Module_Metadata; Msg : in Message_Record)
+     with Global => null;
 
 
 
