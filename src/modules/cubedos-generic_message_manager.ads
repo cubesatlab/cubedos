@@ -15,7 +15,6 @@ with CubedOS.Message_Types; use CubedOS.Message_Types;
 generic
    -- The domain of this message manager.
    Domain : Domain_Metadata;
-   with procedure Send_Outgoing_Message(Msg : in out Msg_Owner);
 package CubedOS.Generic_Message_Manager
   with
 Abstract_State =>

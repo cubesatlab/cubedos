@@ -7,6 +7,7 @@
 pragma SPARK_Mode (On);
 
 with CubedOS.Message_Types.Message_Queues; use CubedOS.Message_Types.Message_Queues;
+with Domain_Config;
 
 package body CubedOS.Generic_Message_Manager with
 Refined_State => (Mailboxes => Message_Storage,
@@ -223,6 +224,8 @@ is
        Post => Message = null
    is
    begin
+      Domain_Config.On_Message_Sent_Debug(Message.all);
+
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
       Message_Storage (Receiver_Address(Message).Module_ID).Send
         (Message, Status);
@@ -236,8 +239,9 @@ is
        Post => Message = null
    is
    begin
+      Domain_Config.On_Message_Sent_Debug(Message.all);
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
-         Send_Outgoing_Message(Message);
+         Domain_Config.Send_Outgoing_Message(Message);
       else
          Message_Storage (Receiver_Address(Message).Module_ID).Unchecked_Send
            (Message);
