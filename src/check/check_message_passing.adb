@@ -31,6 +31,10 @@ package body Check_Message_Passing is
    Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array'Access));
    Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, Receiver_Metadata);
 
+   --------------------
+   -- Helper Functions
+   --------------------
+
    function Pending_Messages(Box : Module_Mailbox) return Natural is
       Number : Natural;
    begin
@@ -50,6 +54,10 @@ package body Check_Message_Passing is
       Send_Message(Sender, Unacceptable_Msg, Receiver_Metadata, This_Domain);
    end;
 
+   ----------------
+   -- Tests
+   ----------------
+
    -- Messages of an unreceivable type aren't read by mailboxes.
    procedure Test_Msg_Type_Checking(T : in out AUnit.Test_Cases.Test_Case'Class) is
    begin
@@ -58,8 +66,6 @@ package body Check_Message_Passing is
       -- Register mailboxes
       Register_Module(Sender, 1);
       Register_Module(Receiver, 1);
-
-      Message_Manager.Skip_Mailbox_Initialization;
 
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);
@@ -81,10 +87,30 @@ package body Check_Message_Passing is
       Assert(Pending_Messages(Receiver) = 0, "Unacceptable message was desposited in the destination mailbox.");
    end Test_Msg_Type_Checking;
 
+   -- Request ID generator produces unique, non-zero ids
+   procedure Test_Request_ID_Generator(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      IDs : array (1..100) of Request_ID_Type := (others => 1);
+   begin
+      pragma Unused(T);
+      for Index in IDs'Range loop
+         Message_Manager.Get_Next_Request_ID(IDs(Index));
+
+         Assert(IDs(Index) /= 0, "Produced id of zero");
+
+         -- Check that no prior ID matches this one
+         for I in 1 .. Index-1 loop
+            Assert(IDs(I) /= IDs(Index), "Message Manager produced non-unique request ID");
+         end loop;
+      end loop;
+   end Test_Request_ID_Generator;
+
+
 
    procedure Register_Tests(T : in out Message_Passing_Test) is
    begin
+      Message_Manager.Skip_Mailbox_Initialization;
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Msg_Type_Checking'Access, "Message Type Safety");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Request_ID_Generator'Access, "Request ID Generation");
    end Register_Tests;
 
 
