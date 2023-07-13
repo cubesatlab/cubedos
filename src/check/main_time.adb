@@ -13,7 +13,7 @@ with Ada.Text_IO;
 with CubedOS.Time_Server;
 with CubedOS.Time_Server.API;
 with CubedOS.Time_Server.Messages;
-pragma Unreferenced(CubedOS.Time_Server.Messages);
+with Test_Constants;
 with Message_Manager;
 with GNAT.Time_Stamp;
 
@@ -30,7 +30,7 @@ procedure Main_Time is
 
    -- Take the module ID of the file server because it isn't included in this test
    My_Module_ID : constant Module_ID_Type := Name_Resolver.File_Server;
-   Metadata : constant Module_Metadata := Define_Module(My_Module_ID, Empty_Type_Array'Access);
+   Metadata : constant Module_Metadata := Define_Module(My_Module_ID, Test_Constants.Receives_Tick_Messages'Access);
    My_Mailbox : constant Module_Mailbox := Make_Module_Mailbox(My_Module_ID, Metadata);
 
    Incoming_Message  : Message_Record;

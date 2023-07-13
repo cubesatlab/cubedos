@@ -148,10 +148,12 @@ is
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
          if Q = null or else Is_Full(Q.all) then
+            Domain_Config.On_Message_Receive_Failed(Message.all);
             Status := Mailbox_Full;
             Delete(Message);
             Message := null;
          else
+            Domain_Config.On_Message_Receive_Succeed(Message.all);
             Put(Q.all, Message);
             Message_Waiting := True;
             Status          := Accepted;
@@ -163,9 +165,11 @@ is
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
+            Domain_Config.On_Message_Receive_Failed(Message.all);
             Delete(Message);
             Message := null;
          else
+            Domain_Config.On_Message_Receive_Succeed(Message.all);
             Put(Q.all, Message);
             Message_Waiting := True;
          end if;
@@ -225,7 +229,6 @@ is
    is
    begin
       Domain_Config.On_Message_Sent_Debug(Message.all);
-
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
       Message_Storage (Receiver_Address(Message).Module_ID).Send
         (Message, Status);
@@ -317,10 +320,12 @@ is
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
+         Domain_Config.On_Message_Discarded(Spec(Box), Result);
          Delete(Result);
          Message_Storage (Box.Spec.Module_ID).Receive (Result);
          pragma Loop_Invariant(Payload(Result) /= null);
       end loop;
+      Domain_Config.On_Message_Read(Spec(Box), Result);
       pragma Assert(Receives(Spec(Box), Message_Type(Result)));
       Msg := Result;
       pragma Assert(Receives(Spec(Box), Message_Type(Msg)));
