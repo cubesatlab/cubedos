@@ -71,7 +71,7 @@ is
 
    private
       Q : Message_Queue_Owner := null;
-      Metadata : Module_Metadata;
+      Metadata : Module_Metadata := (1, Empty_Type_Array'Access);
       Message_Waiting : Boolean := False;
    end Sync_Mailbox;
 
