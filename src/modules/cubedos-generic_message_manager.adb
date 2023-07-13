@@ -215,7 +215,7 @@ is
       procedure Initialize (Spec : Module_Metadata; Size : in Natural) is
       begin
          if Q = null then
-            Q := new Message_Queues.Bounded_Queue(Size);
+            Q := new Message_Queues.Bounded_Queue'(Make(Size));
             Metadata := Spec;
          end if;
       end Initialize;
