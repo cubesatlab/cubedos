@@ -9,7 +9,6 @@ pragma Profile(Jorvik);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with CubedOS.Generic_Message_Manager;
-pragma Elaborate_All(CubedOS.Generic_Message_Manager);
 
 with Name_Resolver;
 

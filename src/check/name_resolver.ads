@@ -41,18 +41,22 @@ package Name_Resolver is
    -- Table_Server             : constant Module_ID_Type := 8;
    Interpreter              : constant Module_ID_Type := 9;
 
+   -- Application-Specific Modules.
+   -- Make up names as you see fit (typically the same as your module's top level package).
+   -- Be sure there are no duplicate module ids.
+   -- The names below are examples.
 
+   -- Echo_Client             : constant Module_ID_Type := 10;
+   -- Echo_Server             : constant Module_ID_Type := 11;
+
+
+   -- Domains
+
+   -- Once every module used in the project has been assigned a unique ID, define
+   -- one or more Domains, each with one or more modules and a unique domain ID.
    Domain : aliased constant Domain_Metadata := Declare_Domain(5, 1, (Log_Server,
                                                                   Publish_Subscribe_Server,
                                                                   Time_Server,
                                                                   File_Server,
                                                                   Interpreter));
-   -- Application-Specific Modules.
-   -- Make up names as you see fit (typically the same as your module's top level package).
-   -- Be sure there are no duplicate (Domain_ID, Module_ID) pairs.
-   -- The names below are examples.
-
-   -- Echo_Client             : constant Message_Address := (0, 3);
-   -- Echo_Server             : constant Message_Address := (0, 4);
-
 end Name_Resolver;

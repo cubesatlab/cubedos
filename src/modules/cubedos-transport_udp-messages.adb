@@ -98,7 +98,7 @@ package body CubedOS.Transport_UDP.Messages is
    is
       Server        : Socket_Type;
       Address, From : Sock_Addr_Type;
-      Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Data_Index_Type'Last + 6)));
+      Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Max_Message_Size + 6)));
       Last          : Ada.Streams.Stream_Element_Offset;
       Message : Msg_Owner;
    begin

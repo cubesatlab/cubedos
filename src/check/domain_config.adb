@@ -7,15 +7,14 @@
 
 pragma SPARK_Mode (On);
 
---with CubedOS.Transport_UDP.Messages;
+with CubedOS.Transport_UDP.Messages;
 with Ada.Text_IO;
 
 package body Domain_Config is
 
    procedure Send_Outgoing_Message (Msg : in out Msg_Owner) is
    begin
-      null;
-      --CubedOS.Transport_UDP.Messages.Send(Msg);
+      CubedOS.Transport_UDP.Messages.Send(Msg);
    end Send_Outgoing_Message;
 
    procedure On_Message_Sent_Debug (Msg : in Message_Record)

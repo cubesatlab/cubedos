@@ -16,7 +16,8 @@ package CubedOS.Transport_UDP.Messages is
    procedure Init;
 
    procedure Send(Msg : in out Msg_Owner)
-     with Pre => Msg /= null and then Payload(Msg) /= null,
+     with Pre => Msg /= null
+     and then Payload(Msg) /= null,
      Post => Msg = null;
 
 	task Outgoing_Loop is
