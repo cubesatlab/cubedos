@@ -31,6 +31,8 @@ package body Check_Message_Passing is
    Sender : constant Module_Mailbox := Make_Module_Mailbox(Sender_Addr.Module_ID, (Sender_Addr.Module_ID, Empty_Type_Array'Access));
    Receiver : constant Module_Mailbox := Make_Module_Mailbox(Receiver_Addr.Module_ID, Receiver_Metadata);
 
+   Receiver_Queue_Size : constant Natural := 8;
+
    --------------------
    -- Helper Functions
    --------------------
@@ -62,10 +64,6 @@ package body Check_Message_Passing is
    procedure Test_Msg_Type_Checking(T : in out AUnit.Test_Cases.Test_Case'Class) is
    begin
       pragma Unused(T);
-
-      -- Register mailboxes
-      Register_Module(Sender, 1);
-      Register_Module(Receiver, 1);
 
       -- Check that acceptable message reaches receiver
       Send_Message(Sender, Acceptable_Msg);
@@ -104,13 +102,57 @@ package body Check_Message_Passing is
       end loop;
    end Test_Request_ID_Generator;
 
+   -- Mailboxes only store a finite number of messages
+   procedure Test_Mailbox_Size_Constraints(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      Messages : constant array (1..10) of Message_Record := (others => Immutable(Make_Empty_Message(Sender_Addr,
+                                                     Receiver_Addr,
+                                                     1, Acceptable_Type, 0)));
+      Result : Status_Type;
+   begin
+      pragma Unused(T);
+      pragma Assert(Pending_Messages(Receiver) = 0);
+
+      -- Send messages to Receiver
+      Route_Message(Messages(1));
+      Route_Message(Messages(2));
+      Route_Message(Messages(3));
+      Route_Message(Messages(4), Result);
+
+      Assert(Pending_Messages(Receiver) = 4, "Receiver hasn't received the correct number of messages 1");
+      Assert(Result = Accepted, "Mailbox failed to accept messsage 1");
+
+      Route_Message(Messages(5));
+      Route_Message(Messages(6));
+      Route_Message(Messages(7));
+      Route_Message(Messages(8), Result);
+
+      -- The receiver has a mailbox size of 8, so this message should be accepted
+      Assert(Pending_Messages(Receiver) = 8, "Receiver hasn't received the correct number of messages 2. Received: " & Integer'Image(Pending_Messages(Receiver)));
+      Assert(Result = Accepted, "Mailbox failed to accept messsage 2");
+
+      -- No more messages should be accepted
+      Route_Message(Messages(9), Result);
+      Assert(Pending_Messages(Receiver) = 8, "Receiver shouldn't have accepted this message 3");
+      Assert(Result = Mailbox_Full, "Mailbox accepted more messages than it can store");
+
+      -- No more messages should be accepted
+      Route_Message(Messages(10), Result);
+      Assert(Pending_Messages(Receiver) = 8, "Receiver shouldn't have accepted this message");
+      Assert(Result = Mailbox_Full, "Mailbox accepted more messages than it can store");
+
+   end Test_Mailbox_Size_Constraints;
 
 
    procedure Register_Tests(T : in out Message_Passing_Test) is
    begin
       Message_Manager.Skip_Mailbox_Initialization;
+      -- Register mailboxes
+      Register_Module(Sender, 1);
+      Register_Module(Receiver, Receiver_Queue_Size);
+
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Msg_Type_Checking'Access, "Message Type Safety");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Request_ID_Generator'Access, "Request ID Generation");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Mailbox_Size_Constraints'Access, "Mailbox Size Constraints");
    end Register_Tests;
 
 
