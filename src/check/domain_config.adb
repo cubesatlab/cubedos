@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+-- FILE   : domain_config.adb
+-- SUBJECT: Specifies information regarding a domain.
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+--
+--------------------------------------------------------------------------------
+
 pragma SPARK_Mode (On);
 
 --with CubedOS.Transport_UDP.Messages;

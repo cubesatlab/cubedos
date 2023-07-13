@@ -47,8 +47,6 @@ package Name_Resolver is
                                                                   Time_Server,
                                                                   File_Server,
                                                                   Interpreter));
-   pragma Assert(Has_Module(Domain, Time_Server));
-
    -- Application-Specific Modules.
    -- Make up names as you see fit (typically the same as your module's top level package).
    -- Be sure there are no duplicate (Domain_ID, Module_ID) pairs.

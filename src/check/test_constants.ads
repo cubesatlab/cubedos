@@ -1,4 +1,11 @@
-
+--------------------------------------------------------------------------------
+-- FILE   : test_constants.ads
+-- SUBJECT: Some constants used in tests.
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+--
+-- Ada is very picky about when it is safe to 'Access things, so this file
+-- defines some constants which are aliased in various test programs.
+--------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
