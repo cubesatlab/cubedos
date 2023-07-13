@@ -129,10 +129,10 @@ is
       Message_Manager.Wait;
 
       loop
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
          Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
          Delete(Incoming_Message);
-         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 

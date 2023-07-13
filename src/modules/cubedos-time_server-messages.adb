@@ -17,6 +17,8 @@ is
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
 
+   pragma Assert(This_Module = Name_Resolver.Time_Server);
+   pragma Assert(This_Module = Mail_Target.Module_ID);
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    -- Stores all persistent info about a series.
@@ -291,6 +293,7 @@ is
       Message_Manager.Wait;
 
       loop
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
          Read_Next(Mailbox, Incoming_Message);
 
          -- This module should never receive a message from itself.
@@ -300,7 +303,7 @@ is
             Process (Incoming_Message);
          end if;
          Delete(Incoming_Message);
-         pragma Loop_Invariant(Payload(Incoming_Message) = null);
+
       end loop;
    end Message_Loop;
 
