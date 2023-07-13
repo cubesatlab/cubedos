@@ -146,7 +146,7 @@ is
      and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID),
      Post => Payload(Msg) = null;
 
-   type Status_Type is (Accepted, Mailbox_Full);
+   type Status_Type is (Accepted, Mailbox_Full, Rejected_Type);
 
    -- Sends the given message.
    -- Returns immediately with the status of the operation's result.

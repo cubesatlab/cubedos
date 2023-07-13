@@ -66,11 +66,12 @@ is
       entry Receive (Message : out Message_Record);
         --with Post => Is_Valid(Message);
 
-      -- Change the array used to store messages.
-      procedure Set_Queue_Size (Size : in Natural);
+      -- Set the mailbox size and metadata
+      procedure Initialize (Spec : Module_Metadata; Size : in Natural);
 
    private
       Q : Message_Queue_Owner := null;
+      Metadata : Module_Metadata;
       Message_Waiting : Boolean := False;
    end Sync_Mailbox;
 
@@ -152,6 +153,11 @@ is
             Status := Mailbox_Full;
             Delete(Message);
             Message := null;
+         elsif not Receives(Metadata, Message_Type(Message)) then
+            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Status := Rejected_Type;
+            Delete(Message);
+            Message := null;
          else
             Domain_Config.On_Message_Receive_Succeed(Message.all);
             Put(Q.all, Message);
@@ -165,6 +171,10 @@ is
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
+            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Delete(Message);
+            Message := null;
+         elsif not Receives(Metadata, Message_Type(Message)) then
             Domain_Config.On_Message_Receive_Failed(Message.all);
             Delete(Message);
             Message := null;
@@ -202,12 +212,13 @@ is
          end if;
       end Receive;
 
-      procedure Set_Queue_Size (Size : in Natural) is
+      procedure Initialize (Spec : Module_Metadata; Size : in Natural) is
       begin
          if Q = null then
             Q := new Message_Queues.Bounded_Queue(Size);
+            Metadata := Spec;
          end if;
-      end Set_Queue_Size;
+      end Initialize;
 
    end Sync_Mailbox;
 
@@ -341,7 +352,7 @@ is
    is
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Module_ID(Mailbox)).Set_Queue_Size (Msg_Queue_Size);
+      Message_Storage (Module_ID(Mailbox)).Initialize (Spec(Mailbox), Msg_Queue_Size);
 
       Init_Lock.Unlock(Module_ID(Mailbox));
    end Register_Module;
