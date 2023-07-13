@@ -42,7 +42,7 @@ package Name_Resolver is
    Interpreter              : constant Module_ID_Type := 9;
 
 
-   Domain : aliased constant Domain_Metadata := Declare_Domain(5, 0, (Log_Server,
+   Domain : aliased constant Domain_Metadata := Declare_Domain(5, 1, (Log_Server,
                                                                   Publish_Subscribe_Server,
                                                                   Time_Server,
                                                                   File_Server,
