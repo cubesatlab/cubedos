@@ -8,8 +8,6 @@
 -- The check packages that are children of library packages are organized that way so they will have
 -- access to the private section of the parent library package. The check packages that are *not*
 -- children do not need access to the private section of the package they are testing.
---
-with CubedOS.Lib.Bounded_Strings.Check;
 
 with Check_Message_Passing;
 
