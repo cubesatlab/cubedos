@@ -25,6 +25,8 @@ package body Check_Message_Passing is
                                                      (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
    Unacceptable_Msg_2 : Message_Record := Immutable(Make_Empty_Message
                                                     (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
+   Unacceptable_Msg_3 : Message_Record := Immutable(Make_Empty_Message
+                                                    (Sender_Addr, Receiver_Addr, 0, Unnacceptable_Type, 0));
    Acceptable_Msg : Message_Record := Immutable(Make_Empty_Message
                                                 (Sender_Addr, Receiver_Addr, 0, Acceptable_Type, 0));
 
@@ -78,8 +80,16 @@ package body Check_Message_Passing is
       -- Check that unacceptable message can't be sent by the safe send procedure
       Assert_Exception(Send_Unacceptable_Message_With_Safe_Procedure'Access, "Safe send procedure didn't prevent sending unsafe message");
 
+      -- Check that unacceptable message gets rejected status from statused send procedure
+      declare
+         Result : Status_Type;
+      begin
+         Send_Message(Sender, Unacceptable_Msg_2, Result);
+         Assert(Result = Rejected_Type, "Failed to reject unacceptable message");
+      end;
+
       -- Send the unreceivable message using the unsafe procedure
-      Send_Message(Sender, Unacceptable_Msg_2);
+      Send_Message(Sender, Unacceptable_Msg_3);
 
       -- Verify that the message wasn't deposited in the destination mailbox
       Assert(Pending_Messages(Receiver) = 0, "Unacceptable message was desposited in the destination mailbox.");
