@@ -1,4 +1,18 @@
-
+--------------------------------------------------------------------------------
+-- FILE   : domain_config.ads
+-- SUBJECT: Specifies information regarding a domain.
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+--
+-- This file is included by instantiations of message manager.
+-- It has the procedure used by the message manager to route outgoing
+-- messages to the appropriate transport modules, along with other
+-- domain specific configurations.
+--
+-- It also contains several debug procedures which may be implemented
+-- by the user to get information about message passing during development.
+-- After development, these functions should have their body set to "null"
+-- to avoid pointless computation.
+--------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
