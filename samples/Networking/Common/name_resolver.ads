@@ -13,7 +13,7 @@ package Name_Resolver is
    Network_Server : constant Module_ID_Type := 2;
 
    -- Application-Specific Modules
-   Ping_Server : constant Module_ID_Type := 3;
+   Ping_Server : constant Module_ID_Type  := 3;
    Ping_Client : constant Module_ID_Type  := 4;
 
    Domain_A : constant Domain_Metadata := (Module_Count => 1,
