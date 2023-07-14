@@ -143,10 +143,6 @@ package CubedOS.Message_Types is
          Module_IDs : Module_ID_Set(1 .. Module_Count);
       end record;
 
-   function Declare_Domain(Module_Count : Positive; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Metadata
-     with Pre => Module_Count = Module_IDs'Length,
-       Post => (for all M of Module_IDs => Has_Module(Declare_Domain'Result, M));
-
    -- Checks if the given domain contains a module with the given id.
    function Has_Module(Domain : Domain_Metadata; Module_ID : Module_ID_Type) return Boolean;
 
@@ -195,8 +191,6 @@ package CubedOS.Message_Types is
      Post => Msg = null;
 
 private
-   function Declare_Domain(Module_Count : Positive; Domain_ID : Domain_ID_Type; Module_IDs : Module_ID_Set) return Domain_Metadata
-     is (Module_Count, Domain_ID, Module_IDs);
 
    function Define_Module(This_Module : Module_ID_Type; This_Receives : Const_Msg_Type_Array_Ptr) return Module_Metadata
      is (This_Module, This_Receives);
