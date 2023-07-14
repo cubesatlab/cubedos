@@ -29,6 +29,7 @@ is
 
    protected Init_Lock is
       function Is_Locked return Boolean;
+      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean;
       entry Wait;
       procedure Unlock (Module : Module_ID_Type)
         with Pre => Has_Module(This_Domain, Module);
@@ -109,13 +110,37 @@ is
    protected body Init_Lock is
       function Is_Locked return Boolean
         is (Locked);
+      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean is
+         Index : Module_Index with Relaxed_Initialization;
+      begin
+         if Inited = null then
+            -- Exactly zero modules are currently registered
+            return False;
+         end if;
+
+         -- Get index of given module
+         for I in 1 .. Module_Count loop
+            if This_Domain.Module_IDs(I) = Module_ID then
+               Index := Module_Index(I);
+               exit;
+            end if;
+         end loop;
+
+         -- The loop is guaranteed to find an index because
+         -- of the precondition that the module id must be
+         -- in the domain.
+         -- TODO: Prove this to spark with lemmas
+
+         return Inited(Index);
+      end Is_Initialized;
+
+
       entry Wait when not Locked is
       begin
          null;
       end Wait;
       procedure Unlock (Module : Module_ID_Type) is
          Index : Module_Index with Relaxed_Initialization;
-         Set : Boolean := False;
       begin
          if Inited = null then
             Inited := new Module_Init_List;
@@ -125,14 +150,15 @@ is
          for I in 1 .. Module_Count loop
             if This_Domain.Module_IDs(I) = Module then
                Index := Module_Index(I);
-               Set := True;
                exit;
             end if;
          end loop;
 
-         if Set then
-            Inited(Index) := True;
-         end if;
+         -- The loop is guaranteed to find an index because
+         -- of the precondition that the module id must be
+         -- in the domain.
+         -- TODO: prove this to spark with lemmas
+         Inited(Index) := True;
 
          if (for all I of Inited.all => I) then
             Locked := False;
@@ -334,7 +360,7 @@ is
          Domain_Config.On_Message_Discarded(Spec(Box), Result);
          Delete(Result);
          Message_Storage (Box.Spec.Module_ID).Receive (Result);
-         pragma Loop_Invariant(Payload(Result) /= null);
+         pragma Loop_Invariant(Payload(Result) = null);
       end loop;
       Domain_Config.On_Message_Read(Spec(Box), Result);
       pragma Assert(Receives(Spec(Box), Message_Type(Result)));
@@ -347,6 +373,11 @@ is
       Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
    end Pending_Messages;
 
+   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
+   is (Init_Lock.Is_Initialized(Module_ID))
+     with SPARK_Mode => Off;
+     -- Lying to SPARK because this has no meaningful interferences
+
    procedure Register_Module(Mailbox : in Module_Mailbox;
                              Msg_Queue_Size : in Positive)
    is
@@ -355,6 +386,7 @@ is
       Message_Storage (Module_ID(Mailbox)).Initialize (Spec(Mailbox), Msg_Queue_Size);
 
       Init_Lock.Unlock(Module_ID(Mailbox));
+      pragma Assert(Module_Registered(Module_ID(Mailbox)));
    end Register_Module;
 
    -- Gives a message received from a foreign domain to the message system.

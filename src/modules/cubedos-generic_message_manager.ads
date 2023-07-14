@@ -74,6 +74,10 @@ is
        Post => Module_ID(Make_Module_Mailbox'Result) = ID
        and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
 
+   -- Checks if the given module id has already been registered.
+   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
+     with Ghost, Global => null;
+
    -- Registers a module with the messaging system.
    -- Modules must specify the maximum number of messages their
    -- mailbox can store. The mailbox is registered to the domain
@@ -83,7 +87,10 @@ is
      with Global => (In_Out => (Mailboxes, Lock)),
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
-     Pre => Has_Module(This_Domain, Module_ID(Mailbox));
+     Pre => Has_Module(This_Domain, Module_ID(Mailbox))
+     and not Module_Registered(Module_ID(Mailbox)),
+     Post => Module_Registered(Module_ID(Mailbox));
+
 
    function Spec(Box : Module_Mailbox) return Module_Metadata
      with Post => Spec'Result.Receive_Types /= null;
