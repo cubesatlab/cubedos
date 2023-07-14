@@ -165,11 +165,13 @@ is
          Inited(Index) := True;
 
          if (for all I of Inited.all => I) then
+            Domain_Config.On_Message_System_Initialization_Complete;
             Locked := False;
          end if;
       end Unlock;
       procedure Unlock_Manual is
       begin
+         Domain_Config.On_Message_System_Initialization_Complete;
          Locked := False;
       end Unlock_Manual;
    end Init_Lock;

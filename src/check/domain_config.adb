@@ -17,6 +17,13 @@ package body Domain_Config is
       CubedOS.Transport_UDP.Messages.Send(Msg);
    end Send_Outgoing_Message;
 
+   procedure On_Message_System_Initialization_Complete
+     with SPARK_Mode => Off
+   is
+   begin
+      Ada.Text_IO.Put_Line("[All Modules Initialized]");
+   end On_Message_System_Initialization_Complete;
+
    procedure On_Message_Sent_Debug (Msg : in Message_Record)
      with SPARK_Mode => Off
    is
