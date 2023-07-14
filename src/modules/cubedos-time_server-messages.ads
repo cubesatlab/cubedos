@@ -11,6 +11,7 @@ pragma Partition_Elaboration_Policy(Sequential);
 with Ada.Real_Time;
 with System;
 with Message_Manager; use Message_Manager;
+with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
 
 package CubedOS.Time_Server.Messages
   with
@@ -19,7 +20,9 @@ package CubedOS.Time_Server.Messages
 is
 
    procedure Init
-     with Global => (In_Out => (Mailboxes, Lock));
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Registered(This_Module),
+     Post => Module_Registered(This_Module);
 
    task Message_Loop
      with

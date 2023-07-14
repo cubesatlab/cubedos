@@ -21,7 +21,8 @@ Abstract_State =>
   ((Mailboxes with External),
    (Lock with External),
    (Request_ID_Generator with External)),
-  Initializes => (Mailboxes, Request_ID_Generator, Lock)
+  Initializes => (Mailboxes, Request_ID_Generator, Lock),
+  Initial_Condition => (for all ID in Module_ID_Type => not Module_Registered(ID))
 is
    This_Domain : constant Domain_Metadata := Domain;
    -- The ID of this domain.

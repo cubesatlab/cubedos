@@ -395,4 +395,6 @@ is
       Route_Message(Msg);
    end Handle_Received;
 
+begin
+   pragma Assert(for all ID in Module_ID_Type => not Module_Registered(ID));
 end CubedOS.Generic_Message_Manager;

@@ -26,7 +26,9 @@ is
    use CubedOS.Publish_Subscribe_Server.API;
 
    procedure Init
-     with Global => (In_Out => (Mailboxes, Lock));
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Registered(This_Module),
+     Post => Module_Registered(This_Module);
 
    task type Message_Loop
      with Global => (In_Out => (Database)),

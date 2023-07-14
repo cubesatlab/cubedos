@@ -7,13 +7,16 @@
 pragma SPARK_Mode(On);
 
 with System;
+with CubedOS.Interpreter.API;
 
 package CubedOS.Interpreter.Messages is
-   pragma Elaborate_Body;
-
    use Message_Manager;
+   use CubedOS.Interpreter.API;
 
-   procedure Init;
+   procedure Init
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Registered(This_Module),
+     Post => Module_Registered(This_Module);
 
    task Message_Loop is
       pragma Storage_Size(4 * 1024);

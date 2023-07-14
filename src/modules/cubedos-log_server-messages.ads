@@ -10,14 +10,16 @@ pragma Partition_Elaboration_Policy(Sequential);
 
 with Ada.Text_IO;
 with System;
-with CubedOS.Log_Server.API; use CubedOS.Log_Server.API;
+with CubedOS.Log_Server.API;
 
 package CubedOS.Log_Server.Messages is
-   pragma Elaborate_Body;
-
    use Message_Manager;
+   use CubedOS.Log_Server.API;
 
-   procedure Init;
+   procedure Init
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Registered(This_Module),
+     Post => Module_Registered(This_Module);
 
    task Message_Loop
      with Global => (In_Out => (Ada.Text_IO.File_System, Message_Manager.Mailboxes, Message_Manager.Lock))
