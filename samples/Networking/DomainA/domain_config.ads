@@ -13,7 +13,7 @@ package Domain_Config is
    -- This procedure routes messages destined to foreign
    -- domains to the appropriate transport module.
    procedure Send_Outgoing_Message (Msg : in out Msg_Owner)
-     with Pre => Msg /= null,
+     with Pre => Msg /= null and then Payload(Msg) /= null,
      Post => Msg = null;
 
 

@@ -41,6 +41,7 @@ package body Domain_Config is
      with SPARK_Mode => Off
    is
    begin
+      pragma Unreferenced(Msg);
       Ada.Text_IO.Put_Line("[Message Read] " & Module_ID_Type'Image(Receiver.Module_ID));
    end On_Message_Read;
 
@@ -48,6 +49,7 @@ package body Domain_Config is
      with SPARK_Mode => Off
    is
    begin
+      pragma Unreferenced(Msg);
       Ada.Text_IO.Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID));
    end On_Message_Discarded;
 
