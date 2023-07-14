@@ -22,7 +22,7 @@ Abstract_State =>
    (Lock with External),
    (Request_ID_Generator with External)),
   Initializes => (Mailboxes, Request_ID_Generator, Lock),
-  Initial_Condition => (for all ID in Module_ID_Type => not Module_Registered(ID))
+  Initial_Condition => (for all ID of This_Domain.Module_IDs => not Module_Registered(ID))
 is
    This_Domain : constant Domain_Metadata := Domain;
    -- The ID of this domain.
@@ -222,7 +222,6 @@ is
      and then Payload(Message) /= null;
 
 private
-
    type Module_Mailbox is
       record
          Module_ID : Module_ID_Type;

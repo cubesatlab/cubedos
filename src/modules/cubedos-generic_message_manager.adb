@@ -29,7 +29,8 @@ is
 
    protected Init_Lock is
       function Is_Locked return Boolean;
-      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean;
+      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean
+        with Pre => Has_Module(This_Domain, Module_ID);
       entry Wait;
       procedure Unlock (Module : Module_ID_Type)
         with Pre => Has_Module(This_Domain, Module);
@@ -68,7 +69,8 @@ is
         --with Post => Is_Valid(Message);
 
       -- Set the mailbox size and metadata
-      procedure Initialize (Spec : Module_Metadata; Size : in Natural);
+      procedure Initialize (Spec : Module_Metadata; Size : in Positive)
+        with Pre => Size < Natural'Last - 1;
 
    private
       Q : Message_Queue_Owner := null;
@@ -77,7 +79,7 @@ is
    end Sync_Mailbox;
 
    -- One mailbox for each module.
-   Message_Storage : array (Module_ID_Type) of Sync_Mailbox;
+   Message_Storage : array (Module_Index) of Sync_Mailbox;
 
    function Messaging_Ready return Boolean
    is (not Init_Lock.Is_Locked)
@@ -97,6 +99,29 @@ is
    -- Implementations
    ------------------
 
+   -- A bijective function from Module_IDs inside this domain to their index
+   -- in arrays. In a normal programming language we would be using a map instead
+   -- of this.
+   function Index_Of(Module_ID : Module_ID_Type) return Module_Index
+     with Pre => Has_Module(This_Domain, Module_ID)
+   is
+      Index : Module_Index with Relaxed_Initialization;
+   begin
+      -- Get index of given module
+      for I in 1 .. Module_Count loop
+         if This_Domain.Module_IDs(I) = Module_ID then
+            Index := Module_Index(I);
+            exit;
+         end if;
+      end loop;
+
+      -- The loop is guaranteed to find an index because
+      -- of the precondition that the module id must be
+      -- in the domain.
+      -- TODO: Prove this to spark with lemmas
+      return Index;
+   end Index_Of;
+
    protected body Request_ID_Gen is
 
       procedure Generate_Next_ID (Request_ID : out Request_ID_Type) is
@@ -111,25 +136,12 @@ is
       function Is_Locked return Boolean
         is (Locked);
       function Is_Initialized(Module_ID : Module_ID_Type) return Boolean is
-         Index : Module_Index with Relaxed_Initialization;
+         Index : constant Module_Index := Index_Of(Module_ID);
       begin
          if Inited = null then
             -- Exactly zero modules are currently registered
             return False;
          end if;
-
-         -- Get index of given module
-         for I in 1 .. Module_Count loop
-            if This_Domain.Module_IDs(I) = Module_ID then
-               Index := Module_Index(I);
-               exit;
-            end if;
-         end loop;
-
-         -- The loop is guaranteed to find an index because
-         -- of the precondition that the module id must be
-         -- in the domain.
-         -- TODO: Prove this to spark with lemmas
 
          return Inited(Index);
       end Is_Initialized;
@@ -140,19 +152,11 @@ is
          null;
       end Wait;
       procedure Unlock (Module : Module_ID_Type) is
-         Index : Module_Index with Relaxed_Initialization;
+         Index : constant Module_Index := Index_Of(Module);
       begin
          if Inited = null then
             Inited := new Module_Init_List;
          end if;
-
-         -- Get index of given module
-         for I in 1 .. Module_Count loop
-            if This_Domain.Module_IDs(I) = Module then
-               Index := Module_Index(I);
-               exit;
-            end if;
-         end loop;
 
          -- The loop is guaranteed to find an index because
          -- of the precondition that the module id must be
@@ -238,7 +242,7 @@ is
          end if;
       end Receive;
 
-      procedure Initialize (Spec : Module_Metadata; Size : in Natural) is
+      procedure Initialize (Spec : Module_Metadata; Size : in Positive) is
       begin
          if Q = null then
             Q := new Message_Queues.Bounded_Queue'(Make(Size));
@@ -261,13 +265,14 @@ is
      with
        Pre => Message /= null
        and then Payload(Message) /= null
-       and then Messaging_Ready,
+       and then Messaging_Ready
+       and then Has_Module(This_Domain, Receiver_Address(Message).Module_ID),
        Post => Message = null
    is
    begin
       Domain_Config.On_Message_Sent_Debug(Message.all);
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
-      Message_Storage (Receiver_Address(Message).Module_ID).Send
+      Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Send
         (Message, Status);
    end Route_Message;
 
@@ -283,7 +288,7 @@ is
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Domain_Config.Send_Outgoing_Message(Message);
       else
-         Message_Storage (Receiver_Address(Message).Module_ID).Unchecked_Send
+         Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Unchecked_Send
            (Message);
          pragma Unused(Message);
       end if;
@@ -353,13 +358,13 @@ is
    procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
       Result : Message_Record;
    begin
-      Message_Storage (Box.Spec.Module_ID).Receive (Result);
+      Message_Storage (Index_Of(Box.Spec.Module_ID)).Receive (Result);
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
          Domain_Config.On_Message_Discarded(Spec(Box), Result);
          Delete(Result);
-         Message_Storage (Box.Spec.Module_ID).Receive (Result);
+         Message_Storage (Index_Of(Box.Spec.Module_ID)).Receive (Result);
          pragma Loop_Invariant(Payload(Result) = null);
       end loop;
       Domain_Config.On_Message_Read(Spec(Box), Result);
@@ -370,7 +375,7 @@ is
 
    procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural) is
    begin
-      Size := Message_Storage (Box.Spec.Module_ID).Message_Count;
+      Size := Message_Storage (Index_Of(Box.Spec.Module_ID)).Message_Count;
    end Pending_Messages;
 
    function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
@@ -383,7 +388,7 @@ is
    is
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Module_ID(Mailbox)).Initialize (Spec(Mailbox), Msg_Queue_Size);
+      Message_Storage (Index_Of(Module_ID(Mailbox))).Initialize (Spec(Mailbox), Msg_Queue_Size);
 
       Init_Lock.Unlock(Module_ID(Mailbox));
       pragma Assert(Module_Registered(Module_ID(Mailbox)));
@@ -396,5 +401,5 @@ is
    end Handle_Received;
 
 begin
-   pragma Assert(for all ID in Module_ID_Type => not Module_Registered(ID));
+   pragma Assert(for all ID of This_Domain.Module_IDs => not Module_Registered(ID));
 end CubedOS.Generic_Message_Manager;

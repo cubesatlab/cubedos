@@ -54,7 +54,7 @@ package Name_Resolver is
 
    -- Once every module used in the project has been assigned a unique ID, define
    -- one or more Domains, each with one or more modules and a unique domain ID.
-   Domain : aliased constant Domain_Metadata := Declare_Domain(5, 1, (Log_Server,
+   Domain : aliased constant Domain_Metadata := (5, 1, (Log_Server,
                                                                   Publish_Subscribe_Server,
                                                                   Time_Server,
                                                                   File_Server,
