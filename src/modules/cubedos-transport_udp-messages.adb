@@ -129,7 +129,7 @@ package body CubedOS.Transport_UDP.Messages is
       Address : Sock_Addr_Type;
       Socket : Socket_Type;
       Last : Ada.Streams.Stream_Element_Offset;
-      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Data_Index_Type'Last));
+      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Max_Message_Size));
       Message_Payload_Size : constant Integer := Payload(Message)'Length;
       Payload    : Data_Array(0 .. Message_Types.Payload(Message)'Length) := (others => 0);
       Position : Data_Index_Type := 0;
@@ -176,13 +176,13 @@ package body CubedOS.Transport_UDP.Messages is
    end Incoming_Loop;
 
    task body Outgoing_Loop is
-      Incoming_Message : Msg_Owner;
+      To_Transmit : Msg_Owner;
    begin
       Message_Manager.Wait;
 
       loop
-         Send_Queue.Take(Incoming_Message);
-         Process(Incoming_Message.all);
+         Send_Queue.Take(To_Transmit);
+         Process(To_Transmit.all);
       end loop;
    end Outgoing_Loop;
 
