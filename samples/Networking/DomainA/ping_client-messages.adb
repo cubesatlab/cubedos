@@ -1,21 +1,25 @@
 --------------------------------------------------------------------------------
--- FILE   : echo_client-messages.adb
+-- FILE   : ping_client-messages.adb
 -- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
+pragma SPARK_Mode (On);
+
 with Ada.Text_IO;
 with Ada.Real_Time;
 with Name_Resolver;
-with DomainB_Server.API;
+with CubedOS.Message_Types;
+with Ping_Server.API;
 
-package body DomainA_Client.Messages is
-   use Message_Manager;
+package body Ping_Client.Messages is
    use type Ada.Real_Time.Time;
-   use type DomainB_Server.API.Status_Type;
+   use CubedOS.Message_Types;
 
    package Duration_IO is new Ada.Text_IO.Fixed_IO(Duration);
    package Request_IO  is new Ada.Text_IO.Modular_IO(Request_ID_Type);
+
+   Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    Send_Time      : Ada.Real_Time.Time;
    Receive_Time   : Ada.Real_Time.Time;
@@ -23,15 +27,19 @@ package body DomainA_Client.Messages is
 
    Outgoing_Message : Message_Record;
 
+   procedure Init is
+   begin
+      Register_Module(Mailbox, 8);
+   end Init;
 
    procedure Initialize is
    begin
 	  -- Send the first message!
 	  Send_Time := Ada.Real_Time.Clock;
-	  Outgoing_Message := DomainB_Server.API.Ping_Request_Encode
-		(Sender_Address => Name_Resolver.DomainA_Client,
+	  Ping_Server.API.Send_Ping_Request
+        (Sender => Mailbox,
+         Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
 		 Request_ID    => Request_Number);
-	  Route_Message(Outgoing_Message);
    end Initialize;
 
    -------------------
@@ -39,23 +47,20 @@ package body DomainA_Client.Messages is
    -------------------
 
    procedure Handle_Ping_Reply(Message : in Message_Record) with
-	 Pre => DomainB_Server.API.Is_Ping_Reply(Message)
+	 Pre => Ping_Server.API.Is_Ping_Reply(Message)
    is
-	  Status           : DomainB_Server.API.Status_Type;
 	  Decode_Status    : Message_Status_Type;
 	  Round_Trip_Time  : Ada.Real_Time.Time_Span;
    begin
-	  DomainB_Server.API.Ping_Reply_Decode(Message, Status, Decode_Status);
+	  Ping_Server.API.Ping_Reply_Decode(Message, Decode_Status);
 	  Receive_Time := Ada.Real_Time.Clock;
 	  Round_Trip_Time := Receive_Time - Send_Time;
 
 	  if Decode_Status /= Success then
 		 Ada.Text_IO.Put_Line("ERROR: Unable to decode a Ping_Reply message!");
-	  elsif Status /= DomainB_Server.API.Success then
-		 Ada.Text_IO.Put_Line("ERROR: Networking server reported a ping failure!");
 	  else
 		 Ada.Text_IO.Put("+++ Reply #");
-		 Request_IO.Put(Message.Request_ID);
+		 Request_IO.Put(Request_ID(Message));
 		 Ada.Text_IO.Put(" (RTT = ");
 		 Duration_IO.Put(Ada.Real_Time.To_Duration(Round_Trip_Time));
 		 Ada.Text_IO.Put("s)");
@@ -66,8 +71,9 @@ package body DomainA_Client.Messages is
 
 		 -- Send the next message!
 		 Send_Time := Ada.Real_Time.Clock;
-		 Outgoing_Message := DomainB_Server.API.Ping_Request_Encode
-		   (Sender_Address => Name_Resolver.DomainA_Client,
+		 Ping_Server.API.Send_Ping_Request
+           (Sender => Mailbox,
+            Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
                     Request_ID    => Request_Number);
 		 Route_Message(Outgoing_Message);
 	  end if;
@@ -101,11 +107,8 @@ package body DomainA_Client.Messages is
    -- This procedure processes exactly one message at a time.
    procedure Process(Message : in Message_Record) is
    begin
-	  if DomainB_Server.API.Is_Ping_Reply(Message) then
+	  if Ping_Server.API.Is_Ping_Reply(Message) then
 		 Handle_Ping_Reply(Message);
-	  else
-		 -- An unknown message type has been received. What should be done about that?
-		 null;
 	  end if;
    end Process;
 
@@ -114,13 +117,16 @@ package body DomainA_Client.Messages is
    ---------------
 
    task body Message_Loop is
-	  Incoming_Message : Message_Record;
+      Incoming_Message : Message_Record;
    begin
-	  Initialize;
-	  loop
-		 Message_Manager.Fetch_Message(Name_Resolver.DomainA_Client.Module_ID, Incoming_Message);
-		 Process(Incoming_Message);
-	  end loop;
+      Message_Manager.Wait;
+      Initialize;
+      loop
+         Read_Next(Mailbox, Incoming_Message);
+         Process(Incoming_Message);
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
+      end loop;
    end Message_Loop;
 
-end DomainA_Client.Messages;
+end Ping_Client.Messages;
