@@ -266,12 +266,12 @@ is
        Pre => Message /= null
        and then Payload(Message) /= null
        and then Messaging_Ready
-       and then Has_Module(This_Domain, Receiver_Address(Message).Module_ID),
+       and then Has_Module(This_Domain, Receiver_Address(Message).Module_ID)
+       and then Receiver_Address(Message).Domain_ID = This_Domain.ID,
        Post => Message = null
    is
    begin
       Domain_Config.On_Message_Sent_Debug(Message.all);
-      -- For now, let's ignore the domain and just use the receiver Module_ID only.
       Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Send
         (Message, Status);
    end Route_Message;
