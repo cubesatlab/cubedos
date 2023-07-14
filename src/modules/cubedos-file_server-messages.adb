@@ -202,9 +202,6 @@ package body CubedOS.File_Server.Messages is
          Process_Write_Request(Incoming_Message);
       elsif API.Is_Close_Request(Incoming_Message) then
          Process_Close_Request(Incoming_Message);
-      else
-         -- TODO: What should be done about malformed/unrecognized messages?
-         null;
       end if;
 
    exception

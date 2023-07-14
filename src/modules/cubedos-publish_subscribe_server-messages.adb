@@ -113,9 +113,6 @@ is
          Handle_Unsubscribe_Request(Message);
       elsif Is_Publish_Request(Message) then
          Handle_Publish_Request(Message);
-      else
-         -- TODO: An unexpected message type has been received. What should be done about that?
-         null;
       end if;
    end Process;
 

@@ -273,9 +273,6 @@ is
          Process_Absolute_Request (Incoming_Message);
       elsif API.Is_Cancel_Request (Incoming_Message) then
          Process_Cancel_Request (Incoming_Message);
-      else
-         --$ TODO: What should be done about malformed/unrecognized messages?
-         null;
       end if;
    end Process;
 

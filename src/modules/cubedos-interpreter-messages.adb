@@ -64,9 +64,6 @@ package body CubedOS.Interpreter.Messages is
          Handle_Set_Request(Message);
       elsif CubedOS.Interpreter.API.Is_Add_Request(Message) then
          Handle_Add_Request(Message);
-      else
-         -- An unknown message type has been received. What should be done about that?
-         null;
       end if;
       -- When this procedure returns the message loop will immediately try to receive the next
       -- message. Note that all CubedOS send operations are non-blocking so sending an outgoing
@@ -83,7 +80,7 @@ package body CubedOS.Interpreter.Messages is
       Message_Manager.Wait;
 
       loop
-         Message_Manager.Read_Next(Mailbox, Incoming_Message);
+         Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
          Delete(Incoming_Message);
          pragma Loop_Invariant(Payload(Incoming_Message) = null);
