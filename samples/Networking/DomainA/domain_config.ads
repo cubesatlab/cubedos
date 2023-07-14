@@ -21,6 +21,10 @@ package Domain_Config is
    -- Debugging
    ---------------
 
+   -- Called immediately before messaging is allowed to begin.
+   procedure On_Message_System_Initialization_Complete
+     with Global => null;
+
    -- This procedure is called by the message manager
    -- for every message that is sent.
    procedure On_Message_Sent_Debug (Msg : in Message_Record)
