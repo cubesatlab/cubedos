@@ -58,6 +58,11 @@ package body Check_Message_Passing is
       Send_Message(Sender, Unacceptable_Msg, Receiver_Metadata, This_Domain);
    end;
 
+   procedure Register_Sender is
+   begin
+      Register_Module(Sender, 1);
+   end Register_Sender;
+
    ----------------
    -- Tests
    ----------------
@@ -152,6 +157,14 @@ package body Check_Message_Passing is
 
    end Test_Mailbox_Size_Constraints;
 
+   -- In a domain, each module id may only be registered once.
+   procedure Test_Mailbox_Registration_Cardinality(T : in out AUnit.Test_Cases.Test_Case'Class) is
+   begin
+      pragma Unused(T);
+      Assert_Exception(Register_Sender'Access, "Allowed duplicate registration of module id. 1st try");
+      Assert_Exception(Register_Sender'Access, "Allowed duplicate registration of module id. 2nd try");
+   end Test_Mailbox_Registration_Cardinality;
+
 
    procedure Register_Tests(T : in out Message_Passing_Test) is
    begin
@@ -163,6 +176,7 @@ package body Check_Message_Passing is
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Msg_Type_Checking'Access, "Message Type Safety");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Request_ID_Generator'Access, "Request ID Generation");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Mailbox_Size_Constraints'Access, "Mailbox Size Constraints");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Mailbox_Registration_Cardinality'Access, "Module Cardinality Check");
    end Register_Tests;
 
 
