@@ -8,7 +8,6 @@ pragma SPARK_Mode (On);
 
 with Name_Resolver;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
-with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
 
 package body CubedOS.Time_Server.Messages with
    Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))
@@ -295,13 +294,7 @@ is
       loop
          pragma Loop_Invariant(Payload(Incoming_Message) = null);
          Read_Next(Mailbox, Incoming_Message);
-
-         -- This module should never receive a message from itself.
-         -- We check that here because technically any module can
-         -- send a message to and from anywhere.
-         if Sender_Address(Incoming_Message).Module_ID /= Name_Resolver.Time_Server then
-            Process (Incoming_Message);
-         end if;
+         Process (Incoming_Message);
          Delete(Incoming_Message);
 
       end loop;
