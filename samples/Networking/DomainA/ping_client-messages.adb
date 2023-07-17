@@ -9,12 +9,10 @@ pragma SPARK_Mode (On);
 with Ada.Text_IO;
 with Ada.Real_Time;
 with Name_Resolver;
-with CubedOS.Message_Types;
 with Ping_Server.API;
 
 package body Ping_Client.Messages is
    use type Ada.Real_Time.Time;
-   use CubedOS.Message_Types;
 
    package Duration_IO is new Ada.Text_IO.Fixed_IO(Duration);
    package Request_IO  is new Ada.Text_IO.Modular_IO(Request_ID_Type);
@@ -24,8 +22,6 @@ package body Ping_Client.Messages is
    Send_Time      : Ada.Real_Time.Time;
    Receive_Time   : Ada.Real_Time.Time;
    Request_Number : Request_ID_Type := 0;
-
-   Outgoing_Message : Message_Record;
 
    procedure Init is
    begin
@@ -47,7 +43,9 @@ package body Ping_Client.Messages is
    -------------------
 
    procedure Handle_Ping_Reply(Message : in Message_Record) with
-	 Pre => Ping_Server.API.Is_Ping_Reply(Message)
+     Pre => Ping_Server.API.Is_Ping_Reply(Message)
+     and Payload(Message) /= null
+     and Messaging_Ready
    is
 	  Decode_Status    : Message_Status_Type;
 	  Round_Trip_Time  : Ada.Real_Time.Time_Span;
@@ -75,7 +73,6 @@ package body Ping_Client.Messages is
            (Sender => Mailbox,
             Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
                     Request_ID    => Request_Number);
-		 Route_Message(Outgoing_Message);
 	  end if;
 
 	  -- Do math on time spent on message (possibly faster by saving till end?)
@@ -105,7 +102,10 @@ package body Ping_Client.Messages is
    -----------------------------------
 
    -- This procedure processes exactly one message at a time.
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with Pre => Payload(Message) /= null
+     and Messaging_Ready
+   is
    begin
 	  if Ping_Server.API.Is_Ping_Reply(Message) then
 		 Handle_Ping_Reply(Message);

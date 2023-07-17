@@ -9,14 +9,17 @@ with System;
 
 with Ping_Client.API;
 with Message_Manager;
+with CubedOS.Message_Types;
 
 package Ping_Client.Messages is
    use Ping_Client.API;
    use Message_Manager;
+   use CubedOS.Message_Types;
 
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),
-     Pre => not Module_Registered(This_Module),
+     Pre => not Module_Registered(This_Module)
+     and Has_Module(This_Domain, This_Module),
      Post => Module_Registered(This_Module);
 
    task Message_Loop is
