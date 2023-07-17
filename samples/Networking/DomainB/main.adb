@@ -9,9 +9,6 @@ with System;
 
 -- Bring in the necessary modules, both from CubedOS and from this application.
 with Ping_Server.Messages;
-with CubedOS.Transport_UDP.Messages;
-
-pragma Unreferenced(CubedOS.Transport_UDP.Messages);
 
 procedure Main is
 

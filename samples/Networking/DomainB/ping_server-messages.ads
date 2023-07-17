@@ -5,23 +5,26 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
+pragma Profile(Jorvik);
 
 with System;
 
 with Ping_Server.API;
 with Message_Manager;
+with CubedOS.Message_Types;
 
 package Ping_Server.Messages is
    use Ping_Server.API;
    use Message_Manager;
+   use CubedOS.Message_Types;
 
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),
-     Pre => not Module_Registered(This_Module),
+     Pre => not Module_Registered(This_Module)
+     and Has_Module(This_Domain, This_Module),
      Post => Module_Registered(This_Module);
 
    task Message_Loop is
-	  pragma Storage_Size(4 * 1024);
 	  pragma Priority(System.Default_Priority);
    end Message_Loop;
 

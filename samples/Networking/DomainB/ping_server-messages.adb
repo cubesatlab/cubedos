@@ -6,10 +6,8 @@
 pragma SPARK_Mode (On);
 
 with Ada.Text_IO;
-with CubedOS.Message_Types;
 
 package body Ping_Server.Messages is
-   use CubedOS.Message_Types;
 
    Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
@@ -24,11 +22,12 @@ package body Ping_Server.Messages is
 
    procedure Handle_Ping_Request(Message : in Message_Record)
 	 with
-	   Pre => Is_Ping_Request(Message)
+       Pre => Is_Ping_Request(Message)
+       and Payload(Message) /= null
    is
 	  Decode_Status    : Message_Status_Type;
    begin
-	  Ping_Request_Decode(Message, Decode_Status);
+      Ping_Request_Decode(Message, Decode_Status);
 
 	  -- Just ignore messages that don't decode properly (decoding Ping_Requests can't fail anyway).
 	  -- Report a failed request
@@ -51,11 +50,14 @@ package body Ping_Server.Messages is
    -----------------------------------
 
    -- This procedure processes exactly one message.
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with Pre => Payload(Message) /= null
+   is
    begin
 	  if Is_Ping_Request(Message) then
 		 Handle_Ping_Request(Message);
-	  else
+      else
+         Ada.Text_IO.Put_Line("Unknown message type");
 		 -- An unknown message type has been received. What should be done about that?
 		 null;
 	  end if;
@@ -68,6 +70,8 @@ package body Ping_Server.Messages is
    task body Message_Loop is
       Incoming_Message : Message_Record;
    begin
+      Message_Manager.Wait;
+
       loop
          Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
