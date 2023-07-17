@@ -53,4 +53,11 @@ package body Domain_Config is
       Ada.Text_IO.Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID));
    end On_Message_Discarded;
 
+   procedure On_Message_System_Initialization_Complete
+     with SPARK_Mode => Off
+   is
+   begin
+      Ada.Text_IO.Put_Line("[All Modules Initialized]");
+   end On_Message_System_Initialization_Complete;
+
 end Domain_Config;

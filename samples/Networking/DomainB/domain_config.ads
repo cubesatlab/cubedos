@@ -46,4 +46,7 @@ package Domain_Config is
    procedure On_Message_Discarded(Receiver : in Module_Metadata; Msg : in Message_Record)
      with Global => null;
 
+   procedure On_Message_System_Initialization_Complete
+     with Global => null;
+
 end Domain_Config;
