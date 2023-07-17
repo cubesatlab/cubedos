@@ -24,7 +24,7 @@ package CubedOS.Message_Types is
    -- In a CubedOS system, every type of module has a
    -- statically assigned ID. A system may include a maximum
    -- of unique modules.
-   type Module_ID_Type is new Positive range 1 .. 512;
+   type Module_ID_Type is new Positive range 1 .. 256;
 
    -- An address unambigiously identifies exactly one module by
    -- its Module_ID and Domain_ID.
@@ -65,19 +65,16 @@ package CubedOS.Message_Types is
    -- used by the XDR Octet_Array and String encoders so they can return a correct 'Last' when
    -- given zero length values to encode. Support for encoding zero length arrays and strings is
    -- useful.
-   -- TODO: Remove these definitions. They aren't needed anymore because payload size is variable.
-   subtype Data_Index_Type is XDR_Index_Type;
+   Max_Message_Size : constant Positive := 1024;
+   subtype Data_Index_Type is XDR_Index_Type range 0 .. Max_Message_Size - 1;
    subtype Data_Extended_Index_Type is XDR_Extended_Index_Type;
-   subtype Data_Size_Type is XDR_Size_Type;
-   subtype Data_Array is XDR_Array;
+   subtype Data_Size_Type is XDR_Size_Type range 0 .. Max_Message_Size;
+   subtype Data_Array is XDR_Array
+     with Dynamic_Predicate => Data_Array'Length <= Max_Message_Size;
    type Data_Array_Owner is access Data_Array;
 
    -- Error type for message decoding
    type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
-
-   -- TODO: All references to this value by API packages should be replaced
-   -- with actual message sizes and this constant should be removed.
-   Max_Message_Size : constant Positive := 1024;
 
    -- Message records hold information passed between modules with some
    -- metadata about the transfer. It may reference a dynamically allocated

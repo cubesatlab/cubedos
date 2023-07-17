@@ -16,6 +16,7 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package body CubedOS.Transport_UDP.Messages is
    use Message_Manager;
+   use Ada.Streams;
 
    procedure Init is
    begin
@@ -64,7 +65,13 @@ package body CubedOS.Transport_UDP.Messages is
       end Take;
    end Send_Queue;
 
-   function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Record is
+   function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Record
+     with SPARK_Mode,
+     Pre => Data'Length >= 7 -- Enough space at least for the metadata
+     and Data'First = 0
+     and Last >= 7
+     and Last = Stream_Element_Offset(Data'Length - 1)
+   is
       Sender_Domain : Domain_ID_Type;
       Sender_Module : Module_ID_Type;
       Receiver_Domain : Domain_ID_Type;
@@ -72,8 +79,9 @@ package body CubedOS.Transport_UDP.Messages is
       Request_ID : Request_ID_Type;
       Message_Type : Universal_Message_Type;
       Message : Mutable_Message_Record;
+      Result : Message_Record;
    begin
-
+      -- Read metadata
       Sender_Domain := Domain_ID_Type(Data(0));
       Sender_Module := Module_ID_Type(Data(1));
       Receiver_Domain := Domain_ID_Type(Data(2));
@@ -88,11 +96,16 @@ package body CubedOS.Transport_UDP.Messages is
          Message_Type      => Message_Type,
          Payload_Size     => Positive(Last) - 6);
 
-      for I in 6 .. Last loop
-         Message.Payload(Integer(I) - 6) := XDR.XDR_Octet(Data(I));
+      Ada.Text_IO.Put_Line("Payload size: " & Integer'Image(Positive(Last) - 6));
+      -- Read payload
+      for I in 7 .. Last loop
+         Ada.Text_IO.Put_Line(Stream_Element_Offset'Image(I));
+         Message.Payload(Integer(I) - 7) := XDR.XDR_Octet(Data(I));
       end loop;
 
-      return Immutable(Message);
+      Result := Immutable(Message);
+      Delete(Message);
+      return Result;
    end Read_Stream_Message;
 
    procedure Server_Loop
@@ -128,37 +141,47 @@ package body CubedOS.Transport_UDP.Messages is
       end loop;
    end Server_Loop;
 
-   procedure Send_Network_Message(Message : in Message_Record )is
+   procedure Encode_Network_Message(Msg : in Message_Record; Buffer : in out Ada.Streams.Stream_Element_Array; Result_Last : out Ada.Streams.Stream_Element_Count)
+     with SPARK_Mode,
+     Pre => Payload(Msg) /= null
+     and then Payload(Msg)'Length rem 4 = 0
+     and then Buffer'Length =  7 + Max_Message_Size + 1
+   is
+      Last : Ada.Streams.Stream_Element_Offset := 0;
+   begin
+      -- Encode message metadata
+      Buffer (0) := Ada.Streams.Stream_Element (Sender_Address(Msg).Domain_ID); -- Sender Domain
+      Buffer (1) := Ada.Streams.Stream_Element (Sender_Address(Msg).Module_ID); -- Sender Module
+      Buffer (2) := Ada.Streams.Stream_Element (Receiver_Address(Msg).Domain_ID); -- Receiver Domain
+      Buffer (3) := Ada.Streams.Stream_Element (Receiver_Address(Msg).Module_ID); -- Receiver Module
+      Buffer (4) := Ada.Streams.Stream_Element (Request_ID(Msg)); -- Request ID
+      Buffer (5) := Ada.Streams.Stream_Element (Message_Type(Msg).Module_ID); -- Message type module id
+      Buffer (6) := Ada.Streams.Stream_Element (Message_Type(Msg).Message_ID); -- Message type message id
+      Ada.Text_IO.Put_Line("Sending message w/ payload size " & Integer'Image(Message_Types.Payload(Msg).all'Length));
+
+      -- Encode message content
+      for I in 7 .. Message_Types.Payload(Msg).all'Length loop
+         Buffer (Ada.Streams.Stream_Element_Offset(I)) := Ada.Streams.Stream_Element(Message_Types.Payload(Msg)(I - 7));
+         Last := Ada.Streams.Stream_Element_Offset(I);
+      end loop;
+      Result_Last := Last;
+   end;
+
+   procedure Send_Network_Message(Message : in Message_Record)
+     with SPARK_Mode,
+     Pre => Payload(Message) /= null
+     and then Payload(Message)'Length rem 4 = 0
+   is
       Address : Sock_Addr_Type;
       Socket : Socket_Type;
+      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (7 + Max_Message_Size));
       Last : Ada.Streams.Stream_Element_Offset;
-      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Max_Message_Size));
-      Message_Payload_Size : constant Integer := Payload(Message)'Length;
-      Payload    : Data_Array(0 .. Message_Types.Payload(Message)'Length) := (others => 0);
-      Position : Data_Index_Type := 0;
-      Last_XDR     : Data_Index_Type;
    begin
-
       Address.Port :=  Network_Configuration.Get_Port(Receiver_Address(Message).Domain_ID);
       Address.Addr :=  Network_Configuration.Get_Address(Receiver_Address(Message).Domain_ID);
 
-      XDR.Encode(XDR.XDR_Unsigned(Integer'Pos(Message_Payload_Size)), Payload, Position, Last_XDR);
-      Position := Last_XDR + 1; -- currently not utilized
-
+      Encode_Network_Message(Message, Buffer, Last);
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
-
-      Buffer (0) := Ada.Streams.Stream_Element (Sender_Address(Message).Domain_ID); -- Sender Domain
-      Buffer (1) := Ada.Streams.Stream_Element (Sender_Address(Message).Module_ID); -- Sender Module
-      Buffer (2) := Ada.Streams.Stream_Element (Receiver_Address(Message).Domain_ID); -- Receiver Domain
-      Buffer (3) := Ada.Streams.Stream_Element (Receiver_Address(Message).Module_ID); -- Receiver Module
-      Buffer (4) := Ada.Streams.Stream_Element (Request_ID(Message)); -- Request ID
-      Buffer (5) := Ada.Streams.Stream_Element (Message_Type(Message).Module_ID); -- Message type module id
-      Buffer (6) := Ada.Streams.Stream_Element (Message_Type(Message).Message_ID); -- Message type message id
-
-      for I in 7 .. Message_Types.Payload(Message).all'Length loop
-         Buffer (Ada.Streams.Stream_Element_Offset(I)) := Ada.Streams.Stream_Element(Message_Types.Payload(Message)(I - 7));
-      end loop;
-
       Send_Socket (Socket, Buffer, Last, Address);
    end Send_Network_Message;
 
