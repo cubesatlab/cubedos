@@ -15,6 +15,7 @@ use  CubedOS.Lib;
 with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package body CubedOS.Transport_UDP.Messages is
+   use Message_Manager;
 
    procedure Init is
    begin
@@ -105,11 +106,13 @@ package body CubedOS.Transport_UDP.Messages is
       Create_Socket (Server, Family_Inet, Socket_Datagram);
       Set_Socket_Option (Server, Socket_Level, (Reuse_Address, True));
       Address.Addr := Any_Inet_Addr;
-      Address.Port := Network_Configuration.Get_Port(Message_Manager.Domain_ID);
+      Address.Port := Network_Configuration.Get_Port(This_Domain.ID);
       Bind_Socket (Server, Address);
+      Ada.Text_IO.Put_Line("Started listening " & Image(Address));
       loop
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
+            Ada.TExt_IO.Put_Line("Received something");
             Message := new Message_Record'(Read_Stream_Message(Data, Last));
             Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
             if Sender_Address(Message).Domain_ID = Message_Manager.Domain_ID then
