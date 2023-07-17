@@ -96,10 +96,8 @@ package body CubedOS.Transport_UDP.Messages is
          Message_Type      => Message_Type,
          Payload_Size     => Positive(Last) - 6);
 
-      Ada.Text_IO.Put_Line("Payload size: " & Integer'Image(Positive(Last) - 6));
       -- Read payload
       for I in 7 .. Last loop
-         Ada.Text_IO.Put_Line(Stream_Element_Offset'Image(I));
          Message.Payload(Integer(I) - 7) := XDR.XDR_Octet(Data(I));
       end loop;
 
@@ -121,7 +119,7 @@ package body CubedOS.Transport_UDP.Messages is
       Address.Addr := Any_Inet_Addr;
       Address.Port := Network_Configuration.Get_Port(This_Domain.ID);
       Bind_Socket (Server, Address);
-      Ada.Text_IO.Put_Line("Started listening " & Image(Address));
+      Ada.Text_IO.Put_Line("UDP Transport module started listening " & Image(Address));
       loop
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
@@ -157,7 +155,6 @@ package body CubedOS.Transport_UDP.Messages is
       Buffer (4) := Ada.Streams.Stream_Element (Request_ID(Msg)); -- Request ID
       Buffer (5) := Ada.Streams.Stream_Element (Message_Type(Msg).Module_ID); -- Message type module id
       Buffer (6) := Ada.Streams.Stream_Element (Message_Type(Msg).Message_ID); -- Message type message id
-      Ada.Text_IO.Put_Line("Sending message w/ payload size " & Integer'Image(Message_Types.Payload(Msg).all'Length));
 
       -- Encode message content
       for I in 7 .. Message_Types.Payload(Msg).all'Length loop
