@@ -31,18 +31,16 @@ package body Ping_Server.Messages is
 
 	  -- Just ignore messages that don't decode properly (decoding Ping_Requests can't fail anyway).
 	  -- Report a failed request
-	  if Decode_Status = Success and Request_ID(Message) <= 10 then
-         Send_Ping_Reply
-           (Sender => Mailbox,
-            Receiver_Address => Sender_Address(Message),
-            Request_ID       => Request_ID(Message));
+      if Decode_Status /= Success then
+         Ada.Text_IO.Put_Line("Report Failure");
       else
-		Ada.Text_IO.Put_Line("Report Failure");
-         Send_Ping_Reply
-           (Sender => Mailbox,
-            Receiver_Address => Sender_Address(Message),
-            Request_ID       => Request_ID(Message));
-	  end if;
+         Ada.Text_IO.Put_Line("Received Ping Message");
+      end if;
+
+      Send_Ping_Reply
+        (Sender => Mailbox,
+         Receiver_Address => Sender_Address(Message),
+         Request_ID       => Request_ID(Message));
    end Handle_Ping_Request;
 
    -----------------------------------
@@ -55,12 +53,8 @@ package body Ping_Server.Messages is
    is
    begin
 	  if Is_Ping_Request(Message) then
-		 Handle_Ping_Request(Message);
-      else
-         Ada.Text_IO.Put_Line("Unknown message type");
-		 -- An unknown message type has been received. What should be done about that?
-		 null;
-	  end if;
+         Handle_Ping_Request(Message);
+      end if;
    end Process;
 
    ---------------
