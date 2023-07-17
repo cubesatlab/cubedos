@@ -74,9 +74,10 @@ package CubedOS.File_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12),
-      Post => Message_Types.Message_Type(Result) = Open_Request_Msg
-       and Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
+         and then Receiver_Address.Module_ID = This_Module,
+      Post => CubedOS.Message_Types.Message_Type(Result) = Open_Request_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
@@ -86,11 +87,42 @@ package CubedOS.File_Server.API is
       Name : String;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
       ;
+
+   procedure Send_Open_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Mode : Mode_Type;
+      Name : String;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Open_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Open_Request(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Open_Request_Msg);
+   procedure Open_Request_Decode
+      (Message : in  Message_Record;
+      Mode : out Mode_Type;
+      Name : out String;
+      Name_Size : out Natural;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Open_Request(Message) and Payload(Message) /= null,
+      Depends => ((Mode, Name, Name_Size, Decode_Status) => Message);
+
 
    procedure Open_Reply_Encode
       (Sender_Address : Message_Address;
@@ -102,8 +134,8 @@ package CubedOS.File_Server.API is
    with
       Pre => true
          and then Sender_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Open_Reply_Msg
-       and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Open_Reply_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
@@ -112,10 +144,37 @@ package CubedOS.File_Server.API is
       Handle : File_Handle_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
       ;
+
+   procedure Send_Open_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : File_Handle_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+         and then Receives(Receiving_Module, Open_Reply_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Open_Reply(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Open_Reply_Msg);
+   procedure Open_Reply_Decode
+      (Message : in  Message_Record;
+      Handle : out File_Handle_Type;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Open_Reply(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Decode_Status) => Message);
+
 
    procedure Read_Request_Encode
       (Sender_Address : Message_Address;
@@ -128,8 +187,8 @@ package CubedOS.File_Server.API is
    with
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Read_Request_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Read_Request_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
@@ -139,10 +198,39 @@ package CubedOS.File_Server.API is
       Amount : Read_Size_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
+
+   procedure Send_Read_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Size_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Read_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Read_Request(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Read_Request_Msg);
+   procedure Read_Request_Decode
+      (Message : in  Message_Record;
+      Handle : out Valid_File_Handle_Type;
+      Amount : out Read_Size_Type;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Read_Request(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Amount, Decode_Status) => Message);
+
 
    procedure Read_Reply_Encode
       (Sender_Address : Message_Address;
@@ -154,10 +242,10 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Pre => Amount <= File_Data'Length
+      Pre => true
          and then Sender_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Read_Reply_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Read_Reply_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
@@ -168,10 +256,42 @@ package CubedOS.File_Server.API is
       File_Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => Amount <= File_Data'Length
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
       ;
+
+   procedure Send_Read_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Read_Result_Size_TYpe;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+         and then Receives(Receiving_Module, Read_Reply_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Read_Reply(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Read_Reply_Msg);
+   procedure Read_Reply_Decode
+      (Message : in  Message_Record;
+      Handle : out Valid_File_Handle_Type;
+      Amount : out Read_Result_Size_TYpe;
+      File_Data : out CubedOS.Lib.Octet_Array;
+      Size : out CubedOS.Lib.Octet_Array_Count;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Read_Reply(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Amount, File_Data, Size, Decode_Status) => Message);
+
 
    procedure Write_Request_Encode
       (Sender_Address : Message_Address;
@@ -183,10 +303,10 @@ package CubedOS.File_Server.API is
       Result : out Message_Record;
       Priority : System.Priority := System.Default_Priority)
    with
-      Pre => Amount <= File_Data'Length
+      Pre => true
          and then Receiver_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Write_Request_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Write_Request_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
@@ -197,10 +317,42 @@ package CubedOS.File_Server.API is
       File_Data : CubedOS.Lib.Octet_Array;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => Amount <= File_Data'Length
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
+
+   procedure Send_Write_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Size_Type;
+      File_Data : CubedOS.Lib.Octet_Array;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Write_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Write_Request(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Write_Request_Msg);
+   procedure Write_Request_Decode
+      (Message : in  Message_Record;
+      Handle : out Valid_File_Handle_Type;
+      Amount : out Write_Size_Type;
+      File_Data : out CubedOS.Lib.Octet_Array;
+      Size : out CubedOS.Lib.Octet_Array_Count;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Write_Request(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Amount, File_Data, Size, Decode_Status) => Message);
+
 
    procedure Write_Reply_Encode
       (Sender_Address : Message_Address;
@@ -213,8 +365,8 @@ package CubedOS.File_Server.API is
    with
       Pre => true
          and then Sender_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Write_Reply_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Write_Reply_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
@@ -224,10 +376,39 @@ package CubedOS.File_Server.API is
       Amount : Write_Result_Size_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
       ;
+
+   procedure Send_Write_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Amount : Write_Result_Size_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+         and then Receives(Receiving_Module, Write_Reply_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   function Is_Write_Reply(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Write_Reply_Msg);
+   procedure Write_Reply_Decode
+      (Message : in  Message_Record;
+      Handle : out Valid_File_Handle_Type;
+      Amount : out Write_Result_Size_Type;
+      Decode_Status : out Message_Status_Type)
+   with
+      Global => null,
+      Pre => Is_Write_Reply(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Amount, Decode_Status) => Message);
+
 
    procedure Close_Request_Encode
       (Sender_Address : Message_Address;
@@ -239,8 +420,8 @@ package CubedOS.File_Server.API is
    with
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
-      Post => Message_Types.Message_Type(Result) = Close_Request_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+      Post => CubedOS.Message_Types.Message_Type(Result) = Close_Request_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
@@ -249,106 +430,36 @@ package CubedOS.File_Server.API is
       Handle : Valid_File_Handle_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
 
+   procedure Send_Close_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Handle : Valid_File_Handle_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Close_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
 
-
-   function Is_Open_Request(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Open_Request_Msg);
-
-   function Is_Open_Reply(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Open_Reply_Msg);
-
-   function Is_Read_Request(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Read_Request_Msg);
-
-   function Is_Read_Reply(Message : Message_Record) return Boolean is
-     (Message_Types.Message_Type(Message) = Read_Reply_Msg);
-
-   function Is_Write_Request(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Write_Request_Msg);
-
-   function Is_Write_Reply(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Write_Reply_Msg);
-
-      function Is_Close_Request(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Close_Request_Msg);
-
-
-
-   procedure Open_Request_Decode
-     (Message    : in  Message_Record;
-      Mode       : out Mode_Type;
-      Name       : out String;
-      Name_Size  : out Natural;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Open_Request(Message),
-       Depends => ((Mode, Name_Size, Decode_Status) => Message, Name =>+ Message);
-
-   procedure Open_Reply_Decode
-     (Message    : in  Message_Record;
-      Handle     : out File_Handle_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Open_Reply(Message),
-       Depends => ((Handle, Decode_Status) => Message);
-
-   procedure Read_Request_Decode
-     (Message    : in Message_Record;
-      Handle     : out Valid_File_Handle_Type;
-      Amount     : out Read_Size_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Read_Request(Message),
-       Depends => ((Handle, Amount, Decode_Status) => Message);
-
-   procedure Read_Reply_Decode
-     (Message    : in  Message_Record;
-      Handle     : out Valid_File_Handle_Type;
-      Amount     : out Read_Result_Size_Type;
-      Data       : out CubedOS.Lib.Octet_Array;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Read_Reply(Message) and Data'Length = Read_Result_Size_Type'Last,
-       Depends => ((Handle, Amount, Decode_Status) => Message, Data =>+ Message);
-
-   procedure Write_Request_Decode
-     (Message    : in  Message_Record;
-      Handle     : out Valid_File_Handle_Type;
-      Amount     : out Write_Size_Type;
-      Data       : out CubedOS.Lib.Octet_Array;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Write_Request(Message) and Data'Length = Read_Result_Size_Type'Last,
-       Depends => ((Handle, Amount, Decode_Status) => Message, Data =>+ Message);
-
-   procedure Write_Reply_Decode
-     (Message    : in  Message_Record;
-      Handle     : out Valid_File_Handle_Type;
-      Amount     : out Write_Result_Size_Type;
-      Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Write_Reply(Message),
-       Depends => ((Handle, Amount, Decode_Status) => Message);
-
+   function Is_Close_Request(Message : Message_Record) return Boolean is
+      (CubedOS.Message_Types.Message_Type(Message) = Close_Request_Msg);
    procedure Close_Request_Decode
-     (Message    : in  Message_Record;
-      Handle     : out Valid_File_Handle_Type;
+      (Message : in  Message_Record;
+      Handle : out Valid_File_Handle_Type;
       Decode_Status : out Message_Status_Type)
-     with
-       Global => null,
-       Pre => Is_Close_Request(Message),
-       Depends => ((Handle, Decode_Status) => Message);
+   with
+      Global => null,
+      Pre => Is_Close_Request(Message) and Payload(Message) /= null,
+      Depends => ((Handle, Decode_Status) => Message);
 
 
 end CubedOS.File_Server.API;

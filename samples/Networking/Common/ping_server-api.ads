@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- FILE   : cubedos-ping_server-api.ads
+-- FILE   : ping_server-api.ads
 -- SUBJECT: Specification of a package that defines the Ping_Server API
 -- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
@@ -10,7 +10,6 @@
 pragma SPARK_Mode(On);
 
 with Name_Resolver;
-with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 with System;
@@ -24,10 +23,6 @@ package Ping_Server.API is
 
    Ping_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Ping_Reply));
    Ping_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Ping_Request));
-
-   This_Receives : aliased constant Message_Type_Array := (0 => Ping_Request_Msg);
-   Mail_Target : constant Module_Metadata := (This_Module, This_Receives'Access);
-
    procedure Ping_Request_Encode
       (Sender_Address : Message_Address;
       Receiver_Address : Message_Address;
@@ -46,19 +41,27 @@ package Ping_Server.API is
       Request_ID : Request_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
+      ;
+
+   procedure Send_Ping_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Ping_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
       ;
 
    function Is_Ping_Request(Message : Message_Record) return Boolean is
       (CubedOS.Message_Types.Message_Type(Message) = Ping_Request_Msg);
-   procedure Ping_Request_Decode
-      (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   with
-      Global => null,
-      Pre => Is_Ping_Request(Message) and Payload(Message) /= null;
-
 
    procedure Ping_Reply_Encode
       (Sender_Address : Message_Address;
@@ -78,18 +81,29 @@ package Ping_Server.API is
       Request_ID : Request_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
+      ;
+
+   procedure Send_Ping_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+         and then Receives(Receiving_Module, Ping_Reply_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
       ;
 
    function Is_Ping_Reply(Message : Message_Record) return Boolean is
       (CubedOS.Message_Types.Message_Type(Message) = Ping_Reply_Msg);
-   procedure Ping_Reply_Decode
-      (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
-   with
-      Global => null,
-      Pre => Is_Ping_Reply(Message) and Payload(Message) /= null;
 
+   This_Receives : aliased constant Message_Type_Array := (0 => Ping_Request_Msg);
+   Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
 
 end Ping_Server.API;

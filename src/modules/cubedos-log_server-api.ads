@@ -55,9 +55,10 @@ package CubedOS.Log_Server.API is
       Priority : System.Priority := System.Default_Priority)
    with
       Pre => true
-         and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12),
-      Post => Message_Types.Message_Type(Result) = Log_Text_Msg
-         and Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
+         and then Receiver_Address.Module_ID = This_Module,
+      Post => CubedOS.Message_Types.Message_Type(Result) = Log_Text_Msg
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
 
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
@@ -67,14 +68,31 @@ package CubedOS.Log_Server.API is
       Msg_Content : String;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes),
-      Pre => true
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
          and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
       ;
 
+   procedure Send_Log_Text
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Level : Log_Level_Type;
+      Msg_Content : String;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Pre => Messaging_Ready
+         and then (0 < Msg_Content'Length and Msg_Content'Length <= XDR_Size_Type'Last - 12)
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Log_Text_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
    function Is_Log_Text(Message : Message_Record) return Boolean is
-      (Message_Types.Message_Type(Message) = Log_Text_Msg);
+      (CubedOS.Message_Types.Message_Type(Message) = Log_Text_Msg);
    procedure Log_Text_Decode
       (Message : in  Message_Record;
       Level : out Log_Level_Type;

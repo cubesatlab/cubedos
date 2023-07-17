@@ -61,8 +61,29 @@ package body CubedOS.Log_Server.API is
       Message : Message_Record;
    begin
       Log_Text_Encode(
-         Sender_Address => (Message_Manager.Domain_ID, Module_ID(Sender)),
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Level => Level,
+         Msg_Content => Msg_Content,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Log_Text;
+   procedure Send_Log_Text
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Level : Log_Level_Type;
+      Msg_Content : String;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      Log_Text_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Level => Level,
          Msg_Content => Msg_Content,
@@ -109,6 +130,5 @@ package body CubedOS.Log_Server.API is
          end if;
       end if;
    end Log_Text_Decode;
-
 
 end CubedOS.Log_Server.API;

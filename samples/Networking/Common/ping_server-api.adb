@@ -61,16 +61,23 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Ping_Request;
-   procedure Ping_Request_Decode
-      (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
+   procedure Send_Ping_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+      Message : Message_Record;
    begin
-      Decode_Status := Success;
-      Position := 0;
-   end Ping_Request_Decode;
+      Ping_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Ping_Request;
 
    procedure Ping_Reply_Encode
       (Sender_Address : Message_Address;
@@ -116,16 +123,23 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Ping_Reply;
-   procedure Ping_Reply_Decode
-      (Message : in  Message_Record;
-      Decode_Status : out Message_Status_Type)
+   procedure Send_Ping_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
    is
-      Position : Data_Index_Type;
-      Last : Data_Index_Type;
+      Message : Message_Record;
    begin
-      Decode_Status := Success;
-      Position := 0;
-   end Ping_Reply_Decode;
+      Ping_Reply_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message);
+   end Send_Ping_Reply;
 
 
 end Ping_Server.API;

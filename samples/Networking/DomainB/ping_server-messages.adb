@@ -25,17 +25,9 @@ package body Ping_Server.Messages is
        Pre => Is_Ping_Request(Message)
        and Payload(Message) /= null
    is
-	  Decode_Status    : Message_Status_Type;
    begin
-      Ping_Request_Decode(Message, Decode_Status);
-
-	  -- Just ignore messages that don't decode properly (decoding Ping_Requests can't fail anyway).
-	  -- Report a failed request
-      if Decode_Status /= Success then
-         Ada.Text_IO.Put_Line("Report Failure");
-      else
-         Ada.Text_IO.Put_Line("Received Ping Message");
-      end if;
+      -- Theres nothing to decode
+      Ada.Text_IO.Put_Line("Received Ping Message");
 
       Send_Ping_Reply
         (Sender => Mailbox,
