@@ -1,0 +1,15 @@
+
+-- Ping server
+project Domain_B is
+
+   	for Main use ("DomainB/main.adb");
+         for Object_Dir use "build/DomainB";
+         for Source_Dirs use ("DomainB", "Common", "../../src", "../../src/modules", "../../src/library");
+         for Languages use ("Ada");
+         
+   package Compiler is
+	  for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+   end Compiler;
+
+end Domain_B;
+
