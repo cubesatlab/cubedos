@@ -7,7 +7,6 @@
 pragma SPARK_Mode (On);
 
 with Name_Resolver;
-with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body CubedOS.Time_Server.Messages with
    Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))

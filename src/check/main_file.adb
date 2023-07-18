@@ -109,7 +109,7 @@ begin
 
             if Amount_Read = 0 then
                -- Close the files (both of them).
-               Send_Close_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Read_Handle);
+               Send_Close_Request(My_Mailbox, Message_Address'(Domain_ID, My_Module_ID), 0, Read_Handle);
                Put_Line("TX : Close_Request message sent (input file)");
 
                Send_Close_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Write_Handle);

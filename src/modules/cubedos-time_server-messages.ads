@@ -12,6 +12,7 @@ with Ada.Real_Time;
 with System;
 with Message_Manager; use Message_Manager;
 with CubedOS.Time_Server.API; use CubedOS.Time_Server.API;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package CubedOS.Time_Server.Messages
   with
@@ -21,7 +22,8 @@ is
 
    procedure Init
      with Global => (In_Out => (Mailboxes, Lock)),
-     Pre => not Module_Registered(This_Module),
+     Pre => not Module_Registered(This_Module)
+     and Has_Module(This_Domain, This_Module),
      Post => Module_Registered(This_Module);
 
    task Message_Loop
