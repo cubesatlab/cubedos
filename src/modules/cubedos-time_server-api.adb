@@ -38,7 +38,7 @@ package body CubedOS.Time_Server.API is
       Message : Mutable_Message_Record;
       Interval : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
    begin
-      
+
       Position := 0;
       XDR.Encode(XDR.XDR_Unsigned(1000*Interval), Payload.all, Position, Last);
       Position := Last + 1;
@@ -66,10 +66,35 @@ package body CubedOS.Time_Server.API is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type : Series_Type;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
+      Relative_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Tick_Interval => Tick_Interval,
+         Request_Type => Request_Type,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Status);
+   end Send_Relative_Request;
+   procedure Send_Relative_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Tick_Interval : Ada.Real_Time.Time_Span;
+      Request_Type : Series_Type;
+      Series_ID : Series_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      pragma Assert(Payload(Message) = null);
       Relative_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
@@ -88,11 +113,13 @@ package body CubedOS.Time_Server.API is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type : Series_Type;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
       Relative_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
@@ -102,7 +129,33 @@ package body CubedOS.Time_Server.API is
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+   end Send_Relative_Request;
+   procedure Send_Relative_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Tick_Interval : Ada.Real_Time.Time_Span;
+      Request_Type : Series_Type;
+      Series_ID : Series_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+      Status : Status_Type := Unavailable;
+   begin
+      pragma Assert(Payload(Message) = null);
+      Relative_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Tick_Interval => Tick_Interval,
+         Request_Type => Request_Type,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      pragma Unused(Status);
    end Send_Relative_Request;
    procedure Relative_Request_Decode
       (Message : in  Message_Record;
@@ -197,10 +250,33 @@ package body CubedOS.Time_Server.API is
       Request_ID : Request_ID_Type;
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
+      Absolute_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Tick_Time => Tick_Time,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Status);
+   end Send_Absolute_Request;
+   procedure Send_Absolute_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Tick_Time : Ada.Real_Time.Time;
+      Series_ID : Series_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      pragma Assert(Payload(Message) = null);
       Absolute_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
@@ -217,11 +293,13 @@ package body CubedOS.Time_Server.API is
       Request_ID : Request_ID_Type;
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
       Absolute_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
@@ -230,7 +308,31 @@ package body CubedOS.Time_Server.API is
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+   end Send_Absolute_Request;
+   procedure Send_Absolute_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Tick_Time : Ada.Real_Time.Time;
+      Series_ID : Series_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+      Status : Status_Type := Unavailable;
+   begin
+      pragma Assert(Payload(Message) = null);
+      Absolute_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Tick_Time => Tick_Time,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      pragma Unused(Status);
    end Send_Absolute_Request;
    procedure Absolute_Request_Decode
       (Message : in  Message_Record;
@@ -310,10 +412,33 @@ package body CubedOS.Time_Server.API is
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
       Count : Series_Count_Type;
+      Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
+      Tick_Reply_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Series_ID => Series_ID,
+         Count => Count,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Status);
+   end Send_Tick_Reply;
+   procedure Send_Tick_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Count : Series_Count_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      pragma Assert(Payload(Message) = null);
       Tick_Reply_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
@@ -330,11 +455,13 @@ package body CubedOS.Time_Server.API is
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
       Count : Series_Count_Type;
+      Status : out Status_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
       Tick_Reply_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
@@ -343,7 +470,31 @@ package body CubedOS.Time_Server.API is
          Count => Count,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+   end Send_Tick_Reply;
+   procedure Send_Tick_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Count : Series_Count_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+      Status : Status_Type := Unavailable;
+   begin
+      pragma Assert(Payload(Message) = null);
+      Tick_Reply_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Series_ID => Series_ID,
+         Count => Count,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      pragma Unused(Status);
    end Send_Tick_Reply;
    procedure Tick_Reply_Decode
       (Message : in  Message_Record;
@@ -417,10 +568,31 @@ package body CubedOS.Time_Server.API is
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
+      Cancel_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => Receiver_Address,
+         Request_ID => Request_ID,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Status);
+   end Send_Cancel_Request;
+   procedure Send_Cancel_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+   begin
+      pragma Assert(Payload(Message) = null);
       Cancel_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => Receiver_Address,
@@ -435,11 +607,13 @@ package body CubedOS.Time_Server.API is
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
       Series_ID : Series_ID_Type;
+      Status : out Status_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
+      pragma Assert(Payload(Message) = null);
       Cancel_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
@@ -447,7 +621,29 @@ package body CubedOS.Time_Server.API is
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+   end Send_Cancel_Request;
+   procedure Send_Cancel_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   is
+      Message : Message_Record;
+      Status : Status_Type := Unavailable;
+   begin
+      pragma Assert(Payload(Message) = null);
+      Cancel_Request_Encode(
+         Sender_Address => (This_Domain.ID, Module_ID(Sender)),
+         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Request_ID => Request_ID,
+         Series_ID => Series_ID,
+         Result => Message,
+         Priority => Priority);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      pragma Unused(Status);
    end Send_Cancel_Request;
    procedure Cancel_Request_Decode
       (Message : in  Message_Record;

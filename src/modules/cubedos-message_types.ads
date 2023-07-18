@@ -122,8 +122,7 @@ package CubedOS.Message_Types is
      and Define_Module'Result.Module_ID = This_Module;
 
    -- Determines if the given module is capable of receiving the given message type.
-   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean
-     with Pre => Receiver.Receive_Types /= null;
+   function Receives(Receiver : Module_Metadata; Msg_Type : Universal_Message_Type) return Boolean;
 
 
    ---------------

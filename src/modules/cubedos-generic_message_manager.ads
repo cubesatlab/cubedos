@@ -89,7 +89,8 @@ is
      Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
                  Lock => +Mailbox),
      Pre => Has_Module(This_Domain, Module_ID(Mailbox))
-     and not Module_Registered(Module_ID(Mailbox)),
+     and not Module_Registered(Module_ID(Mailbox))
+     and Msg_Queue_Size < Natural'Last - 1,
      Post => Module_Registered(Module_ID(Mailbox));
 
 
@@ -115,6 +116,16 @@ is
      Post => Payload(Msg) /= null
      and Receives(Spec(Box), Message_Type(Msg));
 
+   -- The result status of a message send operation.
+   -- Accepted: The message was deposited in the destination mailbox successfully.
+   -- Mailbox_Full: The message was discarded because the destination didn't have
+   --               space to store it.
+   -- Rejected_Type: The message was discarded because the destination couldn't
+   --                receive messages of its type.
+   -- Unavailable: The return status is unknown because the message sent to a
+   --              foreign domain.
+   type Status_Type is (Accepted, Mailbox_Full, Rejected_Type, Unavailable);
+
    -- Sends the given message to the specified module and domain. This
    -- procedure asserts that the destination module may receive the given
    -- message type and that the module does exist in the destination domain.
@@ -127,13 +138,14 @@ is
    procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
-                          Target_Domain : Domain_Metadata := This_Domain)
+                          Target_Domain : Domain_Metadata := This_Domain;
+                          Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
      and then Payload(Msg) /= null
      and then Receives(Target_Module, Message_Type(Msg))
      and then Has_Module(Target_Domain, Target_Module.Module_ID)
-     and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
      and then Receiver_Address(Msg) = (Target_Domain.ID, Target_Module.Module_ID),
      Post => Payload(Msg) = null;
 
@@ -151,14 +163,11 @@ is
                  null => Box),
      Pre => Messaging_Ready
      and then Payload(Msg) /= null
-     and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID),
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)),
      Post => Payload(Msg) = null;
-
-   type Status_Type is (Accepted, Mailbox_Full, Rejected_Type);
 
    -- Sends the given message.
    -- Returns immediately with the status of the operation's result.
-   -- The destination domain must be this domain.
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
@@ -169,7 +178,7 @@ is
                  Msg => Msg,
                  null => Box),
      Pre => Messaging_Ready
-     and then Sender_Address(Msg) = (Domain_ID, Spec(Box).Module_ID)
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
      and then Receiver_Address(Msg).Domain_ID = Domain_ID
      and then Payload(Msg) /= null;
 

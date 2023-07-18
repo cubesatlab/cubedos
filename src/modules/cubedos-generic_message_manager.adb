@@ -274,8 +274,13 @@ is
    is
    begin
       Domain_Config.On_Message_Sent_Debug(Message.all);
-      Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Send
-        (Message, Status);
+      if Receiver_Address(Message).Domain_ID /= This_Domain.ID then
+         Status := Unavailable;
+         Domain_Config.Send_Outgoing_Message(Message);
+      else
+         Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Send
+           (Message, Status);
+      end if;
    end Route_Message;
 
    procedure Route_Message (Message : in out Msg_Owner)
@@ -325,13 +330,14 @@ is
    procedure Send_Message(Box : Module_Mailbox;
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
-                          Target_Domain : Domain_Metadata := This_Domain
+                          Target_Domain : Domain_Metadata := This_Domain;
+                          Status : out Status_Type
                          )
    is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
-      Route_Message (Ptr);
+      Route_Message (Ptr, Status);
       pragma Unreferenced(Box, Target_Module, Target_Domain);
       pragma Unused(Ptr);
    end Send_Message;

@@ -51,7 +51,9 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Relative_Request_Msg
-         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address
+         and Payload(Result) /= null;
 
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
@@ -62,7 +64,22 @@ package CubedOS.Time_Server.API is
       Series_ID : Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiver_Address.Module_ID = This_Module
+      ;
+
+   procedure Send_Relative_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Tick_Interval : Ada.Real_Time.Time_Span;
+      Request_Type : Series_Type;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
@@ -77,7 +94,25 @@ package CubedOS.Time_Server.API is
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Relative_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   procedure Send_Relative_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Tick_Interval : Ada.Real_Time.Time_Span;
+      Request_Type : Series_Type;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Relative_Request_Msg)
@@ -110,7 +145,9 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Absolute_Request_Msg
-         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address
+         and Payload(Result) /= null;
 
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
@@ -120,7 +157,21 @@ package CubedOS.Time_Server.API is
       Series_ID : Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiver_Address.Module_ID = This_Module
+      ;
+
+   procedure Send_Absolute_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Tick_Time : Ada.Real_Time.Time;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
@@ -134,7 +185,24 @@ package CubedOS.Time_Server.API is
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Absolute_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   procedure Send_Absolute_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Tick_Time : Ada.Real_Time.Time;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Absolute_Request_Msg)
@@ -166,7 +234,9 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Sender_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Tick_Reply_Msg
-         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address
+         and Payload(Result) /= null;
 
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
@@ -176,7 +246,21 @@ package CubedOS.Time_Server.API is
       Count : Series_Count_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+      ;
+
+   procedure Send_Tick_Reply
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Count : Series_Count_Type;
+      Status : out Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
       ;
@@ -190,7 +274,24 @@ package CubedOS.Time_Server.API is
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Module_ID(Sender) = This_Module
+         and then Receives(Receiving_Module, Tick_Reply_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   procedure Send_Tick_Reply
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Count : Series_Count_Type;
+      Status : out Status_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Tick_Reply_Msg)
@@ -221,7 +322,9 @@ package CubedOS.Time_Server.API is
       Pre => true
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Cancel_Request_Msg
-         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address;
+         and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
+         and CubedOS.Message_Types.Receiver_Address(Result) = Receiver_Address
+         and Payload(Result) /= null;
 
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
@@ -230,7 +333,20 @@ package CubedOS.Time_Server.API is
       Series_ID : Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiver_Address.Module_ID = This_Module
+      ;
+
+   procedure Send_Cancel_Request
+      (Sender : Module_Mailbox;
+      Receiver_Address : Message_Address;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
       ;
@@ -243,7 +359,23 @@ package CubedOS.Time_Server.API is
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    with
-      Global => (In_Out => Mailboxes, Proof_In => Lock),
+      Global => (In_Out => Mailboxes),
+      Pre => Messaging_Ready
+         and then Receiving_Module.Module_ID = This_Module
+         and then Receives(Receiving_Module, Cancel_Request_Msg)
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
+      ;
+
+   procedure Send_Cancel_Request
+      (Sender : Module_Mailbox;
+      Receiving_Module : Module_Metadata;
+      Request_ID : Request_ID_Type;
+      Series_ID : Series_ID_Type;
+      Status : out Status_Type;
+      Receiving_Domain : Domain_Metadata := This_Domain;
+      Priority : System.Priority := System.Default_Priority)
+   with
+      Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Cancel_Request_Msg)

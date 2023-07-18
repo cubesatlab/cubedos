@@ -54,8 +54,10 @@ package body Check_Message_Passing is
    end;
 
    procedure Send_Unacceptable_Message_With_Safe_Procedure is
+      Status : Status_Type;
    begin
-      Send_Message(Sender, Unacceptable_Msg, Receiver_Metadata, This_Domain);
+      Send_Message(Sender, Unacceptable_Msg, Receiver_Metadata, This_Domain, Status);
+      pragma Unused(Status);
    end;
 
    procedure Register_Sender is
