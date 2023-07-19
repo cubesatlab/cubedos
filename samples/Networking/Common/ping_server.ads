@@ -5,8 +5,6 @@
 --
 --------------------------------------------------------------------------------
 
-with Message_Manager;
-
 package Ping_Server is
 
 end Ping_Server;

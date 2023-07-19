@@ -47,33 +47,28 @@ package body Ping_Client.Messages is
      and Payload(Message) /= null
      and Messaging_Ready
    is
-	  Decode_Status    : Message_Status_Type;
 	  Round_Trip_Time  : Ada.Real_Time.Time_Span;
    begin
-	  Ping_Server.API.Ping_Reply_Decode(Message, Decode_Status);
-	  Receive_Time := Ada.Real_Time.Clock;
-	  Round_Trip_Time := Receive_Time - Send_Time;
+      Receive_Time := Ada.Real_Time.Clock;
+      Round_Trip_Time := Receive_Time - Send_Time;
 
-	  if Decode_Status /= Success then
-		 Ada.Text_IO.Put_Line("ERROR: Unable to decode a Ping_Reply message!");
-	  else
-		 Ada.Text_IO.Put("+++ Reply #");
-		 Request_IO.Put(Request_ID(Message));
-		 Ada.Text_IO.Put(" (RTT = ");
-		 Duration_IO.Put(Ada.Real_Time.To_Duration(Round_Trip_Time));
-		 Ada.Text_IO.Put("s)");
-		 Ada.Text_IO.New_Line;
+      Ada.Text_IO.Put("+++ Reply #");
+      Request_IO.Put(Request_ID(Message));
+      Ada.Text_IO.Put(" (RTT = ");
+      Duration_IO.Put(Ada.Real_Time.To_Duration(Round_Trip_Time));
+      Ada.Text_IO.Put("s)");
+      Ada.Text_IO.New_Line;
 
-		 delay 1.0;  -- Delay for a while so the human can read the above messages.
-		 Request_Number := Request_Number + 1;
+      delay 1.0;  -- Delay for a while so the human can read the above messages.
+      Request_Number := Request_Number + 1;
 
-		 -- Send the next message!
-		 Send_Time := Ada.Real_Time.Clock;
-		 Ping_Server.API.Send_Ping_Request
-           (Sender => Mailbox,
-            Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
-                    Request_ID    => Request_Number);
-	  end if;
+      -- Send the next message!
+      Send_Time := Ada.Real_Time.Clock;
+      Ping_Server.API.Send_Ping_Request
+        (Sender => Mailbox,
+         Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
+         Request_ID    => Request_Number);
+
 
 	  -- Do math on time spent on message (possibly faster by saving till end?)
 	  --Relative_Time     := Ada.Real_Time.Clock - Start_Time;
