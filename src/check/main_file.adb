@@ -31,7 +31,7 @@ procedure Main_File is
 
    Incoming_Message : Message_Record;
    Handle       : File_Handle_Type;
-   Read_Handle  : File_Handle_Type;
+   Read_Handle  : Valid_File_Handle_Type;
    Write_Handle : File_Handle_Type;
    Amount_Read  : Read_Result_Size_Type;
    Amount_Write : Write_Result_Size_Type;
@@ -80,7 +80,7 @@ begin
             case Request_ID(Incoming_Message) is
                when 1 =>
                   -- We got a reply to our open-for-reading request.
-                  Read_Handle := Handle;
+                  Read_Handle := Valid_File_Handle_Type(Handle);
                   Send_Read_Request
                     (My_Mailbox, Message_Address'(Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size);
                   Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
