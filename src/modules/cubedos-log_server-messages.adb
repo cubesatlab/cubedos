@@ -58,10 +58,6 @@ package body CubedOS.Log_Server.Messages is
    begin
       if Log_Server.API.Is_Log_Text(Message) then
          Handle_Log_Text(Message);
-      else
-         -- An unknown message type has been received. What should be done about that?
-         -- It seems like this should be logged somehow.
-         null;
       end if;
    end Process;
 
