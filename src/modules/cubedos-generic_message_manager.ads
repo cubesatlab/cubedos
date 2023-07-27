@@ -107,12 +107,13 @@ is
    -- Get the number of messages in the mailbox waiting
    -- to be read.
    procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural)
-     with Global => (In_Out => Mailboxes);
+     with Global => (In_Out => Mailboxes),
+       Pre => Has_Module(This_Domain, Module_ID(Box));
 
    -- A blocking function which will retreive messages sent to the given mailbox.
    -- The message will be of a type that the mailbox is allowed to receive.
    procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
-     with Pre => Messaging_Ready,
+     with Pre => Messaging_Ready and Has_Module(This_Domain, Module_ID(Box)),
      Post => Payload(Msg) /= null
      and Receives(Spec(Box), Message_Type(Msg));
 
@@ -191,7 +192,8 @@ is
    procedure Handle_Received(Msg : in out Msg_Owner)
      with Pre => Msg /= null
      and then Payload(Msg) /= null
-     and then Messaging_Ready,
+     and then Messaging_Ready
+     and then Has_Module(This_Domain, Receiver_Address(Msg).Module_ID),
      Post => Msg = null;
 
 

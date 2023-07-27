@@ -235,6 +235,7 @@ is
          pragma Assume(if Message_Waiting then not Is_Empty(Q.all));
 
          Next(Q.all, Ptr);
+         pragma Assume(Payload(Ptr) /= null);
          Copy(Ptr.all, Message);
          Delete(Ptr);
          pragma Unused(Ptr);
@@ -268,13 +269,14 @@ is
        Pre => Message /= null
        and then Payload(Message) /= null
        and then Messaging_Ready
-       and then Has_Module(This_Domain, Receiver_Address(Message).Module_ID)
-       and then Receiver_Address(Message).Domain_ID = This_Domain.ID,
+       and then Receiver_Address(Message).Domain_ID = This_Domain.ID
+       and then (if Receiver_Address(Message).Domain_ID = Domain_ID then
+          Has_Module(This_Domain, Receiver_Address(Message).Module_ID)),
        Post => Message = null
    is
    begin
       Domain_Config.On_Message_Sent_Debug(Message.all);
-      if Receiver_Address(Message).Domain_ID /= This_Domain.ID then
+      if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Status := Unavailable;
          Domain_Config.Send_Outgoing_Message(Message);
       else
@@ -287,7 +289,9 @@ is
      with
        Pre => Message /= null
        and then Payload(Message) /= null
-       and then Messaging_Ready,
+       and then Messaging_Ready
+       and then (if Receiver_Address(Message).Domain_ID = Domain_ID then
+          Has_Module(This_Domain, Receiver_Address(Message).Module_ID)),
        Post => Message = null
    is
    begin
@@ -366,14 +370,18 @@ is
    procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
       Result : Message_Record;
    begin
-      Message_Storage (Index_Of(Box.Spec.Module_ID)).Receive (Result);
+      Message_Storage (Index_Of(Box.Module_ID)).Receive (Result);
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
          Domain_Config.On_Message_Discarded(Spec(Box), Result);
-         Delete(Result);
-         Message_Storage (Index_Of(Box.Spec.Module_ID)).Receive (Result);
+         if Payload(Result) /= null then
+            Delete(Result);
+         end if;
          pragma Loop_Invariant(Payload(Result) = null);
+
+         pragma Assert(Has_Module(This_Domain, Box.Module_ID));
+         Message_Storage (Index_Of(Box.Module_ID)).Receive (Result);
       end loop;
       Domain_Config.On_Message_Read(Spec(Box), Result);
       pragma Assert(Receives(Spec(Box), Message_Type(Result)));
@@ -383,7 +391,7 @@ is
 
    procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural) is
    begin
-      Size := Message_Storage (Index_Of(Box.Spec.Module_ID)).Message_Count;
+      Size := Message_Storage (Index_Of(Module_ID(Box))).Message_Count;
    end Pending_Messages;
 
    function Module_Registered(Module_ID : in Module_ID_Type) return Boolean

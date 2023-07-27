@@ -16,7 +16,7 @@ package body CubedOS.Message_Types is
      (Object => Data_Array, Name => Data_Array_Owner);
 
    procedure Delete(Msg : in out Message_Record)
-     --with SPARK_Mode => Off
+     with SPARK_Mode => Off
    is
    begin
       -- We lie to spark about this because Free shouldn't be
