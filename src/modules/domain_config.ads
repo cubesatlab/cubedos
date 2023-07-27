@@ -14,6 +14,7 @@
 -- to avoid pointless computation.
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
+pragma Profile (Jorvik);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
@@ -22,7 +23,7 @@ package Domain_Config is
    -- This procedure routes messages destined to foreign
    -- domains to the appropriate transport module.
    procedure Send_Outgoing_Message (Msg : in out Msg_Owner)
-     with Pre => Msg /= null,
+     with Pre => Msg /= null and Payload(Msg) /= null,
      Post => Msg = null;
 
 
@@ -31,34 +32,26 @@ package Domain_Config is
    ---------------
 
    -- Called immediately before messaging is allowed to begin.
-   procedure On_Message_System_Initialization_Complete
-     with Global => null;
+   procedure On_Message_System_Initialization_Complete;
 
    -- This procedure is called by the message manager
    -- for every message that is sent.
-   procedure On_Message_Sent_Debug (Msg : in Message_Record)
-     with Global => null;
+   procedure On_Message_Sent_Debug (Msg : in Message_Record);
 
    -- Called when a message is successfully deposited in its destination
    -- mailbox. Only called for messages sent to this domain.
-   procedure On_Message_Receive_Succeed(Msg : in Message_Record)
-     with Global => null;
+   procedure On_Message_Receive_Succeed(Msg : in Message_Record);
 
    -- Called when a message fails to be deposited in its destination
    -- mailbox. The message is lost after this call.
    -- Only called for messages sent to this domain.
-   procedure On_Message_Receive_Failed(Msg : in Message_Record)
-     with Global => null;
+   procedure On_Message_Receive_Failed(Msg : in Message_Record);
 
    -- Called when a message is read from the mailbox of the receiver.
-   procedure On_Message_Read(Receiver : in Module_Metadata; Msg : in Message_Record)
-     with Global => null;
+   procedure On_Message_Read(Receiver : in Module_Metadata; Msg : in Message_Record);
 
    -- Called when a message from the given mailbox is discarded because the
    -- receiver hasn't declared that it may receive the message type.
-   procedure On_Message_Discarded(Receiver : in Module_Metadata; Msg : in Message_Record)
-     with Global => null;
-
-
+   procedure On_Message_Discarded(Receiver : in Module_Metadata; Msg : in Message_Record);
 
 end Domain_Config;

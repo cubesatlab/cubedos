@@ -79,7 +79,7 @@ begin
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then
 
-               Send_Cancel_Request(My_Mailbox, Message_Address'(Domain_ID, My_Module_ID), 1, Series_ID => 1);
+               Send_Cancel_Request(My_Mailbox, CubedOS.Time_Server.API.Mail_Target, 1, Series_ID => 1);
                Put_Line("TX : Cancel_Request message sent for Series_ID = 1");
             end if;
 
