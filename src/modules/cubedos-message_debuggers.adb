@@ -59,7 +59,8 @@ package body CubedOS.Message_Debuggers is
    procedure On_Message_Discarded(D : in Console_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
    is
    begin
-      Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID));
+      Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID)
+        & " is not configured to receive messages of this type.");
    end;
 
 end CubedOS.Message_Debuggers;

@@ -20,7 +20,7 @@ package CubedOS.Message_Debuggers is
 
    procedure On_Message_Sent_Debug(D : in Message_Debugger; Msg : in Message_Record) is abstract;
    -- This procedure is called by the message manager
-   -- for every message that is sent.
+   -- for any message that any module in the domain sends.
 
    procedure On_Message_Receive_Succeed(D : in Message_Debugger; Msg : in Message_Record) is abstract;
    -- Called when a message is successfully deposited in its destination
