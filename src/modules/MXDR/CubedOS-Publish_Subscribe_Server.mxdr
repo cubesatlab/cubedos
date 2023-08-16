@@ -27,15 +27,6 @@ message struct <- Subscribe_Reply {
     Status_Type     Status;
 };
 
-message struct -> Unsubscribe_Request {
-	Channel_ID_Type Channel;
-}
-
-message struct <- Unsubscribe_Reply {
-	Channel_ID_Type Channel;
-	Status_Type Status;
-}
-
 // Publish Message_Data to the indicated channel.
 message struct -> Publish_Request {
     Channel_ID_Type Channel;
