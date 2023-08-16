@@ -23,6 +23,18 @@ package body CubedOS.Transport_UDP.Messages is
       null;
    end Init;
 
+   protected Send_Lock
+   -- Here to prevent sending messages before we're
+   -- ready to receive them over UDP.
+      with SPARK_Mode
+   is
+      entry Wait;
+      procedure Unlock;
+   private
+      Locked : Boolean := True;
+   end Send_Lock;
+
+
    protected Send_Queue
      with SPARK_Mode
    is
@@ -41,6 +53,19 @@ package body CubedOS.Transport_UDP.Messages is
    begin
       Send_Queue.Add(Msg);
    end Send;
+
+   protected body Send_Lock
+      with SPARK_Mode
+   is
+      entry Wait when not Locked is
+      begin
+         null;
+      end;
+      procedure Unlock is
+      begin
+         Locked := False;
+      end Unlock;
+   end Send_Lock;
 
    protected body Send_Queue
      with SPARK_Mode
@@ -120,6 +145,7 @@ package body CubedOS.Transport_UDP.Messages is
       Address.Port := Network_Configuration.Get_Port(This_Domain.ID);
       Bind_Socket (Server, Address);
       Ada.Text_IO.Put_Line("UDP Transport module started listening " & Image(Address));
+      Send_Lock.Unlock;
       loop
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
@@ -202,6 +228,7 @@ package body CubedOS.Transport_UDP.Messages is
       To_Transmit : Msg_Owner;
    begin
       Message_Manager.Wait;
+      Send_Lock.Wait;
 
       loop
          Send_Queue.Take(To_Transmit);

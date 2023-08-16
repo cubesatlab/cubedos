@@ -64,10 +64,9 @@ package body Ping_Client.Messages is
 
       -- Send the next message!
       Send_Time := Ada.Real_Time.Clock;
+      pragma Assert(Receives(Ping_Server.API.Mail_Target, Ping_Server.API.Ping_Request_Msg));
       Ping_Server.API.Send_Ping_Request
-        (Sender => Mailbox,
-         Receiver_Address => (Name_Resolver.Domain_B.ID, Name_Resolver.Ping_Server),
-         Request_ID    => Request_Number);
+        (Mailbox, Ping_Server.API.Mail_Target, Request_Number, Name_Resolver.Domain_B);
 
 
 	  -- Do math on time spent on message (possibly faster by saving till end?)

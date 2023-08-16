@@ -18,5 +18,6 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package body Ping_Client.API is
 
+   procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
 
 end Ping_Client.API;

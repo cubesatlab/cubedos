@@ -7,6 +7,8 @@
 -- window, and ^C out of it when a suitable time has passed. Then observe the behavior to ensure
 -- the desired effects are happening.
 --------------------------------------------------------------------------------
+pragma SPARK_Mode (On);
+
 with Ada.Integer_Text_IO;
 with Ada.Real_Time;
 with Ada.Text_IO;
