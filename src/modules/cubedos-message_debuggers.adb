@@ -20,11 +20,13 @@ package body CubedOS.Message_Debuggers is
    is null;
    procedure On_Message_Receive_Succeed(D : in Null_Message_Debugger; Msg : in Message_Record)
    is null;
-   procedure On_Message_Receive_Failed(D : in Null_Message_Debugger; Msg : in Message_Record)
+   procedure On_Message_Receive_Failed(D : in Null_Message_Debugger; Msg : in Message_Record; Reason : Fail_Reason)
    is null;
    procedure On_Message_Read(D : in Null_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
    is null;
    procedure On_Message_Discarded(D : in Null_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
+   is null;
+   procedure On_Foreign_Message_Received(D : in Null_Message_Debugger; Msg : in Message_Record)
    is null;
 
    --------------------
@@ -46,10 +48,10 @@ package body CubedOS.Message_Debuggers is
    begin
       Put_Line("[Received OK] " & Stringify_Message(Msg));
    end;
-   procedure On_Message_Receive_Failed(D : in Console_Message_Debugger; Msg : in Message_Record)
+   procedure On_Message_Receive_Failed(D : in Console_Message_Debugger; Msg : in Message_Record; Reason : Fail_Reason)
    is
    begin
-      Put_Line("[Received Fail] " & Stringify_Message(Msg));
+      Put_Line("[Received Fail] " & Stringify_Message(Msg) & " Reason: " & Fail_Reason'Image(Reason));
    end;
    procedure On_Message_Read(D : in Console_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
    is
@@ -61,6 +63,11 @@ package body CubedOS.Message_Debuggers is
    begin
       Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID)
         & " is not configured to receive messages of this type.");
+   end;
+   procedure On_Foreign_Message_Received(D : in Console_Message_Debugger; Msg : in Message_Record)
+   is
+   begin
+      Put_Line("[Received Foreign Message] " & Stringify_Message(Msg));
    end;
 
 end CubedOS.Message_Debuggers;

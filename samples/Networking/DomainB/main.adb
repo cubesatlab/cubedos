@@ -14,5 +14,4 @@ procedure Main is
    pragma Priority(System.Priority'First);
 begin
    Ping_Server.Messages.Init;
-
 end Main;

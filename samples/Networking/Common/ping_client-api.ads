@@ -18,6 +18,7 @@ with System;
 with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
 with Ada.Unchecked_Deallocation;
 
+with Ping_Server.API; use Ping_Server.API;
 
 package Ping_Client.API is
 
@@ -28,7 +29,7 @@ package Ping_Client.API is
    This_Module : constant Module_ID_Type := Name_Resolver.Ping_Client;
    
    
-   This_Receives : aliased constant Message_Type_Array := Empty_Type_Array;
+   This_Receives : aliased constant Message_Type_Array := (0 => Ping_Reply_Msg);
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
    
 

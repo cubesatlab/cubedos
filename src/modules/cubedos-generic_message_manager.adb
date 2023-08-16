@@ -181,12 +181,12 @@ is
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
          if Q = null or else Is_Full(Q.all) then
-            Debugger.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all, Mailbox_Full_Or_Unitialized);
             Status := Mailbox_Full;
             Delete(Message);
             Message := null;
          elsif not Receives(Metadata, Message_Type(Message)) then
-            Debugger.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all, Rejected_Type);
             Status := Rejected_Type;
             Delete(Message);
             Message := null;
@@ -203,11 +203,11 @@ is
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
-            Debugger.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all, Mailbox_Full_Or_Unitialized);
             Delete(Message);
             Message := null;
          elsif not Receives(Metadata, Message_Type(Message)) then
-            Debugger.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all, Rejected_Type);
             Delete(Message);
             Message := null;
          else
@@ -413,6 +413,7 @@ is
    -- Gives a message received from a foreign domain to the message system.
    procedure Handle_Received(Msg : in out Msg_Owner) is
    begin
+      Debugger.On_Foreign_Message_Received(Msg.all);
       Route_Message(Msg);
    end Handle_Received;
 
