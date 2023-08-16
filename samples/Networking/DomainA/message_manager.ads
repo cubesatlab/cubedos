@@ -11,7 +11,8 @@ pragma Partition_Elaboration_Policy(Sequential);
 
 with CubedOS.Generic_Message_Manager;
 with Name_Resolver;
+with CubedOS.Message_Debuggers;
 
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
-	(Name_Resolver.Domain_A);
+	(Name_Resolver.Domain_A, CubedOS.Message_Debuggers.Console_Message_Debugger_Object);
