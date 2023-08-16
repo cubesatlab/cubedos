@@ -118,6 +118,7 @@ package body Ping_Client.Messages is
       Initialize;
       loop
          Read_Next(Mailbox, Incoming_Message);
+         Receive_Time := Ada.Real_Time.Clock;
          Process(Incoming_Message);
          Delete(Incoming_Message);
          pragma Loop_Invariant(Payload(Incoming_Message) = null);

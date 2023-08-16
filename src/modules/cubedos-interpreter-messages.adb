@@ -5,6 +5,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+pragma Warnings(Off);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 with CubedOS.Interpreter.API; use CubedOS.Interpreter.API;
@@ -27,7 +28,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Clear_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Clear_Request;
 
@@ -37,7 +38,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Set_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Set_Request;
 
@@ -47,7 +48,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Add_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Add_Request;
 

@@ -8,6 +8,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+pragma Warnings(Off); -- This file will be auto-generated in the future.
 
 with CubedOS.Lib;
 with Message_Manager;  use Message_Manager;

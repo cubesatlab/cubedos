@@ -11,10 +11,14 @@
 pragma SPARK_Mode(On);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Debuggers; use CubedOS.Message_Debuggers;
 
 generic
    -- The domain of this message manager.
    Domain : Domain_Metadata;
+   -- A debugger may be injected to provide information
+   -- about message passing.
+   Debugger : Message_Debugger'Class := Null_Message_Debugger_Object;
 package CubedOS.Generic_Message_Manager
   with
 Abstract_State =>
@@ -29,7 +33,6 @@ is
    Domain_ID : constant Domain_ID_Type := This_Domain.ID;
    -- The number of modules in this domain.
    Module_Count : constant Positive := This_Domain.Module_Count;
-
 
    -------------------
    -- Initialization
@@ -181,7 +184,8 @@ is
      Pre => Messaging_Ready
      and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
      and then Receiver_Address(Msg).Domain_ID = Domain_ID
-     and then Payload(Msg) /= null;
+     and then Payload(Msg) /= null,
+     Post => Payload(Msg) = null;
 
 
    --------------------------

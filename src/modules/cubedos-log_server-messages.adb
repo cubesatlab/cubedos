@@ -27,14 +27,13 @@ package body CubedOS.Log_Server.Messages is
        and Payload(Message) /= null
    is
       Log_Level : Log_Server.API.Log_Level_Type;
-      Text      : Log_Server.API.Log_Message_Type;
-      Size      : Log_Server.API.Log_Message_Size_Type;
+      Text      : Log_Server.API.Log_Message_Type_Ptr;
       Status    : Message_Status_Type;
 
       Level_Strings : constant array(Log_Server.API.Log_Level_Type) of String(1 .. 3) :=
         ("DBG", "INF", "WRN", "ERR", "CRI");
    begin
-      Log_Server.API.Log_Text_Decode(Message, Log_Level, Text, Size, Status);
+      Log_Server.API.Log_Text_Decode(Message, Log_Level, Text, Status);
 
       -- Ignore log messages that don't decode properly.
       -- TODO: We should also time stamp the messages.
@@ -43,7 +42,7 @@ package body CubedOS.Log_Server.Messages is
            (Level_Strings(Log_Level) &
             " ("  & Domain_ID_Type'Image(Sender_Address(Message).Domain_ID) &
             ","   & Module_ID_Type'Image(Sender_Address(Message).Module_ID) &
-            "): " & Text(1 .. Size));
+            "): " & Text.all);
       end if;
    end Handle_Log_Text;
 

@@ -24,6 +24,7 @@ package body Ping_Server.Messages is
 	 with
        Pre => Is_Ping_Request(Message)
        and Payload(Message) /= null
+       and Messaging_Ready
    is
    begin
       -- Theres nothing to decode
@@ -42,6 +43,7 @@ package body Ping_Server.Messages is
    -- This procedure processes exactly one message.
    procedure Process(Message : in Message_Record)
      with Pre => Payload(Message) /= null
+       and Messaging_Ready
    is
    begin
 	  if Is_Ping_Request(Message) then

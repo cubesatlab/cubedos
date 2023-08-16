@@ -6,8 +6,6 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
-with Name_Resolver;
-
 package body CubedOS.Time_Server.Messages with
    Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))
 is
@@ -15,8 +13,6 @@ is
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
 
-   pragma Assert(This_Module = Name_Resolver.Time_Server);
-   pragma Assert(This_Module = Mail_Target.Module_ID);
    Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    -- Stores all persistent info about a series.
@@ -292,7 +288,6 @@ is
          Read_Next(Mailbox, Incoming_Message);
          Process (Incoming_Message);
          Delete(Incoming_Message);
-
       end loop;
    end Message_Loop;
 

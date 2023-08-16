@@ -4,6 +4,8 @@
 -- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
+pragma SPARK_Mode (On);
+
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is

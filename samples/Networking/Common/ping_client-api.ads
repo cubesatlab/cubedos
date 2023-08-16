@@ -11,18 +11,25 @@ pragma SPARK_Mode(On);
 pragma Warnings(Off);
 
 with Name_Resolver;
-with CubedOS.Lib;
+with CubedOS.Lib; use CubedOS.Lib;
 with Message_Manager;  use Message_Manager;
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 with System;
+with CubedOS.Lib.XDR; use CubedOS.Lib.XDR;
+with Ada.Unchecked_Deallocation;
 
-with Ping_Server.API; use Ping_Server.API;
 
 package Ping_Client.API is
 
    pragma Elaborate_Body;
+   type Octet_Array_Ptr is access CubedOS.Lib.Octet_Array;
+   type String_Ptr is access String;
+   
    This_Module : constant Module_ID_Type := Name_Resolver.Ping_Client;
-   This_Receives : aliased constant Message_Type_Array := (0 => Ping_Reply_Msg);
+   
+   
+   This_Receives : aliased constant Message_Type_Array := Empty_Type_Array;
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
+   
 
 end Ping_Client.API;

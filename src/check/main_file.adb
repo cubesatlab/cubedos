@@ -8,7 +8,6 @@
 -- the desired effects are happening.
 --------------------------------------------------------------------------------
 with Ada.Text_IO;
-with CubedOS.Lib;
 with CubedOS.File_Server.API;
 with CubedOS.File_Server.Messages;
 with Message_Manager;
@@ -33,9 +32,8 @@ procedure Main_File is
    Handle       : File_Handle_Type;
    Read_Handle  : Valid_File_Handle_Type;
    Write_Handle : File_Handle_Type;
-   Amount_Read  : Read_Result_Size_Type;
    Amount_Write : Write_Result_Size_Type;
-   Data   : Lib.Octet_Array(0 .. Maximum_Read_Size - 1);
+   Data   : File_Server.API.Octet_Array_Ptr;
    Status : Message_Status_Type;
 begin
    CubedOS.File_Server.Messages.Init;
@@ -49,12 +47,12 @@ begin
 
    -- Try to open a file to read.
    Send_Open_Request
-     (My_Mailbox, Message_Address'(Domain_ID, Name_Resolver.File_Server), 1, Read, "example.txt");
+     (My_Mailbox, File_Server.API.Mail_Target, 1, Read, "example.txt");
    Put_Line("TX : Open_Request message sent for reading 'example.txt'");
 
    -- Try to open file for writing
    Send_Open_Request
-     (My_Mailbox, Message_Address'(Domain_ID, Name_Resolver.File_Server), 2, Write, "write_test.txt");
+     (My_Mailbox, File_Server.API.Mail_Target, 2, Write, "write_test.txt");
    Put_Line("TX : Open_Request message sent for writing 'write_test.txt'");
 
    loop
@@ -82,8 +80,8 @@ begin
                   -- We got a reply to our open-for-reading request.
                   Read_Handle := Valid_File_Handle_Type(Handle);
                   Send_Read_Request
-                    (My_Mailbox, Message_Address'(Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size);
-                  Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
+                    (My_Mailbox, File_Server.API.Mail_Target, 0, Read_Handle, Read_Size_Type'Last);
+                  Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Max_Read_Size) & " octets");
 
                when 2 =>
                   -- We got a reply to our open-for-writing request.
@@ -99,36 +97,38 @@ begin
       elsif Is_Read_Reply(Incoming_Message) then
          Put_Line("RX : Read_Reply message");
 
-         Read_Reply_Decode(Incoming_Message, Handle, Amount_Read, Data, Status);
+         Read_Reply_Decode(Incoming_Message, Handle, Data, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
-            Send_Close_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Read_Handle);
+            Send_Close_Request(My_Mailbox, File_Server.API.Mail_Target, 0, Read_Handle);
             Put_Line("TX : Close_Request message sent (input file)");
          else
-            Put_Line("     +++ Successfully read " & Read_Size_Type'Image(Amount_Read) & " octets");
+            Put_Line("     +++ Successfully read " & Integer'Image(Data'Length) & " octets");
 
-            if Amount_Read = 0 then
+            if Data'Length = 0 then
                -- Close the files (both of them).
                Send_Close_Request(My_Mailbox, Message_Address'(Domain_ID, My_Module_ID), 0, Read_Handle);
                Put_Line("TX : Close_Request message sent (input file)");
 
-               Send_Close_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Write_Handle);
+               Send_Close_Request(My_Mailbox, File_Server.API.Mail_Target, 0, Write_Handle);
                Put_Line("TX : Close_Request message sent (output file)");
             else
                -- Print the data we just read (it's a text file).
-               for I in 0 .. Amount_Read - 1 loop
+               for I in 0 .. Natural(Data'Length) - 1 loop
                   Put(Character'Val(Data(I)));
                end loop;
                New_Line;  -- Just to make the output look a little nicer.
 
                -- Write this data to the output file too.
-               Amount_Write := Amount_Read;
-               Send_Write_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Write_Handle, Amount_Write, Data);
-               Put_Line("TX : Write_Request message sent writing " & Integer'Image(Amount_Write) & " octets");
-
+               declare
+                  Write_Amount : constant Write_Size_Type :=  Write_Size_Type(Data'Size);
+               begin
+                  Send_Write_Request(My_Mailbox, File_Server.API.Mail_Target, 0, Write_Handle, Data.all);
+                  Put_Line("TX : Write_Request message sent writing " & Write_Size_Type'Image(Write_Amount) & " octets");
+               end;
                -- Request the next chunk from the file.
-               Send_Read_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size);
-               Put_Line("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
+               Send_Read_Request(My_Mailbox, File_Server.API.Mail_Target, 0, Read_Handle, Read_Size_Type'Last);
+               Put_Line("TX : Read_Request message sent requesting " & Read_Size_Type'Image(Read_Size_Type'Last) & " octets");
             end if;
          end if;
 
@@ -138,7 +138,7 @@ begin
          Write_Reply_Decode(Incoming_Message, Handle, Amount_Write, Status);
          if Status = Malformed then
             Put_Line("     *** Message is malformed!");
-            Send_Close_Request(My_Mailbox, (Domain_ID, My_Module_ID), 0, Write_Handle);
+            Send_Close_Request(My_Mailbox, File_Server.API.Mail_Target, 0, Write_Handle);
             Put_Line("TX : Close_Request message sent (output file)");
          else
             Put_Line("     +++ Successfully wrote " & Write_Result_Size_Type'Image(Amount_Write) & " octets");

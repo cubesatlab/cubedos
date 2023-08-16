@@ -7,9 +7,21 @@
 pragma SPARK_Mode(On);
 
 with System;
+with Message_Manager; use Message_Manager;
+with CubedOS.SAMPLE_MODULE.API; use CubedOS.SAMPLE_MODULE.API;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Sample_Module.Messages is
-   
+
+   -- This procedure is called from the main procedure at startup.
+   -- It is responsible for registering the module with the messaging
+   -- system.
+   procedure Init
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Pre => not Module_Registered(This_Module)
+     and Has_Module(This_Domain, This_Module),
+     Post => Module_Registered(This_Module);
+
    -- Every module contains a message loop that receives messages from the module's mailbox and
    -- processes them. That loop is declared here with its attributes. Be mindful of priorities.
    -- We recommend giving every module a unique priority; the correct assignments need to be
@@ -33,16 +45,4 @@ package Sample_Module.Messages is
       pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-   -- This justifcation is needed to silence a SPARK error related tasking. Each CubedOS module
-   -- reads from exactly one mailbox. However, since the mailboxes are stored in an array, SPARK
-   -- can't tell for sure which mailbox is being read by which task. SPARK therefor
-   -- conservatively assumes two tasks might be reading from the same mailbox, which is a
-   -- violation of SPARK rules. This justification should be satisfied as long as every module
-   -- has a unique module ID (since module IDs are used as mailbox identifiers).
-   pragma Annotate
-     (GNATprove,
-      Intentional,
-      "multiple tasks might suspend on protected object",
-      "Every module has a unique ID");
-   
 end Sample_Module.Messages;

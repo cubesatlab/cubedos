@@ -11,6 +11,7 @@ pragma SPARK_Mode(On);
 
 with Ada.Real_Time;
 use Ada.Real_Time;
+pragma Warnings(Off);
 
 with CubedOS.Lib.XDR;
 with CubedOS.Lib;
@@ -20,15 +21,16 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 
 package body CubedOS.Time_Server.API is
 
+   procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
    procedure Relative_Request_Encode
-      (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type : Series_Type;
-      Series_ID : Series_ID_Type;
-      Result : out Message_Record;
-      Priority : System.Priority := System.Default_Priority)
+      (Receiver_Address : in Message_Address;
+      Sender_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type : in Series_Type;
+      Series_ID : in Series_ID_Type;
+      Priority : in System.Priority := System.Default_Priority;
+      Result : out  Message_Record)
    is
       subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
       Position   : Data_Index_Type;
@@ -36,12 +38,15 @@ package body CubedOS.Time_Server.API is
       subtype Definite_Data_Array is Data_Array(Data_Index_Type);
       Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
       Message : Mutable_Message_Record;
-      Interval : constant Duration := Ada.Real_Time.To_Duration(Tick_Interval);
    begin
-
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(1000*Interval), Payload.all, Position, Last);
-      Position := Last + 1;
+      declare
+         type Time_Float is delta 0.000_000_001 digits 18;
+         type Big_Float is delta 1.0 digits 18;
+      begin
+         XDR.Encode(XDR_Unsigned_Hyper(Time_Float(To_Duration(Tick_Interval)) * Big_Float(1_000_000_000.0)), Payload.all, Position, Last);
+         Position := Last + 1;
+      end;
       XDR.Encode(XDR.XDR_Unsigned(Series_Type'Pos(Request_Type)), Payload.all, Position, Last);
       Position := Last + 1;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Payload.all, Position, Last);
@@ -58,14 +63,14 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Relative_Request_Encode;
-
+   
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type : Series_Type;
-      Series_ID : Series_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type : in Series_Type;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -83,13 +88,14 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Relative_Request;
+   
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type : Series_Type;
-      Series_ID : Series_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type : in Series_Type;
+      Series_ID : in Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -106,15 +112,15 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Relative_Request;
+   
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type : Series_Type;
-      Series_ID : Series_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type : in Series_Type;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -122,22 +128,23 @@ package body CubedOS.Time_Server.API is
       pragma Assert(Payload(Message) = null);
       Relative_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
-         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Receiver_Address => (Domain_ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Tick_Interval => Tick_Interval,
          Request_Type => Request_Type,
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Relative_Request;
+   
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Tick_Interval : Ada.Real_Time.Time_Span;
-      Request_Type : Series_Type;
-      Series_ID : Series_ID_Type;
+      Tick_Interval : in Ada.Real_Time.Time_Span;
+      Request_Type : in Series_Type;
+      Series_ID : in Series_ID_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -157,63 +164,59 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Relative_Request;
+   
    procedure Relative_Request_Decode
-      (Message : in  Message_Record;
+      (Message : in Message_Record;
       Tick_Interval : out Ada.Real_Time.Time_Span;
       Request_Type : out Series_Type;
       Series_ID : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
       Position : Data_Index_Type;
-      Raw_Interval  : XDR.XDR_Unsigned;
+      Raw_Tick_Interval  : XDR.XDR_Unsigned_Hyper;
       Raw_Request_Type : XDR.XDR_Unsigned;
-      Raw_Series_ID   : XDR.XDR_Unsigned;
+      Raw_Series_ID : XDR_Unsigned;
       Last : Data_Index_Type;
    begin
       Decode_Status := Success;
-      Tick_Interval := Ada.Real_Time.Time_Span_First;
+      Tick_Interval := Ada.Real_Time.Time_Span(Time_Span_Zero);
       Request_Type := Series_Type'First;
-      Series_ID := Series_ID_Type'First;
+      Series_ID := Series_ID_Type'Last;
       Position := 0;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Interval, Last);
-         Position := Last + 1;
-         if Raw_Interval < XDR.XDR_Unsigned(Integer'Last) then
-            Tick_Interval := Ada.Real_Time.Milliseconds(Integer(Raw_Interval));
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      
+      -- Begin Decoding
+      XDR.Decode(Payload(Message).all, Position, Raw_Tick_Interval, Last);
+      Position := Last + 1;
+      Tick_Interval := Seconds(Integer(Raw_Tick_Interval / 1_000_000_000)) + Nanoseconds(Integer(Raw_Tick_Interval mod 1_000_000_000));
+      XDR.Decode(Payload(Message).all, Position, Raw_Request_Type, Last);
+      Position := Last + 1;
+      if Raw_Request_Type in Series_Type'Pos(Series_Type'First) .. Series_Type'Pos(Series_Type'Last) then
+         Request_Type := Series_Type'Val(Raw_Request_Type);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Request_Type, Last);
-         Position := Last + 1;
-         if Raw_Request_Type in Series_Type'Pos(Series_Type'First) .. Series_Type'Pos(Series_Type'Last) then
-            Request_Type := Series_Type'Val(Raw_Request_Type);
-         else
-            Decode_Status := Malformed;
-            Request_Type := Series_Type'First;
-         end if;
-      end if;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
-         if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
-            Series_ID := Series_ID_Type(Raw_Series_ID);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
+      Position := Last + 1;
+      if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+         Series_ID := Series_ID_Type(Raw_Series_ID);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
    end Relative_Request_Decode;
-
+   
+   
    procedure Absolute_Request_Encode
-      (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Tick_Time : Ada.Real_Time.Time;
-      Series_ID : Series_ID_Type;
-      Result : out Message_Record;
-      Priority : System.Priority := System.Default_Priority)
+      (Receiver_Address : in Message_Address;
+      Sender_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Tick_Time : in Ada.Real_Time.Time;
+      Series_ID : in Series_ID_Type;
+      Priority : in System.Priority := System.Default_Priority;
+      Result : out  Message_Record)
    is
       subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
       Position   : Data_Index_Type;
@@ -221,14 +224,18 @@ package body CubedOS.Time_Server.API is
       subtype Definite_Data_Array is Data_Array(Data_Index_Type);
       Payload : Data_Array_Owner := new Definite_Data_Array'(others => 0);
       Message : Mutable_Message_Record;
-      Seconds  : Ada.Real_Time.Seconds_Count;
-      Fraction : Ada.Real_Time.Time_Span;
    begin
-      Ada.Real_Time.Split(Tick_Time, Seconds, Fraction);
-
       Position := 0;
-      XDR.Encode(XDR.XDR_Unsigned(Seconds), Payload.all, Position, Last);
-      Position := Last + 1;
+      declare
+         Seconds : Seconds_Count;
+         Frac : Time_Span;
+         Result : XDR_Unsigned_Hyper;
+      begin
+         Split(Tick_Time, Seconds, Frac);
+         Result := XDR_Unsigned_Hyper(Seconds) * 1_000_000_000 + XDR_Unsigned_Hyper(To_Duration(Frac) * 1_000_000_000);
+         XDR.Encode(Result, Payload.all, Position, Last);
+         Position := Last + 1;
+      end;
       XDR.Encode(XDR.XDR_Unsigned(Series_ID), Payload.all, Position, Last);
       Position := Last + 1;
       Make_Empty_Message (
@@ -243,13 +250,13 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Absolute_Request_Encode;
-
+   
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Tick_Time : Ada.Real_Time.Time;
-      Series_ID : Series_ID_Type;
+      Tick_Time : in Ada.Real_Time.Time;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -266,12 +273,13 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Absolute_Request;
+   
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Tick_Time : Ada.Real_Time.Time;
-      Series_ID : Series_ID_Type;
+      Tick_Time : in Ada.Real_Time.Time;
+      Series_ID : in Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -287,14 +295,14 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Absolute_Request;
+   
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Tick_Time : Ada.Real_Time.Time;
-      Series_ID : Series_ID_Type;
+      Tick_Time : in Ada.Real_Time.Time;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -302,20 +310,21 @@ package body CubedOS.Time_Server.API is
       pragma Assert(Payload(Message) = null);
       Absolute_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
-         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Receiver_Address => (Domain_ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Tick_Time => Tick_Time,
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Absolute_Request;
+   
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Tick_Time : Ada.Real_Time.Time;
-      Series_ID : Series_ID_Type;
+      Tick_Time : in Ada.Real_Time.Time;
+      Series_ID : in Series_ID_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -334,52 +343,47 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Absolute_Request;
+   
    procedure Absolute_Request_Decode
-      (Message : in  Message_Record;
+      (Message : in Message_Record;
       Tick_Time : out Ada.Real_Time.Time;
       Series_ID : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
       Position : Data_Index_Type;
-      Seconds : Ada.Real_Time.Seconds_Count;
-      Raw_Tick_Time   : XDR.XDR_Unsigned;
-      Raw_Series_ID   : XDR.XDR_Unsigned;
+      Raw_Tick_Time   : XDR.XDR_Unsigned_Hyper;
+      Raw_Series_ID : XDR_Unsigned;
       Last : Data_Index_Type;
    begin
       Decode_Status := Success;
-      Tick_Time := Ada.Real_Time.Time_First;
-      Series_ID := Series_ID_Type'First;
+      Tick_Time := Ada.Real_Time.Time(Time_First);
+      Series_ID := Series_ID_Type'Last;
       Position := 0;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Tick_Time, Last);
-         Position := Last + 1;
-         if Raw_Tick_Time < XDR.XDR_Unsigned(Integer'Last) then
-            Seconds := Ada.Real_Time.Seconds_Count(Raw_Tick_Time);
-            Tick_Time := Ada.Real_Time.Time_Of(Seconds, Ada.Real_Time.Time_Span_Zero);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
-      end if;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
-         if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
-            Series_ID := Series_ID_Type(Raw_Series_ID);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      
+      -- Begin Decoding
+      XDR.Decode(Payload(Message).all, Position, Raw_Tick_Time, Last);
+      Position := Last + 1;
+      Tick_Time := Ada.Real_Time.Time(Ada.Real_Time.Time_Of(Seconds_Count(Raw_Tick_Time / 1_000_000_000), Nanoseconds(Integer(Raw_Tick_Time mod 1_000_000_000))));
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
+      Position := Last + 1;
+      if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+         Series_ID := Series_ID_Type(Raw_Series_ID);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
    end Absolute_Request_Decode;
-
+   
+   
    procedure Tick_Reply_Encode
-      (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Count : Series_Count_Type;
-      Result : out Message_Record;
-      Priority : System.Priority := System.Default_Priority)
+      (Receiver_Address : in Message_Address;
+      Sender_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Series_ID : in Series_ID_Type;
+      Count : in Series_Count_Type;
+      Priority : in System.Priority := System.Default_Priority;
+      Result : out  Message_Record)
    is
       subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
       Position   : Data_Index_Type;
@@ -405,13 +409,13 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Tick_Reply_Encode;
-
+   
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Count : Series_Count_Type;
+      Series_ID : in Series_ID_Type;
+      Count : in Series_Count_Type;
       Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -428,12 +432,13 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Tick_Reply;
+   
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Count : Series_Count_Type;
+      Series_ID : in Series_ID_Type;
+      Count : in Series_Count_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -449,14 +454,14 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Tick_Reply;
+   
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Count : Series_Count_Type;
+      Series_ID : in Series_ID_Type;
+      Count : in Series_Count_Type;
       Status : out Status_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -464,20 +469,21 @@ package body CubedOS.Time_Server.API is
       pragma Assert(Payload(Message) = null);
       Tick_Reply_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
-         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Receiver_Address => (Domain_ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Series_ID => Series_ID,
          Count => Count,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Tick_Reply;
+   
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Count : Series_Count_Type;
+      Series_ID : in Series_ID_Type;
+      Count : in Series_Count_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -496,49 +502,52 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Tick_Reply;
+   
    procedure Tick_Reply_Decode
-      (Message : in  Message_Record;
+      (Message : in Message_Record;
       Series_ID : out Series_ID_Type;
       Count : out Series_Count_Type;
       Decode_Status : out Message_Status_Type)
    is
       Position : Data_Index_Type;
-      Raw_Series_ID   : XDR.XDR_Unsigned;
-      Raw_Count   : XDR.XDR_Unsigned;
+      Raw_Series_ID : XDR_Unsigned;
+      Raw_Count : XDR_Unsigned;
       Last : Data_Index_Type;
    begin
       Decode_Status := Success;
-      Series_ID := Series_ID_Type'First;
-      Count := Series_Count_Type'First;
+      Series_ID := Series_ID_Type'Last;
+      Count := Series_Count_Type'Last;
       Position := 0;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
-         Position := Last + 1;
-         if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
-            Series_ID := Series_ID_Type(Raw_Series_ID);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      
+      -- Begin Decoding
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
+      Position := Last + 1;
+      if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+         Series_ID := Series_ID_Type(Raw_Series_ID);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Count, Last);
-         if Raw_Count in XDR.XDR_Unsigned(Series_Count_Type'First) .. XDR.XDR_Unsigned(Series_Count_Type'Last) then
-            Count := Series_Count_Type(Raw_Count);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      XDR.Decode(Payload(Message).all, Position, Raw_Count, Last);
+      Position := Last + 1;
+      if Raw_Count in XDR.XDR_Unsigned(Series_Count_Type'First) .. XDR.XDR_Unsigned(Series_Count_Type'Last) then
+         Count := Series_Count_Type(Raw_Count);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
    end Tick_Reply_Decode;
-
+   
+   
    procedure Cancel_Request_Encode
-      (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
-      Result : out Message_Record;
-      Priority : System.Priority := System.Default_Priority)
+      (Receiver_Address : in Message_Address;
+      Sender_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Series_ID : in Series_ID_Type;
+      Priority : in System.Priority := System.Default_Priority;
+      Result : out  Message_Record)
    is
       subtype Data_Index_Type is XDR_Index_Type range 0 .. 1023;
       Position   : Data_Index_Type;
@@ -562,12 +571,12 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Cancel_Request_Encode;
-
+   
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -583,11 +592,12 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Cancel_Request;
+   
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
+      Series_ID : in Series_ID_Type;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -602,13 +612,13 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Cancel_Request;
+   
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
+      Series_ID : in Series_ID_Type;
       Status : out Status_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
@@ -616,18 +626,19 @@ package body CubedOS.Time_Server.API is
       pragma Assert(Payload(Message) = null);
       Cancel_Request_Encode(
          Sender_Address => (This_Domain.ID, Module_ID(Sender)),
-         Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
+         Receiver_Address => (Domain_ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Series_ID => Series_ID,
          Result => Message,
          Priority => Priority);
-      Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
+      Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Cancel_Request;
+   
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
       Request_ID : Request_ID_Type;
-      Series_ID : Series_ID_Type;
+      Series_ID : in Series_ID_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
       Priority : System.Priority := System.Default_Priority)
    is
@@ -645,28 +656,32 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Cancel_Request;
+   
    procedure Cancel_Request_Decode
-      (Message : in  Message_Record;
+      (Message : in Message_Record;
       Series_ID : out Series_ID_Type;
       Decode_Status : out Message_Status_Type)
    is
       Position : Data_Index_Type;
-      Raw_Series_ID   : XDR.XDR_Unsigned;
+      Raw_Series_ID : XDR_Unsigned;
       Last : Data_Index_Type;
    begin
       Decode_Status := Success;
-      Series_ID := Series_ID_Type'First;
+      Series_ID := Series_ID_Type'Last;
       Position := 0;
-      if Decode_Status = Success then
-         XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
-         if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
-            Series_ID := Series_ID_Type(Raw_Series_ID);
-            Decode_Status := Success;
-         else
-            Decode_Status := Malformed;
-         end if;
+      
+      -- Begin Decoding
+      XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
+      Position := Last + 1;
+      if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
+         Series_ID := Series_ID_Type(Raw_Series_ID);
+      else
+         pragma Assert(Boolean'(False));
+         Decode_Status := Malformed;
+         return;
       end if;
    end Cancel_Request_Decode;
-
+   
+   
 
 end CubedOS.Time_Server.API;

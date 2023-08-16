@@ -7,6 +7,7 @@
 -- places. It verifies that SPARK is correctly preventing modules
 -- from sending messages to modules that can't accept them.
 --
+-- IT WILL NOT EXECUTE SUCCESFULLY, IT'S NOT SUPPOSED TO
 ---------------------------------------------------------------------------
 
 pragma SPARK_Mode (On);

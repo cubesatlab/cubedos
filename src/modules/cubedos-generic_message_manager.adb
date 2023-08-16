@@ -146,11 +146,11 @@ is
          return Inited(Index);
       end Is_Initialized;
 
-
       entry Wait when not Locked is
       begin
          null;
       end Wait;
+
       procedure Unlock (Module : Module_ID_Type) is
          Index : constant Module_Index := Index_Of(Module);
       begin
@@ -165,13 +165,13 @@ is
          Inited(Index) := True;
 
          if (for all I of Inited.all => I) then
-            Domain_Config.On_Message_System_Initialization_Complete;
+            Debugger.On_Message_System_Initialization_Complete;
             Locked := False;
          end if;
       end Unlock;
       procedure Unlock_Manual is
       begin
-         Domain_Config.On_Message_System_Initialization_Complete;
+         Debugger.On_Message_System_Initialization_Complete;
          Locked := False;
       end Unlock_Manual;
    end Init_Lock;
@@ -181,17 +181,17 @@ is
       procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
       begin
          if Q = null or else Is_Full(Q.all) then
-            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all);
             Status := Mailbox_Full;
             Delete(Message);
             Message := null;
          elsif not Receives(Metadata, Message_Type(Message)) then
-            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all);
             Status := Rejected_Type;
             Delete(Message);
             Message := null;
          else
-            Domain_Config.On_Message_Receive_Succeed(Message.all);
+            Debugger.On_Message_Receive_Succeed(Message.all);
             Put(Q.all, Message);
             Message_Waiting := True;
             Status          := Accepted;
@@ -203,15 +203,15 @@ is
       procedure Unchecked_Send (Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
-            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all);
             Delete(Message);
             Message := null;
          elsif not Receives(Metadata, Message_Type(Message)) then
-            Domain_Config.On_Message_Receive_Failed(Message.all);
+            Debugger.On_Message_Receive_Failed(Message.all);
             Delete(Message);
             Message := null;
          else
-            Domain_Config.On_Message_Receive_Succeed(Message.all);
+            Debugger.On_Message_Receive_Succeed(Message.all);
             Put(Q.all, Message);
             Message_Waiting := True;
          end if;
@@ -275,7 +275,7 @@ is
        Post => Message = null
    is
    begin
-      Domain_Config.On_Message_Sent_Debug(Message.all);
+      Debugger.On_Message_Sent_Debug(Message.all);
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Status := Unavailable;
          Domain_Config.Send_Outgoing_Message(Message);
@@ -295,7 +295,7 @@ is
        Post => Message = null
    is
    begin
-      Domain_Config.On_Message_Sent_Debug(Message.all);
+      Debugger.On_Message_Sent_Debug(Message.all);
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Domain_Config.Send_Outgoing_Message(Message);
       else
@@ -374,7 +374,7 @@ is
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
-         Domain_Config.On_Message_Discarded(Spec(Box), Result);
+         Debugger.On_Message_Discarded(Spec(Box), Result);
          if Payload(Result) /= null then
             Delete(Result);
          end if;
@@ -383,7 +383,7 @@ is
          pragma Assert(Has_Module(This_Domain, Box.Module_ID));
          Message_Storage (Index_Of(Box.Module_ID)).Receive (Result);
       end loop;
-      Domain_Config.On_Message_Read(Spec(Box), Result);
+      Debugger.On_Message_Read(Spec(Box), Result);
       pragma Assert(Receives(Spec(Box), Message_Type(Result)));
       Msg := Result;
       pragma Assert(Receives(Spec(Box), Message_Type(Msg)));

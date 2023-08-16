@@ -56,12 +56,11 @@ package body CubedOS.File_Server.Messages is
 
       Mode       : API.Mode_Type;
       Status     : Message_Status_Type;
-      Name       : String(1 .. 256);  -- Somewhat arbitrary restriction on file name size.
-      Name_Size  : Natural;
+      Name       : File_Name_Type_Ptr;
       Underlying_Mode : Octet_IO.File_Mode;
       Handle     : constant API.File_Handle_Type := Find_Free_Handle;
    begin
-      API.Open_Request_Decode(Incoming_Message, Mode, Name, Name_Size, Status);
+      API.Open_Request_Decode(Incoming_Message, Mode, Name, Status);
 
       -- Don't even bother if there are no available handles.
       if Handle = API.Invalid_Handle then
@@ -80,11 +79,11 @@ package body CubedOS.File_Server.Messages is
          case Mode is
             when API.Read =>
                Underlying_Mode := Octet_IO.In_File;
-               Octet_IO.Open(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
+               Octet_IO.Open(Files(Handle).Underlying, Underlying_Mode, String(Name.all));
 
             when API.Write =>
                Underlying_Mode := Octet_IO.Out_File;
-               Octet_IO.Create(Files(Handle).Underlying, Underlying_Mode, Name(1 .. Name_Size));
+               Octet_IO.Create(Files(Handle).Underlying, Underlying_Mode, String(Name.all));
          end case;
 
          API.Send_Open_Reply
@@ -112,7 +111,7 @@ package body CubedOS.File_Server.Messages is
       Amount : API.Read_Size_Type;
       Status : Message_Status_Type;
       Size   : API.Read_Result_Size_Type;
-      Data   : CubedOS.Lib.Octet_Array(0 .. API.Read_Size_Type'Last - 1);
+      Data   : CubedOS.Lib.Octet_Array(0 .. Positive(Read_Size_Type'Last) - 1);
    begin
       -- If the read request doesn't decode properly we just don't send a reply at all?
       API.Read_Request_Decode(Incoming_Message, Handle, Amount, Status);
@@ -120,8 +119,8 @@ package body CubedOS.File_Server.Messages is
          if Octet_IO.Is_Open(Files(Handle).Underlying) then
             Size := 0;
             begin
-               while Size < Amount loop
-                  Octet_IO.Read(Files(Handle).Underlying, Data(Size));
+               while Size < Read_Result_Size_Type(Amount) loop
+                  Octet_IO.Read(Files(Handle).Underlying, Data(Integer(Size)));
                   Size := Size + 1;
                end loop;
             exception
@@ -134,7 +133,6 @@ package body CubedOS.File_Server.Messages is
                Receiver_Address => Sender_Address(Incoming_Message),
                Request_ID => Request_ID(Incoming_Message),
                Handle     => Handle,
-               Amount     => Size,
                File_Data       => Data);
          end if;
       end if;
@@ -145,20 +143,19 @@ package body CubedOS.File_Server.Messages is
      with Pre => API.Is_Write_Request(Incoming_Message)
    is
       Handle : API.File_Handle_Type;
-      Amount : API.Read_Size_Type;
       Status : Message_Status_Type;
       Size   : API.Read_Result_Size_Type;
-      Data   : CubedOS.Lib.Octet_Array(0 .. API.Read_Size_Type'Last - 1);
+      Data   : API.Octet_Array_Ptr;
    begin
       -- If the read request doesn't decode properly we just don't send a reply at all?
-      API.Write_Request_Decode(Incoming_Message, Handle, Amount, Data, Status);
+      API.Write_Request_Decode(Incoming_Message, Handle, Data, Status);
       if Status = Success then
          if Octet_IO.Is_Open(Files(Handle).Underlying) then
             Size := 0;
             begin
                -- Loop thorugh data to write each character
-               while Size < Amount loop
-                  Octet_IO.Write(Files(Handle).Underlying, Data(Size));
+               while Size < Read_Result_Size_Type(Data'Length) loop
+                  Octet_IO.Write(Files(Handle).Underlying, Data(Natural(Size)));
                   Size := Size + 1;
                end loop;
             exception
@@ -170,7 +167,7 @@ package body CubedOS.File_Server.Messages is
                Receiver_Address => Sender_Address(Incoming_Message),
                Request_ID => Request_ID(Incoming_Message),
                Handle     => Handle,
-               Amount     => Size);
+               Amount     => Write_Result_Size_Type(Size));
          end if;
       end if;
    end Process_Write_Request;

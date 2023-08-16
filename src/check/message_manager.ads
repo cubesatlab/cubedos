@@ -9,9 +9,11 @@ pragma Profile(Jorvik);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with CubedOS.Generic_Message_Manager;
+with CubedOS.Message_Debuggers;
 
 with Name_Resolver;
 
 package Message_Manager is
   new CubedOS.Generic_Message_Manager
-    (Name_Resolver.Domain);
+    (Domain => Name_Resolver.Domain,
+     Debugger => CubedOS.Message_Debuggers.Null_Message_Debugger_Object);

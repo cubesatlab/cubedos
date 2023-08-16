@@ -5,26 +5,25 @@
 enum Mode_Type { Read, Write };
 
 // File handles are integers. The special value 0 is used for invalid files.
-const Invalid_Handle = 0;
 typedef unsigned int File_Handle_Type range 0 .. 64;
-typedef unsigned int Valid_File_Handle_Type range 1 .. 64;
-
-// Merc currently doesn't know how to handle typed constants (but it should)
-// const File_Handle_Type Invalid_Handle = 0;
+typedef unsigned int Valid_File_Handle_Type is File_Handle_Type range 1 .. 64;
+const Invalid_Handle is File_Handle_Type = 0;
 
 // Types to count the number of octets read/written.
-const Maximum_Read_Size = 256;
-const Maximum_Write_Size = 256;
-typedef unsigned int Read_Result_Size_Type range 0 .. Maximum_Read_Size;
-typedef unsigned int Read_Size_Type range 1 .. Maximum_Read_Size;
-typedef unsigned int Write_Result_Size_Type range 0 .. Maximum_Write_Size;
-typedef unsigned int Write_Size_Type range 1 .. Maximum_Write_Size;
+const Max_Read_Size = 256;
+const Max_Write_Size = 256;
+typedef unsigned int Read_Result_Size_Type range 0 .. Max_Read_Size;
+typedef unsigned int Read_Size_Type range 1 .. Max_Read_Size;
+typedef unsigned int Write_Result_Size_Type range 0 .. Max_Write_Size;
+typedef unsigned int Write_Size_Type range 1 .. Max_Write_Size;
+
+typedef string File_Name_Type<256>;
 
 // Open the named file in the given mode.
 // There needs to be a precondition on the encoding function related to the name's length.
 message struct -> Open_Request {
     Mode_Type        Mode;
-    string           Name<>;
+    File_Name_Type   Name;
 };
 
 // Returns the file handle associated with a previous open request or the invalid handle if the
@@ -42,15 +41,13 @@ message struct -> Read_Request {
 // Returns data from the file. The Amount parameter indicates how much space in File_Data is used.
 message struct <- Read_Reply {
     Valid_File_Handle_Type Handle;
-    Read_Result_Size_Type  Amount;
-    opaque                 File_Data<>;
+    opaque                 File_Data<Read_Result_Size_Type'Last>;
 };
 
 // Request that Amount octets from File_Data be written to the indicated file.
 message struct -> Write_Request {
     Valid_File_Handle_Type Handle;
-    Write_Size_Type        Amount;
-    opaque                 File_Data<>;
+    opaque                 File_Data<Write_Size_Type'Last>;
 };
 
 // Returns how many octets were actually written.

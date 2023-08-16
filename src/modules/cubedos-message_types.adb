@@ -25,7 +25,6 @@ package body CubedOS.Message_Types is
    end Delete;
 
    procedure Delete(Msg : in out Msg_Owner)
-     --with SPARK_Mode => Off
    is
    begin
       if Msg.Payload /= null then
