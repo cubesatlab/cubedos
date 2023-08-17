@@ -7,9 +7,10 @@ maintainers = ["Vermont Technical College <example@example.com>"]
 maintainers-logins = ["cubesatlab"]
 [[depends-on]]
 gnatprove = "^12.1.1"
+aunit = "^23.0.0"
 
 [build-switches]
 "*".style_checks = "No"
+"*".ada_version = "Ada2022"
 development.optimization = ["-gnata", "-gnatwa", "-g", "-gnatVa", "-fstack-check"]
-[[depends-on]]
-aunit = "^23.0.0"
+
