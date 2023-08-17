@@ -218,6 +218,7 @@ package body CubedOS.Transport_UDP.Messages is
       Encode_Network_Message(Message, Buffer, Last);
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
       Send_Socket (Socket, Buffer, Last, Address);
+      pragma Unreferenced(Last);
    end Send_Network_Message;
 
    procedure Process(Message : in Message_Record)
