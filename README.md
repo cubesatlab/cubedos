@@ -33,9 +33,7 @@ The [GNAT Community](http://www.adacore.com/community/) Ada compiler and toolset
 sufficient for development at this time. Some non-x86 targets are provided by GNAT Community,
 but other targets are available from AdaCore via their professional subscription.
 
-The basic build of CubedOS can be done by opening the `cubedos.gpr` project file in the `src`
-folder using GPS. Two build scenarios are defined. The "Check" scenario builds various test
-programs. Specifically:
+The project uses the [Alire](https://alire.ada.dev/docs/) build tool. The basic build of CubedOS can be done running `alr edit` in the top level directory. Two build scenarios are defined. The "Check" scenario builds various test programs. Specifically:
 
 + `cubedos_check` is a limited unit test program for various parts of CubedOS.
 
@@ -65,6 +63,5 @@ The program Merc, in a separate repository, is a Scala program for generated Cub
 packages. It is possible to write these packages manually following, for example, the templates
 in the `template` folder (which are extensively commented). Merc makes the job much easier, of
 course. Information about Merc, and how to build and use it, can be found in the Merc
-repository. *Current there is an issue with Merc that limits its usefulness. Most API packages
-in CubedOS have been manually written!*
+repository. Note that Merc is not fully implemented and may not be able to generate all API files.
 
