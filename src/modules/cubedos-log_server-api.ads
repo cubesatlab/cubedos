@@ -39,12 +39,12 @@ package CubedOS.Log_Server.API is
 
    Max_Log_Message_Size : constant Integer := 128;
    
-   type Log_Message_Size_Type is range 0 .. Max_Log_Message_Size;
+   type Log_Message_Size_Type is range (0) .. (Max_Log_Message_Size);
    
-   type Log_Message_Index_Type is range 1 .. Max_Log_Message_Size;
+   type Log_Message_Index_Type is range (1) .. (Max_Log_Message_Size);
    
    subtype Log_Message_Type is String
-      with Dynamic_Predicate => Log_Message_Type'Last <= 128;
+      with Dynamic_Predicate => Log_Message_Type'Length <= 128;
    type Log_Message_Type_Ptr is access Log_Message_Type;
    procedure Free is new Ada.Unchecked_Deallocation(Log_Message_Type, Log_Message_Type_Ptr);
    

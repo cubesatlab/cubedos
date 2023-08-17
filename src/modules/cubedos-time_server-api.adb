@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- FILE   : %FILENAME%
+-- FILE   : cubedos-time_server-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.Time_Server API
 -- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --

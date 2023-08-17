@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- FILE   : %FILENAME%
+-- FILE   : cubedos-log_server-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.Log_Server API
 -- AUTHOR : (C) Copyright 2021 by Vermont Technical College
 --
@@ -167,11 +167,14 @@ package body CubedOS.Log_Server.API is
          Msg_Content := new Definite_String'(others => ' ');
       end;
       Position := 0;
+      
+      -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Level, Last);
       Position := Last + 1;
       if Raw_Level in Log_Level_Type'Pos(Log_Level_Type'First) .. Log_Level_Type'Pos(Log_Level_Type'Last) then
          Level := Log_Level_Type'Val(Raw_Level);
       else
+         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -191,6 +194,7 @@ package body CubedOS.Log_Server.API is
                Position := Last + 1;
             end;
          else
+            pragma Assert(Boolean'(False));
             Decode_Status := Malformed;
             return;
          end if;

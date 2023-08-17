@@ -24,20 +24,19 @@ package Ping_Server.API is
    pragma Elaborate_Body;
    type Octet_Array_Ptr is access CubedOS.Lib.Octet_Array;
    type String_Ptr is access String;
-
+   
    This_Module : constant Module_ID_Type := Name_Resolver.Ping_Server;
-
+   
    type Message_Type is
-      (Ping_Reply,
+      (Ping_Reply, 
       Ping_Request);
 
    Ping_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Ping_Reply));
    Ping_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Ping_Request));
-
+   
    This_Receives : aliased constant Message_Type_Array := (0 => Ping_Request_Msg);
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
-   pragma Assert(Receives(Mail_Target, Ping_Request_Msg));
-
+   
    procedure Ping_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
