@@ -11,6 +11,8 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+with Ada.Real_Time;
+
 package CubedOS.Lib.XDR is
 
    -------------------
@@ -35,6 +37,13 @@ package CubedOS.Lib.XDR is
    type XDR_Float is new Float;
    type XDR_Double is new Long_Float;
    -- TODO: Add support for XDR floating point types? See comments in the body.
+
+   use Ada.Real_Time;
+   Max_Time_Span : constant Time_Span := Seconds(2**31 - 1);
+   -- The longest time span which the library supports encoding.
+
+   Max_Time : constant Time := Time_First + Max_Time_Span;
+   -- The longest time which the library supports encoding.
 
    ----------------------
    -- Encoding Procedures
@@ -115,7 +124,7 @@ package CubedOS.Lib.XDR is
          (Position - Data'First) rem 4 = 0 and then
          Data'Length             rem 4 = 0 and then
          Position <= Data'Last - (8 - 1),
-     Post => Last = Position + (8 - 1);
+       Post => Last = Position + (8 - 1);
 
    -- Encodes an XDR float into Data starting at Position.
    procedure Encode
@@ -183,7 +192,6 @@ package CubedOS.Lib.XDR is
          Value'Length <= Octet_Array_Count'Last and then
          Length_With_Padding(Value'Length) <= (Data'Last - Position) + 1,
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
-
 
    ----------------------
    -- Decoding Procedures
@@ -267,35 +275,48 @@ package CubedOS.Lib.XDR is
          Position <= Data'Last - (8 - 1),
        Post => Last = Position + (8 - 1);
 
-   -- Decodes an float from Data starting at Position up to and including Last.
-   -- procedure Decode
-   --   (Data     : in  XDR_Array;
-   --    Position : in  XDR_Index_Type;
-   --    Value    : out XDR_Float;
-   --    Last     : out XDR_Index_Type)
-   --   with
-   --     Global  => null,
-   --     Depends => (Value => (Data, Position), Last => Position),
-   --     Pre =>
-   --       Position rem 4 = 0 and
-   --       Data'Length rem 4 = 0 and
-   --       Position + (4 - 1) <= Data'Last,
-   --     Post => Last = Position + (4 - 1);
+   type Special_Float_Value is (None, Positive_Infinity, Negative_Infinity, NaN);
+   -- Ada can't handle these floating point values directly.
 
-   -- Decodes an double from Data starting at Position up to and including Last.
-   -- procedure Decode
-   --   (Data     : in  XDR_Array;
-   --    Position : in  XDR_Index_Type;
-   --    Value    : out XDR_Double;
-   --    Last     : out XDR_Index_Type)
-   --   with
-   --     Global  => null,
-   --     Depends => (Value => (Data, Position), Last => Position),
-   --     Pre =>
-   --       Position rem 4 = 0 and
-   --       Data'Length rem 4 = 0 and
-   --       Position + (8 - 1) <= Data'Last,
-   --     Post => Last = Position + (8 - 1);
+   -- Decodes an float from Data starting at Position up to and including Last.
+   -- Conforms to the IEEE standard for normalized single-precision floats.
+   -- Ada doesn't support the special IEEE float values so we return an additional
+   -- Special parameter.
+   procedure Decode
+    (Data     : in  XDR_Array;
+     Position : in  XDR_Index_Type;
+     Value    : out XDR_Float;
+     Last     : out XDR_Index_Type;
+     Special  : out Special_Float_Value)
+    with
+      Global  => null,
+      Depends => ((Value, Special) => (Data, Position), Last => Position),
+      Pre =>
+         Position rem 4 = 0 and
+         Data'Length rem 4 = 0 and
+         Position + (4 - 1) <= Data'Last and
+         (Position - Data'First) rem 4 = 0 and
+         Position in Data'Range,
+      Post => Last = Position + (4 - 1);
+
+   -- Decodes a double from Data starting at Position up to and including Last.
+   -- Conforms to the IEEE standard for normalized double-precision floats.
+   procedure Decode
+    (Data     : in  XDR_Array;
+     Position : in  XDR_Index_Type;
+     Value    : out XDR_Double;
+     Last     : out XDR_Index_Type;
+     Special  : out Special_Float_Value)
+    with
+      Global  => null,
+      Depends => ((Value, Special) => (Data, Position), Last => Position),
+      Pre =>
+        Position rem 4 = 0 and
+        Data'Length rem 4 = 0 and
+        Position <= Data'Last - (8 - 1) and
+        (Position - Data'First) rem 4 = 0 and
+        Position in Data'Range,
+      Post => Last = Position + (8 - 1);
 
    -- Decodes a fixed length array of opaque data from Data starting at Position.
    procedure Decode
@@ -313,6 +334,8 @@ package CubedOS.Lib.XDR is
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
    -- Decodes a fixed length string from Data starting at Position.
+   -- Ada doesn't support NaN types, so an eroneous value will be
+   -- produced if NaN.
    procedure Decode
      (Data     : in  XDR_Array;
       Position : in  XDR_Index_Type;

@@ -26,7 +26,7 @@ package CubedOS.Lib is
    subtype Octet_Array_Count is Natural range 0 .. Maximum_Array_Size;
    type Octet_Array is array (Octet_Array_Index range <>) of Octet
      with Component_Size => 8;
-
+   Zero_Width_Octet_Array : aliased constant Octet_Array(1..0) := (others => 0);
 
    -- Declare intrinsic shift functions for these types.
 

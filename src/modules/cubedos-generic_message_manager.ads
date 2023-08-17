@@ -1,143 +1,257 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.ads
 -- SUBJECT: Specification of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
 --
--- This package defines the core CubedOS mailbox system with associated types, etc. Each time
--- this package is instantiated a new "domain" is created. In a distributed CubedOS system,
--- every domain must have a unique ID as decided upon by administrative coordination.
+-- This package defines the core CubedOS messaging system.
+-- This package is instantiated once for each domain in a distributed CubedOS system.
+-- It handles message passing within the domain and routes messages into other domains.
+-- Every domain must have a unique ID as decided upon by administrative coordination.
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-with System;
-with CubedOS.Lib.XDR;
-use  CubedOS.Lib.XDR;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Message_Debuggers; use CubedOS.Message_Debuggers;
 
 generic
-   Domain_Number : Positive;  -- The domain ID of this message manager.
-   Module_Count  : Positive;  -- Number of modules in the system.
-   Mailbox_Size  : Positive;  -- Maximum number of pending messages in a mailbox.
-   Maximum_Message_Size : Positive;  -- Maximum size of each message payload.
+   -- The domain of this message manager.
+   Domain : Domain_Metadata;
+   -- A debugger may be injected to provide information
+   -- about message passing.
+   Debugger : Message_Debugger'Class := Null_Message_Debugger_Object;
 package CubedOS.Generic_Message_Manager
   with
-    Abstract_State => ((Mailboxes with External), (Request_ID_Generator with External)),
-    Initializes => (Mailboxes, Request_ID_Generator)
+Abstract_State =>
+  ((Mailboxes with External),
+   (Lock with External),
+   (Request_ID_Generator with External)),
+  Initializes => (Mailboxes, Request_ID_Generator, Lock),
+  Initial_Condition => (for all ID of This_Domain.Module_IDs => not Module_Registered(ID))
 is
-   -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
-   -- There is a limit to the number of domains that can be used. Make this a generic parameter?
-   Maximum_Domain_Count : constant := 256;
-   subtype Domain_ID_Type is Natural range 0 .. Maximum_Domain_Count;
-   Domain_ID : constant Domain_ID_Type := Domain_Number;
+   This_Domain : constant Domain_Metadata := Domain;
+   -- The ID of this domain.
+   Domain_ID : constant Domain_ID_Type := This_Domain.ID;
+   -- The number of modules in this domain.
+   Module_Count : constant Positive := This_Domain.Module_Count;
 
-   -- Definition of module ID numbers. Full IDs are qualified by the domain ID.
-   subtype Module_ID_Type is Positive range 1 .. Module_Count;
+   -------------------
+   -- Initialization
+   -------------------
 
-   -- Definition of message IDs. Full IDs are qualified by the module ID.
-   -- There is a limit to how many messages a module can define. Make this a generic parameter?
-   Maximum_Message_Count : constant := 256;
-   type Message_ID_Type is range 0 .. Maximum_Message_Count - 1;
+   -- At runtime, no messages are allowed to be sent until
+   -- every module in this domain has registered its mailbox.
+   function Messaging_Ready return Boolean
+     with Global => null,
+     Depends => (Messaging_Ready'Result => null);
 
-   -- Definition of Request IDs. Normally requests are given unique ID values that are echoed in
-   -- replies. This allows a module to associate a reply with a particular request. The request
-   -- ID of zero i special; it is used in cases where no such request/reply matching is needed
-   -- or sensible.
-   type Request_ID_Type is mod 2**32;
 
-   -- Note: A fully qualified message address is the triple (Domain_ID, Module_ID, Message_ID).
+   -- This function blocks until all modules in the domain have
+   -- intitialized their mailbox and messaging can be done safetly.
+   procedure Wait
+     with Post => Messaging_Ready;
 
-   -- Definition of a CubedOS message. Messages are stored in XDR_Arrays.
 
-   -- Starting the index type at 0 is convenient when expressing "multiple of four" assertions.
-   -- The 'extended' index type provides an extra value before the first allowed index. This is
-   -- used by the XDR Octet_Array and String encoders so they can return a correct 'Last' when
-   -- given zero length values to encode. Support for encoding zero length arrays and strings is
-   -- useful.
-   --
-   subtype Data_Index_Type is XDR_Index_Type range 0 .. Maximum_Message_Size - 1;
-   subtype Data_Extended_Index_Type is XDR_Extended_Index_Type range -1 .. Maximum_Message_Size - 1;
-   subtype Data_Size_Type is XDR_Size_Type range 0 .. Maximum_Message_Size;
-   subtype Data_Array is XDR_Array(Data_Index_Type);
-
-   -- Message Addresses hold the Domain_ID and Module_ID for Modules in a CubedOS Application
-   type Message_Address is
-      record
-         Domain_ID : Domain_ID_Type := 0;
-         Module_ID : Module_ID_Type := 1;
-       end record;
-   -- Messages currently have a priority field that is not used. The intention is to allow high
-   -- priority messages to be processed earlier and without interruption. SPARK does not support
-   -- dynamic task priorities, however, so the usefulness of this idea is questionable. We could
-   -- still sort mailboxes by message priority (not currently done) which might be a little
-   -- useful.
-   type Message_Record is
-      record
-         Sender_Address : Message_Address := (0, 1);
-         Receiver_Address : Message_Address := (0 , 1);
-         Request_ID : Request_ID_Type := 0;
-         Message_ID : Message_ID_Type := 0;
-         Priority   : System.Priority := System.Default_Priority;
-         Size       : Data_Size_Type  := 0;
-         Payload    : Data_Array      := (others => 0);
-      end record;
-
-   -- Convenience constructor function for messages. This is used by encoding functions.
-   function Make_Empty_Message
-     (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Message_ID : Message_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
-     with
-       Global => null,
-       Post=>
-         Make_Empty_Message'Result.Sender_Address   = Sender_Address   and
-         Make_Empty_Message'Result.Receiver_Address = Receiver_Address and
-         Make_Empty_Message'Result.Request_ID = Request_ID and
-         Make_Empty_Message'Result.Message_ID = Message_ID and
-         Make_Empty_Message'Result.Priority   = Priority   and
-         Make_Empty_Message'Result.Size       = 0;
-
-   -- Convenience function to stringify messages
-   function Stringify_Message (Message : in Message_Record) return String;
+   --------------------------
+   -- Request ID Generation
+   --------------------------
 
    -- Returns an arbitrary, domain-unique request ID. Probably these IDs should also be unique
    -- across domains, but that is not yet implemented.
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
      with Global => (In_Out => Request_ID_Generator);
 
-   -- Error codes.
-   type Status_Type is (Accepted, Mailbox_Full);                          -- Mailbox access.
-   type Message_Status_Type is (Success, Malformed, Insufficient_Space);  -- Message decoding.
 
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once with a status of Accepted if the message was definitely delivered. A status
-   -- of Mailbox_Full indicates that delivery did not occur.
-   procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
-     with Global => (In_Out => Mailboxes);
+   -------------------
+   -- Mailboxes
+   -------------------
 
-   -- Send the indicated message to the right mailbox. This might cross domains. This procedure
-   -- returns at once. If the message could not be delivered it is lost with no indication.
+   -- An endpoint associated with exactly one module used
+   -- to send and receive messages. It also stores metadata
+   -- about the module used to prove aspects about message safety.
+   -- Modules should keep their instance of this object hidden.
+   type Module_Mailbox is private;
+
+   function Make_Module_Mailbox(ID : in Module_ID_Type;
+                                Spec : Module_Metadata) return Module_Mailbox
+     with
+       Pre => ID = Spec.Module_ID,
+       Post => Module_ID(Make_Module_Mailbox'Result) = ID
+       and (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
+
+   -- Checks if the given module id has already been registered.
+   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
+     with Ghost, Global => null;
+
+   -- Registers a module with the messaging system.
+   -- Modules must specify the maximum number of messages their
+   -- mailbox can store. The mailbox is registered to the domain
+   -- of this Message_Manager.
+   procedure Register_Module(Mailbox : in Module_Mailbox;
+                             Msg_Queue_Size : in Positive)
+     with Global => (In_Out => (Mailboxes, Lock)),
+     Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
+                 Lock => +Mailbox),
+     Pre => Has_Module(This_Domain, Module_ID(Mailbox))
+     and not Module_Registered(Module_ID(Mailbox))
+     and Msg_Queue_Size < Natural'Last - 1,
+     Post => Module_Registered(Module_ID(Mailbox));
+
+
+   function Spec(Box : Module_Mailbox) return Module_Metadata
+     with Post => Spec'Result.Receive_Types /= null;
+   function Valid(Box : Module_Mailbox) return Boolean;
+   function Module_ID(Box : Module_Mailbox) return Module_ID_Type;
+
+   -- Checks if the given receiver may legally receive the given message type.
+   function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+     with Ghost,
+     Depends => (Receives'Result => (Receiver, Msg_Type));
+
+   -- Get the number of messages in the mailbox waiting
+   -- to be read.
+   procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural)
+     with Global => (In_Out => Mailboxes),
+       Pre => Has_Module(This_Domain, Module_ID(Box));
+
+   -- A blocking function which will retreive messages sent to the given mailbox.
+   -- The message will be of a type that the mailbox is allowed to receive.
+   procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
+     with Pre => Messaging_Ready and Has_Module(This_Domain, Module_ID(Box)),
+     Post => Payload(Msg) /= null
+     and Receives(Spec(Box), Message_Type(Msg));
+
+   -- The result status of a message send operation.
+   -- Accepted: The message was deposited in the destination mailbox successfully.
+   -- Mailbox_Full: The message was discarded because the destination didn't have
+   --               space to store it.
+   -- Rejected_Type: The message was discarded because the destination couldn't
+   --                receive messages of its type.
+   -- Unavailable: The return status is unknown because the message sent to a
+   --              foreign domain.
+   type Status_Type is (Accepted, Mailbox_Full, Rejected_Type, Unavailable);
+
+   -- Sends the given message to the specified module and domain. This
+   -- procedure asserts that the destination module may receive the given
+   -- message type and that the module does exist in the destination domain.
+   -- It is the safest method of sending a message and should be prefered.
+   -- The procedure returns immediately and moves the message's payload
+   -- making it inaccessible after the call.
+   --
+   -- This procedure generally shouldn't be called directly and will be used
+   -- in auto-generated API files.
+   procedure Send_Message(Box : Module_Mailbox;
+                          Msg : in out Message_Record;
+                          Target_Module : Module_Metadata;
+                          Target_Domain : Domain_Metadata := This_Domain;
+                          Status : out Status_Type)
+     with Global => (In_Out => Mailboxes),
+     Pre => Messaging_Ready
+     and then Payload(Msg) /= null
+     and then Receives(Target_Module, Message_Type(Msg))
+     and then Has_Module(Target_Domain, Target_Module.Module_ID)
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
+     and then Receiver_Address(Msg) = (Target_Domain.ID, Target_Module.Module_ID),
+     Post => Payload(Msg) = null;
+
+   -- Sends the given message, guaranteeing only that the sending address is
+   -- from the current domain and sending module.
+   -- Returns immediately, moving the message's payload making it inaccessible
+   -- after the call.
+   --
+   -- This procedure generally shouldn't be called directly and will be used
+   -- in auto-generated API files.
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
+     with Global => (In_Out => Mailboxes),
+     Depends => (Mailboxes => +(Msg),
+                 Msg => Msg,
+                 null => Box),
+     Pre => Messaging_Ready
+     and then Payload(Msg) /= null
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)),
+     Post => Payload(Msg) = null;
+
+   -- Sends the given message.
+   -- Returns immediately with the status of the operation's result.
+   --
+   -- This procedure generally shouldn't be called directly and will be used
+   -- in auto-generated API files.
+   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
+     with Global => (In_Out => Mailboxes),
+     Depends => (Mailboxes => +(Msg),
+                 Status => (Msg, Mailboxes),
+                 Msg => Msg,
+                 null => Box),
+     Pre => Messaging_Ready
+     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
+     and then Receiver_Address(Msg).Domain_ID = Domain_ID
+     and then Payload(Msg) /= null,
+     Post => Payload(Msg) = null;
+
+
+   --------------------------
+   -- Interdomain Messaging
+   --------------------------
+
+   -- Submit a message received from a foreign domain to the message system.
+   procedure Handle_Received(Msg : in out Msg_Owner)
+     with Pre => Msg /= null
+     and then Payload(Msg) /= null
+     and then Messaging_Ready
+     and then Has_Module(This_Domain, Receiver_Address(Msg).Module_ID),
+     Post => Msg = null;
+
+
+   -------------------
+   -- Debug/Testing
+   -------------------
+
+   -- These are convenience functions for development
+   -- and should not be used in production code.
+
+   -- This procedure completes the initialization process
+   -- immediately, unblocking the Wait function and
+   -- allowing messages to be sent prematurely.
+   --
+   -- Doing this removes the guarantee that all
+   -- modules are prepared to receive messages and can cause
+   -- undefined behavior if a message is sent to one of these
+   -- modules.
+   --
+   -- Useful for test configurations where not all modules
+   -- are needed.
+   procedure Skip_Mailbox_Initialization
+     with Global => (In_Out => Lock),
+     Post => Messaging_Ready;
+
+   -- Sends a message without a mailbox. This is
+   -- dangerous because it allows senders to lie about
+   -- their address.
    procedure Route_Message(Message : in Message_Record)
-     with Global => (In_Out => Mailboxes);
+     with Global => (In_Out => Mailboxes),
+     Pre => Messaging_Ready
+     and then Payload(Message) /= null;
 
-   -- Retrieves a message from the indicated mailbox. May block indefinitely.
-   procedure Fetch_Message(Module : in Module_ID_Type; Message : out Message_Record)
-     with Global => (In_Out => Mailboxes);
+   procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
+     with Global => (In_Out => Mailboxes),
+     Pre => Messaging_Ready
+     and then Payload(Message) /= null;
 
+private
+   type Module_Mailbox is
+      record
+         Module_ID : Module_ID_Type;
+         Spec : Module_Metadata;
+      end record;
 
-   -- Definition of the array type used to hold messages in a mailbox. This needs to be here
-   -- rather than in the body because Message_Count_Type is used below.
-   subtype Message_Index_Type is Positive range 1 .. Mailbox_Size;
-   subtype Message_Count_Type is Natural range 0 .. Mailbox_Size;
-   type Message_Array is array(Message_Index_Type) of Message_Record;
+   function Make_Module_Mailbox(ID : in Module_ID_Type;
+                                Spec : Module_Metadata) return Module_Mailbox
+     is (ID, Spec);
 
-   type Message_Count_Array is array(Module_ID_Type) of Message_Count_Type;
-
-   -- Returns a count of the number of messages in each mailbox. Note that the counts might
-   -- not be a consistent snapshot since messages might be added/removed from mailboxes while
-   -- the counts are being gathered. This procedure is intended to be used for software
-   -- telemetry and debugging.
-   procedure Get_Message_Counts(Count_Array : out Message_Count_Array)
-     with Global => (In_Out => Mailboxes);
+   function Spec(Box : Module_Mailbox) return Module_Metadata
+     is (Box.Spec);
+   function Valid(Box : Module_Mailbox) return Boolean
+     is (Box.Spec.Receive_Types /= null);
+   function Module_ID(Box : Module_Mailbox) return Module_ID_Type
+     is (Box.Module_ID);
 
 end CubedOS.Generic_Message_Manager;

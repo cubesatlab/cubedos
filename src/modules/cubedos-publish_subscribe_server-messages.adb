@@ -8,14 +8,14 @@ pragma SPARK_Mode(On);
 
 with CubedOS.Lib;
 with CubedOS.Publish_Subscribe_Server.API;
-with Message_Manager;
-with Name_Resolver;
 use  CubedOS.Publish_Subscribe_Server.API;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package body CubedOS.Publish_Subscribe_Server.Messages
   with Refined_State => (Database => Subscription_Map)
 is
-   use Message_Manager;
+
+   Mailbox : constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    -- If this is really packed, the memory cost is minimal.
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean
@@ -23,81 +23,77 @@ is
 
    Subscription_Map : Subscription_Map_Type := (others => (others => False));
 
+   procedure Init is
+   begin
+      Message_Manager.Register_Module(Mailbox, 8);
+   end Init;
+
    -------------------
    -- Message Handling
    -------------------
 
    procedure Handle_Subscribe_Request(Message : in Message_Record)
-     with Pre => Is_Subscribe_Request(Message)
+     with Pre => Is_Subscribe_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
    begin
       Subscribe_Request_Decode(Message, Channel, Status);
-      if Status = Malformed then
-         Route_Message
-           (API.Subscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
-      else
+      if Status = Success then
          -- Should we have the Subscription_Map handle the entire Message Address?
-         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := True;
-         Route_Message
-           (API.Subscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+         Subscription_Map(Sender_Address(Message).Module_ID, Channel) := True;
       end if;
+        API.Send_Subscribe_Reply
+           (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, (if Status=Success then Success else Failure));
    end Handle_Subscribe_Request;
 
 
    procedure Handle_Unsubscribe_Request(Message : in Message_Record)
-     with Pre => Is_Unsubscribe_Request(Message)
+     with Pre => Is_Unsubscribe_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
       Status  : Message_Status_Type;
    begin
       Unsubscribe_Request_Decode(Message, Channel, Status);
-      if Status = Malformed then
-         Route_Message
-           (API.Unsubscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
-      else
+      if Status = Success then
          -- Notice that unsubscribing from a channel you are not subscribed to is not an error.
          -- The operation returns Success without comment.
          -- TODO: Is this appropriate?
-         Subscription_Map(Message.Sender_Address.Module_ID, Channel) := False;
-         Route_Message
-           (API.Unsubscribe_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+         Subscription_Map(Sender_Address(Message).Module_ID, Channel) := False;
       end if;
+
+      API.Send_Unsubscribe_Reply
+        (Mailbox, Sender_Address(Message), Request_ID(Message), Channel,
+        (if Status = Success then Success else Failure));
    end Handle_Unsubscribe_Request;
 
 
    procedure Handle_Publish_Request(Message : in Message_Record)
-     with Pre => Is_Publish_Request(Message)
+     with Pre => Is_Publish_Request(Message) and Payload(Message) /= null
    is
       Channel : Channel_ID_Type;
-      Message_Data : CubedOS.Lib.Octet_Array(1 .. Data_Size_Type'Last - 8);
+      Message_Data : CubedOS.Lib.Octet_Array(1 .. Payload(Message)'Length - 8);
       Size    : CubedOS.Lib.Octet_Array_Count;
       Status  : Message_Status_Type;
    begin
       Publish_Request_Decode(Message, Channel, Message_Data, Size, Status);
       if Status = Malformed then
-         Route_Message
-           (API.Publish_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Failure));
+         API.Send_Publish_Reply
+              (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, Failure);
       else
-         Route_Message
-           (API.Publish_Reply_Encode
-              (Message.Sender_Address, Message.Request_ID, Channel, Success));
+         API.Send_Publish_Reply
+              (Mailbox, Sender_Address(Message), Request_ID(Message), Channel, Success);
 
          -- Do the actual publishing.
          for I in Module_ID_Type loop
             if Subscription_Map(I, Channel) then
-               Route_Message
-                 (API.Publish_Result_Encode
-                    ((Name_Resolver.Publish_Subscribe_Server.Domain_ID, I),
-                     0,
-                     Channel,
-                     Message_Data(1 .. Size)));
+               API.Send_Publish_Result
+                 (Mailbox,
+                  --TODO: Record the domain of subscribers
+                  (0, I),
+                  0,
+                  Channel,
+                  Message_Data(1 .. Size));
             end if;
          end loop;
       end if;
@@ -107,7 +103,9 @@ is
    -- Message Decoding and Dispatching
    -----------------------------------
 
-   procedure Process(Message : in Message_Record) is
+   procedure Process(Message : in Message_Record)
+     with Pre => Payload(Message) /= null
+   is
    begin
       if Is_Subscribe_Request(Message) then
          Handle_Subscribe_Request(Message);
@@ -115,9 +113,6 @@ is
          Handle_Unsubscribe_Request(Message);
       elsif Is_Publish_Request(Message) then
          Handle_Publish_Request(Message);
-      else
-         -- TODO: An unexpected message type has been received. What should be done about that?
-         null;
       end if;
    end Process;
 
@@ -126,11 +121,15 @@ is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
+      Message_Manager.Wait;
+
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.Publish_Subscribe_Server.Module_ID, Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
+         Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
+         Delete(Incoming_Message);
       end loop;
    end Message_Loop;
 

@@ -3,8 +3,14 @@
 -- SUBJECT : Package containing tests of bounded queue.
 -- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
 ---------------------------------------------------------------------------
+pragma Assertion_Policy(Check);
+
 with AUnit.Assertions; use AUnit.Assertions;
 with CubedOS.Lib.Bounded_Queues;
+
+-- Show that we can instantate a queue
+with CubedOS.Message_Types.Message_Queues;
+pragma Unreferenced(CubedOS.Message_Types.Message_Queues);
 
 package body Check_Bounded_Queue is
 
@@ -13,8 +19,6 @@ package body Check_Bounded_Queue is
    Queue1 : Bool_Queues.Bounded_Queue := Bool_Queues.Make(3);
    use Bool_Queues;
    Bool : Bool_Owner := new Boolean'(False);
-   Bool_False : constant Bool_Owner := new Boolean'(False);
-   Bool_True : constant Bool_Owner := new Boolean'(True);
 
    procedure Take_Next is
    begin
@@ -28,20 +32,10 @@ package body Check_Bounded_Queue is
       Put(Queue1, Value);
    end Put_Another;
 
-   -- Make some instantiations in SPARK
-   procedure SPARK_Inits
-     with SPARK_Mode => On
-   is
-      package Bool_Queues is new CubedOS.Lib.Bounded_Queues(Boolean, Bool_Owner);
-      pragma Unreferenced(Bool_Queues);
-   begin
-      null;
-   end SPARK_Inits;
-
-
    procedure Test_Queue(T : in out AUnit.Test_Cases.Test_Case'Class) is
       False_Value : Bool_Owner := new Boolean'(False);
    begin
+      pragma Unreferenced(T);
 
       Assert(Size(Queue1) = 3, "Created queue with wrong size");
       Assert(Count(Queue1) = 0, "Created queue with elements");
@@ -55,6 +49,8 @@ package body Check_Bounded_Queue is
       Put_Another; -- The next two elements are True
       Put_Another;
 
+      Assert(Size(Queue1) = 3, "Queue should be full 1");
+      Assert(Is_Full(Queue1), "Queue should be full 2");
       Assert_Exception(Put_Another'Access, "Queue took element even though it is full");
 
       Assert(Count(Queue1) = Size(Queue1), "When queue is full, count should equal size");

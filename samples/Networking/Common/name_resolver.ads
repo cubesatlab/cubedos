@@ -4,16 +4,24 @@
 -- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with Message_Manager; use Message_Manager;
+pragma SPARK_Mode (On);
+
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is
 
-    -- Core Modules
-    Name_Resolver  : constant Module_ID_Type := 1;
-    Network_Server : constant Module_ID_Type := 2;
+   -- Core Modules
+   Name_Resolver  : constant Module_ID_Type := 1;
 
-    -- Application-Specific Modules
-    DomainA_Client : constant Message_Address  := (1, 3);
-    DomainB_Server : constant Message_Address  := (2, 3);
+   -- Application-Specific Modules
+   Ping_Server : constant Module_ID_Type  := 2;
+   Ping_Client : constant Module_ID_Type  := 3;
+
+   Domain_A : constant Domain_Metadata := (Module_Count => 1,
+                                           ID => 1,
+                                           Module_IDs => (1 => Ping_Client));
+   Domain_B : constant Domain_Metadata := (Module_Count => 1,
+                                           ID => 2,
+                                           Module_IDs => (1 => Ping_Server));
 
 end Name_Resolver;

@@ -2,6 +2,12 @@ build
 src/library/obj
 src/library/lib
 src/library/doc
+obj
+
+#alire
+alire
+src/cubedos-loc.xml
+config
 
 # LaTeX build artifacts
 *.aux
