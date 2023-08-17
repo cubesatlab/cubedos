@@ -4,19 +4,31 @@
 -- AUTHOR : (C) Copyright 2022 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
+pragma SPARK_Mode(On);
 with System;
 
-package CubedOS.Transport_UDP.Messages is
-	
-	task Network_Loop is
-		pragma Priority(System.Default_Priority);
-	end Network_Loop;
+with Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
-   task Message_Loop
-	 with Global => (In_Out => Message_Manager.Mailboxes)
+
+package CubedOS.Transport_UDP.Messages is
+
+   procedure Init;
+
+   procedure Send(Msg : in out Msg_Owner)
+     with Pre => Msg /= null
+     and then Payload(Msg) /= null,
+     Post => Msg = null;
+
+	task Outgoing_Loop is
+		pragma Priority(System.Default_Priority);
+	end Outgoing_Loop;
+
+   task Incoming_Loop
+	 with Global => (In_Out => (Message_Manager.Mailboxes, Message_Manager.Lock))
    is
 	  -- pragma Storage_Size(4 * 1024);
 	  pragma Priority(System.Default_Priority);
-   end Message_Loop;
+   end Incoming_Loop;
 
 end CubedOS.Transport_UDP.Messages;

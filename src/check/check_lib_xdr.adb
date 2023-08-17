@@ -247,63 +247,205 @@ package body Check_Lib_XDR is
 
 
    -- Test encoding/decoding of XDR single precision float.
-   -- procedure Test_Encode_Decode_8(T : in out AUnit.Test_Cases.Test_Case'Class) is
-   --    pragma Unreferenced(T);
-   --
-   --    Data : XDR_Array(0 .. Test_XDR_Size - 1);
-   --    Decoded_Value : XDR_Float;
-   --    Last : XDR_Index_Type;
-   -- begin
-   --    Data := (others => 0);
-   --    Encode(XDR_Float'(0.0), Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = 0.0, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Float'Last, Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = XDR_Float'Last, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Float'First, Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = XDR_Float'First, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Float'(3.141592653589793E+10), Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = 3.141592653589793E+10, "Decoded incorrectly");
-   -- end Test_Encode_Decode_8;
+   procedure Test_Encode_Decode_8(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
+      Decoded_Value : XDR_Float;
+      Last : XDR_Index_Type;
+      Special : Special_Float_Value := None;
+   begin
+      -- Zero
+      Data := (others => 2#1111_1111#);
+      Encode(XDR_Float'(0.0), Data, 0, Last);
+      Assert(Data(0) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 0.0, "Decoded incorrectly" & XDR_Float'Image(Decoded_Value) & " (should be 0)");
+      Assert(Special = None, "Number was not special");
+
+      -- negative zero
+      Data := (others => 2#1111_1111#);
+      Encode(XDR_Float'(-0.0), Data, 0, Last);
+      Assert(Data(0) = 2#1000_0000#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = (-0.0), "Decoded incorrectly" & XDR_Float'Image(Decoded_Value) & " (should be -0)");
+      Assert(Special = None, "Number was not special");
+
+      -- 1.21
+      Data := (others => 0);
+      Encode(XDR_Float(1.21), Data, 0, Last);
+      -- 0011 1111 1001 1010 1110 0001 0100 1000
+      Assert(Data(0) = 2#0011_1111#, "Encoded incorrectly");
+      Assert(Data(1) = 2#1001_1010#, "Encoded incorrectly");
+      Assert(Data(2) = 2#1110_0001#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0100_1000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 1.21, "Decoded incorrectly: " & XDR_Float'Image(Decoded_Value) & " (should be 1.21)");
+      Assert(Special = None, "Number was not special");
+
+      -- Max
+      Data := (others => 0);
+      Encode(XDR_Float'Last, Data, 0, Last);
+      Assert(Data(0) = 2#0111_1111#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0111_1111#, "Encoded incorrectly");
+      Assert(Data(2) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(3) = 2#1111_1111#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = XDR_Float'Last, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- Min
+      Data := (others => 0);
+      Encode(XDR_Float'First, Data, 0, Last);
+      Assert(Data(0) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0111_1111#, "Encoded incorrectly");
+      Assert(Data(2) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(3) = 2#1111_1111#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = XDR_Float'First, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- 3.14159...E+10
+      Data := (others => 0);
+      Encode(XDR_Float'(3.141592653589793E+10), Data, 0, Last);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 3.141592653589793E+10, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+
+      -- Positive number with exponent all 1s and nonzero fraction is NaN
+      Data := (2#0111_1111#, 2#1000_0001#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = NaN, "NaN number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- Positive infinity
+      Data := (2#0111_1111#, 2#1000_0000#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = Positive_Infinity, "+Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- Negative infinity
+      Data := (2#1111_1111#, 2#1000_0000#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = Negative_Infinity, "-Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- TODO: Check for increased precision for near-zero values caused by denormalization
+   end Test_Encode_Decode_8;
 
 
    -- Test encoding/decoding of XDR double precision float.
-   -- procedure Test_Encode_Decode_9(T : in out AUnit.Test_Cases.Test_Case'Class) is
-   --    pragma Unreferenced(T);
-   --
-   --    Data : XDR_Array(0 .. Test_XDR_Size - 1);
-   --    Decoded_Value : XDR_Double;
-   --    Last : XDR_Index_Type;
-   -- begin
-   --    Data := (others => 0);
-   --    Encode(XDR_Double'(0.0), Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = 0.0, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Double'Last, Data, 0, Last);
-   --   Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = XDR_Double'Last, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Double'First, Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = XDR_Double'First, "Decoded incorrectly");
-   --
-   --    Data := (others => 0);
-   --    Encode(XDR_Double'(3.141592653589793E+100), Data, 0, Last);
-   --    Decode(Data, 0, Decoded_Value, Last);
-   --    Assert(Decoded_Value = 3.141592653589793E+100, "Decoded incorrectly");
-   -- end Test_Encode_Decode_9;
+   procedure Test_Encode_Decode_9(T : in out AUnit.Test_Cases.Test_Case'Class) is
+      pragma Unreferenced(T);
+
+      Data : XDR_Array(0 .. Test_XDR_Size - 1);
+      Decoded_Value : XDR_Double;
+      Last : XDR_Index_Type;
+      Special : Special_Float_Value;
+   begin
+      -- Zero
+      Data := (others => 2#1111_1111#);
+      Encode(XDR_Double'(0.0), Data, 0, Last);
+      Assert(Data(0) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 0.0, "Decoded incorrectly" & XDR_Double'Image(Decoded_Value) & " (should be 0)");
+      Assert(Special = None, "Number was not special");
+
+      -- negative zero
+      Data := (others => 2#1111_1111#);
+      Encode(XDR_Double'(-0.0), Data, 0, Last);
+      Assert(Data(0) = 2#1000_0000#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(4) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(5) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(6) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(7) = 2#0000_0000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = (-0.0), "Decoded incorrectly" & XDR_Double'Image(Decoded_Value) & " (should be -0)");
+      Assert(Special = None, "Number was not special");
+
+      -- 3
+      -- 0100 0000 0000 1000 0000 0000 0000000000000000000000000000000000000000
+      Data := (others => 0);
+      Encode(XDR_Double(3.0), Data, 0, Last);
+      Assert(Data(0) = 2#0100_0000#, "Encoded incorrectly");
+      Assert(Data(1) = 2#0000_1000#, "Encoded incorrectly");
+      Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(4) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(5) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(6) = 2#0000_0000#, "Encoded incorrectly");
+      Assert(Data(7) = 2#0000_0000#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 3.0, "Decoded incorrectly: " & XDR_Double'Image(Decoded_Value) & " (should be 1.21)");
+      Assert(Special = None, "Number was not special");
+
+      -- Max
+      Data := (others => 0);
+      Encode(XDR_Double'Last, Data, 0, Last);
+      Assert(Data(0) = 2#0111_1111#, "Encoded incorrectly");
+      Assert(Data(1) = 2#1110_1111#, "Encoded incorrectly");
+      Assert(Data(2) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(3) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(4) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(5) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(6) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(7) = 2#1111_1111#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = XDR_Double'Last, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- Min
+      Data := (others => 0);
+      Encode(XDR_Double'First, Data, 0, Last);
+      Assert(Data(0) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(1) = 2#1110_1111#, "Encoded incorrectly");
+      Assert(Data(2) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(3) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(4) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(5) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(6) = 2#1111_1111#, "Encoded incorrectly");
+      Assert(Data(7) = 2#1111_1111#, "Encoded incorrectly");
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = XDR_Double'First, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- 3.14159...E+10
+      Data := (others => 0);
+      Encode(XDR_Double'(3.141592653589793E+10), Data, 0, Last);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Decoded_Value = 3.141592653589793E+10, "Decoded incorrectly");
+      Assert(Special = None, "Number was not special");
+
+      -- https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+
+      -- Positive number with exponent all 1s and nonzero fraction is NaN
+      Data := (2#0111_1111#, 2#1111_0001#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = NaN, "NaN number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- Positive infinity
+      Data := (2#0111_1111#, 2#1111_0000#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = Positive_Infinity, "+Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- Negative infinity
+      Data := (2#1111_1111#, 2#1111_0000#, others => 0);
+      Decode(Data, 0, Decoded_Value, Last, Special);
+      Assert(Special = Negative_Infinity, "-Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+
+      -- TODO: Check for increased precision for near-zero values caused by denormalization
+   end Test_Encode_Decode_9;
 
 
    -- Test encoding/decoding of fixed length opaque data.
@@ -375,8 +517,8 @@ package body Check_Lib_XDR is
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_5'Access, "64 bit integer");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
-      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
-      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_10'Access, "fixed length opaque data");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_11'Access, "fixed length string");
    end Register_Tests;

@@ -5,17 +5,19 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+pragma Warnings(Off);
 
-with CubedOS.Interpreter.API;  -- Needed so that the types in the API can be used here.
-with Name_Resolver;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
+with CubedOS.Interpreter.API; use CubedOS.Interpreter.API;
 
 package body CubedOS.Interpreter.Messages is
-   use Message_Manager;
 
-   procedure Initialize is
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
+
+   procedure Init is
    begin
-      null;
-   end Initialize;
+      Register_Module(Mailbox, 8);
+   end Init;
 
    -------------------
    -- Message Handling
@@ -26,7 +28,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Clear_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Clear_Request;
 
@@ -36,7 +38,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Set_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Set_Request;
 
@@ -46,7 +48,7 @@ package body CubedOS.Interpreter.Messages is
    is
       Status : Message_Status_Type;
    begin
-      CubedOS.Interpreter.API.Add_Request_Decode(Message, Status);
+      null;
       -- Act on the request message.
    end Handle_Add_Request;
 
@@ -63,9 +65,6 @@ package body CubedOS.Interpreter.Messages is
          Handle_Set_Request(Message);
       elsif CubedOS.Interpreter.API.Is_Add_Request(Message) then
          Handle_Add_Request(Message);
-      else
-         -- An unknown message type has been received. What should be done about that?
-         null;
       end if;
       -- When this procedure returns the message loop will immediately try to receive the next
       -- message. Note that all CubedOS send operations are non-blocking so sending an outgoing
@@ -77,13 +76,15 @@ package body CubedOS.Interpreter.Messages is
    ---------------
 
    task body Message_Loop is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
-      Initialize;
+      Message_Manager.Wait;
 
       loop
-         Message_Manager.Fetch_Message(Name_Resolver.Interpreter.Module_ID, Incoming_Message);
+         Read_Next(Mailbox, Incoming_Message);
          Process(Incoming_Message);
+         Delete(Incoming_Message);
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
       end loop;
    end Message_Loop;
 

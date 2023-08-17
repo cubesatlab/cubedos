@@ -16,14 +16,6 @@ package body CubedOS.Lib.Bounded_Queues is
       Src := null;
    end Move;
 
-   --  type Bounded_Queue (Size : Count_Type) is
-   --     record
-   --        Storage : Data_Array(0 .. Size-1);
-   --        Next_In : Index := 0;
-   --        Next_Out : Index := 0;
-   --        Num_Items : Count_Type := 0;
-   --     end record;
-
    function Make (Capacity : Positive) return Bounded_Queue is
       (Capacity - 1, (others => null), 0, 0, 0);
 
@@ -38,7 +30,7 @@ package body CubedOS.Lib.Bounded_Queues is
      is (Q.Num_Items = 0);
 
    function Is_Full (Q: in Bounded_Queue) return Boolean
-     is (Q.Num_Items = Q.Max_Index + 1);
+     is (Q.Num_Items - 1 = Q.Max_Index);
 
    -- Takes the next item off the queue.
    procedure Next(Q: in out Bounded_Queue; Item : in out Data_Owner) is
@@ -55,14 +47,5 @@ package body CubedOS.Lib.Bounded_Queues is
       Q.Next_In := (Q.Next_In + 1) mod (Q.Max_Index + 1);
       Q.Num_Items := Q.Num_Items + 1;
    end Put;
-
-   function Valid(Q : Bounded_Queue) return Boolean
-   is (
-       Q.Next_In in Q.Storage'Range
-       and then Q.Next_Out in Q.Storage'Range
-       and then (Q.Storage(Q.Next_In) = null or Q.Num_Items - 1 = Q.Max_Index)
-       and then (Q.Storage(Q.Next_Out) /= null or Q.Num_Items = 0)
-       and then Q.Max_Index < Natural'Last - 1
-      );
 
 end CubedOS.Lib.Bounded_Queues;

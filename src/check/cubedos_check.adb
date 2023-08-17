@@ -8,10 +8,13 @@ with AUnit.Run;
 with AUnit.Reporter.Text;
 
 with CubedLib_Suite;
+with CubedOS_Messaging_Suite;
 
 procedure CubedOS_Check is
-   procedure Run is new AUnit.Run.Test_Runner(CubedLib_Suite.Suite);
+   procedure Run_Lib_Tests is new AUnit.Run.Test_Runner(CubedLib_Suite.Suite);
+   procedure Run_Messaging_Tests is new AUnit.Run.Test_Runner(CubedOS_Messaging_Suite.Suite);
    Reporter : AUnit.Reporter.Text.Text_Reporter;
 begin
-   Run(Reporter);
+   Run_Lib_Tests(Reporter);
+   Run_Messaging_Tests(Reporter);
 end CubedOS_Check;

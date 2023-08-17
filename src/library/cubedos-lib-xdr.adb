@@ -27,8 +27,6 @@ package body CubedOS.Lib.XDR is
    --
    function XDR_Float_To_Unsigned is
      new Ada.Unchecked_Conversion(Source => XDR_Float, Target => XDR_Unsigned);
-   -- function XDR_Unsigned_To_Float is
-   --   new Ada.Unchecked_Conversion(Source => XDR_Unsigned, Target => XDR_Float);
 
    function XDR_Double_To_Unsigned is
      new Ada.Unchecked_Conversion(Source => XDR_Double, Target => XDR_Unsigned_Hyper);
@@ -176,7 +174,6 @@ package body CubedOS.Lib.XDR is
       Encode(Temporary_Array, Data, Position, Last);
    end Encode;
 
-
    ----------------------
    -- Decoding Procedures
    ----------------------
@@ -264,37 +261,171 @@ package body CubedOS.Lib.XDR is
       Last := Natural(Position + 7);
    end Decode;
 
+   subtype Bit is Natural range 0 .. 1;
+   type Bit_List is array(Positive range <>) of Bit
+     with Component_Size => 1;
 
-   -- Unfortunately decoding floating point values isn't this easy. The unchecked conversion
-   -- being used here isn't acceptable to SPARK (see the comments where they are declared),
-   -- so a much fussier approach is required. Furthermore, the bit pattern in the Data array
-   -- may not form a valid floating point value, so some method of dealing with that error
-   -- must be provided.
-   --
-   -- procedure Decode
-   --   (Data     : in  XDR_Array;
-   --    Position : in  XDR_Index_Type;
-   --    Value    : out XDR_Float;
-   --    Last     : out XDR_Index_Type)
-   -- is
-   --    Temp : XDR_Unsigned;
-   -- begin
-   --    Decode(Data, Position, Temp, Last);
-   --    Value := XDR_Unsigned_To_Float(Temp);
-   -- end Decode;
+   -- https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+
+   procedure Decode
+    (Data     : in  XDR_Array;
+     Position : in  XDR_Index_Type;
+     Value    : out XDR_Float;
+     Last     : out XDR_Index_Type;
+     Special  : out Special_Float_Value)
+   is
+      Raw : XDR_Unsigned;
+      type Bit_List_32 is new Bit_List(1..32);
+      Bits : Bit_List_32;
+      procedure To_Bits(Int : in out XDR_Unsigned; Result : out Bit_List_32) is
+      begin
+         for I in reverse 1..32 loop
+            Result(I) := Bit(Int rem 2);
+            Int := Int / 2;
+         end loop;
+      end;
+      Sign : Bit;
+      type Float_Exp_Bits is mod 2**8;
+      Raw_Exp : Float_Exp_Bits := 0;
+      -- Note that not all of these exponent values are valid
+      subtype Float_Exponent is Integer range -127 .. 128;
+      Biased_Exp : Float_Exponent;
+      type Float_Fraction_Part is mod 2**23;
+      Raw_Frac : Float_Fraction_Part := 0;
+      Frac : XDR_Float;
+      Normalized : Boolean := True;
+   begin
+      Decode(Data, Position, Raw, Last);
+      Special := None;
+      To_Bits(Raw, Bits);
+      Sign := Bits(1);
+
+      -- Big endian, early bits are more significant
+      for I in 2 .. 9 loop
+         Raw_Exp := Raw_Exp + Float_Exp_Bits(Bits(I)) * 2**(8 - (I - 1));
+      end loop;
+
+      for I in 10 .. 32 loop
+         Raw_Frac := Raw_Frac + Float_Fraction_Part(Natural(Bits(I))) * 2**(23 - (I - 9));
+      end loop;
+
+      -- Check for special values
+      if Raw_Exp = 255 then
+         if Raw_Frac = 0 then
+            if Sign = 1 then
+               Special := Negative_Infinity;
+            else
+               Special := Positive_Infinity;
+            end if;
+         else
+            Special := NaN;
+         end if;
+         Value := XDR_Float(0.0); -- Arbitrary
+         return;
+      elsif Raw_Exp = 0 then
+         if Raw_Frac = 0 then
+            Value := XDR_Float(0.0 * Float(-1.0) ** Sign);
+            return;
+         else
+            Normalized := False;
+         end if;
+      end if;
 
 
-   -- procedure Decode
-   --   (Data     : in  XDR_Array;
-   --    Position : in  XDR_Index_Type;
-   --    Value    : out XDR_Double;
-   --    Last     : out XDR_Index_Type)
-   -- is
-   --    Temp : XDR_Unsigned_Hyper;
-   -- begin
-   --    Decode(Data, Position, Temp, Last);
-   --    Value := XDR_Unsigned_To_Double(Temp);
-   -- end Decode;
+      if Normalized then
+         -- Subtract the bias
+         Biased_Exp := Float_Exponent(Raw_Exp - 127);
+         Frac := 1.0 + XDR_Float(Raw_Frac) / 2.0**23;
+      else
+         Biased_Exp := (-126);
+         Frac := XDR_Float(Raw_Frac) / 2.0**23;
+      end if;
+
+      -- (-1)**S * 2**(E-Bias) * 1.F
+      -- https://www.ibm.com/docs/en/aix/7.2?topic=types-single-precision-floating-point
+
+      Value := XDR_Float((-1.0) ** Sign * (2.0)**Biased_Exp * Frac);
+   end Decode;
+
+   -- TODO: Decode compliant with IEEE standard (XDR calls for this)
+   procedure Decode
+    (Data     : in  XDR_Array;
+     Position : in  XDR_Index_Type;
+     Value    : out XDR_Double;
+     Last     : out XDR_Index_Type;
+     Special  : out Special_Float_Value)
+   is
+      Raw : XDR_Unsigned_Hyper;
+      type Bit_List_64 is new Bit_List(1..64);
+      Bits : Bit_List_64;
+      procedure To_Bits(Int : in out XDR_Unsigned_Hyper; Result : out Bit_List_64) is
+      begin
+         for I in reverse 1..64 loop
+            Result(I) := Bit(Int rem 2);
+            Int := Int / 2;
+         end loop;
+      end;
+      Sign : Bit;
+      type Float_Exp_Bits is mod 2**11;
+      Raw_Exp : Float_Exp_Bits := 0;
+      -- Note that not all of these exponent values are valid
+      subtype Float_Exponent is Integer range -1023 .. 1024;
+      Biased_Exp : Float_Exponent;
+      type Float_Fraction_Part is mod 2**52;
+      Raw_Frac : Float_Fraction_Part := 0;
+      Frac : XDR_Double;
+      Normalized : Boolean := True;
+   begin
+      Decode(Data, Position, Raw, Last);
+      Special := None;
+      To_Bits(Raw, Bits);
+      Sign := Bits(1);
+
+      -- Big endian, early bits are more significant
+      for I in 2 .. 12 loop
+         Raw_Exp := Raw_Exp + Float_Exp_Bits(Bits(I)) * 2**(11 - (I - 1));
+      end loop;
+
+      for I in 13 .. 64 loop
+         Raw_Frac := Raw_Frac + Float_Fraction_Part(Natural(Bits(I))) * 2**(52 - (I - 12));
+      end loop;
+
+      -- Check for special values
+      if Raw_Exp = 2047 then
+         if Raw_Frac = 0 then
+            if Sign = 1 then
+               Special := Negative_Infinity;
+            else
+               Special := Positive_Infinity;
+            end if;
+         else
+            Special := NaN;
+         end if;
+         Value := XDR_Double(0.0); -- Arbitrary
+         return;
+      elsif Raw_Exp = 0 then
+         if Raw_Frac = 0 then
+            Value := XDR_Double(0.0 * Float(-1.0) ** Sign);
+            return;
+         else
+            Normalized := False;
+         end if;
+      end if;
+
+
+      if Normalized then
+         -- Subtract the bias
+         Biased_Exp := Float_Exponent(Raw_Exp - 1023);
+         Frac := 1.0 + XDR_Double(Raw_Frac) / 2.0**52;
+      else
+         Biased_Exp := (-126);
+         Frac := XDR_Double(Raw_Frac) / 2.0**52;
+      end if;
+
+      -- (-1)**S * 2**(E-Bias) * 1.F
+
+      Value := XDR_Double((-1.0) ** Sign * (2.0)**Biased_Exp * Frac);
+    end Decode;
 
 
    -- Decodes a fixed length array of opaque data from Data starting at Position.
@@ -305,9 +436,6 @@ package body CubedOS.Lib.XDR is
       Last     : out XDR_Extended_Index_Type)
    is
    begin
-      -- For SPARK flow analysis. It seems like this shouldn't be needed.
-      Value := (others => 0);
-
       for I in Value'Range loop
          Value(I) := Octet(Data(Position + (I - Value'First)));
       end loop;

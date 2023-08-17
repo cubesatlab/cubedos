@@ -1,12 +1,12 @@
 --------------------------------------------------------------------------------
--- FILE   : networking_client.ads
+-- FILE   : ping_client.ads
 -- SUBJECT: Top level package of the echo client module.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2023 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
 pragma Warnings (Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
 
-package DomainA_Client is
+package Ping_Client is
 
-end DomainA_Client;
+end Ping_Client;

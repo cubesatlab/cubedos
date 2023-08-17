@@ -6,17 +6,14 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode (On);
 
-with Name_Resolver;
-with CubedOS.Time_Server.API;
-use CubedOS.Time_Server.API;
-
 package body CubedOS.Time_Server.Messages with
    Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages))
 is
 
-   use Message_Manager;
    use type Ada.Real_Time.Time;
    use type Ada.Real_Time.Time_Span;
+
+   Mailbox : aliased constant Module_Mailbox := Make_Module_Mailbox(This_Module, Mail_Target);
 
    -- Stores all persistent info about a series.
    type Series_Record is record
@@ -59,7 +56,8 @@ is
 
          -- Send tick message(s) to the core logic as required.
       procedure Next_Ticks with
-         Global => (Input => Ada.Real_Time.Clock_Time, In_Out => Mailboxes);
+        Global => (Input => (Ada.Real_Time.Clock_Time), In_Out => Mailboxes),
+        Pre => Messaging_Ready;
 
    private
       Series_Array : Series_Array_Type;
@@ -67,7 +65,8 @@ is
    end Series_Database;
 
    -- This must be declared before the body of Series_Database.
-   task Send_Tick_Messages;
+   task Send_Tick_Messages
+     with Global => (In_Out => (Mailboxes, Series_Database, Lock), Input => (Ada.Real_Time.Clock_Time));
 
    protected body Series_Database is
 
@@ -125,6 +124,7 @@ is
       procedure Next_Ticks is
          Current_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
       begin
+
          -- Iterate through the array to see who needs a tick message.
          for I in Series_Array'Range loop
             declare
@@ -134,11 +134,14 @@ is
                if Current_Series.Is_Used
                  and then Current_Series.Next <= Current_Time
                then
-                  Route_Message
-                    (Tick_Reply_Encode
-                       (Receiver_Address => Current_Series.Address,
-                        Request_ID       => 0, Series_ID => Current_Series.ID,
-                        Count            => Current_Series.Count));
+
+                  pragma Assert(Module_ID(Mailbox) = This_Module);
+
+                  Send_Tick_Reply
+                    (Sender => Mailbox,
+                     Receiver_Address => Current_Series.Address,
+                     Request_ID       => 0, Series_ID => Current_Series.ID,
+                     Count            => Current_Series.Count);
 
                   -- Update the current record.
                   case Current_Series.Kind is
@@ -167,6 +170,8 @@ is
    task body Send_Tick_Messages is
       Next_Release : Ada.Real_Time.Time := Ada.Real_Time.Clock;
    begin
+      Message_Manager.Wait;
+
       loop
          delay until Next_Release;
          Next_Release := Next_Release + Release_Interval;
@@ -174,13 +179,21 @@ is
       end loop;
    end Send_Tick_Messages;
 
+   procedure Init
+   is
+   begin
+      Register_Module(Mailbox, 8);
+   end Init;
+
    -----------------------------------
    -- Message Decoding and Dispatching
    -----------------------------------
 
    procedure Process_Relative_Request
      (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Relative_Request (Incoming_Message)
+     Pre => API.Is_Relative_Request (Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Tick_Interval : Ada.Real_Time.Time_Span;
       Request_Type  : Series_Type;
@@ -193,7 +206,7 @@ is
         (Incoming_Message, Tick_Interval, Request_Type, Series_ID, Status);
       if Status = Success then
          Series :=
-           (Address => Incoming_Message.Sender_Address, ID => Series_ID,
+           (Address => Sender_Address(Incoming_Message), ID => Series_ID,
             Kind    => Request_Type, Interval => Tick_Interval,
             Next => Current_Time + Tick_Interval, Count => 1, Is_Used => True);
          Series_Database.Unchecked_Add_Series_Record (Series);
@@ -203,7 +216,9 @@ is
 
    procedure Process_Absolute_Request
      (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Absolute_Request (Incoming_Message)
+     Pre => API.Is_Absolute_Request (Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Tick_Time : Ada.Real_Time.Time;
       Series_ID : API.Series_ID_Type;
@@ -215,7 +230,7 @@ is
       if Status = Success then
 
          Series :=
-           (Address => Incoming_Message.Sender_Address, ID => Series_ID,
+           (Address => Sender_Address(Incoming_Message), ID => Series_ID,
             Kind    => One_Shot, Interval => Ada.Real_Time.Time_Span_Zero,
             Next    => Tick_Time, Count => 1, Is_Used => True);
          Series_Database.Unchecked_Add_Series_Record (Series);
@@ -224,7 +239,9 @@ is
    end Process_Absolute_Request;
 
    procedure Process_Cancel_Request (Incoming_Message : in Message_Record) with
-      Pre => API.Is_Cancel_Request (Incoming_Message)
+     Pre => API.Is_Cancel_Request (Incoming_Message)
+     and Payload(Incoming_Message) /= null,
+     Post => Payload(Incoming_Message) /= null
    is
       Series_ID : API.Series_ID_Type;
       Status    : Message_Status_Type;
@@ -233,14 +250,16 @@ is
 
       if Status = Success then
          Series_Database.Remove_Series_Record
-           (Incoming_Message.Sender_Address, Series_ID);
+           (Sender_Address(Incoming_Message), Series_ID);
       end if;
    end Process_Cancel_Request;
 
    procedure Process (Incoming_Message : in Message_Record) with
       Global => (Input => Ada.Real_Time.Clock_Time, In_Out => Series_Database),
       Depends =>
-      (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message))
+       (Series_Database =>+ (Ada.Real_Time.Clock_Time, Incoming_Message)),
+       Pre => Payload(Incoming_Message) /= null,
+       Post => Payload(Incoming_Message) /= null
    is
    begin
       if API.Is_Relative_Request (Incoming_Message) then
@@ -249,9 +268,6 @@ is
          Process_Absolute_Request (Incoming_Message);
       elsif API.Is_Cancel_Request (Incoming_Message) then
          Process_Cancel_Request (Incoming_Message);
-      else
-         --$ TODO: What should be done about malformed/unrecognized messages?
-         null;
       end if;
    end Process;
 
@@ -260,21 +276,18 @@ is
    ---------------
 
    task body Message_Loop with
-      Refined_Global => (Input => Ada.Real_Time.Clock_Time,
-       In_Out => (Series_Database, Mailboxes))
+      Refined_Global => (Input => (Ada.Real_Time.Clock_Time),
+       In_Out => (Series_Database, Mailboxes, Lock))
    is
-      Incoming_Message : Message_Manager.Message_Record;
+      Incoming_Message : Message_Record;
    begin
-      loop
-         Message_Manager.Fetch_Message
-           (Name_Resolver.Time_Server.Module_ID, Incoming_Message);
+      Message_Manager.Wait;
 
-         -- This module should never receive a message from itself.
-         -- We check that here because technically any module can
-         -- send a message to and from anywhere.
-         if Incoming_Message.Sender_Address /= Name_Resolver.Time_Server then
-            Process (Incoming_Message);
-         end if;
+      loop
+         pragma Loop_Invariant(Payload(Incoming_Message) = null);
+         Read_Next(Mailbox, Incoming_Message);
+         Process (Incoming_Message);
+         Delete(Incoming_Message);
       end loop;
    end Message_Loop;
 
