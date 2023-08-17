@@ -24,7 +24,7 @@ package body CubedOS.Message_Debuggers is
    is null;
    procedure On_Message_Read(D : in Null_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
    is null;
-   procedure On_Message_Discarded(D : in Null_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
+   procedure On_Message_Discarded(D : in Null_Message_Debugger; Msg : in Message_Record; Reason : Message_Discard_Reason)
    is null;
    procedure On_Foreign_Message_Received(D : in Null_Message_Debugger; Msg : in Message_Record)
    is null;
@@ -58,11 +58,10 @@ package body CubedOS.Message_Debuggers is
    begin
       Put_Line("[Message Read] " & Module_ID_Type'Image(Receiver.Module_ID));
    end;
-   procedure On_Message_Discarded(D : in Console_Message_Debugger; Receiver : in Module_Metadata; Msg : in Message_Record)
+   procedure On_Message_Discarded(D : in Console_Message_Debugger; Msg : in Message_Record; Reason : Message_Discard_Reason)
    is
    begin
-      Put_Line("[Message Discarded] " & Module_ID_Type'Image(Receiver.Module_ID)
-        & " is not configured to receive messages of this type.");
+      Put_Line("[Message Discarded] " & Stringify_Message(Msg) & " Reason: " & Message_Discard_Reason'Image(Reason));
    end;
    procedure On_Foreign_Message_Received(D : in Console_Message_Debugger; Msg : in Message_Record)
    is

@@ -46,7 +46,7 @@ package body Ping_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Ping_Request_Encode;
-   
+
    procedure Send_Ping_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -65,7 +65,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Ping_Request;
-   
+
    procedure Send_Ping_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -83,7 +83,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Ping_Request;
-   
+
    procedure Send_Ping_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -102,7 +102,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Ping_Request;
-   
+
    procedure Send_Ping_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -119,12 +119,12 @@ package body Ping_Server.API is
          Receiver_Address => (Receiving_Domain.ID, Receiving_Module.Module_ID),
          Request_ID => Request_ID,
          Result => Message,
-         Priority => Priority);
+                          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Ping_Request;
-   
-   
+
+
    procedure Ping_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -152,7 +152,7 @@ package body Ping_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Ping_Reply_Encode;
-   
+
    procedure Send_Ping_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -171,7 +171,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Ping_Reply;
-   
+
    procedure Send_Ping_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -189,7 +189,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Ping_Reply;
-   
+
    procedure Send_Ping_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -208,7 +208,7 @@ package body Ping_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Ping_Reply;
-   
+
    procedure Send_Ping_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -229,7 +229,7 @@ package body Ping_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Ping_Reply;
-   
-   
+
+
 
 end Ping_Server.API;

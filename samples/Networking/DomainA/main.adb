@@ -13,4 +13,7 @@ procedure Main is
    pragma Priority(System.Priority'First);
 begin
    Ping_Client.Messages.Init;
+   loop
+      delay 1.0;
+   end loop;
 end Main;

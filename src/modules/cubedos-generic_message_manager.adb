@@ -105,7 +105,7 @@ is
    function Index_Of(Module_ID : Module_ID_Type) return Module_Index
      with Pre => Has_Module(This_Domain, Module_ID)
    is
-      Index : Module_Index with Relaxed_Initialization;
+      Index : Module_Index;
    begin
       -- Get index of given module
       for I in 1 .. Module_Count loop
@@ -268,20 +268,25 @@ is
      with
        Pre => Message /= null
        and then Payload(Message) /= null
-       and then Messaging_Ready
-       and then Receiver_Address(Message).Domain_ID = This_Domain.ID
-       and then (if Receiver_Address(Message).Domain_ID = Domain_ID then
-          Has_Module(This_Domain, Receiver_Address(Message).Module_ID)),
+       and then Messaging_Ready,
        Post => Message = null
    is
+      Dest_Module_ID : constant Module_ID_Type := Receiver_Address(Message).Module_ID;
    begin
-      Debugger.On_Message_Sent_Debug(Message.all);
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Status := Unavailable;
+         Debugger.On_Message_Sent_Debug(Message.all);
          Domain_Config.Send_Outgoing_Message(Message);
       else
-         Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Send
-           (Message, Status);
+         if Has_Module(This_Domain, Dest_Module_ID) then
+            Debugger.On_Message_Sent_Debug(Message.all);
+            Message_Storage (Index_Of(Dest_Module_ID)).Send
+              (Message, Status);
+         else
+            Debugger.On_Message_Discarded(Message.all, Destination_Doesnt_Exist);
+            Status := Unavailable;
+            Delete(Message);
+         end if;
       end if;
    end Route_Message;
 
@@ -289,9 +294,7 @@ is
      with
        Pre => Message /= null
        and then Payload(Message) /= null
-       and then Messaging_Ready
-       and then (if Receiver_Address(Message).Domain_ID = Domain_ID then
-          Has_Module(This_Domain, Receiver_Address(Message).Module_ID)),
+       and then Messaging_Ready,
        Post => Message = null
    is
    begin
@@ -299,8 +302,13 @@ is
       if Receiver_Address(Message).Domain_ID /= Domain_ID then
          Domain_Config.Send_Outgoing_Message(Message);
       else
-         Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Unchecked_Send
-           (Message);
+         if Has_Module(This_Domain, Receiver_Address(Message).Module_ID) then
+            Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Unchecked_Send
+              (Message);
+         else
+            Debugger.On_Message_Discarded(Message.all, Destination_Doesnt_Exist);
+            Delete(Message);
+         end if;
          pragma Unused(Message);
       end if;
    end Route_Message;
@@ -335,8 +343,7 @@ is
                           Msg : in out Message_Record;
                           Target_Module : Module_Metadata;
                           Target_Domain : Domain_Metadata := This_Domain;
-                          Status : out Status_Type
-                         )
+                          Status : out Status_Type)
    is
       Ptr : Msg_Owner;
    begin
@@ -374,7 +381,7 @@ is
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
-         Debugger.On_Message_Discarded(Spec(Box), Result);
+         Debugger.On_Message_Discarded(Result, Destination_Doesnt_Accept_Message_Type);
          if Payload(Result) /= null then
             Delete(Result);
          end if;

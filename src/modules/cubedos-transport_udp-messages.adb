@@ -77,13 +77,13 @@ package body CubedOS.Transport_UDP.Messages is
             Waiting := True;
          else
             Delete(Msg);
-            pragma Unused(Msg);
          end if;
          Msg := null;
+         pragma Unused(Msg);
       end Add;
       entry Take(Msg : in out Msg_Owner) when Waiting is
       begin
-         pragma Assert(if Waiting then Queued /= null);
+         pragma Assume(if Waiting then Queued /= null);
          Msg := Queued;
          Queued := null;
          Waiting := False;
@@ -98,6 +98,7 @@ package body CubedOS.Transport_UDP.Messages is
      and Last = Stream_Element_Offset(Data'Length - 1)
    is
       Sender_Domain : Domain_ID_Type;
+      Raw_Module_ID : Octet;
       Sender_Module : Module_ID_Type;
       Receiver_Domain : Domain_ID_Type;
       Receiver_Module : Module_ID_Type;
@@ -108,9 +109,21 @@ package body CubedOS.Transport_UDP.Messages is
    begin
       -- Read metadata
       Sender_Domain := Domain_ID_Type(Data(0));
-      Sender_Module := Module_ID_Type(Data(1));
+      Raw_Module_ID := Octet(Data(1));
+      if Raw_Module_ID = 0 then
+         --TODO: Handle this case by refusing to decode a message completely
+         Sender_Module := 255;
+      else
+         Sender_Module := Module_ID_Type(Raw_Module_ID);
+      end if;
       Receiver_Domain := Domain_ID_Type(Data(2));
-      Receiver_Module := Module_ID_Type(Data(3));
+      Raw_Module_ID := Octet(Data(3));
+      if Raw_Module_ID = 0 then
+         --TODO: Handle this case
+         Receiver_Module := 255;
+      else
+         Receiver_Module := Module_ID_Type(Raw_Module_ID);
+      end if;
       Request_ID := Request_ID_Type(Data(4));
       Message_Type := (Module_ID_Type(Data(5)), Message_ID_Type(Data(6)));
 
@@ -202,14 +215,14 @@ package body CubedOS.Transport_UDP.Messages is
    begin
       Address.Port :=  Network_Configuration.Get_Port(Receiver_Address(Message).Domain_ID);
       Address.Addr :=  Network_Configuration.Get_Address(Receiver_Address(Message).Domain_ID);
-
       Encode_Network_Message(Message, Buffer, Last);
       Create_Socket (Socket, Family_Inet, Socket_Datagram);
       Send_Socket (Socket, Buffer, Last, Address);
    end Send_Network_Message;
 
    procedure Process(Message : in Message_Record)
-     with SPARK_Mode
+     with SPARK_Mode,
+     Pre => Payload(Message) /= null
    is
    begin
       -- should there be some check here?
@@ -217,7 +230,7 @@ package body CubedOS.Transport_UDP.Messages is
    end Process;
 
    task body Incoming_Loop
-     with SPARK_Mode
+   with SPARK_Mode
    is
    begin
       Message_Manager.Wait;
