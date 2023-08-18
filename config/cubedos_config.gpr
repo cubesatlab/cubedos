@@ -8,7 +8,7 @@ abstract project Cubedos_Config is
 
    Alire_Host_Arch := "x86_64";
 
-   Alire_Host_Distro := "ubuntu";
+   Alire_Host_Distro := "arch";
    Ada_Compiler_Switches := External_As_List ("ADAFLAGS", " ");
    Ada_Compiler_Switches := Ada_Compiler_Switches &
           (

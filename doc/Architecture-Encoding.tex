@@ -51,15 +51,11 @@ components can also be defined.
 can't be accessed directly from the encoding and decoding subprograms. There is currently no
 mechanism in \texttt{Merc} to solve this problem in the general case.
 
-Each message type has an ID number that is unique across the application. This is required to
-distinguish valid messages from invalid ones. \texttt{Merc} assigns these message type ID
-numbers automatically. The encoding subprogram installs the ID number into the message as a
-hidden component. The decoding subprogram checks the message type ID number and returns a
-failure status if it is invalid. A CubedOS module extracts a message from its mailbox and then
-applies the relevant decoder subprograms to that message until one succeeds. If all decoder
-subprograms fail the message either has an unexpected type (for example it was accidentally sent
-to the wrong mailbox) or the message is malformed in some way. The module must then make a
-runtime decision about how to handle that situation.
+Each message type has a message ID that is unique across the application. This is required to
+distinguish valid messages from invalid ones. \texttt{Merc} assigns these message type IDs automatically. The encoding subprogram installs the ID into the message as a
+hidden component. The decoding subprogram checks the message type ID and returns a
+failure status if it is invalid. Modules declare statically what message types it is prepared to receive and the message system discards unacceptable messages before they reach their destination. A CubedOS module reads a message from its mailbox, reads its message type and then
+disbatches it to the relevant decoder subprograms.
 
 \texttt{Merc} is a work in progress. We intend to ultimately support as much of the XDR standard
 as we can including, for example, variable length arrays and discriminated unions.

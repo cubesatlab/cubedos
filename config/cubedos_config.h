@@ -9,7 +9,7 @@
 
 #define ALIRE_HOST_ARCH "x86_64"
 
-#define ALIRE_HOST_DISTRO "ubuntu"
+#define ALIRE_HOST_DISTRO "arch"
 
 #define BUILD_PROFILE_RELEASE 1
 #define BUILD_PROFILE_VALIDATION 2
