@@ -54,11 +54,8 @@ task is the only task. The following requirements apply:
 \item \textbf{Core.SPARK}. The core system, including the core modules described in this
   document, shall be written in \SPARK\ and proved free of information flow errors and execution
   runtime errors.
-\item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
-  document, shall be written to conform with the restrictions of the Ravenscar profile. \pet{We
-    might want to ``upgrade'' to the Jorvik profile. This gives us: relative delays, ``pure''
-    barrier expressions, and access to Ada.Calendar. It gives us other things that I think we
-    are less likely to need.}
+\item \textbf{Core.Jorvik}. The core system, including the core modules described in this
+  document, shall be written to conform with the restrictions of the Jorvik profile.
 \item \textbf{Core.Static}. Modules shall be statically allocated. All modules the system will
   ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
     about on-the-fly software updates? Are we ruling that out, or is that outside the scope of
@@ -68,11 +65,6 @@ task is the only task. The following requirements apply:
   initialization time by the Name Service. \pet{The Name Service is controversial. We might not
     want it and instead require that module ID numbers all be statically assigned.} CubedOS core
   modules (described below) shall have fixed, ``well known'' module ID numbers.
-\item \textbf{Core.IDNumbers}. Module ID numbers shall be small integers beginning at $1$ and
-  ranging up to the number of modules in the system. However, if a particular core module is not
-  used, it's ID number is skipped (not reassigned). \pet{We probably don't really want to waste
-    module ID number space like this. Reassigning core module ID numbers for core modules that
-    are not used seems like a desirable optimization that we should allow developers.}
 \end{itemize}
 
 \section{Runtime Library}
@@ -113,22 +105,11 @@ include, but are not limited to:
 
 What distinguishes runtime library material from active CubedOS modules is that none of the
 runtime library components contain tasks or perform blocking operations (such as delays).
-Notice, however, that some library components may wish to send messages to other active
-components, such as the file server. In that case the library cannot directly receive the reply
-(only a module can receive from a mailbox), but instead must rely on the module using the
-library to forward replies into the library as appropriate. This unusual organization also
-distinguishes the CubedOS runtime library from most other libraries. \pet{Probably it would be
-  better for library components to never send messages. Maybe we should make that another aspect
-  of our CubedOS coding conventions.}
 
 \section{Core Modules}
 \label{sec:core-modules}
 
-Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. They always
-exist and have fixed, well-known module ID numbers. Note that it is possible that some core
-modules will not be required by all applications. However, their module ID numbers remain
-reserved. \pet{The motivation for using well-known ID numbers is to facilitate third party
-  module development.} In this section we describe these core modules.
+Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. In this section we describe these core modules.
 
 \subsection{Message Manager}
 \label{sec:message-manager}
@@ -139,21 +120,16 @@ communication between the other active modules in the system. The following requ
 
 \begin{itemize}
 \item \textbf{MessageManager.Mailbox}. The message manager shall provide exactly one mailbox for
-  each module in the system.
-\item \textbf{MessageManager.Access}. Mailboxes shall be accessed using the module ID number of
-  the recipient. These ID numbers shall be globally available to all modules either as statically
-  initialized constants or via the Name Service using abstract names as keys.
+  each module in the domain.
+\item \textbf{MessageManager.Access}. Reading messages from a mailbox is only possible from the associated module. Messages sent to a module are deposited in the destination mailbox indirectly through the message system.
 \item \textbf{MessageManager.Async}. Messages shall be delivered asynchronously to a module's
   mailbox. It is not necessary for a module to receive a sent message immediately.
 \item \textbf{MessageManager.Sender}. Messages shall carry the full CubedOS address of the
   sender to so that replies can be returned.
-\item \textbf{MessageManager.Unstructured}. Messages shall be unstructured octet arrays. This
-  allows all modules to use a common message type. However, to simplify the task of creating and
+\item \textbf{MessageManager.Unstructured}. Messages content must be stored an unstructured octet array suitable for standardized transmission outside the system. To simplify the task of creating and
   decoding messages, CubedOS shall provide a standard message encoding/decoding facility.
   \footnote{This facility is implemented in the Merc tool.}
-\item \textbf{MessageManager.Sizes}. It shall be possible for the application developer to tune
-  the size of the mailboxes (number of pending messages) and the size of the messages
-  themselves.
+\item \textbf{MessageManager.Sizes}. To support resource constrained systems, the size of a module's message queue and the length of messages must be configurable.
 \item \textbf{MessageManager.Priority}. Messages shall have a priority assigned to them which
   shall be, by default, the priority of the sending module.
 \item \textbf{MessageManager.PrioritySet}. It shall be possible for the sender of a message to
@@ -171,6 +147,7 @@ communication between the other active modules in the system. The following requ
   the sender, b) the message shall be lost with no status return, or c) the oldest message with
   the same or lower priority shall be purged from the mailbox. If no such message exists in the
   last case (because they all have higher priority), the message shall be lost.
+\item \textbf{MessageManager.Safety}. Messages must have a universally unique message type. Modules must explicitly specify what message types they may receive. The message system must protect modules from receiving messages they haven't declared support for.
 \end{itemize}
 
 The message manager only provides support for asynchronous messages. No support for synchronous
@@ -222,7 +199,7 @@ services. \pet{This needs to be investigated further. What can be specifically s
 \subsection{File Service}
 \label{sec:file-service}
 
-Not all missions may require a file system, but many will. The core File Server module provides
+Not all missions will require a file system, but many will. The core File Server module provides
 a simple file system interface, but the precise implementation is not specified here. It could
 be implemented as a layer around a host operating system API, through a third party library, or
 even as a RAM disk. The following requirements apply:
