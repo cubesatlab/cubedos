@@ -54,7 +54,7 @@ To use the messaging system, a module needs to hold a |Module_Mailbox| object. T
 
 The object is typically a constant named |Mailbox| and is constructed by calling |Message_Manager.Make_Module_Mailbox|. The needed parameters for the call are values found in the genreated API file: |This_Module|, which refers to the module's ID, and |Mail_Target|, which contains the metadata.
 
-At startup, all modules are registered with the messaging system. This is done sequentially by the main application thread by calling the |Init| procedure of each module. This procedure's only implementation requirement is to call |Message_Manager.Register_Module| and supply the |Mailbox| object. This registers the module with the message system, allowing it to move proceed with the initialization process.
+At startup, all modules are registered with the messaging system. This is done sequentially by the main application thread by calling the |Init| procedure of each module. This procedure's only implementation requirement is to call |Message_Manager.Register_Module| and supply the |Mailbox| object. This registers the module with the message system, allowing it to proceed with the initialization process.
 
 \subsection{Receiving Messages}
 
