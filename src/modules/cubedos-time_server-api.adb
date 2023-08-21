@@ -22,6 +22,7 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 package body CubedOS.Time_Server.API is
 
    procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
+   procedure Free is new Ada.Unchecked_Deallocation(Octet_Array, Octet_Array_Ptr);
    procedure Relative_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -193,7 +194,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Request_Type in Series_Type'Pos(Series_Type'First) .. Series_Type'Pos(Series_Type'Last) then
          Request_Type := Series_Type'Val(Raw_Request_Type);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -202,7 +202,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
          Series_ID := Series_ID_Type(Raw_Series_ID);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -369,7 +368,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
          Series_ID := Series_ID_Type(Raw_Series_ID);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -525,7 +523,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
          Series_ID := Series_ID_Type(Raw_Series_ID);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -534,7 +531,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Count in XDR.XDR_Unsigned(Series_Count_Type'First) .. XDR.XDR_Unsigned(Series_Count_Type'Last) then
          Count := Series_Count_Type(Raw_Count);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -676,7 +672,6 @@ package body CubedOS.Time_Server.API is
       if Raw_Series_ID in XDR.XDR_Unsigned(Series_ID_Type'First) .. XDR.XDR_Unsigned(Series_ID_Type'Last) then
          Series_ID := Series_ID_Type(Raw_Series_ID);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;

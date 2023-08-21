@@ -19,6 +19,7 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 package body CubedOS.File_Server.API is
 
    procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
+   procedure Free is new Ada.Unchecked_Deallocation(Octet_Array, Octet_Array_Ptr);
    procedure Open_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -174,7 +175,6 @@ package body CubedOS.File_Server.API is
       if Raw_Mode in Mode_Type'Pos(Mode_Type'First) .. Mode_Type'Pos(Mode_Type'Last) then
          Mode := Mode_Type'Val(Raw_Mode);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -194,7 +194,6 @@ package body CubedOS.File_Server.API is
                Position := Last + 1;
             end;
          else
-            pragma Assert(Boolean'(False));
             Decode_Status := Malformed;
             return;
          end if;
@@ -337,7 +336,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(File_Handle_Type'First) .. XDR.XDR_Unsigned(File_Handle_Type'Last) then
          Handle := File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -493,7 +491,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) .. XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -502,7 +499,6 @@ package body CubedOS.File_Server.API is
       if Raw_Amount in XDR.XDR_Unsigned(Read_Size_Type'First) .. XDR.XDR_Unsigned(Read_Size_Type'Last) then
          Amount := Read_Size_Type(Raw_Amount);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -659,7 +655,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) .. XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -673,12 +668,12 @@ package body CubedOS.File_Server.API is
                Final_Size : constant XDR_Unsigned := File_Data_Size;
                subtype Definite_Octet_Array is Octet_Array(0 .. Natural(Final_Size) - 1);
             begin
+               Free(File_Data);
                File_Data := new Definite_Octet_Array'(others => 0);
             end;
             XDR.Decode(Payload(Message).all, Position, Octet_Array(File_Data.all), Last);
             Position := Last + 1;
          else
-            pragma Assert(Boolean'(False));
             Decode_Status := Malformed;
             return;
          end if;
@@ -836,7 +831,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) .. XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -850,12 +844,12 @@ package body CubedOS.File_Server.API is
                Final_Size : constant XDR_Unsigned := File_Data_Size;
                subtype Definite_Octet_Array is Octet_Array(0 .. Natural(Final_Size) - 1);
             begin
+               Free(File_Data);
                File_Data := new Definite_Octet_Array'(others => 0);
             end;
             XDR.Decode(Payload(Message).all, Position, Octet_Array(File_Data.all), Last);
             Position := Last + 1;
          else
-            pragma Assert(Boolean'(False));
             Decode_Status := Malformed;
             return;
          end if;
@@ -1012,7 +1006,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) .. XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -1021,7 +1014,6 @@ package body CubedOS.File_Server.API is
       if Raw_Amount in XDR.XDR_Unsigned(Write_Result_Size_Type'First) .. XDR.XDR_Unsigned(Write_Result_Size_Type'Last) then
          Amount := Write_Result_Size_Type(Raw_Amount);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -1163,7 +1155,6 @@ package body CubedOS.File_Server.API is
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) .. XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) then
          Handle := Valid_File_Handle_Type(Raw_Handle);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;

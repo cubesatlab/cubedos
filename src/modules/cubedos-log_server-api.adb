@@ -19,6 +19,7 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 package body CubedOS.Log_Server.API is
 
    procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
+   procedure Free is new Ada.Unchecked_Deallocation(Octet_Array, Octet_Array_Ptr);
    procedure Log_Text_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -174,7 +175,6 @@ package body CubedOS.Log_Server.API is
       if Raw_Level in Log_Level_Type'Pos(Log_Level_Type'First) .. Log_Level_Type'Pos(Log_Level_Type'Last) then
          Level := Log_Level_Type'Val(Raw_Level);
       else
-         pragma Assert(Boolean'(False));
          Decode_Status := Malformed;
          return;
       end if;
@@ -194,7 +194,6 @@ package body CubedOS.Log_Server.API is
                Position := Last + 1;
             end;
          else
-            pragma Assert(Boolean'(False));
             Decode_Status := Malformed;
             return;
          end if;
