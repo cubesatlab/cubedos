@@ -39,7 +39,7 @@ project Cubedos is
    end Install;
 
    package Check is
-      for Default_Switches ("ada") use ("-rules", "-from=cubedos-rules.txt");
+      for Default_Switches ("ada") use ("-rules", "-from=src/cubedos-rules.txt");
    end Check;
 
 end Cubedos;

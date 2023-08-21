@@ -7,9 +7,9 @@
 
 # It is necessary to cd into the 'src' folder so that cubedos-casing-exceptions.txt is found.
 cd src
-codepeer-gnatcheck -P cubedos.gpr library/*.ads library/*.adb
-codepeer-gnatcheck -P cubedos.gpr modules/*.ads modules/*.adb
-codepeer-gnatcheck -P cubedos.gpr check/*.ads check/*.adb
+codepeer-gnatcheck -P ../cubedos.gpr library/*.ads library/*.adb
+codepeer-gnatcheck -P ../cubedos.gpr modules/*.ads modules/*.adb
+codepeer-gnatcheck -P ../cubedos.gpr check/*.ads check/*.adb
 cd ..
 
 exit 0  # Success!

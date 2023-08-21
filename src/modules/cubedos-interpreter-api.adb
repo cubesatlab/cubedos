@@ -19,6 +19,7 @@ with CubedOS.Message_Types.Mutable; use CubedOS.Message_Types.Mutable;
 package body CubedOS.Interpreter.API is
 
    procedure Free is new Ada.Unchecked_Deallocation(String, String_Ptr);
+   procedure Free is new Ada.Unchecked_Deallocation(Octet_Array, Octet_Array_Ptr);
    procedure Clear_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
