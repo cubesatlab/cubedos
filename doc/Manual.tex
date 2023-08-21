@@ -89,7 +89,7 @@ All send procedures are non-blocking and require the sending module be specified
 When the destination module is known at compile time, use the safer variant of send. These send procedures take |Module_Metadata| and |Domain_Metadata| objects to identify the message destination. These objects can be found in the destination module's API package and the |Name_Resolver| file respectively. Providing these objects allows SPARK to verify certian aspects of the send operation are correct:
 
 \begin{itemize}
-\item The mailbox metadata is used to check that the receiving module has declared support for the type of message being sent. This allows SPARK to detect statically that the message will not be successfully received by the destination module and warn you about it. This could reveal an error in the interface definition for a module, or alert you that you sent the message to the wrong module, saving time spent debugging later.
+\item The mailbox metadata is used to check that the receiving module has declared support for the type of message being sent. This allows SPARK to detect statically if the message will not be successfully received by the destination module and warn you about it. This could reveal an error in the interface definition for a module, or alert you that you sent the message to the wrong module, saving time spent debugging later.
 
 \item The domain metadata is used to check that the destination domain contains the destination module. Again, if you forgot to declare a module as part of a domain, or sent something to the wrong domain by mistake, SPARK will notify you.
 \end{itemize}
