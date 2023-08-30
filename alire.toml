@@ -1,10 +1,10 @@
 name = "cubedos"
-description = "Software framework for CubSat space missions."
+description = "A flight software framework for CubSat space missions."
 version = "0.1.0-dev"
 
-authors = ["Vermont Technical College"]
-maintainers = ["Vermont Technical College <example@example.com>"]
-maintainers-logins = ["cubesatlab"]
+authors = ["Vermont State University"]
+maintainers = ["Peter Chapin <peter.chapin@vermontstate.edu>"]
+maintainers-logins = ["pchapin"]
 [[depends-on]]
 gnatprove = "^12.1.1"
 aunit = "^23.0.0"
