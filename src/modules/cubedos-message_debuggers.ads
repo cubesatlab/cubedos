@@ -4,7 +4,7 @@
 -- AUTHOR : (C) Copyright 2023 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode (On);
+pragma SPARK_Mode(On);
 
 with CubedOS.Message_Types; use CubedOS.Message_Types;
 
@@ -57,8 +57,6 @@ package CubedOS.Message_Debuggers is
    procedure On_Message_Discarded(D : in Null_Message_Debugger; Msg : in Message_Record; Reason : Message_Discard_Reason);
    procedure On_Foreign_Message_Received(D : in Null_Message_Debugger; Msg : in Message_Record);
 
-   Null_Message_Debugger_Object : aliased constant Null_Message_Debugger := Null_Message_Debugger'(null record);
-
    type Console_Message_Debugger is new Message_Debugger with null record;
    -- This message debugger prints info to the console.
 
@@ -70,6 +68,21 @@ package CubedOS.Message_Debuggers is
    procedure On_Message_Discarded(D : in Console_Message_Debugger; Msg : in Message_Record; Reason : Message_Discard_Reason);
    procedure On_Foreign_Message_Received(D : in Console_Message_Debugger; Msg : in Message_Record);
 
-   Console_Message_Debugger_Object : aliased constant Console_Message_Debugger := Console_Message_Debugger'(null record);
+   -- With both objects declared here, the following error is produced:
+   --
+   -- cubedos-message_debuggers.ads:49:04: error: first freezing point of type "Null_Message_Debugger" must appear within early call region of primitive body [E0003]
+   -- cubedos-message_debuggers.ads:49:04: error: launch "gnatprove --explain=E0003" for more information
+   -- cubedos-message_debuggers.ads:49:04: error: region starts at line 72
+   -- cubedos-message_debuggers.ads:49:04: error: region ends at cubedos-message_debuggers.adb:17
+   -- cubedos-message_debuggers.ads:49:04: error: first freezing point at line 71
+   --
+   -- The problem appears to be due to the way the declaration of the first object interacts with the second.
+   -- Switching the order of the declarations just causes the other object to generate the same error.
+   -- To fix this, it might be necessary to declare Null_Message_Debuger and Console_Message_Debugger in
+   -- separate packages (each with their own pragma Elaborate_Body). In the meantime, I'm commenting out one
+   -- of the declarations since Console_Message_Debugger_Object isn't needed right now.
+   --
+   Null_Message_Debugger_Object : aliased constant Null_Message_Debugger := Null_Message_Debugger'(null record);
+   -- Console_Message_Debugger_Object : aliased constant Console_Message_Debugger := Console_Message_Debugger'(null record);
 
 end CubedOS.Message_Debuggers;

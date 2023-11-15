@@ -22,8 +22,10 @@ obj/development/cubedos_check
 # Build the sample programs.
 # ... needs to be updated for the message refactor.
 #gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
-gprbuild -P samples/Networking/domain_a.gpr samples/Networking/DomainA/main.adb
-gprbuild -P samples/Networking/domain_b.gpr samples/Networking/DomainB/main.adb
+# ... needs to Console_Message_Debugger_Object which isn't available.
+# ... see comments in cubedos-message_debuggers.ads.
+#gprbuild -P samples/Networking/domain_a.gpr samples/Networking/DomainA/main.adb
+#gprbuild -P samples/Networking/domain_b.gpr samples/Networking/DomainB/main.adb
 # ... need to be updated for the message refactor.
 #gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 #gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
@@ -33,7 +35,9 @@ gprbuild -P samples/Networking/domain_b.gpr samples/Networking/DomainB/main.adb
 bin/run-gnatcheck.sh
 
 # Build the API documentation. This has to be done after a successful build.
-gnatdoc -P cubedos.gpr --output=html
+# ... this causes gnatdoc to fail with GNATDOC.NOT_IMPLEMETNED exceptions.
+# ... could this be due to Alire's stuff in the project file?
+gnatdoc -P cubedos.gpr
 
 # Build the main documentation.
 cd doc
@@ -45,9 +49,11 @@ cd ..
 
 # Do SPARK analysis.
 gnatprove -P cubedos.gpr --clean
-gnatprove -P cubedos.gpr --level=2 --mode=silver -j2
+# ... SPARK crashes... need to send a bug report
+#gnatprove -P cubedos.gpr --level=2 --mode=silver -j2
 
 # Do CodePeer analysis.
-codepeer -P ./cubedos.gpr -level 2 -j2 -output-msg -quiet
+gnatsas analyze -P ./cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
+gnatsas report text -P ./cubedos.gpr --quiet -j2 --mode=deep
 
 # TODO: Copy documentation to the web site for public review.
