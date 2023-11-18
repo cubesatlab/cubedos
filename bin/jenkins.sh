@@ -7,26 +7,21 @@ set -e
 # Make sure we have the environment we need.
 export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/codepeer/bin:/opt/gnatstudio/bin:$PATH
 
-# Build the system.
-alr build
+# Build and run the unit tests.
+gprbuild -P src/cubedos.gpr src/check/cubedos_check.adb
+src/check/build/cubedos_check
 
-# Run the unit tests.
-obj/development/cubedos_check
-
-# Run the test programs.
-# ... can't actually do this because they are infinite loops.
-#obj/development/main
-#obj/development/main_file
-#obj/development/main_time
+# Build the test programs. We can't run them right now because they are infinite loops.
+gprbuild -P src/cubedos.gpr src/check/main.adb
+#gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
+gprbuild -P src/cubedos.gpr src/check/main_file.adb
+gprbuild -P src/cubedos.gpr src/check/main_time.adb
 
 # Build the sample programs.
-# ... needs to be updated for the message refactor.
-#gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
-# ... needs to Console_Message_Debugger_Object which isn't available.
-# ... see comments in cubedos-message_debuggers.ads.
-#gprbuild -P samples/Networking/domain_a.gpr samples/Networking/DomainA/main.adb
-#gprbuild -P samples/Networking/domain_b.gpr samples/Networking/DomainB/main.adb
 # ... need to be updated for the message refactor.
+#gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
+#gprbuild -P samples/Networking/networking.gpr -XBUILD=DomainA samples/Networking/DomainA/main.adb
+#gprbuild -P samples/Networking/networking.gpr -XBUILD=DomainB samples/Networking/DomainB/main.adb
 #gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 #gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
 
@@ -35,9 +30,7 @@ obj/development/cubedos_check
 bin/run-gnatcheck.sh
 
 # Build the API documentation. This has to be done after a successful build.
-# ... this causes gnatdoc to fail with GNATDOC.NOT_IMPLEMETNED exceptions.
-# ... could this be due to Alire's stuff in the project file?
-gnatdoc -P cubedos.gpr
+gnatdoc -P src/cubedos.gpr
 
 # Build the main documentation.
 cd doc
@@ -48,12 +41,10 @@ pdflatex -file-line-error -halt-on-error CubedOS.tex > /dev/null
 cd ..
 
 # Do SPARK analysis.
-gnatprove -P cubedos.gpr --clean
-# ... SPARK crashes... need to send a bug report
-#gnatprove -P cubedos.gpr --level=2 --mode=silver -j2
+#gnatprove -P src/cubedos.gpr --level=2 --mode=silver -j2
 
 # Do CodePeer analysis.
-gnatsas analyze -P ./cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
-gnatsas report text -P ./cubedos.gpr --quiet -j2 --mode=deep
+gnatsas analyze -P src/cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
+gnatsas report text -P src/cubedos.gpr --quiet -j2 --mode=deep
 
 # TODO: Copy documentation to the web site for public review.

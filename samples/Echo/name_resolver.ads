@@ -4,14 +4,15 @@
 -- AUTHOR  : (C) Copyright 2021 by Vermont Technical College
 --
 --------------------------------------------------------------------------------
-with Message_Manager; use Message_Manager;
+with CubedOS.Message_Types; use CubedOS.Message_Types;
 
 package Name_Resolver is
 
     -- Core Modules
 
     -- Application-Specific Modules
-    Echo_Client             : constant Message_Address := (0,1);
-    Echo_Server             : constant Message_Address := (0,2);
-
+    Echo_Client             : constant Module_ID_Type := 10;
+    Echo_Server             : constant Module_ID_Type := 11;    
+                            
+   Domain : aliased constant Domain_Metadata := (2, 1, (Echo_Client, Echo_Server));
 end Name_Resolver;

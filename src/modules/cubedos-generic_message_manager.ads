@@ -16,8 +16,7 @@ with CubedOS.Message_Debuggers; use CubedOS.Message_Debuggers;
 generic
    -- The domain of this message manager.
    Domain : Domain_Metadata;
-   -- A debugger may be injected to provide information
-   -- about message passing.
+   -- A debugger may be injected to provide information about message passing.
    Debugger : Message_Debugger'Class := Null_Message_Debugger_Object;
 package CubedOS.Generic_Message_Manager
   with

@@ -2,6 +2,12 @@
 CubedOS Samples
 ===============
 
+The projects in this folder are intended to demonstrate CubedOS in various ways. They can be
+used to help understand how the system works, or as the basis of your own applications.
+
+*Note that these samples have not yet been updated to reflect a major refactor of the design of
+CubedOS done during the Summer of 2023!*
+
 + `BBB`: A sample application that runs on the BeagleBone Black. This sample demonstrates that
   CubedOS applications will run on that platform. [This sample should be changed to be another
   build scenario in the Echo sample. This code has *not* yet been updated to reflect the
@@ -10,6 +16,9 @@ CubedOS Samples
 + `Echo`: A sample application that where two modules send messages back and forth indefinitely.
   It is the "Hello, World" application of message passing! We use this sample to evaluate rough
   performance and as a base for other, more interesting programs.
+  
++ `Echo_Alire`: This is a version of the Echo sample that uses Alire as a build tool. It is
+  intended to be an experimental testbed for using Alire with CubedOS.
   
 + `GettingStarted`: The final form of the sample application described in the "Getting Started"
   guide in the documentation folder. [Not yet implemented.]
