@@ -1,5 +1,8 @@
 
 <project name="CubedOS" default="compile" basedir=".">
+  <!-- This is an Ant build script for CubedOS. It is not being maintained (Nov 2023). If we
+       want to keep it, we should think about moving it to the root of the source tree and, of
+       course, updating it. -->
 
   <!-- set global properties for this build -->
   <property name="src.dir" value="."/>

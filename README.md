@@ -55,7 +55,7 @@ folders contain several other samples that might be of interest.
   terminate for the same reason as `main_file` but after the cancelation of Series #1 there
   should be no further output.
   
-These programs are all written to the `src/check/build` folder.
+These programs are all written to the `build` folder.
 
 The program Merc, in a separate repository, is a Scala program for generated CubedOS API
 packages. It is possible to write these packages manually following, for example, the templates

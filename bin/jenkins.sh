@@ -8,16 +8,17 @@ set -e
 export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/codepeer/bin:/opt/gnatstudio/bin:$PATH
 
 # Build and run the unit tests.
-gprbuild -P src/cubedos.gpr src/check/cubedos_check.adb
-src/check/build/cubedos_check
+gprbuild -P cubedos.gpr src/check/cubedos_check.adb
+build/cubedos_check
 
 # Build the test programs. We can't run them right now because they are infinite loops.
-gprbuild -P src/cubedos.gpr src/check/main.adb
-#gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
-gprbuild -P src/cubedos.gpr src/check/main_file.adb
-gprbuild -P src/cubedos.gpr src/check/main_time.adb
+gprbuild -P cubedos.gpr src/check/main.adb
+#gprbuild -P cubedos.gpr src/check/main_message_manager.adb
+gprbuild -P cubedos.gpr src/check/main_file.adb
+gprbuild -P cubedos.gpr src/check/main_time.adb
 
 # Build the sample programs.
+# TODO: These builds should be part of the top-level project file eventually.
 # ... need to be updated for the message refactor.
 #gprbuild -P samples/Echo/echo.gpr samples/Echo/main.adb
 #gprbuild -P samples/Networking/networking.gpr -XBUILD=DomainA samples/Networking/DomainA/main.adb
@@ -30,7 +31,7 @@ gprbuild -P src/cubedos.gpr src/check/main_time.adb
 bin/run-gnatcheck.sh
 
 # Build the API documentation. This has to be done after a successful build.
-gnatdoc -P src/cubedos.gpr
+gnatdoc -P cubedos.gpr
 
 # Build the main documentation.
 cd doc
@@ -41,10 +42,10 @@ pdflatex -file-line-error -halt-on-error CubedOS.tex > /dev/null
 cd ..
 
 # Do SPARK analysis.
-#gnatprove -P src/cubedos.gpr --level=2 --mode=silver -j2
+#gnatprove -P cubedos.gpr --level=2 --mode=silver -j2
 
 # Do CodePeer analysis.
-gnatsas analyze -P src/cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
-gnatsas report text -P src/cubedos.gpr --quiet -j2 --mode=deep
+gnatsas analyze -P cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
+gnatsas report text -P cubedos.gpr --quiet -j2 --mode=deep
 
 # TODO: Copy documentation to the web site for public review.

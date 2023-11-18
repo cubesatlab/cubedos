@@ -5,11 +5,8 @@
 # This causes Jenkins to fail the build unless the style is *perfect*, which is unreasonable.
 # This script runs gnatcheck but always returns a success status code.
 
-# It is necessary to cd into the 'src' folder so that cubedos-casing-exceptions.txt is found.
-cd src
-codepeer-gnatcheck -P cubedos.gpr library/*.ads library/*.adb
-codepeer-gnatcheck -P cubedos.gpr modules/*.ads modules/*.adb
-codepeer-gnatcheck -P cubedos.gpr check/*.ads check/*.adb
-cd ..
+codepeer-gnatcheck -P cubedos.gpr src/library/*.ads src/library/*.adb
+codepeer-gnatcheck -P cubedos.gpr src/modules/*.ads src/modules/*.adb
+codepeer-gnatcheck -P cubedos.gpr src/check/*.ads src/check/*.adb
 
 exit 0  # Success!
