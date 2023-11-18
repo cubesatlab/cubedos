@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : test_constants.ads
 -- SUBJECT: Some constants used in tests.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- Ada is very picky about when it is safe to 'Access things, so this file
 -- defines some constants which are aliased in various test programs.

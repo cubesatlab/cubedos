@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-sorters.adb
 -- SUBJECT: Body of a package containing utility sorting procedures.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE    : network_configuration.ads
 -- SUBJECT : Specification of a package holding Domain IDs and Module IDs
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 -- Each distributed CubedOS application must provide a version of this file that maps "well-
 -- known" network addresses and ports to domains in the distributed CubedOS application.

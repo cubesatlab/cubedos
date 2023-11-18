@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-tc_frames.adb
 -- SUBJECT: Body of a package containing CCSDS space packet encoding/decoding logic.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);

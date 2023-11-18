@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-interpreter-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.Interpreter API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -47,7 +47,7 @@ package body CubedOS.Interpreter.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Clear_Request_Encode;
-   
+
    procedure Send_Clear_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -66,7 +66,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Clear_Request;
-   
+
    procedure Send_Clear_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -84,7 +84,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Clear_Request;
-   
+
    procedure Send_Clear_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -103,7 +103,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Clear_Request;
-   
+
    procedure Send_Clear_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -124,8 +124,8 @@ package body CubedOS.Interpreter.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Clear_Request;
-   
-   
+
+
    procedure Set_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -153,7 +153,7 @@ package body CubedOS.Interpreter.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Set_Request_Encode;
-   
+
    procedure Send_Set_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -172,7 +172,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Set_Request;
-   
+
    procedure Send_Set_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -190,7 +190,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Set_Request;
-   
+
    procedure Send_Set_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -209,7 +209,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Set_Request;
-   
+
    procedure Send_Set_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -230,8 +230,8 @@ package body CubedOS.Interpreter.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Set_Request;
-   
-   
+
+
    procedure Set_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -259,7 +259,7 @@ package body CubedOS.Interpreter.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Set_Reply_Encode;
-   
+
    procedure Send_Set_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -278,7 +278,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Set_Reply;
-   
+
    procedure Send_Set_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -296,7 +296,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Set_Reply;
-   
+
    procedure Send_Set_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -315,7 +315,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Set_Reply;
-   
+
    procedure Send_Set_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -336,8 +336,8 @@ package body CubedOS.Interpreter.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Set_Reply;
-   
-   
+
+
    procedure Add_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -365,7 +365,7 @@ package body CubedOS.Interpreter.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Add_Request_Encode;
-   
+
    procedure Send_Add_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -384,7 +384,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Add_Request;
-   
+
    procedure Send_Add_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -402,7 +402,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Add_Request;
-   
+
    procedure Send_Add_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -421,7 +421,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Add_Request;
-   
+
    procedure Send_Add_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -442,8 +442,8 @@ package body CubedOS.Interpreter.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Add_Request;
-   
-   
+
+
    procedure Add_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -471,7 +471,7 @@ package body CubedOS.Interpreter.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Add_Reply_Encode;
-   
+
    procedure Send_Add_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -490,7 +490,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Add_Reply;
-   
+
    procedure Send_Add_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -508,7 +508,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Add_Reply;
-   
+
    procedure Send_Add_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -527,7 +527,7 @@ package body CubedOS.Interpreter.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Add_Reply;
-   
+
    procedure Send_Add_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -548,7 +548,7 @@ package body CubedOS.Interpreter.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Add_Reply;
-   
-   
+
+
 
 end CubedOS.Interpreter.API;

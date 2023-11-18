@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-bounded_queues.ads
 -- SUBJECT: SPARK verified bounded queue implementation.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- First in first out queue of a fixed size implemented in SPARK.
 --------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : check_lib_xdr.ads
 -- SUBJECT: Specification of an XDR encoding/decoding unit test package.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 with AUnit;

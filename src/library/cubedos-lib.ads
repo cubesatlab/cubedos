@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib.ads
 -- SUBJECT: Specification of a package serving as a parent to the CubedOS runtime library.
--- AUTHOR : (C) Copyright 2016 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This package also defines a number of useful, library-wide data types.
 --------------------------------------------------------------------------------

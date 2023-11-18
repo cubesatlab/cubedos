@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-log_server-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.Log_Server API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -55,7 +55,7 @@ package body CubedOS.Log_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Log_Text_Encode;
-   
+
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -78,7 +78,7 @@ package body CubedOS.Log_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Log_Text;
-   
+
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -100,7 +100,7 @@ package body CubedOS.Log_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Log_Text;
-   
+
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -123,7 +123,7 @@ package body CubedOS.Log_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Log_Text;
-   
+
    procedure Send_Log_Text
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -148,7 +148,7 @@ package body CubedOS.Log_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Log_Text;
-   
+
    procedure Log_Text_Decode
       (Message : in Message_Record;
       Level : out Log_Level_Type;
@@ -168,7 +168,7 @@ package body CubedOS.Log_Server.API is
          Msg_Content := new Definite_String'(others => ' ');
       end;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Level, Last);
       Position := Last + 1;
@@ -199,7 +199,7 @@ package body CubedOS.Log_Server.API is
          end if;
       end;
    end Log_Text_Decode;
-   
-   
+
+
 
 end CubedOS.Log_Server.API;

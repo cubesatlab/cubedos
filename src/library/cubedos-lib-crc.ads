@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-crc.adb
 -- SUBJECT: Specification of a package for handling CRC calculations
--- AUTHOR : (C) Copyright 2016 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);

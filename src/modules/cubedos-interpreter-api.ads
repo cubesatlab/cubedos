@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-interpreter-api.ads
 -- SUBJECT: Specification of a package that defines the CubedOS.Interpreter API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -24,14 +24,14 @@ package CubedOS.Interpreter.API is
    pragma Elaborate_Body;
    type Octet_Array_Ptr is access CubedOS.Lib.Octet_Array;
    type String_Ptr is access String;
-   
+
    This_Module : constant Module_ID_Type := Name_Resolver.Interpreter;
-   
+
    type Message_Type is
-      (Set_Reply, 
-      Add_Request, 
-      Clear_Request, 
-      Add_Reply, 
+      (Set_Reply,
+      Add_Request,
+      Clear_Request,
+      Add_Reply,
       Set_Request);
 
    Set_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Set_Reply));
@@ -39,13 +39,13 @@ package CubedOS.Interpreter.API is
    Clear_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Clear_Request));
    Add_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Add_Reply));
    Set_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Set_Request));
-   
+
    This_Receives : aliased constant Message_Type_Array := (
    Add_Request_Msg,
    Clear_Request_Msg,
    Set_Request_Msg);
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
-   
+
    procedure Clear_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;

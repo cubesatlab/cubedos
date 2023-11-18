@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-time_server-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.Time_Server API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -64,7 +64,7 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Relative_Request_Encode;
-   
+
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -89,7 +89,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Relative_Request;
-   
+
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -113,7 +113,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Relative_Request;
-   
+
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -138,7 +138,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Relative_Request;
-   
+
    procedure Send_Relative_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -165,7 +165,7 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Relative_Request;
-   
+
    procedure Relative_Request_Decode
       (Message : in Message_Record;
       Tick_Interval : out Ada.Real_Time.Time_Span;
@@ -184,7 +184,7 @@ package body CubedOS.Time_Server.API is
       Request_Type := Series_Type'First;
       Series_ID := Series_ID_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Tick_Interval, Last);
       Position := Last + 1;
@@ -206,8 +206,8 @@ package body CubedOS.Time_Server.API is
          return;
       end if;
    end Relative_Request_Decode;
-   
-   
+
+
    procedure Absolute_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -249,7 +249,7 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Absolute_Request_Encode;
-   
+
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -272,7 +272,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Absolute_Request;
-   
+
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -294,7 +294,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Absolute_Request;
-   
+
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -317,7 +317,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Absolute_Request;
-   
+
    procedure Send_Absolute_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -342,7 +342,7 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Absolute_Request;
-   
+
    procedure Absolute_Request_Decode
       (Message : in Message_Record;
       Tick_Time : out Ada.Real_Time.Time;
@@ -358,7 +358,7 @@ package body CubedOS.Time_Server.API is
       Tick_Time := Ada.Real_Time.Time(Time_First);
       Series_ID := Series_ID_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Tick_Time, Last);
       Position := Last + 1;
@@ -372,8 +372,8 @@ package body CubedOS.Time_Server.API is
          return;
       end if;
    end Absolute_Request_Decode;
-   
-   
+
+
    procedure Tick_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -407,7 +407,7 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Tick_Reply_Encode;
-   
+
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -430,7 +430,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Tick_Reply;
-   
+
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -452,7 +452,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Tick_Reply;
-   
+
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -475,7 +475,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Tick_Reply;
-   
+
    procedure Send_Tick_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -500,7 +500,7 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Tick_Reply;
-   
+
    procedure Tick_Reply_Decode
       (Message : in Message_Record;
       Series_ID : out Series_ID_Type;
@@ -516,7 +516,7 @@ package body CubedOS.Time_Server.API is
       Series_ID := Series_ID_Type'Last;
       Count := Series_Count_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
       Position := Last + 1;
@@ -535,8 +535,8 @@ package body CubedOS.Time_Server.API is
          return;
       end if;
    end Tick_Reply_Decode;
-   
-   
+
+
    procedure Cancel_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -567,7 +567,7 @@ package body CubedOS.Time_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Cancel_Request_Encode;
-   
+
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -588,7 +588,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Cancel_Request;
-   
+
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -608,7 +608,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Cancel_Request;
-   
+
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -629,7 +629,7 @@ package body CubedOS.Time_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Cancel_Request;
-   
+
    procedure Send_Cancel_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -652,7 +652,7 @@ package body CubedOS.Time_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Cancel_Request;
-   
+
    procedure Cancel_Request_Decode
       (Message : in Message_Record;
       Series_ID : out Series_ID_Type;
@@ -665,7 +665,7 @@ package body CubedOS.Time_Server.API is
       Decode_Status := Success;
       Series_ID := Series_ID_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Series_ID, Last);
       Position := Last + 1;
@@ -676,7 +676,7 @@ package body CubedOS.Time_Server.API is
          return;
       end if;
    end Cancel_Request_Decode;
-   
-   
+
+
 
 end CubedOS.Time_Server.API;

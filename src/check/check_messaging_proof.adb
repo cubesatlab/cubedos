@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : check_messaging_proof.adb
 -- SUBJECT : Tests formal verification of messages.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 -- This file should fail/pass spark proof inspection in the specified
 -- places. It verifies that SPARK is correctly preventing modules

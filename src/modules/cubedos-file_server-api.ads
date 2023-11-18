@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-file_server-api.ads
 -- SUBJECT: Specification of a package that defines the CubedOS.File_Server API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -24,16 +24,16 @@ package CubedOS.File_Server.API is
    pragma Elaborate_Body;
    type Octet_Array_Ptr is access CubedOS.Lib.Octet_Array;
    type String_Ptr is access String;
-   
+
    This_Module : constant Module_ID_Type := Name_Resolver.File_Server;
-   
+
    type Message_Type is
-      (Write_Reply, 
-      Read_Request, 
-      Write_Request, 
-      Close_Request, 
-      Open_Request, 
-      Read_Reply, 
+      (Write_Reply,
+      Read_Request,
+      Write_Request,
+      Close_Request,
+      Open_Request,
+      Read_Reply,
       Open_Reply);
 
    Write_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Write_Reply));
@@ -43,39 +43,39 @@ package CubedOS.File_Server.API is
    Open_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Open_Request));
    Read_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Read_Reply));
    Open_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Open_Reply));
-   
+
    This_Receives : aliased constant Message_Type_Array := (
    Read_Request_Msg,
    Write_Request_Msg,
    Close_Request_Msg,
    Open_Request_Msg);
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
-   
+
    type Mode_Type is (Read, Write);
 
    type File_Handle_Type is range (0) .. (64);
-   
+
    subtype Valid_File_Handle_Type is File_Handle_Type range (1) .. (64);
-   
+
    Invalid_Handle : constant File_Handle_Type := 0;
-   
+
    Max_Read_Size : constant Integer := 256;
-   
+
    Max_Write_Size : constant Integer := 256;
-   
+
    type Read_Result_Size_Type is range (0) .. (Max_Read_Size);
-   
+
    type Read_Size_Type is range (1) .. (Max_Read_Size);
-   
+
    type Write_Result_Size_Type is range (0) .. (Max_Write_Size);
-   
+
    type Write_Size_Type is range (1) .. (Max_Write_Size);
-   
+
    subtype File_Name_Type is String
       with Dynamic_Predicate => File_Name_Type'Length <= 256;
    type File_Name_Type_Ptr is access File_Name_Type;
    procedure Free is new Ada.Unchecked_Deallocation(File_Name_Type, File_Name_Type_Ptr);
-   
+
    procedure Open_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;

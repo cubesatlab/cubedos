@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : main.adb
 -- SUBJECT: Main program to test full build of all core modules.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This program doesn't actually do anything. However, it pulls in all of the core
 -- modules in a single executable. Compiling this program thus will ensure that all

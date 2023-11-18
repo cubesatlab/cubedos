@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-message_debuggers.ads
 -- SUBJECT: Specification of a message system debugger object.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);

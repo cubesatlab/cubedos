@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : main_time.adb
 -- SUBJECT: The main file to test the time server package.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- In order to test the time server module, you must run the produced executable in a console
 -- window, and ^C out of it when a suitable time has passed. Then observe the behavior to ensure

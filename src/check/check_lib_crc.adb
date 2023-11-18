@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-crc-check.adb
 -- SUBJECT: Body of a CRC unit test package.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 with AUnit.Assertions;

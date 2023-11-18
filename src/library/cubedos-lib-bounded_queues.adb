@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-bounded_queues.adb
 -- SUBJECT: Implementation of a package serving as a parent to the CubedOS runtime library.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 

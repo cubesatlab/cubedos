@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : check_trivial.ads
 -- SUBJECT : Package containing tests of nothing in particular.
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 -- The "trivial" test is just a place holder. It can be used as a template for other tests.
 --

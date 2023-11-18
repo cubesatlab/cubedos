@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-message_types-mutable.adb
 -- SUBJECT: Specification of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This package implements several functions used in the message passing system in
 -- auto-generated API files.

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-publish_subscribe_server.ads
 -- SUBJECT: Top level package of a CubedOS Publish/Subscribe server.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This module supports a publish/subscribe message passing paradigm on top of the base CubedOS
 -- point-to-point message system. Publish/subscribe is often a useful way to broadcast or

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE    : network_configuration.adb
 -- SUBJECT : Package for retrieving addresses and ports for Domains in a distributed CubedOS application
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 ----------------------------------------------------------------------------------
 package body Network_Configuration is
 

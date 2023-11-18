@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-bounded_strings-check.adb
 -- SUBJECT: Package containing unit tests of bounded_strings
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 with Ada.Characters.Latin_1;

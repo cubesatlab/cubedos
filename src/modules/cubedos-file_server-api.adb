@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-file_server-api.adb
 -- SUBJECT: Body of a package that implements the CubedOS.File_Server API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -55,7 +55,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Open_Request_Encode;
-   
+
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -78,7 +78,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Open_Request;
-   
+
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -100,7 +100,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Open_Request;
-   
+
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -123,7 +123,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Open_Request;
-   
+
    procedure Send_Open_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -148,7 +148,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Open_Request;
-   
+
    procedure Open_Request_Decode
       (Message : in Message_Record;
       Mode : out Mode_Type;
@@ -168,7 +168,7 @@ package body CubedOS.File_Server.API is
          Name := new Definite_String'(others => ' ');
       end;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Mode, Last);
       Position := Last + 1;
@@ -199,8 +199,8 @@ package body CubedOS.File_Server.API is
          end if;
       end;
    end Open_Request_Decode;
-   
-   
+
+
    procedure Open_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -231,7 +231,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Open_Reply_Encode;
-   
+
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -252,7 +252,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Open_Reply;
-   
+
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -272,7 +272,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Open_Reply;
-   
+
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -293,7 +293,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Open_Reply;
-   
+
    procedure Send_Open_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -316,7 +316,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Open_Reply;
-   
+
    procedure Open_Reply_Decode
       (Message : in Message_Record;
       Handle : out File_Handle_Type;
@@ -329,7 +329,7 @@ package body CubedOS.File_Server.API is
       Decode_Status := Success;
       Handle := File_Handle_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -340,8 +340,8 @@ package body CubedOS.File_Server.API is
          return;
       end if;
    end Open_Reply_Decode;
-   
-   
+
+
    procedure Read_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -375,7 +375,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Read_Request_Encode;
-   
+
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -398,7 +398,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Read_Request;
-   
+
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -420,7 +420,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Read_Request;
-   
+
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -443,7 +443,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Read_Request;
-   
+
    procedure Send_Read_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -468,7 +468,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Read_Request;
-   
+
    procedure Read_Request_Decode
       (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
@@ -484,7 +484,7 @@ package body CubedOS.File_Server.API is
       Handle := Valid_File_Handle_Type'Last;
       Amount := Read_Size_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -503,8 +503,8 @@ package body CubedOS.File_Server.API is
          return;
       end if;
    end Read_Request_Decode;
-   
-   
+
+
    procedure Read_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -540,7 +540,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Read_Reply_Encode;
-   
+
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -563,7 +563,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Read_Reply;
-   
+
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -585,7 +585,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Read_Reply;
-   
+
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -608,7 +608,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Read_Reply;
-   
+
    procedure Send_Read_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -633,7 +633,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Read_Reply;
-   
+
    procedure Read_Reply_Decode
       (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
@@ -648,7 +648,7 @@ package body CubedOS.File_Server.API is
       Handle := Valid_File_Handle_Type'Last;
       File_Data := new Octet_Array'(Octet_Array(Zero_Width_Octet_Array));
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -679,8 +679,8 @@ package body CubedOS.File_Server.API is
          end if;
       end;
    end Read_Reply_Decode;
-   
-   
+
+
    procedure Write_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -716,7 +716,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Write_Request_Encode;
-   
+
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -739,7 +739,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Write_Request;
-   
+
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -761,7 +761,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Write_Request;
-   
+
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -784,7 +784,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Write_Request;
-   
+
    procedure Send_Write_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -809,7 +809,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Write_Request;
-   
+
    procedure Write_Request_Decode
       (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
@@ -824,7 +824,7 @@ package body CubedOS.File_Server.API is
       Handle := Valid_File_Handle_Type'Last;
       File_Data := new Octet_Array'(Octet_Array(Zero_Width_Octet_Array));
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -855,8 +855,8 @@ package body CubedOS.File_Server.API is
          end if;
       end;
    end Write_Request_Decode;
-   
-   
+
+
    procedure Write_Reply_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -890,7 +890,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Write_Reply_Encode;
-   
+
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -913,7 +913,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Write_Reply;
-   
+
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -935,7 +935,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Write_Reply;
-   
+
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -958,7 +958,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Write_Reply;
-   
+
    procedure Send_Write_Reply
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -983,7 +983,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Write_Reply;
-   
+
    procedure Write_Reply_Decode
       (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
@@ -999,7 +999,7 @@ package body CubedOS.File_Server.API is
       Handle := Valid_File_Handle_Type'Last;
       Amount := Write_Result_Size_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -1018,8 +1018,8 @@ package body CubedOS.File_Server.API is
          return;
       end if;
    end Write_Reply_Decode;
-   
-   
+
+
    procedure Close_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
@@ -1050,7 +1050,7 @@ package body CubedOS.File_Server.API is
       Delete(Message);
       pragma Unused(Last, Payload, Position, Message);
    end Close_Request_Encode;
-   
+
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -1071,7 +1071,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Status);
    end Send_Close_Request;
-   
+
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
       Receiver_Address : Message_Address;
@@ -1091,7 +1091,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message);
    end Send_Close_Request;
-   
+
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -1112,7 +1112,7 @@ package body CubedOS.File_Server.API is
          Priority => Priority);
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, This_Domain, Status);
    end Send_Close_Request;
-   
+
    procedure Send_Close_Request
       (Sender : Module_Mailbox;
       Receiving_Module : Module_Metadata;
@@ -1135,7 +1135,7 @@ package body CubedOS.File_Server.API is
       Message_Manager.Send_Message(Sender, Message, Receiving_Module, Receiving_Domain, Status);
       pragma Unused(Status);
    end Send_Close_Request;
-   
+
    procedure Close_Request_Decode
       (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
@@ -1148,7 +1148,7 @@ package body CubedOS.File_Server.API is
       Decode_Status := Success;
       Handle := Valid_File_Handle_Type'Last;
       Position := 0;
-      
+
       -- Begin Decoding
       XDR.Decode(Payload(Message).all, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -1159,7 +1159,7 @@ package body CubedOS.File_Server.API is
          return;
       end if;
    end Close_Request_Decode;
-   
-   
+
+
 
 end CubedOS.File_Server.API;

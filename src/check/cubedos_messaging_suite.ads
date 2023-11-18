@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : cubedos_messaging_suite.ads
 -- SUBJECT : The main test suite of the CubedOS message manager unit test program.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical COllege
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 ---------------------------------------------------------------------------
 with AUnit.Test_Suites;

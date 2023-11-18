@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : cubedlib_suite.ads
 -- SUBJECT : The main test suite of the CubedOS library unit test program.
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical COllege
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 ---------------------------------------------------------------------------
 with AUnit.Test_Suites;

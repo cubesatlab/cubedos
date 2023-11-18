@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : cubedos_check.adb
 -- SUBJECT : Main procedure of the CubedOS library unit test program.
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 ---------------------------------------------------------------------------
 with AUnit.Run;

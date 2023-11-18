@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-transport_udp-messages.ads
 -- SUBJECT: body package for the UDP implementation of the CubedOS Message Service.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 with GNAT.Sockets;   use GNAT.Sockets;

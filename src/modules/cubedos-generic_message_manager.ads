@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.ads
 -- SUBJECT: Specification of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This package defines the core CubedOS messaging system.
 -- This package is instantiated once for each domain in a distributed CubedOS system.

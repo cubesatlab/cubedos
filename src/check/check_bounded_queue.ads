@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : check_bounded_queue.ads
 -- SUBJECT : Package containing tests the bounded queue.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 ---------------------------------------------------------------------------
 with AUnit;
 with AUnit.Test_Cases;

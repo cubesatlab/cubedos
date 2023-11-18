@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-message_types.adb
 -- SUBJECT: Implementation of message passing types in CubedOS.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This package implements several types used in the message passing system.
 --------------------------------------------------------------------------------

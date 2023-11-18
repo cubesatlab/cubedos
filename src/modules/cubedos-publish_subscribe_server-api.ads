@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-publish_subscribe_server-api.ads
 -- SUBJECT: Specification of a package that defines the publish/subscribe API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.

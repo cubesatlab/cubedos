@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : check_message_passing.ads
 -- SUBJECT : Package containing tests for the message system.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 -- Tests intra-domain message passing.
 --

@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : check_bounded_queue.adb
 -- SUBJECT : Package containing tests of bounded queue.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 ---------------------------------------------------------------------------
 pragma Assertion_Policy(Check);
 

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE    : name_resolver.ads
 -- SUBJECT : Specification of a package holding Domain IDs and Module IDs
--- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 -- Each CubedOS application must provide a version of this file that maps "well-
 -- known" names to (Domain_ID, Module_ID) pairs. The precise ID asssigments are

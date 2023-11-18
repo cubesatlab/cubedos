@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-time_server-api.ads
 -- SUBJECT: Specification of a package that defines the CubedOS.Time_Server API
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package are task safe.
 --
@@ -26,32 +26,32 @@ package CubedOS.Time_Server.API is
    pragma Elaborate_Body;
    type Octet_Array_Ptr is access CubedOS.Lib.Octet_Array;
    type String_Ptr is access String;
-   
+
    This_Module : constant Module_ID_Type := Name_Resolver.Time_Server;
-   
+
    type Message_Type is
-      (Tick_Reply, 
-      Relative_Request, 
-      Absolute_Request, 
+      (Tick_Reply,
+      Relative_Request,
+      Absolute_Request,
       Cancel_Request);
 
    Tick_Reply_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Tick_Reply));
    Relative_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Relative_Request));
    Absolute_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Absolute_Request));
    Cancel_Request_Msg : constant Universal_Message_Type := (This_Module, Message_Type'Pos(Cancel_Request));
-   
+
    This_Receives : aliased constant Message_Type_Array := (
    Relative_Request_Msg,
    Absolute_Request_Msg,
    Cancel_Request_Msg);
    Mail_Target : aliased constant Module_Metadata := Define_Module(This_Module, This_Receives'Access);
-   
+
    type Series_Type is (One_Shot, Periodic);
 
    type Series_ID_Type is range (1) .. (Natural'Last);
-   
+
    type Series_Count_Type is range (0) .. (Natural'Last);
-   
+
    procedure Relative_Request_Encode
       (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;

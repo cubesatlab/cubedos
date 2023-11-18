@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- FILE    : cubedos_messaging_suite.adb
 -- SUBJECT : The main test suite of the CubedOS message manger unit test program.
--- AUTHOR  : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 ---------------------------------------------------------------------------
 

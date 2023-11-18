@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-xdr.ads
 -- SUBJECT: Specification of an XDR encoding/decoding package.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- XDR is a standard for converting typed data into an octet stream suitable for exchange
 -- between communicating partners. Unlike ASN.1, the data is not self describing so the

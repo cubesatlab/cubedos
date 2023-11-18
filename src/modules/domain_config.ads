@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : domain_config.ads
 -- SUBJECT: Specifies information regarding a domain.
--- AUTHOR : (C) Copyright 2023 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This file is included by instantiations of message manager.
 -- It has the procedure used by the message manager to route outgoing

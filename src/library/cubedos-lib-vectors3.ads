@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-vectors3.ads
 -- SUBJECT: Specification of a package for manipulating 3D vectors of floating point numbers.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
