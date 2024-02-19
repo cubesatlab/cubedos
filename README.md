@@ -19,7 +19,6 @@ used for generating CubedOS API encoder/decoder subprograms. The subfolders are 
   developer can use these templates to simplify the programming of new applications, however
   their use is not strictly required.
 
-
 Build & Test Instructions
 -------------------------
 
