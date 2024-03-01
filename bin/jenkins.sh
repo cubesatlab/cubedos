@@ -5,7 +5,7 @@
 set -e
 
 # Make sure we have the environment we need.
-export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/codepeer/bin:/opt/gnatstudio/bin:$PATH
+export PATH=/opt/gnat/bin:/opt/spark/bin:/opt/gnatsas/bin:/opt/gnatstudio/bin:$PATH
 
 # Build and run the unit tests.
 gprbuild -P cubedos.gpr src/check/cubedos_check.adb
