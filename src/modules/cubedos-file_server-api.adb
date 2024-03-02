@@ -57,13 +57,13 @@ package body CubedOS.File_Server.API is
    end Open_Request_Encode;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -80,12 +80,12 @@ package body CubedOS.File_Server.API is
    end Send_Open_Request;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -102,13 +102,13 @@ package body CubedOS.File_Server.API is
    end Send_Open_Request;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -125,13 +125,13 @@ package body CubedOS.File_Server.API is
    end Send_Open_Request;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -150,7 +150,7 @@ package body CubedOS.File_Server.API is
    end Send_Open_Request;
 
    procedure Open_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Mode : out Mode_Type;
       Name : out File_Name_Type_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -178,6 +178,7 @@ package body CubedOS.File_Server.API is
          Decode_Status := Malformed;
          return;
       end if;
+
       declare
          Name_Size : XDR_Unsigned;
       begin
@@ -202,7 +203,7 @@ package body CubedOS.File_Server.API is
 
 
    procedure Open_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
@@ -233,12 +234,12 @@ package body CubedOS.File_Server.API is
    end Open_Reply_Encode;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -254,11 +255,11 @@ package body CubedOS.File_Server.API is
    end Send_Open_Reply;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -274,12 +275,12 @@ package body CubedOS.File_Server.API is
    end Send_Open_Reply;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -295,12 +296,12 @@ package body CubedOS.File_Server.API is
    end Send_Open_Reply;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -318,7 +319,7 @@ package body CubedOS.File_Server.API is
    end Send_Open_Reply;
 
    procedure Open_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    is
@@ -337,13 +338,12 @@ package body CubedOS.File_Server.API is
          Handle := File_Handle_Type(Raw_Handle);
       else
          Decode_Status := Malformed;
-         return;
       end if;
    end Open_Reply_Decode;
 
 
    procedure Read_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -377,13 +377,13 @@ package body CubedOS.File_Server.API is
    end Read_Request_Encode;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -400,12 +400,12 @@ package body CubedOS.File_Server.API is
    end Send_Read_Request;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -422,13 +422,13 @@ package body CubedOS.File_Server.API is
    end Send_Read_Request;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -445,13 +445,13 @@ package body CubedOS.File_Server.API is
    end Send_Read_Request;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
       Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -470,7 +470,7 @@ package body CubedOS.File_Server.API is
    end Send_Read_Request;
 
    procedure Read_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Amount : out Read_Size_Type;
       Decode_Status : out Message_Status_Type)
@@ -506,7 +506,7 @@ package body CubedOS.File_Server.API is
 
 
    procedure Read_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -542,13 +542,13 @@ package body CubedOS.File_Server.API is
    end Read_Reply_Encode;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -565,12 +565,12 @@ package body CubedOS.File_Server.API is
    end Send_Read_Reply;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -587,13 +587,13 @@ package body CubedOS.File_Server.API is
    end Send_Read_Reply;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -610,13 +610,13 @@ package body CubedOS.File_Server.API is
    end Send_Read_Reply;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -635,7 +635,7 @@ package body CubedOS.File_Server.API is
    end Send_Read_Reply;
 
    procedure Read_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       File_Data : out Octet_Array_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -682,7 +682,7 @@ package body CubedOS.File_Server.API is
 
 
    procedure Write_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -718,13 +718,13 @@ package body CubedOS.File_Server.API is
    end Write_Request_Encode;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -741,12 +741,12 @@ package body CubedOS.File_Server.API is
    end Send_Write_Request;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -763,13 +763,13 @@ package body CubedOS.File_Server.API is
    end Send_Write_Request;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -786,13 +786,13 @@ package body CubedOS.File_Server.API is
    end Send_Write_Request;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -811,7 +811,7 @@ package body CubedOS.File_Server.API is
    end Send_Write_Request;
 
    procedure Write_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       File_Data : out Octet_Array_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -858,7 +858,7 @@ package body CubedOS.File_Server.API is
 
 
    procedure Write_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -892,13 +892,13 @@ package body CubedOS.File_Server.API is
    end Write_Reply_Encode;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -915,12 +915,12 @@ package body CubedOS.File_Server.API is
    end Send_Write_Reply;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -937,13 +937,13 @@ package body CubedOS.File_Server.API is
    end Send_Write_Reply;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -960,13 +960,13 @@ package body CubedOS.File_Server.API is
    end Send_Write_Reply;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -985,7 +985,7 @@ package body CubedOS.File_Server.API is
    end Send_Write_Reply;
 
    procedure Write_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Amount : out Write_Result_Size_Type;
       Decode_Status : out Message_Status_Type)
@@ -1021,7 +1021,7 @@ package body CubedOS.File_Server.API is
 
 
    procedure Close_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -1052,12 +1052,12 @@ package body CubedOS.File_Server.API is
    end Close_Request_Encode;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
       Request_ID : Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -1073,11 +1073,11 @@ package body CubedOS.File_Server.API is
    end Send_Close_Request;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -1093,12 +1093,12 @@ package body CubedOS.File_Server.API is
    end Send_Close_Request;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
    begin
@@ -1114,12 +1114,12 @@ package body CubedOS.File_Server.API is
    end Send_Close_Request;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    is
       Message : Message_Record;
       Status : Status_Type := Unavailable;
@@ -1137,7 +1137,7 @@ package body CubedOS.File_Server.API is
    end Send_Close_Request;
 
    procedure Close_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    is
@@ -1159,7 +1159,5 @@ package body CubedOS.File_Server.API is
          return;
       end if;
    end Close_Request_Decode;
-
-
 
 end CubedOS.File_Server.API;

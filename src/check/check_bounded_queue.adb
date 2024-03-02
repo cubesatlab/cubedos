@@ -57,10 +57,10 @@ package body Check_Bounded_Queue is
       Assert(Size(Queue1) = 3, "Queue size changed");
 
       Next(Queue1, Bool);
-      Assert(Bool.all = False, "Queue fetched eroneous element 1");
+      Assert(not Bool.all, "Queue fetched eroneous element 1");
       Bool := null;
       Next(Queue1, Bool);
-      Assert(Bool.all = True, "Queue fetched eroneous element 2");
+      Assert(Bool.all, "Queue fetched eroneous element 2");
       Bool := null;
 
       Assert(Count(Queue1) = 1, "Queue failed to remove elements");

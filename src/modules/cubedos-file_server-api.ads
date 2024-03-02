@@ -77,7 +77,7 @@ package CubedOS.File_Server.API is
    procedure Free is new Ada.Unchecked_Deallocation(File_Name_Type, File_Name_Type_Ptr);
 
    procedure Open_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
@@ -85,7 +85,7 @@ package CubedOS.File_Server.API is
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Open_Request_Msg
@@ -94,73 +94,69 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
-         and then Receiver_Address.Module_ID = This_Module
-      ;
+         and then Receiver_Address.Module_ID = This_Module;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiver_Address.Module_ID = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Open_Request_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Open_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Mode : in Mode_Type;
       Name : in File_Name_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then (0 < Name'Length and Name'Length <= XDR_Size_Type'Last - 12)
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Open_Request_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Open_Request(Message : Message_Record) return Boolean is
+   function Is_Open_Request(Message : in Message_Record) return Boolean is
       (CubedOS.Message_Types.Message_Type(Message) = Open_Request_Msg);
    procedure Open_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Mode : out Mode_Type;
       Name : out File_Name_Type_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -170,14 +166,14 @@ package CubedOS.File_Server.API is
 
 
    procedure Open_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Sender_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Open_Reply_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -185,53 +181,50 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
-         and then Module_ID(Sender) = This_Module
-      ;
+         and then Module_ID(Sender) = This_Module;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Open_Reply_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Open_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
@@ -240,10 +233,10 @@ package CubedOS.File_Server.API is
          and then Has_Module(This_Domain, Receiving_Module.Module_ID)
       ;
 
-   function Is_Open_Reply(Message : Message_Record) return Boolean is
+   function Is_Open_Reply(Message : in Message_Record) return Boolean is
       (CubedOS.Message_Types.Message_Type(Message) = Open_Reply_Msg);
    procedure Open_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    with
@@ -252,7 +245,7 @@ package CubedOS.File_Server.API is
 
 
    procedure Read_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -260,7 +253,7 @@ package CubedOS.File_Server.API is
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Read_Request_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -268,12 +261,12 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
@@ -281,56 +274,53 @@ package CubedOS.File_Server.API is
       ;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Read_Request_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Read_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Read_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Read_Request_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Read_Request(Message : Message_Record) return Boolean is
+   function Is_Read_Request(Message : in Message_Record) return Boolean is
       (CubedOS.Message_Types.Message_Type(Message) = Read_Request_Msg);
    procedure Read_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Amount : out Read_Size_Type;
       Decode_Status : out Message_Status_Type)
@@ -340,7 +330,7 @@ package CubedOS.File_Server.API is
 
 
    procedure Read_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -348,7 +338,7 @@ package CubedOS.File_Server.API is
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Sender_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Read_Reply_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -356,69 +346,66 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
-         and then Module_ID(Sender) = This_Module
-      ;
+         and then Module_ID(Sender) = This_Module;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Read_Reply_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Read_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Read_Reply_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Read_Reply(Message : Message_Record) return Boolean is
-      (CubedOS.Message_Types.Message_Type(Message) = Read_Reply_Msg);
+   function Is_Read_Reply(Message : in Message_Record) return Boolean is
+     (CubedOS.Message_Types.Message_Type(Message) = Read_Reply_Msg);
+
    procedure Read_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       File_Data : out Octet_Array_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -428,7 +415,7 @@ package CubedOS.File_Server.API is
 
 
    procedure Write_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -436,7 +423,7 @@ package CubedOS.File_Server.API is
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Write_Request_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -444,69 +431,66 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
-         and then Receiver_Address.Module_ID = This_Module
-      ;
+         and then Receiver_Address.Module_ID = This_Module;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Write_Request_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Write_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       File_Data : in Octet_Array;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Write_Request_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Write_Request(Message : Message_Record) return Boolean is
-      (CubedOS.Message_Types.Message_Type(Message) = Write_Request_Msg);
+   function Is_Write_Request(Message : in Message_Record) return Boolean is
+     (CubedOS.Message_Types.Message_Type(Message) = Write_Request_Msg);
+
    procedure Write_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       File_Data : out Octet_Array_Ptr;
       Decode_Status : out Message_Status_Type)
@@ -516,7 +500,7 @@ package CubedOS.File_Server.API is
 
 
    procedure Write_Reply_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
@@ -524,7 +508,7 @@ package CubedOS.File_Server.API is
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Sender_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Write_Reply_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -532,69 +516,66 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
-         and then Module_ID(Sender) = This_Module
-      ;
+         and then Module_ID(Sender) = This_Module;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Write_Reply_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Write_Reply
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Amount : in Write_Result_Size_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Module_ID(Sender) = This_Module
          and then Receives(Receiving_Module, Write_Reply_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Write_Reply(Message : Message_Record) return Boolean is
-      (CubedOS.Message_Types.Message_Type(Message) = Write_Reply_Msg);
+   function Is_Write_Reply(Message : in Message_Record) return Boolean is
+     (CubedOS.Message_Types.Message_Type(Message) = Write_Reply_Msg);
+
    procedure Write_Reply_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Amount : out Write_Result_Size_Type;
       Decode_Status : out Message_Status_Type)
@@ -604,14 +585,14 @@ package CubedOS.File_Server.API is
 
 
    procedure Close_Request_Encode
-      (Receiver_Address : in Message_Address;
+     (Receiver_Address : in Message_Address;
       Sender_Address : in Message_Address;
       Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Priority : in System.Priority := System.Default_Priority;
       Result : out  Message_Record)
    with
-      Pre => true
+      Pre => True
          and then Receiver_Address.Module_ID = This_Module,
       Post => CubedOS.Message_Types.Message_Type(Result) = Close_Request_Msg
          and CubedOS.Message_Types.Sender_Address(Result) = Sender_Address
@@ -619,71 +600,66 @@ package CubedOS.File_Server.API is
          and Payload(Result) /= null;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
-         and then Receiver_Address.Module_ID = This_Module
-      ;
+         and then Receiver_Address.Module_ID = This_Module;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiver_Address.Module_ID = This_Module
-         and then Receiver_Address.Domain_ID = Domain_ID
-      ;
+         and then Receiver_Address.Domain_ID = Domain_ID;
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
-      Receiving_Domain : Domain_Metadata := This_Domain;
-      Priority : System.Priority := System.Default_Priority)
+      Receiving_Domain : in Domain_Metadata := This_Domain;
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Close_Request_Msg)
-         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(Receiving_Domain, Receiving_Module.Module_ID);
 
    procedure Send_Close_Request
-      (Sender : Module_Mailbox;
-      Receiving_Module : Module_Metadata;
-      Request_ID : Request_ID_Type;
+     (Sender : in Module_Mailbox;
+      Receiving_Module : in Module_Metadata;
+      Request_ID : in Request_ID_Type;
       Handle : in Valid_File_Handle_Type;
       Status : out Status_Type;
-      Priority : System.Priority := System.Default_Priority)
+      Priority : in System.Priority := System.Default_Priority)
    with
       Global => (In_Out => Mailboxes),
       Pre => Messaging_Ready
          and then Receiving_Module.Module_ID = This_Module
          and then Receives(Receiving_Module, Close_Request_Msg)
-         and then Has_Module(This_Domain, Receiving_Module.Module_ID)
-      ;
+         and then Has_Module(This_Domain, Receiving_Module.Module_ID);
 
-   function Is_Close_Request(Message : Message_Record) return Boolean is
-      (CubedOS.Message_Types.Message_Type(Message) = Close_Request_Msg);
+   function Is_Close_Request(Message : in Message_Record) return Boolean is
+     (CubedOS.Message_Types.Message_Type(Message) = Close_Request_Msg);
+
    procedure Close_Request_Decode
-      (Message : in Message_Record;
+     (Message : in Message_Record;
       Handle : out Valid_File_Handle_Type;
       Decode_Status : out Message_Status_Type)
    with
       Global => null,
       Pre => Is_Close_Request(Message) and Payload(Message) /= null;
-
-
 
 end CubedOS.File_Server.API;

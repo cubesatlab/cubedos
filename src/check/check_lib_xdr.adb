@@ -263,10 +263,11 @@ package body Check_Lib_XDR is
       Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
       Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = 0.0, "Decoded incorrectly" & XDR_Float'Image(Decoded_Value) & " (should be 0)");
+      Assert
+        (Decoded_Value = 0.0, "Decoded incorrectly: " & XDR_Float'Image(Decoded_Value) & " (should be 0)");
       Assert(Special = None, "Number was not special");
 
-      -- negative zero
+      -- Negative zero
       Data := (others => 2#1111_1111#);
       Encode(XDR_Float'(-0.0), Data, 0, Last);
       Assert(Data(0) = 2#1000_0000#, "Encoded incorrectly");
@@ -274,7 +275,8 @@ package body Check_Lib_XDR is
       Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
       Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = (-0.0), "Decoded incorrectly" & XDR_Float'Image(Decoded_Value) & " (should be -0)");
+      Assert
+        (Decoded_Value = (-0.0), "Decoded incorrectly: " & XDR_Float'Image(Decoded_Value) & " (should be -0)");
       Assert(Special = None, "Number was not special");
 
       -- 1.21
@@ -286,7 +288,8 @@ package body Check_Lib_XDR is
       Assert(Data(2) = 2#1110_0001#, "Encoded incorrectly");
       Assert(Data(3) = 2#0100_1000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = 1.21, "Decoded incorrectly: " & XDR_Float'Image(Decoded_Value) & " (should be 1.21)");
+      Assert
+        (Decoded_Value = 1.21, "Decoded incorrectly: " & XDR_Float'Image(Decoded_Value) & " (should be 1.21)");
       Assert(Special = None, "Number was not special");
 
       -- Max
@@ -323,17 +326,21 @@ package body Check_Lib_XDR is
       -- Positive number with exponent all 1s and nonzero fraction is NaN
       Data := (2#0111_1111#, 2#1000_0001#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = NaN, "NaN number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert(Special = NaN, "NaN number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- Positive infinity
       Data := (2#0111_1111#, 2#1000_0000#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = Positive_Infinity, "+Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert
+        (Special = Positive_Infinity,
+         "+Infinity number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- Negative infinity
       Data := (2#1111_1111#, 2#1000_0000#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = Negative_Infinity, "-Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert
+        (Special = Negative_Infinity,
+         "-Infinity number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- TODO: Check for increased precision for near-zero values caused by denormalization
    end Test_Encode_Decode_8;
@@ -356,7 +363,8 @@ package body Check_Lib_XDR is
       Assert(Data(2) = 2#0000_0000#, "Encoded incorrectly");
       Assert(Data(3) = 2#0000_0000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = 0.0, "Decoded incorrectly" & XDR_Double'Image(Decoded_Value) & " (should be 0)");
+      Assert
+        (Decoded_Value = 0.0, "Decoded incorrectly: " & XDR_Double'Image(Decoded_Value) & " (should be 0)");
       Assert(Special = None, "Number was not special");
 
       -- negative zero
@@ -371,7 +379,8 @@ package body Check_Lib_XDR is
       Assert(Data(6) = 2#0000_0000#, "Encoded incorrectly");
       Assert(Data(7) = 2#0000_0000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = (-0.0), "Decoded incorrectly" & XDR_Double'Image(Decoded_Value) & " (should be -0)");
+      Assert
+        (Decoded_Value = (-0.0), "Decoded incorrectly: " & XDR_Double'Image(Decoded_Value) & " (should be -0)");
       Assert(Special = None, "Number was not special");
 
       -- 3
@@ -387,7 +396,8 @@ package body Check_Lib_XDR is
       Assert(Data(6) = 2#0000_0000#, "Encoded incorrectly");
       Assert(Data(7) = 2#0000_0000#, "Encoded incorrectly");
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Decoded_Value = 3.0, "Decoded incorrectly: " & XDR_Double'Image(Decoded_Value) & " (should be 1.21)");
+      Assert
+        (Decoded_Value = 3.0, "Decoded incorrectly: " & XDR_Double'Image(Decoded_Value) & " (should be 1.21)");
       Assert(Special = None, "Number was not special");
 
       -- Max
@@ -432,17 +442,22 @@ package body Check_Lib_XDR is
       -- Positive number with exponent all 1s and nonzero fraction is NaN
       Data := (2#0111_1111#, 2#1111_0001#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = NaN, "NaN number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert
+        (Special = NaN, "NaN number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- Positive infinity
       Data := (2#0111_1111#, 2#1111_0000#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = Positive_Infinity, "+Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert
+        (Special = Positive_Infinity,
+         "+Infinity number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- Negative infinity
       Data := (2#1111_1111#, 2#1111_0000#, others => 0);
       Decode(Data, 0, Decoded_Value, Last, Special);
-      Assert(Special = Negative_Infinity, "-Infinity number was marked incorrectly " & Special_Float_Value'Image(Special));
+      Assert
+        (Special = Negative_Infinity,
+         "-Infinity number was marked incorrectly: " & Special_Float_Value'Image(Special));
 
       -- TODO: Check for increased precision for near-zero values caused by denormalization
    end Test_Encode_Decode_9;
@@ -510,17 +525,38 @@ package body Check_Lib_XDR is
 
    procedure Register_Tests(T : in out Lib_XDR_Test) is
    begin
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_1'Access, "32 bit integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_2'Access, "32 bit integer (with negatives)");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_3'Access, "32 bit unsigned integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_4'Access, "Boolean");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_5'Access, "64 bit integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_10'Access, "fixed length opaque data");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_11'Access, "fixed length string");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_1'Access, "32-bit integer");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_2'Access, "32-bit integer (with negatives)");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_3'Access, "32-bit unsigned integer");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_4'Access, "Boolean");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_5'Access, "64-bit integer");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_6'Access, "64-bit integer (with negatives)");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_7'Access, "64-bit unsigned integer");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_8'Access, "single precision float");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_9'Access, "double precision float");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_10'Access, "fixed length opaque data");
+
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_11'Access, "fixed length string");
    end Register_Tests;
 
 

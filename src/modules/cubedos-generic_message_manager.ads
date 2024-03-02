@@ -70,8 +70,9 @@ is
    -- Modules should keep their instance of this object hidden.
    type Module_Mailbox is private;
 
-   function Make_Module_Mailbox(ID : in Module_ID_Type;
-                                Spec : Module_Metadata) return Module_Mailbox
+   function Make_Module_Mailbox
+     (ID : in Module_ID_Type;
+      Spec : in Module_Metadata) return Module_Mailbox
      with
        Pre => ID = Spec.Module_ID,
        Post => Module_ID(Make_Module_Mailbox'Result) = ID
@@ -96,25 +97,25 @@ is
      Post => Module_Registered(Module_ID(Mailbox));
 
 
-   function Spec(Box : Module_Mailbox) return Module_Metadata
+   function Spec(Box : in Module_Mailbox) return Module_Metadata
      with Post => Spec'Result.Receive_Types /= null;
-   function Valid(Box : Module_Mailbox) return Boolean;
-   function Module_ID(Box : Module_Mailbox) return Module_ID_Type;
+   function Valid(Box : in Module_Mailbox) return Boolean;
+   function Module_ID(Box : in Module_Mailbox) return Module_ID_Type;
 
    -- Checks if the given receiver may legally receive the given message type.
-   function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+   function Receives(Receiver : in Module_Mailbox; Msg_Type : in Universal_Message_Type) return Boolean
      with Ghost,
      Depends => (Receives'Result => (Receiver, Msg_Type));
 
    -- Get the number of messages in the mailbox waiting
    -- to be read.
-   procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural)
+   procedure Pending_Messages(Box : in Module_Mailbox; Size : out Natural)
      with Global => (In_Out => Mailboxes),
        Pre => Has_Module(This_Domain, Module_ID(Box));
 
    -- A blocking function which will retreive messages sent to the given mailbox.
    -- The message will be of a type that the mailbox is allowed to receive.
-   procedure Read_Next(Box : Module_Mailbox; Msg : out Message_Record)
+   procedure Read_Next(Box : in Module_Mailbox; Msg : out Message_Record)
      with Pre => Messaging_Ready and Has_Module(This_Domain, Module_ID(Box)),
      Post => Payload(Msg) /= null
      and Receives(Spec(Box), Message_Type(Msg));
@@ -138,11 +139,12 @@ is
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
-   procedure Send_Message(Box : Module_Mailbox;
-                          Msg : in out Message_Record;
-                          Target_Module : Module_Metadata;
-                          Target_Domain : Domain_Metadata := This_Domain;
-                          Status : out Status_Type)
+   procedure Send_Message
+     (Box : in Module_Mailbox;
+      Msg : in out Message_Record;
+      Target_Module : in Module_Metadata;
+      Target_Domain : in Domain_Metadata := This_Domain;
+      Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Pre => Messaging_Ready
      and then Payload(Msg) /= null
@@ -159,7 +161,7 @@ is
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
-   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record)
+   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record)
      with Global => (In_Out => Mailboxes),
      Depends => (Mailboxes => +(Msg),
                  Msg => Msg,
@@ -174,7 +176,7 @@ is
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
-   procedure Send_Message(Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
+   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
      with Global => (In_Out => Mailboxes),
      Depends => (Mailboxes => +(Msg),
                  Status => (Msg, Mailboxes),
@@ -242,15 +244,16 @@ private
          Spec : Module_Metadata;
       end record;
 
-   function Make_Module_Mailbox(ID : in Module_ID_Type;
-                                Spec : Module_Metadata) return Module_Mailbox
-     is (ID, Spec);
+   function Make_Module_Mailbox(ID : in Module_ID_Type; Spec : in Module_Metadata) return Module_Mailbox is
+     (ID, Spec);
 
-   function Spec(Box : Module_Mailbox) return Module_Metadata
-     is (Box.Spec);
-   function Valid(Box : Module_Mailbox) return Boolean
-     is (Box.Spec.Receive_Types /= null);
-   function Module_ID(Box : Module_Mailbox) return Module_ID_Type
-     is (Box.Module_ID);
+   function Spec(Box : in Module_Mailbox) return Module_Metadata is
+     (Box.Spec);
+
+   function Valid(Box : in Module_Mailbox) return Boolean is
+     (Box.Spec.Receive_Types /= null);
+
+   function Module_ID(Box : in Module_Mailbox) return Module_ID_Type is
+     (Box.Module_ID);
 
 end CubedOS.Generic_Message_Manager;

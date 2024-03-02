@@ -29,11 +29,15 @@ is
 
    protected Init_Lock is
       function Is_Locked return Boolean;
-      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean
+
+      function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean
         with Pre => Has_Module(This_Domain, Module_ID);
+
       entry Wait;
-      procedure Unlock (Module : Module_ID_Type)
+
+      procedure Unlock(Module : in Module_ID_Type)
         with Pre => Has_Module(This_Domain, Module);
+
       procedure Unlock_Manual
         with Post => not Is_Locked;
    private
@@ -66,10 +70,10 @@ is
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
       entry Receive (Message : out Message_Record);
-        --with Post => Is_Valid(Message);
+      -- with Post => Is_Valid(Message);
 
       -- Set the mailbox size and metadata
-      procedure Initialize (Spec : Module_Metadata; Size : in Positive)
+      procedure Initialize (Spec : in Module_Metadata; Size : in Positive)
         with Pre => Size < Natural'Last - 1;
 
    private
@@ -102,7 +106,7 @@ is
    -- A bijective function from Module_IDs inside this domain to their index
    -- in arrays. In a normal programming language we would be using a map instead
    -- of this.
-   function Index_Of(Module_ID : Module_ID_Type) return Module_Index
+   function Index_Of(Module_ID : in Module_ID_Type) return Module_Index
      with Pre => Has_Module(This_Domain, Module_ID)
    is
       Index : Module_Index;
@@ -135,7 +139,7 @@ is
    protected body Init_Lock is
       function Is_Locked return Boolean
         is (Locked);
-      function Is_Initialized(Module_ID : Module_ID_Type) return Boolean is
+      function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean is
          Index : constant Module_Index := Index_Of(Module_ID);
       begin
          if Inited = null then
@@ -151,7 +155,7 @@ is
          null;
       end Wait;
 
-      procedure Unlock (Module : Module_ID_Type) is
+      procedure Unlock (Module : in Module_ID_Type) is
          Index : constant Module_Index := Index_Of(Module);
       begin
          if Inited = null then
@@ -245,7 +249,7 @@ is
          end if;
       end Receive;
 
-      procedure Initialize (Spec : Module_Metadata; Size : in Positive) is
+      procedure Initialize (Spec : in Module_Metadata; Size : in Positive) is
       begin
          if Q = null then
             Q := new Message_Queues.Bounded_Queue'(Make(Size));
@@ -260,7 +264,7 @@ is
       Request_ID_Gen.Generate_Next_ID (Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : Module_Mailbox; Msg_Type : Universal_Message_Type) return Boolean
+   function Receives(Receiver : in Module_Mailbox; Msg_Type : in Universal_Message_Type) return Boolean
      is (Receives(Spec(Receiver), Msg_Type));
 
    procedure Route_Message
@@ -339,11 +343,12 @@ is
    -- Mailbox
    -------------
 
-   procedure Send_Message(Box : Module_Mailbox;
-                          Msg : in out Message_Record;
-                          Target_Module : Module_Metadata;
-                          Target_Domain : Domain_Metadata := This_Domain;
-                          Status : out Status_Type)
+   procedure Send_Message
+     (Box : in Module_Mailbox;
+      Msg : in out Message_Record;
+      Target_Module : in Module_Metadata;
+      Target_Domain : in Domain_Metadata := This_Domain;
+      Status : out Status_Type)
    is
       Ptr : Msg_Owner;
    begin
@@ -353,7 +358,7 @@ is
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Send_Message (Box : Module_Mailbox; Msg : in out Message_Record)
+   procedure Send_Message (Box : in Module_Mailbox; Msg : in out Message_Record)
    is
       Ptr : Msg_Owner;
    begin
@@ -364,7 +369,7 @@ is
    end Send_Message;
 
    procedure Send_Message
-     (Box : Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
+     (Box : in Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
    is
       Ptr : Msg_Owner;
    begin
@@ -374,7 +379,7 @@ is
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Read_Next (Box : Module_Mailbox; Msg : out Message_Record) is
+   procedure Read_Next (Box : in Module_Mailbox; Msg : out Message_Record) is
       Result : Message_Record;
    begin
       Message_Storage (Index_Of(Box.Module_ID)).Receive (Result);
@@ -396,7 +401,7 @@ is
       pragma Assert(Receives(Spec(Box), Message_Type(Msg)));
    end Read_Next;
 
-   procedure Pending_Messages(Box : Module_Mailbox; Size : out Natural) is
+   procedure Pending_Messages(Box : in Module_Mailbox; Size : out Natural) is
    begin
       Size := Message_Storage (Index_Of(Module_ID(Box))).Message_Count;
    end Pending_Messages;
@@ -406,8 +411,9 @@ is
      with SPARK_Mode => Off;
      -- Lying to SPARK because this has no meaningful interferences
 
-   procedure Register_Module(Mailbox : in Module_Mailbox;
-                             Msg_Queue_Size : in Positive)
+   procedure Register_Module
+     (Mailbox : in Module_Mailbox;
+      Msg_Queue_Size : in Positive)
    is
    begin
       -- Create a new mailbox for the ID
@@ -424,6 +430,6 @@ is
       Route_Message(Msg);
    end Handle_Received;
 
-begin
+begin -- CubedOS.Generic_Message_Manager
    pragma Assert(for all ID of This_Domain.Module_IDs => not Module_Registered(ID));
 end CubedOS.Generic_Message_Manager;

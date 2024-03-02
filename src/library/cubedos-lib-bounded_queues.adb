@@ -16,7 +16,7 @@ package body CubedOS.Lib.Bounded_Queues is
       Src := null;
    end Move;
 
-   function Make (Capacity : Positive) return Bounded_Queue is
+   function Make (Capacity : in Positive) return Bounded_Queue is
       (Capacity - 1, (others => null), 0, 0, 0);
 
    function Count(Q: in Bounded_Queue) return Count_Type is
