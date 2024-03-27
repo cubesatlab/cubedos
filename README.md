@@ -28,7 +28,7 @@ sample, and benchmark programs can be compiled and run on the development host. 
 that target other platforms are also included. Final testing and performance evaluations should
 be done on your specific target platform, of course.
 
-We use the GNAT Pro v24 toolset for development. Some experimentation has been done with using
+We use the GNAT Pro v24.1 toolset for development. Some experimentation has been done with using
 [Alire](https://alire.ada.dev/docs/) as a build tool for CubedOS and its sample programs, but
 that work is incomplete. The `alire.toml` file at the root of the CubedOS source tree should be
 considered experimental.
