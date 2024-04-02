@@ -4,7 +4,7 @@
 
 CubedOS mailboxes store messages as unstructured octet arrays. This allows a general purpose
 mailbox package to store and manipulate messages of any type. Unfortunately this also requires
-that well structured, well typed message information be encoded to raw octets before being
+that well-structured, well typed message information be encoded to raw octets before being
 placed in a mailbox and then decoded after being retrieved from a mailbox.
 
 The CubedOS convention is to use External Data Representation (XDR) encoded messages. XDR is a
@@ -18,7 +18,7 @@ the correctness of \texttt{Merc} itself.
 
 The use of \texttt{Merc} mitigates some of CubedOS's disadvantages. The developer need not
 manually write the tedious and repetitive encoding and decoding subprograms. Furthermore, those
-subprograms have well-typed parameters thus shielding the programer from the inherent lack of
+subprograms have well-typed parameters thus shielding the programmer from the inherent lack of
 type safety in the mailboxes themselves.
 
 To illustrate CubedOS message handling, consider the following short example of a message
@@ -51,11 +51,14 @@ components can also be defined.
 can't be accessed directly from the encoding and decoding subprograms. There is currently no
 mechanism in \texttt{Merc} to solve this problem in the general case.
 
-Each message type has a message ID that is unique across the application. This is required to
-distinguish valid messages from invalid ones. \texttt{Merc} assigns these message type IDs automatically. The encoding subprogram installs the ID into the message as a
-hidden component. The decoding subprogram checks the message type ID and returns a
-failure status if it is invalid. Modules declare statically what message types it is prepared to receive and the message system discards unacceptable messages before they reach their destination. A CubedOS module reads a message from its mailbox, reads its message type and then
-disbatches it to the relevant decoder subprograms.
+Each message type has a message type ID that is unique across the application. This is required
+to distinguish valid messages from invalid ones. \texttt{Merc} assigns these message type IDs
+automatically. The encoding subprogram installs the ID into the message as a hidden component.
+The decoding subprogram checks the message type ID and returns a failure status if it is
+invalid. Modules declare statically what message types it is prepared to receive and the message
+system discards unacceptable messages before they reach their destination. A CubedOS module
+reads a message from its mailbox, reads its message type and then dispatches it to the relevant
+decoder subprograms.
 
 \texttt{Merc} is a work in progress. We intend to ultimately support as much of the XDR standard
-as we can including, for example, variable length arrays and discriminated unions.
+as possible including, for example, variable length arrays and discriminated unions.

@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "aunit",
+			"path": "../../local/gnat/include/aunit"
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"deallocated",
+			"Jorvik",
+			"Merc",
+			"MXDR",
+			"Ravenscar",
+			"subfolders"
+		],
+		"latex-workshop.latex.autoBuild.run": "never"
+	}
+}
