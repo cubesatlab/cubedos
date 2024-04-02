@@ -4,15 +4,17 @@
 -- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
-pragma SPARK_Mode (On);
+pragma SPARK_Mode(On);
 
 with CubedOS.Message_Types.Message_Queues; use CubedOS.Message_Types.Message_Queues;
 with Domain_Config;
 
-package body CubedOS.Generic_Message_Manager with
-Refined_State => (Mailboxes => Message_Storage,
-                  Lock => Init_Lock,
-                  Request_ID_Generator => Request_ID_Gen)
+package body CubedOS.Generic_Message_Manager
+with
+Refined_State =>
+  (Mailboxes            => Message_Storage,
+   Lock                 => Init_Lock,
+   Request_ID_Generator => Request_ID_Gen)
 is
 
    -- A protected object for generating request ID values.
@@ -77,7 +79,7 @@ is
         with Pre => Size < Natural'Last - 1;
 
    private
-      Q : Message_Queue_Owner := null;
+      Q : Message_Queue_Owner;
       Metadata : Module_Metadata := (1, Empty_Type_Array'Access);
       Message_Waiting : Boolean := False;
    end Sync_Mailbox;
