@@ -19,10 +19,10 @@ generic
 package CubedOS.Generic_Message_Manager
 with
   Abstract_State =>
-    ((Mailboxes with External),
-     (Lock with External),
-     (Request_ID_Generator with External)),
-    Initializes => (Mailboxes, Request_ID_Generator, Lock),
+    ((Mailboxes with External)),
+     --(Lock with External)),
+     --(Request_ID_Generator with External)),
+    Initializes => (Mailboxes),
     Initial_Condition => (for all ID of This_Domain.Module_IDs => not Module_Registered(ID))
 is
    This_Domain  : constant Domain_Metadata := Domain;
@@ -36,16 +36,16 @@ is
 
    -- At runtime, no messages are allowed to be sent until every module in this domain has
    -- registered its mailbox.
-   function Messaging_Ready return Boolean
-     with
-       Global => null,
-       Depends => (Messaging_Ready'Result => null);
+   function Messaging_Ready return Boolean;
+     --with
+     --  Global => null,
+     --  Depends => (Messaging_Ready'Result => null);
 
 
    -- This function blocks until all modules in the domain have intitialized their mailbox
    -- and messaging can be done safetly.
-   procedure Wait
-     with Post => Messaging_Ready;
+   procedure Wait;
+     --with Post => Messaging_Ready;
 
 
    --------------------------
@@ -54,8 +54,8 @@ is
 
    -- Returns an arbitrary, domain-unique request ID. Probably these IDs should also be unique
    -- across domains, but that is not yet implemented.
-   procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type)
-     with Global => (In_Out => Request_ID_Generator);
+   procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type);
+     --with Global => (In_Out => Request_ID_Generator);
 
 
    -------------------
@@ -69,30 +69,30 @@ is
 
    function Make_Module_Mailbox
      (ID   : in Module_ID_Type;
-      Spec : in Module_Metadata) return Module_Mailbox
-     with
-       Pre  => ID = Spec.Module_ID,
-       Post => Module_ID(Make_Module_Mailbox'Result) = ID and
-         (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
+      Spec : in Module_Metadata) return Module_Mailbox;
+     --with
+     --  Pre  => ID = Spec.Module_ID,
+     --  Post => Module_ID(Make_Module_Mailbox'Result) = ID and
+     --    (for all T of Spec.Receive_Types.all => Receives(Make_Module_Mailbox'Result, T));
 
    -- Checks if the given module id has already been registered.
-   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
-     with
-       Ghost,
-       Global => null;
+   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean;
+     --with
+     --  Ghost,
+     --  Global => null;
 
    -- Registers a module with the messaging system. Modules must specify the maximum number of
    -- messages their mailbox can store. The mailbox is registered to the domain of this
    -- Message_Manager.
-   procedure Register_Module(Mailbox : in Module_Mailbox; Msg_Queue_Size : in Positive)
-     with
-       Global  => (In_Out => (Mailboxes, Lock)),
-       Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
-                   Lock => +Mailbox),
-       Pre => Has_Module(This_Domain, Module_ID(Mailbox)) and
-         not Module_Registered(Module_ID(Mailbox)) and
-         Msg_Queue_Size < Natural'Last - 1,
-       Post => Module_Registered(Module_ID(Mailbox));
+   procedure Register_Module(Mailbox : in Module_Mailbox; Msg_Queue_Size : in Positive);
+     --with
+     --  Global  => (In_Out => (Mailboxes, Lock)),
+     --  Depends => (Mailboxes => +(Mailbox, Msg_Queue_Size),
+     --              Lock => +Mailbox),
+     --  Pre => Has_Module(This_Domain, Module_ID(Mailbox)) and
+     --    not Module_Registered(Module_ID(Mailbox)) and
+     --    Msg_Queue_Size < Natural'Last - 1,
+     --  Post => Module_Registered(Module_ID(Mailbox));
 
 
    function Spec(Box : in Module_Mailbox) return Module_Metadata
@@ -103,24 +103,24 @@ is
    -- Checks if the given receiver may legally receive the given message type.
    function Receives
      (Receiver : in Module_Mailbox;
-      Msg_Type : in Universal_Message_Type) return Boolean
-     with
-       Ghost,
-       Depends => (Receives'Result => (Receiver, Msg_Type));
+      Msg_Type : in Universal_Message_Type) return Boolean;
+     --with
+     --  Ghost,
+     --  Depends => (Receives'Result => (Receiver, Msg_Type));
 
    -- Get the number of messages in the mailbox waiting to be read.
-   procedure Pending_Messages(Box : in Module_Mailbox; Size : out Natural)
-     with
-       Global => (In_Out => Mailboxes),
-       Pre => Has_Module(This_Domain, Module_ID(Box));
+   procedure Pending_Messages(Box : in Module_Mailbox; Size : out Natural);
+     --with
+     --  Global => (In_Out => Mailboxes),
+     --  Pre => Has_Module(This_Domain, Module_ID(Box));
 
    -- A blocking function which will retreive messages sent to the given mailbox.
    -- The message will be of a type that the mailbox is allowed to receive.
-   procedure Read_Next(Box : in Module_Mailbox; Msg : out Message_Record)
-     with
-       Pre => Messaging_Ready and Has_Module(This_Domain, Module_ID(Box)),
-       Post => Payload(Msg) /= null and
-         Receives(Spec(Box), Message_Type(Msg));
+   procedure Read_Next(Box : in Module_Mailbox; Msg : out Message_Record);
+     --with
+     --  Pre => Messaging_Ready and Has_Module(This_Domain, Module_ID(Box)),
+     --  Post => Payload(Msg) /= null and
+     --    Receives(Spec(Box), Message_Type(Msg));
 
    -- The result status of a message send operation.
    --
@@ -146,16 +146,16 @@ is
       Msg : in out Message_Record;
       Target_Module : in Module_Metadata;
       Target_Domain : in Domain_Metadata := This_Domain;
-      Status : out Status_Type)
-     with
-       Global => (In_Out => Mailboxes),
-         Pre => Messaging_Ready and then
-         Payload(Msg) /= null and then
-         Receives(Target_Module, Message_Type(Msg)) and then
-         Has_Module(Target_Domain, Target_Module.Module_ID) and then
-         Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)) and then
-         Receiver_Address(Msg) = (Target_Domain.ID, Target_Module.Module_ID),
-       Post => Payload(Msg) = null;
+      Status : out Status_Type);
+     --with
+     --  Global => (In_Out => Mailboxes),
+     --    Pre => Messaging_Ready and then
+     --    Payload(Msg) /= null and then
+     --    Receives(Target_Module, Message_Type(Msg)) and then
+     --    Has_Module(Target_Domain, Target_Module.Module_ID) and then
+     --    Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)) and then
+     --    Receiver_Address(Msg) = (Target_Domain.ID, Target_Module.Module_ID),
+     --  Post => Payload(Msg) = null;
 
    -- Sends the given message, guaranteeing only that the sending address is from the current
    -- domain and sending module. Returns immediately, moving the message's payload making it
@@ -163,32 +163,32 @@ is
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
-   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record)
-     with Global => (In_Out => Mailboxes),
-     Depends => (Mailboxes => +(Msg),
-                 Msg => Msg,
-                 null => Box),
-     Pre => Messaging_Ready
-     and then Payload(Msg) /= null
-     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)),
-     Post => Payload(Msg) = null;
+   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record);
+     --with Global => (In_Out => Mailboxes),
+     --Depends => (Mailboxes => +(Msg),
+     --            Msg => Msg,
+     --            null => Box),
+     --Pre => Messaging_Ready
+     --and then Payload(Msg) /= null
+     --and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box)),
+     --Post => Payload(Msg) = null;
 
    -- Sends the given message.
    -- Returns immediately with the status of the operation's result.
    --
    -- This procedure generally shouldn't be called directly and will be used
    -- in auto-generated API files.
-   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
-     with Global => (In_Out => Mailboxes),
-     Depends => (Mailboxes => +(Msg),
-                 Status => (Msg, Mailboxes),
-                 Msg => Msg,
-                 null => Box),
-     Pre => Messaging_Ready
-     and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
-     and then Receiver_Address(Msg).Domain_ID = Domain_ID
-     and then Payload(Msg) /= null,
-     Post => Payload(Msg) = null;
+   procedure Send_Message(Box : in Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type);
+     --with Global => (In_Out => Mailboxes),
+     --Depends => (Mailboxes => +(Msg),
+     --            Status => (Msg, Mailboxes),
+     --            Msg => Msg,
+     --            null => Box),
+     --Pre => Messaging_Ready
+     --and then Sender_Address(Msg) = (This_Domain.ID, Module_ID(Box))
+     --and then Receiver_Address(Msg).Domain_ID = Domain_ID
+     --and then Payload(Msg) /= null,
+     --Post => Payload(Msg) = null;
 
 
    --------------------------
@@ -196,12 +196,12 @@ is
    --------------------------
 
    -- Submit a message received from a foreign domain to the message system.
-   procedure Handle_Received(Msg : in out Msg_Owner)
-     with Pre => Msg /= null
-     and then Payload(Msg) /= null
-     and then Messaging_Ready
-     and then Has_Module(This_Domain, Receiver_Address(Msg).Module_ID),
-     Post => Msg = null;
+   procedure Handle_Received(Msg : in out Msg_Owner);
+     --with Pre => Msg /= null
+     --and then Payload(Msg) /= null
+     --and then Messaging_Ready
+     --and then Has_Module(This_Domain, Receiver_Address(Msg).Module_ID),
+     --Post => Msg = null;
 
 
    -------------------
@@ -222,22 +222,22 @@ is
    --
    -- Useful for test configurations where not all modules
    -- are needed.
-   procedure Skip_Mailbox_Initialization
-     with Global => (In_Out => Lock),
-     Post => Messaging_Ready;
+   procedure Skip_Mailbox_Initialization;
+     --with Global => (In_Out => Lock),
+     --Post => Messaging_Ready;
 
    -- Sends a message without a mailbox. This is
    -- dangerous because it allows senders to lie about
    -- their address.
-   procedure Route_Message(Message : in Message_Record)
-     with Global => (In_Out => Mailboxes),
-     Pre => Messaging_Ready
-     and then Payload(Message) /= null;
+   procedure Route_Message(Message : in Message_Record);
+     --with Global => (In_Out => Mailboxes),
+     --Pre => Messaging_Ready
+     --and then Payload(Message) /= null;
 
-   procedure Route_Message(Message : in Message_Record; Status : out Status_Type)
-     with Global => (In_Out => Mailboxes),
-     Pre => Messaging_Ready
-     and then Payload(Message) /= null;
+   procedure Route_Message(Message : in Message_Record; Status : out Status_Type);
+     --with Global => (In_Out => Mailboxes),
+     --Pre => Messaging_Ready
+     --and then Payload(Message) /= null;
 
 private
    type Module_Mailbox is

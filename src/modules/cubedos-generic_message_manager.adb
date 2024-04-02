@@ -11,45 +11,65 @@ with Domain_Config;
 
 package body CubedOS.Generic_Message_Manager
 with
-Refined_State =>
-  (Mailboxes            => Message_Storage,
-   Lock                 => Init_Lock,
-   Request_ID_Generator => Request_ID_Gen)
+  Refined_State =>
+    (Mailboxes => Message_Storage)
+     --Lock      => Init_Lock)
+     --Request_ID_Generator => Request_ID_Gen)
 is
+   -- SPARK tends to crash when it processes this file. The problem appears to be related to
+   -- using protected objects as constituents of refined abstract state. In an effort to
+   -- address the issue, I (pchapin) commented out the Request_ID_Gen object and it's
+   -- associated SPARK declarations as abstract state. Procedure Get_Next_Request_ID currently
+   -- always returns 1 instead of generating a unique ID. Unfortunately this was not sufficient
+   -- to stop the crashing, although it seemed like it was in my earlier trials. In any case,
+   -- could the request ID generator be put into a separate package as a workaround (that is,
+   -- assuming I can get it working)?
+   --
+   -- EDIT: I also removed the `Lock` abstract state, which required me to gut several sub-
+   -- programs. Most likely the resulting code won't work properly without those subprograms.
+   -- However, this still did not stop SPARK from crashing. Yet I'm almost 100% sure I was able
+   -- to stop the crashing earlier by doing this.. not sure why it's not working now!
+   --
+   -- It's possible that in my earlier tests, I was encountering a SPARK error *before* SPARK
+   -- got to the part where it crashes. Now that I'm attempting to make a (semi)working version
+   -- of the code, I'm still running into the crash. In fact, it might be totally unrelated to
+   -- the protected objects.
 
    -- A protected object for generating request ID values.
-   protected Request_ID_Gen is
-      procedure Generate_Next_ID (Request_ID : out Request_ID_Type);
-   private
-      Next_Request_ID : Request_ID_Type := 1;
-   end Request_ID_Gen;
+   --protected Request_ID_Gen is
+   --   procedure Generate_Next_ID(Request_ID : out Request_ID_Type);
+   --private
+   --   Next_Request_ID : Request_ID_Type := 1;
+   --end Request_ID_Gen;
 
    type Module_Index is new Positive range 1 .. Module_Count;
    type Module_Init_List is array (Module_Index) of Boolean
      with Default_Component_Value => False;
    type Module_Init_List_Owner is access Module_Init_List;
 
-   protected Init_Lock is
-      function Is_Locked return Boolean;
 
-      function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean
-        with Pre => Has_Module(This_Domain, Module_ID);
+   --protected Init_Lock is
+   --   function Is_Locked return Boolean;
+   --
+   --   function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean;
+   --     --with Pre => Has_Module(This_Domain, Module_ID);
+   --
+   --   entry Wait;
+   --
+   --   procedure Unlock(Module : in Module_ID_Type);
+   --     --with Pre => Has_Module(This_Domain, Module);
+   --
+   --   procedure Unlock_Manual;
+   --     --with Post => not Is_Locked;
+   --private
+   --   Inited : Module_Init_List_Owner;
+   --   Locked : Boolean := True;
+   --end Init_Lock;
 
-      entry Wait;
-
-      procedure Unlock(Module : in Module_ID_Type)
-        with Pre => Has_Module(This_Domain, Module);
-
-      procedure Unlock_Manual
-        with Post => not Is_Locked;
-   private
-      Inited : Module_Init_List_Owner;
-      Locked : Boolean := True;
-   end Init_Lock;
 
    type Message_Queue_Owner is access Message_Queues.Bounded_queue;
-
    subtype Message_Count_Type is Natural;
+
 
    -- A protected type for holding messages.
    protected type Sync_Mailbox is
@@ -57,26 +77,26 @@ is
       -- Deposit the given message into THIS mailbox. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the returned status indicates this.
       procedure Send
-        (Message : in out Msg_Owner; Status : out Status_Type)
-        with Pre => Message /= null and then Payload(Message.all) /= null,
-        Post => Message = null;
+        (Message : in out Msg_Owner; Status : out Status_Type);
+        --with Pre => Message /= null and then Payload(Message.all) /= null,
+        --Post => Message = null;
 
       -- Send the indicated message. This procedure returns at once without waiting for the
       -- message to be received. If the mailbox is full the message is lost.
-      procedure Unchecked_Send (Message : in out Msg_Owner)
-        with Pre => Message /= null and then Payload(Message.all) /= null,
-        Post => Message = null;
+      procedure Unchecked_Send (Message : in out Msg_Owner);
+        --with Pre => Message /= null and then Payload(Message.all) /= null,
+        --Post => Message = null;
 
       -- Returns the number of messages in the mailbox.
       function Message_Count return Message_Count_Type;
 
       -- Receive a message. This entry waits indefinitely for a message to be available.
       entry Receive (Message : out Message_Record);
-      -- with Post => Is_Valid(Message);
+        --with Post => Is_Valid(Message);
 
       -- Set the mailbox size and metadata
-      procedure Initialize (Spec : in Module_Metadata; Size : in Positive)
-        with Pre => Size < Natural'Last - 1;
+      procedure Initialize (Spec : in Module_Metadata; Size : in Positive);
+        --with Pre => Size < Natural'Last - 1;
 
    private
       Q : Message_Queue_Owner;
@@ -87,17 +107,20 @@ is
    -- One mailbox for each module.
    Message_Storage : array (Module_Index) of Sync_Mailbox;
 
-   function Messaging_Ready return Boolean
-   is (not Init_Lock.Is_Locked)
-     with SPARK_Mode => Off,
-     -- We hide this from SPARK because Init_Lock.Is_Locked doesn't have
-     -- any meaningful interferences.
-     Refined_Post => Messaging_Ready'Result = not Init_Lock.Is_Locked;
+   -- See comment at the top of the file.
+   function Messaging_Ready return Boolean is (True);
+   --function Messaging_Ready return Boolean is (not Init_Lock.Is_Locked);
+     --with SPARK_Mode => Off,
+     ---- We hide this from SPARK because Init_Lock.Is_Locked doesn't have
+     ---- any meaningful interferences.
+     --Refined_Post => Messaging_Ready'Result = not Init_Lock.Is_Locked;
 
    procedure Skip_Mailbox_Initialization is
    begin
-      Init_Lock.Unlock_Manual;
-      pragma Assert(Messaging_Ready);
+      null;
+      -- See comment at the top of the file.
+      --Init_Lock.Unlock_Manual;
+      --pragma Assert(Messaging_Ready);
    end Skip_Mailbox_Initialization;
 
 
@@ -109,7 +132,7 @@ is
    -- in arrays. In a normal programming language we would be using a map instead
    -- of this.
    function Index_Of(Module_ID : in Module_ID_Type) return Module_Index
-     with Pre => Has_Module(This_Domain, Module_ID)
+     --with Pre => Has_Module(This_Domain, Module_ID)
    is
       Index : Module_Index;
    begin
@@ -121,70 +144,74 @@ is
          end if;
       end loop;
 
-      -- The loop is guaranteed to find an index because
-      -- of the precondition that the module id must be
-      -- in the domain.
+      -- The loop is guaranteed to find an index because of the precondition that the module
+      -- ID must be in the domain.
+      --
       -- TODO: Prove this to spark with lemmas
       return Index;
    end Index_Of;
 
-   protected body Request_ID_Gen is
 
-      procedure Generate_Next_ID (Request_ID : out Request_ID_Type) is
-      begin
-         Request_ID      := Next_Request_ID;
-         Next_Request_ID := Next_Request_ID + 1;
-      end Generate_Next_ID;
+   --protected body Request_ID_Gen is
+   --
+   --   procedure Generate_Next_ID(Request_ID : out Request_ID_Type) is
+   --   begin
+   --      Request_ID      := Next_Request_ID;
+   --      Next_Request_ID := Next_Request_ID + 1;
+   --   end Generate_Next_ID;
+   --
+   --end Request_ID_Gen;
 
-   end Request_ID_Gen;
 
-   protected body Init_Lock is
-      function Is_Locked return Boolean
-        is (Locked);
-      function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean is
-         Index : constant Module_Index := Index_Of(Module_ID);
-      begin
-         if Inited = null then
-            -- Exactly zero modules are currently registered
-            return False;
-         end if;
+   --protected body Init_Lock is
+   --   function Is_Locked return Boolean is (Locked);
+   --
+   --   function Is_Initialized(Module_ID : in Module_ID_Type) return Boolean is
+   --      Index : constant Module_Index := Index_Of(Module_ID);
+   --   begin
+   --      if Inited = null then
+   --         -- Exactly zero modules are currently registered
+   --         return False;
+   --      end if;
+   --
+   --      return Inited(Index);
+   --   end Is_Initialized;
+   --
+   --   entry Wait when not Locked is
+   --   begin
+   --      null;
+   --   end Wait;
+   --
+   --   procedure Unlock(Module : in Module_ID_Type) is
+   --      Index : constant Module_Index := Index_Of(Module);
+   --   begin
+   --      if Inited = null then
+   --         Inited := new Module_Init_List;
+   --      end if;
+   --
+   --      -- The loop is guaranteed to find an index because of the precondition that the module
+   --      -- id must be in the domain.
+   --      --
+   --      -- TODO: prove this to spark with lemmas
+   --      Inited(Index) := True;
+   --
+   --      if (for all I of Inited.all => I) then
+   --         Debugger.On_Message_System_Initialization_Complete;
+   --         Locked := False;
+   --      end if;
+   --   end Unlock;
+   --
+   --   procedure Unlock_Manual is
+   --   begin
+   --      Debugger.On_Message_System_Initialization_Complete;
+   --      Locked := False;
+   --   end Unlock_Manual;
+   --end Init_Lock;
 
-         return Inited(Index);
-      end Is_Initialized;
-
-      entry Wait when not Locked is
-      begin
-         null;
-      end Wait;
-
-      procedure Unlock (Module : in Module_ID_Type) is
-         Index : constant Module_Index := Index_Of(Module);
-      begin
-         if Inited = null then
-            Inited := new Module_Init_List;
-         end if;
-
-         -- The loop is guaranteed to find an index because
-         -- of the precondition that the module id must be
-         -- in the domain.
-         -- TODO: prove this to spark with lemmas
-         Inited(Index) := True;
-
-         if (for all I of Inited.all => I) then
-            Debugger.On_Message_System_Initialization_Complete;
-            Locked := False;
-         end if;
-      end Unlock;
-      procedure Unlock_Manual is
-      begin
-         Debugger.On_Message_System_Initialization_Complete;
-         Locked := False;
-      end Unlock_Manual;
-   end Init_Lock;
 
    protected body Sync_Mailbox is
 
-      procedure Send (Message : in out Msg_Owner; Status : out Status_Type) is
+      procedure Send(Message : in out Msg_Owner; Status : out Status_Type) is
       begin
          if Q = null or else Is_Full(Q.all) then
             Debugger.On_Message_Receive_Failed(Message.all, Mailbox_Full_Or_Unitialized);
@@ -206,7 +233,7 @@ is
          pragma Unused(Message);
       end Send;
 
-      procedure Unchecked_Send (Message : in out Msg_Owner) is
+      procedure Unchecked_Send(Message : in out Msg_Owner) is
       begin
          if Q = null or else Is_Full(Q.all) then
             Debugger.On_Message_Receive_Failed(Message.all, Mailbox_Full_Or_Unitialized);
@@ -234,7 +261,7 @@ is
          end if;
       end Message_Count;
 
-      entry Receive (Message : out Message_Record) when Message_Waiting is
+      entry Receive(Message : out Message_Record) when Message_Waiting is
          Ptr : Msg_Owner;
       begin
          pragma Assume(if Message_Waiting then Q /= null);
@@ -251,7 +278,7 @@ is
          end if;
       end Receive;
 
-      procedure Initialize (Spec : in Module_Metadata; Size : in Positive) is
+      procedure Initialize(Spec : in Module_Metadata; Size : in Positive) is
       begin
          if Q = null then
             Q := new Message_Queues.Bounded_Queue'(Make(Size));
@@ -261,21 +288,27 @@ is
 
    end Sync_Mailbox;
 
-   procedure Get_Next_Request_ID (Request_ID : out Request_ID_Type) is
+
+   procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type) is
    begin
-      Request_ID_Gen.Generate_Next_ID (Request_ID);
+      Request_ID := 1;
+      -- See comment at the top of this file.
+      --Request_ID_Gen.Generate_Next_ID(Request_ID);
    end Get_Next_Request_ID;
 
-   function Receives(Receiver : in Module_Mailbox; Msg_Type : in Universal_Message_Type) return Boolean
-     is (Receives(Spec(Receiver), Msg_Type));
 
-   procedure Route_Message
-     (Message : in out Msg_Owner; Status : out Status_Type)
-     with
-       Pre => Message /= null
-       and then Payload(Message) /= null
-       and then Messaging_Ready,
-       Post => Message = null
+   function Receives
+     (Receiver : in Module_Mailbox;
+      Msg_Type : in Universal_Message_Type) return Boolean is
+     (Receives(Spec(Receiver), Msg_Type));
+
+
+   procedure Route_Message(Message : in out Msg_Owner; Status : out Status_Type)
+     --with
+     --  Pre => Message /= null
+     --  and then Payload(Message) /= null
+     --  and then Messaging_Ready,
+     --  Post => Message = null
    is
       Dest_Module_ID : constant Module_ID_Type := Receiver_Address(Message).Module_ID;
    begin
@@ -296,12 +329,13 @@ is
       end if;
    end Route_Message;
 
-   procedure Route_Message (Message : in out Msg_Owner)
-     with
-       Pre => Message /= null
-       and then Payload(Message) /= null
-       and then Messaging_Ready,
-       Post => Message = null
+
+   procedure Route_Message(Message : in out Msg_Owner)
+     --with
+     --  Pre => Message /= null
+     --  and then Payload(Message) /= null
+     --  and then Messaging_Ready,
+     --  Post => Message = null
    is
    begin
       Debugger.On_Message_Sent_Debug(Message.all);
@@ -309,7 +343,7 @@ is
          Domain_Config.Send_Outgoing_Message(Message);
       else
          if Has_Module(This_Domain, Receiver_Address(Message).Module_ID) then
-            Message_Storage (Index_Of(Receiver_Address(Message).Module_ID)).Unchecked_Send
+            Message_Storage(Index_Of(Receiver_Address(Message).Module_ID)).Unchecked_Send
               (Message);
          else
             Debugger.On_Message_Discarded(Message.all, Destination_Doesnt_Exist);
@@ -319,25 +353,28 @@ is
       end if;
    end Route_Message;
 
-   procedure Route_Message (Message : in Message_Record) is
+
+   procedure Route_Message(Message : in Message_Record) is
       Ptr : Msg_Owner := Copy(Message);
    begin
-      Route_Message (Ptr);
+      Route_Message(Ptr);
       pragma Unused(Ptr);
    end Route_Message;
 
-   procedure Route_Message
-     (Message : in Message_Record; Status : out Status_Type)
-   is
+
+   procedure Route_Message(Message : in Message_Record; Status : out Status_Type) is
       Ptr : Msg_Owner := Copy(Message);
    begin
-      Route_Message (Ptr, Status);
+      Route_Message(Ptr, Status);
       pragma Unused(Ptr);
    end Route_Message;
+
 
    procedure Wait is
    begin
-      Init_Lock.Wait;
+      null;
+      -- See comment at the top of the file.
+      --Init_Lock.Wait;
       pragma Assert(Messaging_Ready);
    end Wait;
 
@@ -360,8 +397,8 @@ is
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Send_Message (Box : in Module_Mailbox; Msg : in out Message_Record)
-   is
+
+   procedure Send_Message (Box : in Module_Mailbox; Msg : in out Message_Record) is
       Ptr : Msg_Owner;
    begin
       Move(Msg, Ptr);
@@ -369,6 +406,7 @@ is
       pragma Unreferenced(Box);
       pragma Unused(Ptr);
    end Send_Message;
+
 
    procedure Send_Message
      (Box : in Module_Mailbox; Msg : in out Message_Record; Status : out Status_Type)
@@ -381,10 +419,11 @@ is
       pragma Unused(Ptr);
    end Send_Message;
 
-   procedure Read_Next (Box : in Module_Mailbox; Msg : out Message_Record) is
+
+   procedure Read_Next(Box : in Module_Mailbox; Msg : out Message_Record) is
       Result : Message_Record;
    begin
-      Message_Storage (Index_Of(Box.Module_ID)).Receive (Result);
+      Message_Storage(Index_Of(Box.Module_ID)).Receive (Result);
 
       -- Don't allow a mailbox to read a message it can't receive.
       while not Receives(Spec(Box), Message_Type(Result)) or Payload(Result) = null loop
@@ -403,15 +442,21 @@ is
       pragma Assert(Receives(Spec(Box), Message_Type(Msg)));
    end Read_Next;
 
+
    procedure Pending_Messages(Box : in Module_Mailbox; Size : out Natural) is
    begin
       Size := Message_Storage (Index_Of(Module_ID(Box))).Message_Count;
    end Pending_Messages;
 
-   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean
-   is (Init_Lock.Is_Initialized(Module_ID))
-     with SPARK_Mode => Off;
-     -- Lying to SPARK because this has no meaningful interferences
+
+   function Module_Registered(Module_ID : in Module_ID_Type) return Boolean is
+      (True);
+   -- See comment at the top of the file.
+   --function Module_Registered(Module_ID : in Module_ID_Type) return Boolean is
+   --  (Init_Lock.Is_Initialized(Module_ID));
+     --with SPARK_Mode => Off;
+     ---- Lying to SPARK because this has no meaningful interferences
+
 
    procedure Register_Module
      (Mailbox : in Module_Mailbox;
@@ -419,11 +464,13 @@ is
    is
    begin
       -- Create a new mailbox for the ID
-      Message_Storage (Index_Of(Module_ID(Mailbox))).Initialize (Spec(Mailbox), Msg_Queue_Size);
+      Message_Storage(Index_Of(Module_ID(Mailbox))).Initialize(Spec(Mailbox), Msg_Queue_Size);
 
-      Init_Lock.Unlock(Module_ID(Mailbox));
+      -- See comment at the top of the file.
+      --Init_Lock.Unlock(Module_ID(Mailbox));
       pragma Assert(Module_Registered(Module_ID(Mailbox)));
    end Register_Module;
+
 
    -- Gives a message received from a foreign domain to the message system.
    procedure Handle_Received(Msg : in out Msg_Owner) is
@@ -431,6 +478,7 @@ is
       Debugger.On_Foreign_Message_Received(Msg.all);
       Route_Message(Msg);
    end Handle_Received;
+
 
 begin -- CubedOS.Generic_Message_Manager
    pragma Assert(for all ID of This_Domain.Module_IDs => not Module_Registered(ID));
