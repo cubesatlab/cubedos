@@ -28,7 +28,7 @@ For a module named |My_Module| we recommend the following three child packages:
 \item |My_Module.Messages| is a public child package containing the server task that loops
   infinitely reading the module mailbox and processing the messages it finds there. This loop
   drives the activity of the module, processing exactly one message at a time. No other task in
-  the module, or indeed in the entire system, should read from the module mailbox. Furthermore
+  the module, or indeed in the entire system, should read from the module mailbox. Furthermore,
   the server task should receive a message in only one place in the program. This highly
   stylized structure is conceptually simple and easy to analyze.
 
@@ -40,7 +40,7 @@ For a module named |My_Module| we recommend the following three child packages:
 
 \item |My_Module.API| is a public child package that contains helper functions for constructing
   and parsing module-specific messages. These helper functions only manipulate message records.
-  They do no actual message processing. Consequently they can be easily written as pure
+  They do no actual message processing. Consequently, they can be easily written as pure
   functions and made task-safe. Other modules will call these functions to build messages sent
   to and parse messages received from |My_Module|. The |API| package may also include type
   definitions related to the module's public interface.
@@ -66,18 +66,18 @@ that is then sent to the module's mailbox. For example:
 
 Here |Operation_Message| creates a message causing |My_Module| to perform some operation. The
 name of the function should be reflective of the operation being done. Here ``operation'' is
-used as a place holder for some more descriptive name. We recommend using the convention of
+used as a placeholder for some more descriptive name. We recommend using the convention of
 adding ``Message'' as a suffix to the names of all message constructing functions.
 
 The arguments to the function (1, 2, and 3 in this case) are arguments to the operation and are
 packed into a message using some module-specific means; module authors have total control over
-the formatting of their messages so the message format need not be made public information.
-\pet{Currently the message record type is not private, but it may be possible to use type
+the formatting of their messages, so the message format need not be made public information.
+\pet{Currently, the message record type is not private, but it may be possible to use type
   extension to fix this (each module provides a private extension). That would reduce potential
   problems by prohibiting module users from editing the contents of messages.} The resulting
 message returned by |Operation_Message| is then sent to |My_Module|'s mailbox.
 
-Finally the architecture of modules is compatible with the Ravenscar restrictions. In
+Finally, the architecture of modules is compatible with the Ravenscar restrictions. In
 particular: a module's server task is a single, library level task that runs infinitely, and all
 communication with a module is by way of a protected mailbox object with only one entry for
 receiving messages.

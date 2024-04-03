@@ -81,7 +81,7 @@ package body CubedOS.Time_Server.Messages
 
             -- If the caller is attempting to add two identical series IDs, there is no effect.
             for I in Series_Array'Range loop
-               if Series_Array (I).Is_Used and then Series_Array (I).ID = Series.ID then
+               if Series_Array(I).Is_Used and then Series_Array(I).ID = Series.ID then
                   return;
                end if;
             end loop;

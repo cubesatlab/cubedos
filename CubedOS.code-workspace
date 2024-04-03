@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "aunit",
+			"path": "../../local/gnat/include/aunit"
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"Alire",
+			"cancelation",
+			"Merc",
+			"Ravenscar",
+			"subfolders"
+		]
+	}
+}
