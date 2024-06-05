@@ -20,8 +20,11 @@ generic
    Maximum_Message_Size : Positive;  -- Maximum size of each message payload.
 package CubedOS.Generic_Message_Manager
   with
-    Abstract_State => ((Mailboxes with External), (Request_ID_Generator with External)),
-    Initializes => (Mailboxes, Request_ID_Generator)
+    Abstract_State =>
+      ((Mailboxes with External),
+      (Request_ID_Generator with External)),
+    Initializes =>
+      (Mailboxes, Request_ID_Generator)
 is
    -- Definition of domain ID numbers. Domain #0 is special; it means the "current" domain.
    -- There is a limit to the number of domains that can be used. Make this a generic parameter?
@@ -63,7 +66,7 @@ is
       record
          Domain_ID : Domain_ID_Type := 0;
          Module_ID : Module_ID_Type := 1;
-       end record;
+      end record;
    -- Messages currently have a priority field that is not used. The intention is to allow high
    -- priority messages to be processed earlier and without interruption. SPARK does not support
    -- dynamic task priorities, however, so the usefulness of this idea is questionable. We could
@@ -82,11 +85,11 @@ is
 
    -- Convenience constructor function for messages. This is used by encoding functions.
    function Make_Empty_Message
-     (Sender_Address : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Message_ID : Message_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Message_ID : in Message_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
      with
        Global => null,
        Post=>

@@ -65,8 +65,13 @@ begin
       if Is_Tick_Reply(Incoming_Message) then
          Tick_Reply_Decode(Incoming_Message, Series_ID, Count, Status);
          if Status = Success then
-            Put("Time Duration: "); Put(Relative_Duration); Put("     Time Stamp:      "); Put(Absolute_Time);
-            Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- "); Put(Count); New_Line;
+            Put("Time Duration: ");
+            Put(Relative_Duration);
+            Put("     Time Stamp:      ");
+            Put(Absolute_Time);
+            Put("      Series " & Series_ID_Type'Image(Series_ID) & " -- ");
+            Put(Count);
+            New_Line;
 
             -- Cancel series #1 after 10 ticks.
             if Series_ID = 1 and then Count = 10 then

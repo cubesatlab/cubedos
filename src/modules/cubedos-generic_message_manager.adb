@@ -122,11 +122,11 @@ is
 
 
    function Make_Empty_Message
-     (Sender_Address   : Message_Address;
-      Receiver_Address : Message_Address;
-      Request_ID : Request_ID_Type;
-      Message_ID : Message_ID_Type;
-      Priority   : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address   : in Message_Address;
+      Receiver_Address : in Message_Address;
+      Request_ID : in Request_ID_Type;
+      Message_ID : in Message_ID_Type;
+      Priority   : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record;
    begin
@@ -151,9 +151,9 @@ is
       Message_Image     : constant String := Sender_Domain_String & "!" & Sender_Module_String & "!" &
                                              Receiver_Domain_String & "!" &  Receiver_Module_String & "!" &
                                              Request_ID_String & "!" & Message_ID_String & "!";
-    begin
+   begin
       return Message_Image;
-    end Stringify_Message;
+   end Stringify_Message;
 
 
    procedure Get_Next_Request_ID(Request_ID : out Request_ID_Type) is
@@ -174,9 +174,9 @@ is
       if Message.Receiver_Address.Domain_ID /= Domain_ID then
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
         -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
-        Message_Storage(2).Unchecked_Send(Message);
+         Message_Storage(2).Unchecked_Send(Message);
       else
-        Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
+         Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
       end if;
    end Route_Message;
 

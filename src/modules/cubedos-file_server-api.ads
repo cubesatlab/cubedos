@@ -109,25 +109,32 @@ package CubedOS.File_Server.API is
 
 
    function Is_Open_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Open_Request));
 
    function Is_Open_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Open_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Open_Reply));
 
    function Is_Read_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Read_Request));
 
    function Is_Read_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Read_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Read_Reply));
 
    function Is_Write_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Write_Request));
 
    function Is_Write_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Write_Reply));
+     (Message.Sender_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Write_Reply));
 
    function Is_Close_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.File_Server and Message.Message_ID = Message_Type'Pos(Close_Request));
+     (Message.Receiver_Address = Name_Resolver.File_Server
+      and Message.Message_ID = Message_Type'Pos(Close_Request));
 
 
 

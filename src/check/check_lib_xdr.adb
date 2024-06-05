@@ -368,17 +368,28 @@ package body Check_Lib_XDR is
 
    procedure Register_Tests(T : in out Lib_XDR_Test) is
    begin
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_1'Access, "32 bit integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_2'Access, "32 bit integer (with negatives)");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_3'Access, "32 bit unsigned integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_4'Access, "Boolean");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_5'Access, "64 bit integer");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
-      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_8'Access, "single precision float");
-      -- AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_9'Access, "double precision float");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_10'Access, "fixed length opaque data");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Encode_Decode_11'Access, "fixed length string");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_1'Access, "32 bit integer");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_2'Access, "32 bit integer (with negatives)");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_3'Access, "32 bit unsigned integer");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_4'Access, "Boolean");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_5'Access, "64 bit integer");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_6'Access, "64 bit integer (with negatives)");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
+      -- AUnit.Test_Cases.Registration.Register_Routine
+        --(T, Test_Encode_Decode_8'Access, "single precision float");
+      -- AUnit.Test_Cases.Registration.Register_Routine
+        --(T, Test_Encode_Decode_9'Access, "double precision float");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_10'Access, "fixed length opaque data");
+      AUnit.Test_Cases.Registration.Register_Routine
+        (T, Test_Encode_Decode_11'Access, "fixed length string");
    end Register_Tests;
 
 

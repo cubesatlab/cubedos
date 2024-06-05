@@ -100,16 +100,20 @@ package CubedOS.Time_Server.API is
      with Global => null;
 
    function Is_Relative_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Relative_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and
+        Message.Message_ID = Message_Type'Pos (Relative_Request));
 
    function Is_Absolute_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Absolute_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and
+        Message.Message_ID = Message_Type'Pos (Absolute_Request));
 
    function Is_Tick_Reply(Message : in Message_Record) return Boolean is
-      (Message.Sender_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Tick_Reply));
+     (Message.Sender_Address = Name_Resolver.Time_Server and
+        Message.Message_ID = Message_Type'Pos (Tick_Reply));
 
    function Is_Cancel_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Time_Server and Message.Message_ID = Message_Type'Pos (Cancel_Request));
+     (Message.Receiver_Address = Name_Resolver.Time_Server and
+        Message.Message_ID = Message_Type'Pos (Cancel_Request));
 
    -- Decode Relative_Request messages. See Relative_Request_Encode for information about the
    -- parameters.

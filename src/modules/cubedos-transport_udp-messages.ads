@@ -7,16 +7,16 @@
 with System;
 
 package CubedOS.Transport_UDP.Messages is
-	
-	task Network_Loop is
-		pragma Priority(System.Default_Priority);
-	end Network_Loop;
+
+   task Network_Loop is
+      pragma Priority(System.Default_Priority);
+   end Network_Loop;
 
    task Message_Loop
-	 with Global => (In_Out => Message_Manager.Mailboxes)
+      with Global => (In_Out => Message_Manager.Mailboxes)
    is
-	  -- pragma Storage_Size(4 * 1024);
-	  pragma Priority(System.Default_Priority);
+      -- pragma Storage_Size(4 * 1024);
+      pragma Priority(System.Default_Priority);
    end Message_Loop;
 
 end CubedOS.Transport_UDP.Messages;

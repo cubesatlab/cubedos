@@ -15,7 +15,9 @@ use  CubedOS.Lib;
 
 package body CubedOS.Transport_UDP.Messages is
 
-   function Read_Stream_Message ( Data : Ada.Streams.Stream_Element_Array; Last : Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
+   function Read_Stream_Message (
+                                 Data : in Ada.Streams.Stream_Element_Array;
+                                 Last : in Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
       Sender_Domain : Message_Manager.Domain_ID_Type;
       Sender_Module : Message_Manager.Module_ID_Type;
       Receiver_Domain : Message_Manager.Domain_ID_Type;
@@ -48,7 +50,8 @@ package body CubedOS.Transport_UDP.Messages is
    procedure Server_Loop is
       Server        : Socket_Type;
       Address, From : Sock_Addr_Type;
-      Data          : Ada.Streams.Stream_Element_Array (0 .. (Ada.Streams.Stream_Element_Offset(Message_Manager.Data_Index_Type'Last + 6)));
+      Data          : Ada.Streams.Stream_Element_Array
+        (0 .. (Ada.Streams.Stream_Element_Offset(Message_Manager.Data_Index_Type'Last + 6)));
       Last          : Ada.Streams.Stream_Element_Offset;
       Message : Message_Manager.Message_Record;
    begin
@@ -79,7 +82,8 @@ package body CubedOS.Transport_UDP.Messages is
       Address : Sock_Addr_Type;
       Socket : Socket_Type;
       Last : Ada.Streams.Stream_Element_Offset;
-      Buffer : Ada.Streams.Stream_Element_Array (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
+      Buffer : Ada.Streams.Stream_Element_Array
+        (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
       Message_Payload_Size : constant Integer := Message.Payload'Length;
       Payload    : Message_Manager.Data_Array      := (others => 0);
       Position : Message_Manager.Data_Index_Type := 0;

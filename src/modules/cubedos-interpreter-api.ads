@@ -58,19 +58,24 @@ package CubedOS.Interpreter.API is
    with Global => null;
 
    function Is_Clear_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Clear_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter and
+        Message.Message_ID = Message_Type'Pos(Clear_Request));
 
    function Is_Set_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Set_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter
+      and Message.Message_ID = Message_Type'Pos(Set_Request));
 
    function Is_Set_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Set_Reply));
+     (Message.Sender_Address = Name_Resolver.Interpreter
+      and Message.Message_ID = Message_Type'Pos(Set_Reply));
 
    function Is_Add_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Add_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter
+      and Message.Message_ID = Message_Type'Pos(Add_Request));
 
    function Is_Add_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.Interpreter and Message.Message_ID = Message_Type'Pos(Add_Reply));
+     (Message.Sender_Address = Name_Resolver.Interpreter
+      and Message.Message_ID = Message_Type'Pos(Add_Reply));
 
    procedure Clear_Request_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type)
      with
