@@ -17,10 +17,10 @@ package CubedOS.File_Server.Messages is
       pragma Priority(System.Default_Priority);
    end Message_Loop;
 
-   pragma Annotate
-     (GNATprove,
-      Intentional,
-      "multiple tasks might queue on protected entry",
-      "Every module has a unique ID");
+   --  pragma Annotate
+   --    (GNATprove,
+   --     Intentional,
+   --     "multiple tasks might queue on protected entry",
+   --     "Every module has a unique ID");
 
 end CubedOS.File_Server.Messages;

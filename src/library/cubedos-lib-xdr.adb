@@ -305,9 +305,6 @@ package body CubedOS.Lib.XDR is
       Last     : out XDR_Extended_Index_Type)
    is
    begin
-      -- For SPARK flow analysis. It seems like this shouldn't be needed.
-      Value := (others => 0);
-
       for I in Value'Range loop
          Value(I) := Octet(Data(Position + (I - Value'First)));
       end loop;

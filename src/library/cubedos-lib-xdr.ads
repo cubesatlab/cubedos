@@ -164,7 +164,9 @@ package CubedOS.Lib.XDR is
          Position in Data'Range            and then
          (Position - Data'First) rem 4 = 0 and then
          Data'Length             rem 4 = 0 and then
-         Length_With_Padding(Value'Length) <= (Data'Last - Position) + 1,
+         (if Data'Last <= Integer'Last-1 or Position >= 1 then
+            Length_With_Padding(Value'Length) <= Data'Last - Position + 1
+          else Length_With_Padding(Value'Length) <= Data'Last),
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
    -- Encodes XDR fixed length string into Data starting at Position.
@@ -181,7 +183,9 @@ package CubedOS.Lib.XDR is
          (Position - Data'First) rem 4 = 0 and then
          Data'Length             rem 4 = 0 and then
          Value'Length <= Octet_Array_Count'Last and then
-         Length_With_Padding(Value'Length) <= (Data'Last - Position) + 1,
+         (if Data'Last <= Integer'Last-1 or Position >= 1 then
+            Length_With_Padding(Value'Length) <= Data'Last - Position + 1
+          else Length_With_Padding(Value'Length) <= Data'Last),
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
 
@@ -307,10 +311,10 @@ package CubedOS.Lib.XDR is
        Global  => null,
        Depends => (Value =>+ (Data, Position), Last => (Position, Value)),
        Pre =>
-         Position rem 4 = 0 and
-         Data'Length rem 4 = 0 and
-         Position + (Length_With_Padding(Value'Length) - 1) <= Data'Last,
-       Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
+         Position rem 4 = 0 and then
+         Data'Length rem 4 = 0 and then
+         Position + Length_With_Padding(Value'Length) - 1 <= Data'Last,
+         Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
    -- Decodes a fixed length string from Data starting at Position.
    procedure Decode
@@ -326,7 +330,8 @@ package CubedOS.Lib.XDR is
          Data'Length > 0 and then
          Data'Length rem 4 = 0 and then
          Value'Length <= Octet_Array_Count'Last and then
-         Position <= Data'Last - (Length_With_Padding(Value'Length) - 1),
+         Position <= Data'Last - Length_With_Padding(Value'Length) - 1 and then
+         Value'Length <= Integer'Last - Position,
        Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
 end CubedOS.Lib.XDR;
