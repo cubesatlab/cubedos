@@ -15,7 +15,7 @@ with Message_Manager; use Message_Manager;
 
 package Network_Configuration is
 
-   Local_Host_Addr : in Inet_Addr_Type := Inet_Addr("127.0.0.1");
+   Local_Host_Addr : Inet_Addr_Type := Inet_Addr("127.0.0.1");
    Default_Port : Port_Type := 50000;
 
    function Get_Port
