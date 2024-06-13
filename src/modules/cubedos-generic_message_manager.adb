@@ -19,7 +19,6 @@ is
       Next_Request_ID : Request_ID_Type := 1;
    end Request_ID_Gen;
 
-
   -- A protected type for holding messages.
    protected type Mailbox is
 

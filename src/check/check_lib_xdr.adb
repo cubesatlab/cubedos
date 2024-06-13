@@ -383,9 +383,9 @@ package body Check_Lib_XDR is
       AUnit.Test_Cases.Registration.Register_Routine
         (T, Test_Encode_Decode_7'Access, "64 bit unsigned integer");
       -- AUnit.Test_Cases.Registration.Register_Routine
-        --(T, Test_Encode_Decode_8'Access, "single precision float");
+      --  (T, Test_Encode_Decode_8'Access, "single precision float");
       -- AUnit.Test_Cases.Registration.Register_Routine
-        --(T, Test_Encode_Decode_9'Access, "double precision float");
+      --  (T, Test_Encode_Decode_9'Access, "double precision float");
       AUnit.Test_Cases.Registration.Register_Routine
         (T, Test_Encode_Decode_10'Access, "fixed length opaque data");
       AUnit.Test_Cases.Registration.Register_Routine

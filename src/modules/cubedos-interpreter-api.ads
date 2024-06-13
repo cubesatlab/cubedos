@@ -58,8 +58,8 @@ package CubedOS.Interpreter.API is
    with Global => null;
 
    function Is_Clear_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Interpreter and
-        Message.Message_ID = Message_Type'Pos(Clear_Request));
+     (Message.Receiver_Address = Name_Resolver.Interpreter
+      and Message.Message_ID = Message_Type'Pos(Clear_Request));
 
    function Is_Set_Request(Message : in Message_Record) return Boolean is
      (Message.Receiver_Address = Name_Resolver.Interpreter

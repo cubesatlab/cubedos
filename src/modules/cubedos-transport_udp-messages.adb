@@ -17,7 +17,8 @@ package body CubedOS.Transport_UDP.Messages is
 
    function Read_Stream_Message (
                                  Data : in Ada.Streams.Stream_Element_Array;
-                                 Last : in Ada.Streams.Stream_Element_Offset) return Message_Manager.Message_Record is
+                                 Last : in Ada.Streams.Stream_Element_Offset)
+                                 return Message_Manager.Message_Record is
       Sender_Domain : Message_Manager.Domain_ID_Type;
       Sender_Module : Message_Manager.Module_ID_Type;
       Receiver_Domain : Message_Manager.Domain_ID_Type;

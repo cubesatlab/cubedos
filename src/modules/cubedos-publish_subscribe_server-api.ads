@@ -87,32 +87,46 @@ package CubedOS.Publish_Subscribe_Server.API is
        Pre => Message_Data'Length <= Data_Size_Type'Last - 8;
 
 
-   function Is_Subscribe_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Subscribe_Request(Message : in Message_Record)
+                                 return Boolean is
+     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Subscribe_Request));
 
-   function Is_Subscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Subscribe_Reply(Message : in Message_Record)
+                               return Boolean is
+     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Subscribe_Reply));
 
-   function Is_Unsubscribe_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Unsubscribe_Request(Message : in Message_Record)
+                                   return Boolean is
+     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Unsubscribe_Request));
 
-   function Is_Unsubscribe_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Unsubscribe_Reply(Message : in Message_Record)
+                                 return Boolean is
+     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Unsubscribe_Reply));
 
-   function Is_Publish_Request(Message : in Message_Record) return Boolean is
-     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Publish_Request(Message : in Message_Record)
+                               return Boolean is
+     (Message.Receiver_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Publish_Request));
 
-   function Is_Publish_Reply(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Publish_Reply(Message : in Message_Record)
+                             return Boolean is
+     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Publish_Reply));
 
-   function Is_Publish_Result(Message : in Message_Record) return Boolean is
-     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server and
+   function Is_Publish_Result(Message : in Message_Record)
+                              return Boolean is
+     (Message.Sender_Address = Name_Resolver.Publish_Subscribe_Server
+      and
         Message.Message_ID = Message_Type'Pos(Publish_Result));
 
 

@@ -148,7 +148,7 @@ package CubedOS.Lib.XDR is
          Position <= Data'Last - (8 - 1),
        Post => Last = Position + (8 - 1);
 
-   function Length_With_Padding(Length : Octet_Array_Count) return Octet_Array_Count is
+   function Length_With_Padding(Length : in Octet_Array_Count) return Octet_Array_Count is
      (Length + (if Length rem 4 = 0 then 0 else (4 - Length rem 4)));
 
    -- Encodes XDR fixed length opaque data into Data starting at Position.

@@ -74,7 +74,9 @@ begin
                   Message_Manager.Route_Message
                     (Read_Request_Encode((Domain_ID, My_Module_ID), 0, Read_Handle, Maximum_Read_Size));
                   Put_Line
-                    ("TX : Read_Request message sent requesting " & Integer'Image(Maximum_Read_Size) & " octets");
+                    ("TX : Read_Request message sent requesting "
+                     & Integer'Image(Maximum_Read_Size) &
+                       " octets");
 
                when 2 =>
                   -- We got a reply to our open-for-writing request.

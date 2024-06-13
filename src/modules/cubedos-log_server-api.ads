@@ -30,8 +30,8 @@ package CubedOS.Log_Server.API is
    -- Different log levels to indicate degree of "seriousness" of a message.
    type Log_Level_Type is (Debug, Informational, Warning, Error, Critical);
 
-   type Message_Type is
-     (Log_Text);
+     type Message_Type is
+       (Log_Text);
 
    -- Convenience procedure that creates and sends a log message.
    procedure Log_Message

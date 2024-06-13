@@ -3,9 +3,9 @@
 -- SUBJECT : Specification of a package holding Domain IDs and Module IDs
 -- AUTHOR  : (C) Copyright 2022 by Vermont Technical College
 --
--- Each distributed CubedOS application must provide a version of this file that maps "well-
--- known" network addresses and ports to domains in the distributed CubedOS application.
--- The precise ID asssigments are arbitrary.
+-- Each distributed CubedOS application must provide a version of this file that maps
+-- "wellknown" network addresses and ports to domains in the distributed CubedOS
+-- application. The precise ID asssigments are arbitrary.
 --
 -- Copy this file to your CubedOS application code base and edit it to mention
 -- only the address, ports, and domains you need
