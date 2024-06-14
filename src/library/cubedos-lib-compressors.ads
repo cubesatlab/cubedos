@@ -29,7 +29,6 @@ package CubedOS.Lib.Compressors is
       Data_Out      : out Compressed_Block;
       Data_Out_Size : out Block_Size_Type) is abstract;
 
-
    -- Trivial Compressor
    ---------------------
    -- The Trivial_Compressor doesn't actually compress anything! It exists only to check

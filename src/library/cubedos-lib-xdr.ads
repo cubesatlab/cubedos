@@ -312,9 +312,11 @@ package CubedOS.Lib.XDR is
        Depends => (Value =>+ (Data, Position), Last => (Position, Value)),
        Pre =>
          Position rem 4 = 0 and then
+         Position >= Data'First and then
          Data'Length rem 4 = 0 and then
+         Position <= Integer'Last - Length_With_Padding(Value'Length) - 1 and then
          Position + Length_With_Padding(Value'Length) - 1 <= Data'Last,
-         Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
+       Post => Last = Position + (Length_With_Padding(Value'Length) - 1);
 
    -- Decodes a fixed length string from Data starting at Position.
    procedure Decode
@@ -327,6 +329,7 @@ package CubedOS.Lib.XDR is
        Depends => (Value =>+ (Data, Position), Last => (Position, Value)),
        Pre =>
          Position rem 4 = 0 and then
+         Position >= Data'First and then
          Data'Length > 0 and then
          Data'Length rem 4 = 0 and then
          Value'Length <= Octet_Array_Count'Last and then

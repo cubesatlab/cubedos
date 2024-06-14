@@ -84,7 +84,6 @@ package CubedOS.Lib.TC_Frames is
         (Extract_Secondary_Header_Flag(Format_Primary_Header'Result) = Secondary_Header_Flag) and
         (Extract_APID(Format_Primary_Header'Result) = APID) and
         (Extract_Segementation_Flags(Format_Primary_Header'Result) = Segementation_Flags) and
-        (Extract_Sequence_Count(Format_Primary_Header'Result) = Sequence_Count) and
-        (Extract_Data_Length(Format_Primary_Header'Result) = Data_Length);
+        (Extract_Sequence_Count(Format_Primary_Header'Result) = Sequence_Count);
 
 end CubedOS.Lib.TC_Frames;

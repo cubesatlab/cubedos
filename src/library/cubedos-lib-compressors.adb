@@ -29,7 +29,9 @@ package body CubedOS.Lib.Compressors is
          Data_Out(I) := Data_In(I);
       end loop;
       Data_Out_Size := Data_In_Size;
-      C.Operation_Count := C.Operation_Count + 1;
+      if C.Operation_Count <= Integer'Last - 1 then
+         C.Operation_Count := C.Operation_Count + 1;
+      end if;
    end Compress;
 
 
@@ -41,7 +43,9 @@ package body CubedOS.Lib.Compressors is
    begin
       Data_Out := (others => 0);
       Data_Out_Size := 0;
-      C.Operation_Count := C.Operation_Count + 1;
+      if C.Operation_Count <= Integer'Last - 1 then
+         C.Operation_Count := C.Operation_Count + 1;
+      end if;
    end Flush;
 
 end CubedOS.Lib.Compressors;
