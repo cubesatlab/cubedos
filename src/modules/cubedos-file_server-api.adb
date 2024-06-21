@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-file_server-api.adb
 -- SUBJECT: Body of a package that simplifies use of the file server.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -217,21 +217,22 @@ package body CubedOS.File_Server.API is
       Raw_Name_Size : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
-      Decode_Status := Success;
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
+
       Name := (others => ' ');
 
-      -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Mode, Last);
       Position := Last + 1;
       if Raw_Mode <= Mode_Type'Pos(Mode_Type'Last) then
          Mode := Mode_Type'Val(Raw_Mode);
+         Decode_Status := Success;
       else
-         Decode_Status := Malformed;
          Mode := Mode_Type'First; -- appropriate?
+         Decode_Status := Malformed;
       end if;
+      -- TODO: Should we return here if Decode_Status is Malformed?
+
       XDR.Decode(Message.Payload, Position, Raw_Name_Size, Last);
       Position := Last + 1;
       if Raw_Name_Size <= XDR.XDR_Unsigned(Natural'Last) then
@@ -253,8 +254,7 @@ package body CubedOS.File_Server.API is
       Raw_Handle : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
 
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
@@ -281,11 +281,8 @@ package body CubedOS.File_Server.API is
       Raw_Amount : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
-      Decode_Status := Success;
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
 
-      -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -293,10 +290,13 @@ package body CubedOS.File_Server.API is
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
+         Decode_Status := Success;
       else
          Decode_Status := Malformed;
          Handle := Valid_File_Handle_Type'First;
       end if;
+      -- TODO: Should we return here if Decode_Status is Malformed?
+
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Read_Size_Type'First) ..
                        XDR.XDR_Unsigned(Read_Size_Type'Last)
@@ -321,8 +321,8 @@ package body CubedOS.File_Server.API is
       Position   : Data_Index_Type;
       Last       : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
+
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       Position := Last + 1;
@@ -330,7 +330,7 @@ package body CubedOS.File_Server.API is
       Position := Last + 1;
       Data := (others => 0);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
-          XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
+                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
          Raw_Amount <= XDR.XDR_Unsigned(Read_Result_Size_Type'Last)
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
@@ -358,9 +358,7 @@ package body CubedOS.File_Server.API is
       Raw_Amount : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
-      Decode_Status := Success;
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
 
       -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
@@ -369,10 +367,12 @@ package body CubedOS.File_Server.API is
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
+         Decode_Status := Success;
       else
          Decode_Status := Malformed;
          Handle := Valid_File_Handle_Type'First; -- Is that what this should be?
       end if;
+
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
       if Raw_Amount in XDR.XDR_Unsigned(Write_Result_Size_Type'First + 1) ..
@@ -380,8 +380,10 @@ package body CubedOS.File_Server.API is
       then
          Amount := Write_Result_Size_Type(Raw_Amount);
       else
+         -- TODO: Is this really the right value to use here?
          Amount := 1;
       end if;
+
       Position := Last + 1;
       Data := (others => 0);
       XDR.Decode(Message.Payload, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
@@ -399,14 +401,15 @@ package body CubedOS.File_Server.API is
       Raw_Amount : XDR.XDR_Unsigned;
       Last : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
+
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
+
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
-          XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
+                       XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
          Raw_Amount <= XDR.XDR_Unsigned(Write_Result_Size_Type'Last)
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
@@ -430,20 +433,18 @@ package body CubedOS.File_Server.API is
       Raw_Handle : XDR.XDR_Unsigned;
       Last       : Data_Index_Type;
    begin
-      pragma Warnings
-        (Off, "unused assignment to ""Last""", Reason => "No further decoding required");
-      Decode_Status := Success;
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
 
-      -- TODO: Need to verify the conversions below. Returned Malformed if they won't work.
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Handle, Last);
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last)
       then
          Handle := Valid_File_Handle_Type(Raw_Handle);
+         Decode_Status := Success;
       else
-         Decode_Status := Malformed;
          Handle := Valid_File_Handle_Type'First; -- Again, is that what this should be?
+         Decode_Status := Malformed;
       end if;
    end Close_Request_Decode;
 

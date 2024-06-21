@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : SAMPLE_MODULE-api.adb
 -- SUBJECT: Body of a package that simplifies use of the module.
--- AUTHOR : (C) Copyright 2021 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -123,21 +123,23 @@ package body CubedOS.Interpreter.API is
    end Set_Request_Decode;
 
 
-   procedure Set_Reply_Decode (Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
+   procedure Set_Reply_Decode(Message : in  Message_Record; Decode_Status : out Message_Status_Type) is
       Position  : Data_Index_Type;
       Last      : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value     : Positive; -- Commonly, this would be an out parameter.
+      Value     : Positive; -- Commonly, this would be an out parameter. (Why isn't it? --pchapin)
    begin
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
+
       -- Set a starting position.
       Position := 0;
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
       XDR.Decode(Message.Payload, Position, Raw_Value, Last);
-      Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!
+      -- TODO: This is a little weird. What are we trying to do? Why not just convert XDR_Unsigned to Positive?
       if Integer(Raw_Value) not in Positive then
          Decode_Status := Malformed;
       else
@@ -158,17 +160,19 @@ package body CubedOS.Interpreter.API is
       Position  : Data_Index_Type;
       Last      : Data_Index_Type;
       Raw_Value : XDR.XDR_Unsigned;
-      Value     : Positive; -- Commonly, this would be an out parameter.
+      Value     : Positive; -- Commonly, this would be an out parameter. (Why isn't it? --pchapin)
    begin
+      pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
+
       -- Set a starting position.
       Position := 0;
 
       -- Decode one parameter (encoding logic must be consistent).
       -- Set position to get ready for next parameter.
       XDR.Decode(Message.Payload, Position, Raw_Value, Last);
-      Position := Last + 1;
 
       -- Convert raw XDR primitive type into appropriate result. Note runtime check needed!
+      -- TODO: Again, weird (see above).
       if Integer(Raw_Value) not in Positive then
          Decode_Status := Malformed;
       else

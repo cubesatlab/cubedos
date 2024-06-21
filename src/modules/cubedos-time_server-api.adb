@@ -13,6 +13,7 @@ use CubedOS.Lib;
 package body CubedOS.Time_Server.API is
    use type XDR.XDR_Unsigned;
 
+   -- TODO: Is it better to put this pragma in every subprogram that requires it?
    pragma Warnings
      (GNATprove, Off, """Last"" is set by ""Decode"" but not used",
       Reason  => "The last value of Last is not needed");
