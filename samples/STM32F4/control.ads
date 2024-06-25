@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : control.ads
 -- SUBJECT: Top level package of the STM demo controller module.
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);

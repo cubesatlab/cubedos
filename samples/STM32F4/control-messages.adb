@@ -1,19 +1,21 @@
  -------------------------------------------------------------------------------
 -- FILE   : control-messages.adb
 -- SUBJECT: Body of a package that implements the controller message loop.
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
 with Ada.Real_Time;
+
 with CubedOS.Time_Server.API;
 use  CubedOS;
+with CubedOS.Publish_Subscribe_Server.API; use CubedOS.Publish_Subscribe_Server.API;
+
 with LED_Driver.API;
 with LED_Driver; use LED_Driver;
 with Name_Resolver;
 --with LEDs; -- Used for testing
-with CubedOS.Publish_Subscribe_Server.API; use CubedOS.Publish_Subscribe_Server.API;
 
 package body Control.Messages is
    use Message_Manager;
@@ -24,12 +26,11 @@ package body Control.Messages is
 
    type Pattern_Index_Type is mod 4;
    Pattern : constant array(Pattern_Index_Type) of LED_Driver.LED_Type :=
-     (LED_Driver.Green, LED_Driver.Orange, LED_Driver.Red, LED_Driver.Blue);
+     [LED_Driver.Green, LED_Driver.Orange, LED_Driver.Red, LED_Driver.Blue];
    Current_LED : Pattern_Index_Type := Pattern_Index_Type'Last;  -- Incremented before used.
 
    -- Counter for tick timer
    Counter : Integer := 1;
-
 
 
    procedure Handle_Subscribe_Result(Message : in Message_Record)
@@ -38,63 +39,61 @@ package body Control.Messages is
       Outgoing_Message: Message_Record;
    begin
 
-     -- Cancel the tick request, set tick timer to 10.0 seconds
-     if (Counter mod 3 = 0) then
-      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Series_ID     => 1,
-         Priority      => System.Default_Priority);
-      Route_Message(Outgoing_Message);
+      -- Cancel the tick request, set tick timer to 10.0 seconds
+      if (Counter mod 3 = 0) then
+         Outgoing_Message := Time_Server.API.Cancel_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Series_ID     => 1,
+            Priority      => System.Default_Priority);
+         Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
-         Request_Type  => Time_Server.API.Periodic,
-         Series_ID     => 1);
-      Route_Message(Outgoing_Message);
+         Outgoing_Message := Time_Server.API.Relative_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Tick_Interval => Ada.Real_Time.To_Time_Span(10.0),
+            Request_Type  => Time_Server.API.Periodic,
+            Series_ID     => 1);
+         Route_Message(Outgoing_Message);
          Counter := Counter + 1;
 
-   -- Cancel the tick request, set tick timer to 3.0 seconds
-     elsif (Counter mod 3 = 1) then
-      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Series_ID     => 1,
-         Priority      => System.Default_Priority);
-      Route_Message(Outgoing_Message);
+      -- Cancel the tick request, set tick timer to 3.0 seconds
+      elsif (Counter mod 3 = 1) then
+         Outgoing_Message := Time_Server.API.Cancel_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Series_ID     => 1,
+            Priority      => System.Default_Priority);
+         Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(3.0),
-         Request_Type  => Time_Server.API.Periodic,
-         Series_ID     => 1);
-      Route_Message(Outgoing_Message);
+         Outgoing_Message := Time_Server.API.Relative_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Tick_Interval => Ada.Real_Time.To_Time_Span(3.0),
+            Request_Type  => Time_Server.API.Periodic,
+            Series_ID     => 1);
+         Route_Message(Outgoing_Message);
          Counter := Counter + 1;
 
-     -- Cancel the tick request, set tick timer to 1.0 seconds
-     elsif (Counter mod 3 = 2) then
-      Outgoing_Message := Time_Server.API.Cancel_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Series_ID     => 1,
-         Priority      => System.Default_Priority);
-      Route_Message(Outgoing_Message);
+      -- Cancel the tick request, set tick timer to 1.0 seconds
+      elsif (Counter mod 3 = 2) then
+         Outgoing_Message := Time_Server.API.Cancel_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Series_ID     => 1,
+            Priority      => System.Default_Priority);
+         Route_Message(Outgoing_Message);
 
-      Outgoing_Message := Time_Server.API.Relative_Request_Encode
-        (Sender_Address => Name_Resolver.Control,
-         Request_ID    => 0,
-         Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
-         Request_Type  => Time_Server.API.Periodic,
-         Series_ID     => 1);
-      Route_Message(Outgoing_Message);
+         Outgoing_Message := Time_Server.API.Relative_Request_Encode
+           (Sender_Address => Name_Resolver.Control,
+            Request_ID    => 0,
+            Tick_Interval => Ada.Real_Time.To_Time_Span(1.0),
+            Request_Type  => Time_Server.API.Periodic,
+            Series_ID     => 1);
+         Route_Message(Outgoing_Message);
          Counter := Counter + 1;
-   end if;
-
+      end if;
    end Handle_Subscribe_Result;
-
 
 
    procedure Handle_Tick_Reply(Message : in Message_Record)
@@ -144,7 +143,6 @@ package body Control.Messages is
    -- Message Loop
    ---------------
 
-
    task body Message_Loop is
       Incoming_Message : Message_Record;
       Outgoing_Message : Message_Record;
@@ -181,7 +179,6 @@ package body Control.Messages is
          Priority      => System.Default_Priority);
       Route_Message(Outgoing_Message);
 
-
       loop
          Message_Manager.Fetch_Message(Name_Resolver.Control.Module_ID, Incoming_Message);
          Process(Incoming_Message);
@@ -189,4 +186,3 @@ package body Control.Messages is
    end Message_Loop;
 
 end Control.Messages;
-

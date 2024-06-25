@@ -13,7 +13,7 @@ project STMdemo is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("Ada") use ("-g", "-gnatwa");
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-g", "-gnatwa");
    end Compiler;
 
    package Ide is

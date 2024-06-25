@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : led_driver-messages.adb
 -- SUBJECT: Body of a package that implements the LED driver.
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -15,7 +15,7 @@ package body LED_Driver.Messages is
 
    -- A look up table that maps my abstract representation of an LED into that required by LEDs.
    LED_Lookup : constant array(LED_Type) of LEDs.User_LED :=
-     (Green => LEDs.Green, Orange => LEDs.Orange, Red => LEDs.Red, Blue => LEDs.Blue);
+     [Green => LEDs.Green, Orange => LEDs.Orange, Red => LEDs.Red, Blue => LEDs.Blue];
 
    -------------------
    -- Message Handling

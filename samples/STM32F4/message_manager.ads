@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE    : message_manager.adb
 -- SUBJECT : Package holding the mailboxes used by CubedOS message passing.
--- AUTHOR  : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR  : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 
@@ -12,4 +12,4 @@ package Message_Manager is
     (Domain_Number => 1,
      Module_Count  => 5,
      Mailbox_Size  => 4,
-     Maximum_Message_Size => 32);
+     Maximum_Message_Size => 256);

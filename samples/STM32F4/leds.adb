@@ -78,10 +78,10 @@ package body LEDs is
       RCC.AHB1ENR := RCC.AHB1ENR or RCC_AHB1ENR_GPIOD;
 
       --  Configure PD12-15
-      GPIOD.MODER   (12 .. 15) := (others => Mode_OUT);
-      GPIOD.OTYPER  (12 .. 15) := (others => Type_PP);
-      GPIOD.OSPEEDR (12 .. 15) := (others => Speed_100MHz);
-      GPIOD.PUPDR   (12 .. 15) := (others => No_Pull);
+      GPIOD.MODER   (12 .. 15) := [others => Mode_OUT];
+      GPIOD.OTYPER  (12 .. 15) := [others => Type_PP];
+      GPIOD.OSPEEDR (12 .. 15) := [others => Speed_100MHz];
+      GPIOD.PUPDR   (12 .. 15) := [others => No_Pull];
    end Initialize;
 
 

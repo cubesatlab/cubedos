@@ -330,7 +330,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Raw_Size    : XDR_Unsigned;
    begin
       Channel := Channel_ID_Type'First;
-      Message_Data := (others => 0);
+      Message_Data := [others => 0];
       Size := 0;
 
       Position := 0;
@@ -413,7 +413,7 @@ package body CubedOS.Publish_Subscribe_Server.API is
       Raw_Size    : XDR_Unsigned;
    begin
       Channel := Channel_ID_Type'First;
-      Message_Data := (others => 0);
+      Message_Data := [others => 0];
       Size := 0;
 
       Position := 0;

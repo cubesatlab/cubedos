@@ -18,7 +18,7 @@ project Networking is
    end case;
    
    package Compiler is
-	  for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+	  for Default_Switches ("ada") use ("-gnat2020", "-fstack-check", "-gnatwa", "-gnata", "-g");
    end Compiler;
 
 end Networking;

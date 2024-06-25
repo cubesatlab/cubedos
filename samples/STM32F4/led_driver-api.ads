@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : led_driver-api.ads
 -- SUBJECT: Specification of the LED driver API package.
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -13,7 +13,6 @@ with System;
 package LED_Driver.API is
 
    type Message_Type is (On_Request, Off_Request, All_On_Request, All_Off_Request);
-
 
    function On_Request_Encode
      (Sender_Address : Message_Address;

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : button_driver.ads
 -- SUBJECT: Top level package of a CubedOS Button driver for the STM32F4
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);

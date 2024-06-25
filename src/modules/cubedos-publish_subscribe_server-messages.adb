@@ -21,7 +21,7 @@ is
    type Subscription_Map_Type is array (Module_ID_Type, Channel_ID_Type) of Boolean
      with Pack;
 
-   Subscription_Map : Subscription_Map_Type := (others => (others => False));
+   Subscription_Map : Subscription_Map_Type := [others => [others => False]];
 
    -------------------
    -- Message Handling

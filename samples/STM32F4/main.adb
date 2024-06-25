@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : main.adb
--- SUBJECT: Main program of the Ping/Pong CubedOS demonstration program.
--- AUTHOR : (C) Copyright 2020 by Vermont Technical College
+-- SUBJECT: Main program of the STM32F4 demonstration.
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 with Ada.Real_Time;
