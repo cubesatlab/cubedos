@@ -164,18 +164,19 @@ is
    procedure Route_Message(Message : in Message_Record; Status : out Status_Type) is
    begin
       -- For now, let's ignore the domain and just use the receiver Module_ID only.
+      -- TODO: Generalize this for multiple domains. How should Status be handled in that case?
       Message_Storage(Message.Receiver_Address.Module_ID).Send(Message, Status);
    end Route_Message;
 
 
    procedure Route_Message(Message : in Message_Record) is
    begin
-      if Message.Receiver_Address.Domain_ID /= Domain_ID then
+      if Message.Receiver_Address.Domain_ID = 0 or Message.Receiver_Address.Domain_ID = Domain_ID then
+         Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
+      else
         -- Circular Dependency with Name_Resolver so resorting to hardcoding
         -- Message_Storage(Name_Resolver.Network_Server.Module_ID).Unchecked_Send(Message);
          Message_Storage(2).Unchecked_Send(Message);
-      else
-         Message_Storage(Message.Receiver_Address.Module_ID).Unchecked_Send(Message);
       end if;
    end Route_Message;
 
