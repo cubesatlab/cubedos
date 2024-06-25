@@ -11,7 +11,7 @@ package body CubedOS.Lib.Bounded_Strings is
    function Make(Upper_Bound : in Index_Type; Initializer : in Bounded_String) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
-      Result.Text := (others => Ada.Characters.Latin_1.Nul);
+      Result.Text := [others => Ada.Characters.Latin_1.Nul];
       Result.Text(1 .. Initializer.Length) := Initializer.Text(1 .. Initializer.Length);
       Result.Length := Initializer.Length;
       return Result;
@@ -21,7 +21,7 @@ package body CubedOS.Lib.Bounded_Strings is
    function Make(Upper_Bound : in Index_Type; Initializer : in String) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
-      Result.Text := (others => Ada.Characters.Latin_1.Nul);
+      Result.Text := [others => Ada.Characters.Latin_1.Nul];
       Result.Text(1 .. Initializer'Length) := Initializer;
       Result.Length := Initializer'Length;
       return Result;
@@ -31,7 +31,7 @@ package body CubedOS.Lib.Bounded_Strings is
    function Make(Upper_Bound : in Index_Type; Initializer : in Character) return Bounded_String is
       Result : Bounded_String(Upper_Bound);
    begin
-      Result.Text := (others => Ada.Characters.Latin_1.Nul);
+      Result.Text := [others => Ada.Characters.Latin_1.Nul];
       Result.Text(1) := Initializer;
       Result.Length := 1;
       return Result;
@@ -77,7 +77,7 @@ package body CubedOS.Lib.Bounded_Strings is
 
    procedure Clear(Target : out Bounded_String) is
    begin
-      Target.Text := (others => Ada.Characters.Latin_1.Nul);
+      Target.Text := [others => Ada.Characters.Latin_1.Nul];
       Target.Length := 0;
    end Clear;
 

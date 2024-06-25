@@ -145,7 +145,7 @@ private
 
    type Bounded_String(Bound : Index_Type) is
       record
-         Text : String(1 .. Bound) := (others => Ada.Characters.Latin_1.NUL);
+         Text : String(1 .. Bound) := [others => Ada.Characters.Latin_1.NUL];
          Length : Length_Type := 0;
       end record;
    -- Type_Invariants are not yet supported in child units.
