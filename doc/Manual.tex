@@ -34,7 +34,7 @@ For a module named |My_Module| we recommend the following three child packages:
 
 \item |My_Module.Internals| is a private child package that contains the bulk of the module's
   processing logic. The message loop is intended to be minimal; it calls into the |Internals|
-  package as soon as it can. The code in this package is not accessible from outside the module
+  package as soon as it can. The code in this package is not accessible from outside the module,
   and it can assume it is called by only one task (unless additional, internal tasks are created
   by the module developer).
 
@@ -73,11 +73,67 @@ The arguments to the function (1, 2, and 3 in this case) are arguments to the op
 packed into a message using some module-specific means; module authors have total control over
 the formatting of their messages, so the message format need not be made public information.
 \pet{Currently, the message record type is not private, but it may be possible to use type
-  extension to fix this (each module provides a private extension). That would reduce potential
-  problems by prohibiting module users from editing the contents of messages.} The resulting
+extension to fix this (each module provides a private extension). That would reduce potential
+problems by prohibiting module users from editing the contents of messages.} The resulting
 message returned by |Operation_Message| is then sent to |My_Module|'s mailbox.
 
 Finally, the architecture of modules is compatible with the Ravenscar restrictions. In
 particular: a module's server task is a single, library level task that runs infinitely, and all
 communication with a module is by way of a protected mailbox object with only one entry for
 receiving messages.
+
+\section{Core Module Documentation}
+\label{sec:core-module-documentation}
+
+This section describes the core modules that are part of the CubedOS distribution. These modules
+are intended to be used by most CubedOS applications. They provide basic services that are
+common to all applications.
+
+\subsection{Log Server}
+\label{sec:log-server}
+
+The log server is a core module that provides a simple logging facility. It is expected that
+every CubedOS application will define its own body for the messages package of the log server
+that defines how that application wants to log messages. At the time of this writing, the
+provided body simply prints messages to the console.
+
+The API package provides a convenience procedure named |Log_Message| that takes care of the
+details of constructing a message record and sending it to the log server. It is expected that
+most uses of the Log Server will be by way of calling |Log_Message|. Currently, the Log Server
+does not send any reply messages. Logging is assumed to always be successful. This is an area
+for future improvement.
+
+Of particular interest is the |Log_Level| parameter to |Log_Message|. This parameter is an
+enumeration type that allows the caller to specify the severity of the message. The Log levels
+are intended to follow those used by the Unix syslog facility. The following log levels are
+defined:
+
+\begin{itemize}
+\item |Debug|: Messages that are only of interest to developers. These messages are typically
+  very detailed and are used to diagnose problems in the system. Debug messages are not
+  typically enabled in a production system.
+
+\item |Informational|: Messages that are of interest to users. These messages are typically high-level
+  and are used to inform the user of the system's normal operation.
+
+\item |Notice|: Like informational messages, notice messages occur during normal system
+  operation. However, they log particularly significant events that are meant to stand out
+  compared to ordinary informational messages.
+
+\item |Warning|: Messages that indicate a potential problem. The system is still functioning
+  correctly, but the message indicates that something might be wrong.
+
+\item |Error|: Messages that indicate a problem has occurred. The system is still functioning,
+  but the message indicates that something unintended or unexpected has happened.
+
+\item |Critical|: Critical messages are similar to error messages, except with more severity and
+  criticality. A critical message indicates that the system is in a bad state and that the
+  problem must be addressed soon.
+
+\item |Alert|: Messages that indicate a problem that has occurred that is so severe that the
+  system cannot continue without corrective action. The system will likely fail soon after
+  sending an alert message.
+
+\item |Emergency|: Emergency messages are the most severe. They indicate that the system is
+  unusable, or soon will be, and that immediate action is required.
+\end{itemize}

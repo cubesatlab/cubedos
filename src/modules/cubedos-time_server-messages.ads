@@ -5,8 +5,6 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-pragma Profile(Ravenscar);
-pragma Partition_Elaboration_Policy(Sequential);
 
 with Ada.Real_Time;
 with System;

@@ -1,12 +1,10 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-log_server-api.adb
--- SUBJECT: Body of the logger's API package
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- SUBJECT: Body of the log server's API package
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-pragma Profile(Ravenscar);
-pragma Partition_Elaboration_Policy(Sequential);
 
 with CubedOS.Lib.XDR;
 
@@ -21,6 +19,7 @@ package body CubedOS.Log_Server.API is
       Text           : in String)
    is
    begin
+      -- Always use a Request_ID of zero for now. Is there ever a reason to use a different value?
       Message_Manager.Route_Message(Log_Text_Encode(Sender_Address, 0, Log_Level, Text));
    end Log_Message;
 
@@ -64,7 +63,7 @@ package body CubedOS.Log_Server.API is
       Last          : Data_Index_Type;
       Raw_Log_Level : XDR.XDR_Unsigned;
       Raw_Size      : XDR.XDR_Unsigned;
-      Raw_Text      : String(Log_Message_Index_Type) := (others => ' ');
+      Raw_Text      : Log_Message_Type := (others => ' ');
    begin
       Text := (others => ' ');
       Position := 0;
@@ -86,8 +85,8 @@ package body CubedOS.Log_Server.API is
             Size := Log_Message_Size_Type(Raw_Size);
 
             pragma Warnings
-              (Off, """Last"" is set by ""Decode"" but not used after the call",
-                    Reason  => "The last value of Last is not needed");
+              (Off, """Last"" is set by ""Decode""", Reason  => "The last value of Last is not needed");
+
             XDR.Decode(Message.Payload, Position, Raw_Text(1 .. Size), Last);
             Text(Text'First .. (Text'First - 1) + Size) := Raw_Text(1 .. Size);
             Decode_Status := Success;

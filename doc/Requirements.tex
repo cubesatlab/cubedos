@@ -23,17 +23,17 @@ specific modules and device drivers). There is no ``kernel mode'' of execution. 
 we describe here is thus enforced primarily by convention. In theory, any structuring
 expressible using normal Ada visibility rules would be acceptable, but there are advantages to
 following the conventions of CubedOS, as we describe throughout this document. \pet{We should
-  consider building a tool that enforces the aspects of our convention that are most important.
-  We should also consider writing a document that specifies all CubedOS conventions in a single,
-  easy to reference place.}
+consider building a tool that enforces the aspects of our convention that are most important. We
+should also consider writing a document that specifies all CubedOS conventions in a single, easy
+to reference place.}
 
-For example it is possible, even if not normally desirable, for an application module to
+For example, it is possible, even if not normally desirable, for an application module to
 directly invoke functionality in a device driver. In contrast, conventional operating systems
 typically do not allow this, or only allow it under very controlled circumstances. However, such
 direct invocations may be more efficient; an important consideration for a constrained embedded
 system. This example shows that while we recommend certain design approaches when using CubedOS,
 we also do not want to be overly constraining. CubedOS users with special needs, should be able
-to work with the system rather than outside of it.
+to work with the system rather than outside it.
 
 CubedOS does distinguish between active modules and packages of shared library code. A module is
 distinguished from library code in that a module contains at least one task, whereas library
@@ -41,9 +41,8 @@ packages are entirely passive. CubedOS conventions do permit library packages to
 multiple modules, but it is not permitted for any module to directly call subprograms or entries
 in another module. It is also not permitted for one module to communicate with another module
 via the internal state of a library package. \pet{Ada has some pragmas in the distributed
-  systems annex that we can perhaps use here to provide compiler enforcement of this
-  restriction.} The only way functionality in another module can be invoked is by sending that
-module a message.
+systems annex that we can perhaps use here to provide compiler enforcement of this restriction.}
+The only way functionality in another module can be invoked is by sending that module a message.
 
 In each module one task selected by the programmer, called the module's \newterm{server task},
 is distinguished. The server task is the \emph{only} task in a module that is allowed to receive
@@ -56,9 +55,9 @@ task is the only task. The following requirements apply:
   runtime errors.
 \item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
   document, shall be written to conform with the restrictions of the Ravenscar profile. \pet{We
-    might want to ``upgrade'' to the Jorvik profile. This gives us: relative delays, ``pure''
-    barrier expressions, and access to Ada.Calendar. It gives us other things that I think we
-    are less likely to need.}
+  might want to ``upgrade'' to the Jorvik profile. This gives us: relative delays, ``pure''
+  barrier expressions, and access to Ada.Calendar. It gives us other things that I think we are
+  less likely to need.}
 \item \textbf{Core.Static}. Modules shall be statically allocated. All modules the system will
   ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
     about on-the-fly software updates? Are we ruling that out, or is that outside the scope of
@@ -70,7 +69,7 @@ task is the only task. The following requirements apply:
   modules (described below) shall have fixed, ``well known'' module ID numbers.
 \item \textbf{Core.IDNumbers}. Module ID numbers shall be small integers beginning at $1$ and
   ranging up to the number of modules in the system. However, if a particular core module is not
-  used, it's ID number is skipped (not reassigned). \pet{We probably don't really want to waste
+  used, its ID number is skipped (not reassigned). \pet{We probably don't really want to waste
     module ID number space like this. Reassigning core module ID numbers for core modules that
     are not used seems like a desirable optimization that we should allow developers.}
 \end{itemize}
@@ -118,8 +117,8 @@ components, such as the file server. In that case the library cannot directly re
 (only a module can receive from a mailbox), but instead must rely on the module using the
 library to forward replies into the library as appropriate. This unusual organization also
 distinguishes the CubedOS runtime library from most other libraries. \pet{Probably it would be
-  better for library components to never send messages. Maybe we should make that another aspect
-  of our CubedOS coding conventions.}
+better for library components to never send messages. Maybe we should make that another aspect
+of our CubedOS coding conventions.}
 
 \section{Core Modules}
 \label{sec:core-modules}
@@ -128,7 +127,7 @@ Any CubedOS based system shall contain certain \newterm{core modules} as a minim
 exist and have fixed, well-known module ID numbers. Note that it is possible that some core
 modules will not be required by all applications. However, their module ID numbers remain
 reserved. \pet{The motivation for using well-known ID numbers is to facilitate third party
-  module development.} In this section we describe these core modules.
+module development.} In this section we describe these core modules.
 
 \subsection{Message Manager}
 \label{sec:message-manager}
@@ -198,25 +197,25 @@ services. \pet{This needs to be investigated further. What can be specifically s
   hour (3,600,000 ms). The total set of tick messages generated in response to such a request is
   called a \newterm{periodic series}.
 \item \textbf{Tick.Latency}. The time between when a request for a periodic series is received
-  by the time server and when the first tick message in that series is sent shall be not more
+  by the timeserver and when the first tick message in that series is sent shall be not more
   than one millisecond plus the latency due to message passing and processing.
-\item \textbf{Tick.OneShot}. The time server shall provide a service whereby a module can
+\item \textbf{Tick.OneShot}. The timeserver shall provide a service whereby a module can
   request the delivery of a single tick message either after a specified delay (in the range
   from 1 ms to 1 hour), or at a specified absolute time. In this case the response message
   constitutes a \newterm{one shot series} of size one.
 \item \textbf{Tick.SeriesID}. Every request shall contain a \newterm{series ID}, specified by
   the requester, that identifies a particular series.
-\item \textbf{Tick.MultiSeries}. The time server shall support multiple series being
+\item \textbf{Tick.MultiSeries}. The timeserver shall support multiple series being
   delivered to the same module. For example a periodic series and a one shot series, or multiple
   periodic series with different periods, all going to the same module is supported.
 \item \textbf{Tick.Message}. Tick messages shall contain a counter, starting at one, that
   indicates which message in the series it is.\footnote{The counter shall always be one in the
-    case of one shot ticks.} Also tick messages shall contain the series ID number.
-\item \textbf{Tick.Cancel}. The time server shall accept messages that cancel a
+  case of one shot ticks.} Also tick messages shall contain the series ID number.
+\item \textbf{Tick.Cancel}. The timeserver shall accept messages that cancel a
   pending\footnote{For example a one shot tick that has not yet occurred can still be canceled}
   or active series. The cancellation message shall contain the series ID. If the ID is invalid,
-  there shall be no effect. \pet{Implementing cancellation could be tricky and it may not be
-    important. This requirement should be considered low priority.}
+  there shall be no effect. \pet{Implementing cancellation could be tricky, and it may not be
+  important. This requirement should be considered low priority.}
 \end{itemize}
 
 \subsection{File Service}
@@ -262,7 +261,7 @@ even as a RAM disk. The following requirements apply:
 \end{itemize}
 
 Roughly speaking the file server interface should provide all the usual file operations, but
-with a minimum of extra functionality. The maximum size of data transfered when reading or
+with a minimum of extra functionality. The maximum size of data transferred when reading or
 writing files is left unspecified. It is recommended that implementations allow transfers up to
 maximally sized messages.
 
@@ -296,22 +295,22 @@ work. The following requirements apply:
     past? Should it ignore the command or issue it ``immediately?''}
 \item \textbf{Interpreter.ScriptBuilder}. A separate tool shall be provided that can be used to
   prepare the input for the Interpreter. It as assumed that hand preparation of that input will
-  be excessively difficult and error prone.
+  be excessively difficult and error-prone.
 \end{itemize}
 
-The ScriptBuilder tool has its own requirements, design, and implementation, and is decribed
+The ScriptBuilder tool has its own requirements, design, and implementation, and is described
 elsewhere.
 
 \subsection{Log Service}
 \label{sec:log-service}
 
 The Log Server module is used to log messages from other modules. \pet{Library components
-  shouldn't attempt to log messages directly. They should return appropriate status indications
-  to the calling module and that module can then log an appropriate message if necessary.} Here
-we use ``log'' expansively to include telemetry messages. The log can be stored on non-volatile
+shouldn't attempt to log messages directly. They should return appropriate status indications to
+the calling module and that module can then log an appropriate message if necessary.} Here we
+use ``log'' expansively to include telemetry messages. The log can be stored on non-volatile
 storage, printed on a console (if one is available), or gathered in a data structure for later
-transmission to a ground station. Unlike telemetry ``data'' which might be in an unreadible
-binary form, telemetry messages are expected to be human readible. The following requirements
+transmission to a ground station. Unlike telemetry ``data'' which might be in an unreadable
+binary form, telemetry messages are expected to be human-readable. The following requirements
 apply:
 
 \begin{itemize}
@@ -327,7 +326,7 @@ apply:
     minimize problems with processing the messages later.
   \item \textbf{Log.Language}. Log messages shall be written in (American) English using, as
     much as possible, standard English spelling and punctuation. Log messages are intended to be
-    human readible.
+    human-readable.
   \item \textbf{Log.Level}. The Log Server shall allow messages to be marked with different
     ``levels'' including (but not limited to): debug, informational, warning, error, and
     critical levels. This can be used to classify each message with respect to its criticality.

@@ -12,7 +12,7 @@ section unless they are interested in the rationale behind some of CubedOS's des
 
 One of the central problems facing the message manager is the handling of message mailboxes.
 Since \SPARK\ does not allow dynamically allocated memory, any method that involves dynamically
-allocating space for messages is not an option. Instead mailbox space must be allocated
+allocating space for messages is not an option. Instead, mailbox space must be allocated
 statically. This forces users of CubedOS to anticipate the maximum sizes of the mailboxes they
 require.
 
@@ -26,21 +26,20 @@ We considered three strategies for managing mailboxes.
 
 \begin{itemize}
 \item \emph{Define a Mailbox type that can hold a fixed number of pending messages. Create a
-    separate mailbox for each module.} This approach has the advantage of being simple. It also
+  separate mailbox for each module.} This approach has the advantage of being simple. It also
   separates the total mailbox space by module. The value of the separation is that should one
   mailbox fill due to a dead or slow module, that won't impact the communication between other
   modules using different mailboxes.
 
   The main problem with this approach is that it tends to waste space. We assume most modules
-  won't require a large number of pending messages (a large mailbox size). Yet if even one
-  module does require a large size, the |Mailbox| type must be adjusted to accommodate it,
-  causing unnecessarily large mailboxes in most cases.
+  won't require many pending messages (a large mailbox size). Yet if even one module does
+  require a large size, the |Mailbox| type must be adjusted to accommodate it, causing
+  unnecessarily large mailboxes in most cases.
 
 \item \emph{Define a single Mailbox object that holds pending messages for all modules
-    together.} This approach addresses the disadvantage of the previous approach by
-  consolidating the free space into a single mailbox object. Modules requiring a large number of
-  pending messages can in effect ``borrow'' free mailbox space from modules with few pending
-  messages.
+  together.} This approach addresses the disadvantage of the previous approach by consolidating
+  the free space into a single mailbox object. Modules requiring many pending messages can in
+  effect ``borrow'' free mailbox space from modules with few pending messages.
 
   Implementing this design is more complicated, but a bigger disadvantage is that modules can
   interfere with each other. If one module is slow and gets backlogged, the (one and only)
@@ -49,7 +48,7 @@ We considered three strategies for managing mailboxes.
   we feel this is a serious enough problem to rule out this design choice.
 
 \item \emph{Define a Mailbox type that is discriminated on its size. Create a separate mailbox
-    for each module, tuned for that module's needs.} This is a variation of the first approach
+  for each module, tuned for that module's needs.} This is a variation of the first approach
   except here the mailbox instances can each have a different size. The author of a module
   defines the size of the mailbox needed for that module; large mailboxes are only used where
   necessary and space is conserved. This approach also maintains the freedom from interference
@@ -75,22 +74,22 @@ For these reasons CubedOS follows the first approach, using a generic package to
 mailboxes. The package can be instantiated differently for each CubedOS application with mailbox
 sizes set appropriately for that application.
 
-Selecting the most appropriate size for a the mailboxes is the one major issue remaining. If a
+Selecting the most appropriate size for the mailboxes is the one major issue remaining. If a
 mailbox fills during operation, sending further messages to that mailbox will fail. Senders do
-not block because doing so would introduce the risk of deadlock. Thus failure to send a message
+not block because doing so would introduce the risk of deadlock. Thus, failure to send a message
 due to a full mailbox creates awkwardness for senders who must manually retry the send
-operation, if desired. Furthermore senders will not likely want to retry sending indefinitely
+operation, if desired. Furthermore, senders will not likely want to retry sending indefinitely
 and risk being tied up doing a send operation that will never succeed. This leaves open the
 question of how the failed send should ultimately be handled.
 
-It would be better if mailbox sizes were tuned so that sending could never fail. However doing
+It would be better if mailbox sizes were tuned so that sending could never fail. However, doing
 this requires high level reasoning about the flow of messages in the system. We propose
 constructing a formal model of module communication that includes finite sized mailboxes, and
 then use a model checker (such as \texttt{spin}?), or some other tool, to find a configuration
 of mailbox sizes where no send operation can ever fail. Doing this is an avenue for future work.
 
 In lieu of such an analysis, human reasoning could be used to estimate appropriate mailbox sizes
-followed by rigorous testing. Of course, such an approach is likely to be more error prone than
+followed by rigorous testing. Of course, such an approach is likely to be more error-prone than
 the formal approach.
 
 If it can be formally shown that no send operation can ever fail, all calls to the |Send|
@@ -115,9 +114,9 @@ For these reasons we advocate continued checking for failed send operations even
 expected in normal operation.
 
 \pet{We should also say a few words about selecting the maximum size of messages, and about the
-  handling of module ID numbers. For example, we originally considered allowing ID numbers to be
-  dynamically assigned and then using a name resolver module to map module names to their
-  (dynamic) ID numbers. However, that design was overly complicated.}
+handling of module ID numbers. For example, we originally considered allowing ID numbers to be
+dynamically assigned and then using a name resolver module to map module names to their
+(dynamic) ID numbers. However, that design was overly complicated.}
 
 \section{Message Encoding}
 \label{design-message-encoding}
@@ -144,7 +143,7 @@ in the message and time used to encode and decode the messages. For this reason 
 use the simpler XDR approach.
 
 The encoding/decoding subprograms in the API packages must contend with the richness of Ada's
-type system. In particular they should be able to handle multiple parameters of various types,
+type system. In particular, they should be able to handle multiple parameters of various types,
 called \newterm{messageable types}, where a messageable type is defined inductively as follows:
 
 \begin{itemize}
@@ -156,17 +155,17 @@ called \newterm{messageable types}, where a messageable type is defined inductiv
 Roughly a messageable type is any type allowed by the XDR standard (although we do not aim to
 provide support for XDR discriminated union types at this time).
 
-The encoding and decoding of messageable types is tedious and repetative. Supporting subprograms
+The encoding and decoding of messageable types is tedious and repetitive. Supporting subprograms
 to handle basic scalars and simple arrays are provided by way of a library package
 |CubedOS.Lib.XDR|. The handling of XDR arrays and records can be done using the lower level
 subprograms provided by the library.
 
 Since the creation of the API packages is largely mechanical, CubedOS comes with a tool,
-\texttt{Merc}, that converts an textual representation of the message types into a corresponding
+\texttt{Merc}, that converts a textual representation of the message types into a corresponding
 API package written in provable \SPARK. In effect, \texttt{Merc} plays a role similar to that
 played by \texttt{rpcgen} in many ONC RPC \cite{rfc-5531} implementations. In particular, it
 converts a high level interface description into code that encodes/decodes messages to/from the
-implementer of that interface. However \texttt{Merc} differs from other similar tools in several
+implementer of that interface. However, \texttt{Merc} differs from other similar tools in several
 important respects:
 
 \begin{itemize}
@@ -183,8 +182,8 @@ then the subprograms in that package to encode messages for that module or decod
 that module. In addition, \texttt{Merc} provides subprograms the module author can use to decode
 incoming messages and encode replies.
 
-Currently it is still possible for a develper to directly access message data but doing this is
-strongly not recommended. \pet{This could possibly be enforced by making the message a private
-  type. However, that would require all the generated API packages to be children of the generic
-  message manager package (and hence generic themselves). This might be an overly complicated
-  design.}
+Currently, it is still possible for a developer to directly access message data but doing this
+is strongly not recommended. \pet{This could possibly be enforced by making the message a
+private type. However, that would require all the generated API packages to be children of the
+generic message manager package (and hence generic themselves). This might be an overly
+complicated design.}

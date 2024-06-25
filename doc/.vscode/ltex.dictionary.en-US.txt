@@ -4,3 +4,8 @@ Merc
 AdaCore
 Alire
 GNATstudio
+messageable
+ONC
+XDR
+pragmas
+Jorvik

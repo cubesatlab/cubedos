@@ -5,7 +5,7 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-pragma Profile(Ravenscar);
+pragma Profile(Jorvik);
 pragma Partition_Elaboration_Policy(Sequential);
 
 with CubedOS.Generic_Message_Manager;

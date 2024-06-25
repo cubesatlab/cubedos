@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-log_server-api.ads
--- SUBJECT: Specification of the logger's API package
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- SUBJECT: Specification of the log server's API package
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- All the subprograms in this package must be task safe. They can be simultaneously called
 -- from multiple tasks. If possible, make every subprogram here a pure function.
@@ -20,18 +20,23 @@ package CubedOS.Log_Server.API is
    -- type Status_Type is (Success, Failure);
 
    -- The maximum size of a log message.
-   -- The other types here are for convenience only, but notice that Log_Message_Type is always 128 characters.
-   -- In contrast, if a short string is sent to Log_Message, only a short string is encoded.
+   -- The other types here are for convenience, but notice that Log_Message_Type is always exactly 128 characters.
+   -- However, if a shorter string is sent to Log_Message, only that short string is encoded. The trailing
+   -- characters of a Log_Message_Type are intended to be spaces.
+   -- TODO: Use a Dynamic_Predicate to assert the condition about trailing spaces?
    Maximum_Log_Message_Size : constant := 128;
    subtype Log_Message_Size_Type is Natural range 0 .. Maximum_Log_Message_Size;
    subtype Log_Message_Index_Type is Positive range 1 .. Maximum_Log_Message_Size;
    subtype Log_Message_Type is String(1 .. Maximum_Log_Message_Size);
 
-   -- Different log levels to indicate degree of "seriousness" of a message.
-   type Log_Level_Type is (Debug, Informational, Warning, Error, Critical);
+   -- Different log levels to indicate degree of "seriousness" of a message. These levels are copied from those
+   -- used by the Unix system logger, syslog. The significance and purpose of each level is intended to be the
+   -- same as for syslog.
+   type Log_Level_Type is (Debug, Informational, Notice, Warning, Error, Critical, Alert, Emergency);
 
-     type Message_Type is
-       (Log_Text);
+   -- TODO: Define some additional message types in this API?
+   type Message_Type is
+     (Log_Text);
 
    -- Convenience procedure that creates and sends a log message.
    procedure Log_Message

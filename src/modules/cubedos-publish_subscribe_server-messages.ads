@@ -5,12 +5,6 @@
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
-pragma Profile(Ravenscar);
-pragma Partition_Elaboration_Policy(Sequential);
-
--- Why are these here?
-pragma Task_Dispatching_Policy(FIFO_Within_Priorities);
-pragma Queuing_Policy(FIFO_Queuing);
 
 with System;
 

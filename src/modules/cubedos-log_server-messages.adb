@@ -1,10 +1,12 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-log_server-messages.adb
--- SUBJECT: Body of a package that implements the main part of the module.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- SUBJECT: Body of a package that implements the main part of the log server.
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+
+with Ada.Calendar.Formatting;
 
 with CubedOS.Log_Server.API;
 with Name_Resolver;
@@ -24,18 +26,22 @@ package body CubedOS.Log_Server.Messages is
       Size      : Log_Server.API.Log_Message_Size_Type;
       Status    : Message_Status_Type;
 
-      Level_Strings : constant array(Log_Server.API.Log_Level_Type) of String(1 .. 3) :=
-        ("DBG", "INF", "WRN", "ERR", "CRI");
+      Level_Strings : constant array(Log_Server.API.Log_Level_Type) of String(1 .. 4) :=
+        ("DBUG", "INFO", "NOTC", "WARN", "ERRO", "CRIT", "ALRT", "EMRG");
+
+      -- Note that the date/time we report is when we process the log message, not when it was sent.
+      Now : Ada.Calendar.Time;
    begin
       Log_Server.API.Log_Text_Decode(Message, Log_Level, Text, Size, Status);
 
       -- Ignore log messages that don't decode properly.
       -- TODO: We should also time stamp the messages.
       if Status = Success then
+         Now := Ada.Calendar.Clock;
          Ada.Text_IO.Put_Line
-           (Level_Strings(Log_Level) &
-            " ("  & Domain_ID_Type'Image(Message.Sender_Address.Domain_ID) &
-            ","   & Module_ID_Type'Image(Message.Sender_Address.Module_ID) &
+           (Level_Strings(Log_Level) & ": " & Ada.Calendar.Formatting.Image(Now) &
+            ", FROM: ("  & Domain_ID_Type'Image(Message.Sender_Address.Domain_ID) &
+            ", "   & Module_ID_Type'Image(Message.Sender_Address.Module_ID) &
             "): " & Text(1 .. Size));
       end if;
    end Handle_Log_Text;
@@ -51,7 +57,7 @@ package body CubedOS.Log_Server.Messages is
          Handle_Log_Text(Message);
       else
          -- An unknown message type has been received. What should be done about that?
-         -- It seems like this should be logged somehow.
+         -- It seems like this should be logged somehow, but do we log to the logger while in the logger?
          null;
       end if;
    end Process;
