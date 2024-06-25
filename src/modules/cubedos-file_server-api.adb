@@ -219,7 +219,7 @@ package body CubedOS.File_Server.API is
    begin
       pragma Warnings(Off, """Last"" is set by ""Decode""", Reason => "No further decoding required");
 
-      Name := (others => ' ');
+      Name := [others => ' '];
 
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Mode, Last);
@@ -328,7 +328,7 @@ package body CubedOS.File_Server.API is
       Position := Last + 1;
       XDR.Decode(Message.Payload, Position, Raw_Amount, Last);
       Position := Last + 1;
-      Data := (others => 0);
+      Data := [others => 0];
       if Raw_Handle in XDR.XDR_Unsigned(Valid_File_Handle_Type'First) ..
                        XDR.XDR_Unsigned(Valid_File_Handle_Type'Last) and
          Raw_Amount <= XDR.XDR_Unsigned(Read_Result_Size_Type'Last)
@@ -385,7 +385,7 @@ package body CubedOS.File_Server.API is
       end if;
 
       Position := Last + 1;
-      Data := (others => 0);
+      Data := [others => 0];
       XDR.Decode(Message.Payload, Position, Data(Data'First .. Data'First + (Amount - 1)), Last);
    end Write_Request_Decode;
 

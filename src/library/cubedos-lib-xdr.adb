@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-xdr.adb
 -- SUBJECT: Body of an XDR encoding/decoding package.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -150,7 +150,7 @@ package body CubedOS.Lib.XDR is
       if Value'Length rem 4 /= 0 then
          Padding_Start := Position + Value'Length;
          Padding_Stop := Padding_Start + (3 - Value'Length rem 4);
-         Data(Padding_Start .. Padding_Stop) := (others => 0);
+         Data(Padding_Start .. Padding_Stop) := [others => 0];
       end if;
       Last := Position + (Length_With_Padding(Value'Length) - 1);
    end Encode;
@@ -169,7 +169,7 @@ package body CubedOS.Lib.XDR is
       -- This approch puts an artificial restriction on the size of the strings we can encode. Since
       -- XDR_Arrays can be huge, in theory it should be possible to encode a huge string into one. Going
       -- through Octet_Array inhibits that ability since Octet_Arrays have moderate length.
-      Temporary_Array := (others => 0);
+      Temporary_Array := [others => 0];
       for I in Value'Range loop
          Temporary_Array(I - Value'First) := Character'Pos(Value(I));
       end loop;
@@ -320,7 +320,7 @@ package body CubedOS.Lib.XDR is
       Last     : out XDR_Extended_Index_Type)
    is
    begin
-      Value := (others => ' ');
+      Value := [others => ' '];
       for I in Position .. (Position + Value'Length - 1) loop
          Value(Value'First + (I - Position)) := Character'Val(Data(I));
       end loop;

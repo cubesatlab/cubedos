@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.adb
 -- SUBJECT: Body of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -135,7 +135,7 @@ is
       Message.Message_ID := Message_ID;
       Message.Priority   := Priority;
       Message.Size       := 0;
-      Message.Payload := (others => 0);
+      Message.Payload := [others => 0];
       return Message;
    end Make_Empty_Message;
 

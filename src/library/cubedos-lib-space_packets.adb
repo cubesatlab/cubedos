@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-space_packets.adb
 -- SUBJECT: Body of a package containing CCSDS space packet encoding/decoding logic.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -16,7 +16,7 @@ package body CubedOS.Lib.Space_Packets is
       Secondary_Header_Flag : in Boolean := False;
       Segementation_Flags   : in Segementation_Flag_Type := Unsegmented) return Primary_Header
    is
-      Header : Primary_Header := (others => 0);
+      Header : Primary_Header := [others => 0];
    begin
       Header(1) :=
         (case Packet_Type is

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-compressors.adb
 -- SUBJECT: Implementation of a package containing compression algorithms.
--- AUTHOR : (C) Copyright 2017 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -24,7 +24,7 @@ package body CubedOS.Lib.Compressors is
       Data_Out_Size : out Block_Size_Type)
    is
    begin
-      Data_Out := (others => 0);
+      Data_Out := [others => 0];
       for I in 1 .. Data_In_Size loop
          Data_Out(I) := Data_In(I);
       end loop;
@@ -41,7 +41,7 @@ package body CubedOS.Lib.Compressors is
       Data_Out_Size : out Block_Size_Type)
    is
    begin
-      Data_Out := (others => 0);
+      Data_Out := [others => 0];
       Data_Out_Size := 0;
       if C.Operation_Count <= Integer'Last - 1 then
          C.Operation_Count := C.Operation_Count + 1;

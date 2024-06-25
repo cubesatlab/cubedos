@@ -1,9 +1,9 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-generic_rid_map.ads
--- SUBJECT: Specification of a package for maps of Request IDs to some other data type
---          used to map Request IDs to senders, for instance.
--- AUTHOR : (C) Copyright 2018 by Vermont Technical College
+-- SUBJECT: Specification of a package for maps of Request IDs to some other data type.
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
+-- This can be used to map request IDs to senders, for example.
 --------------------------------------------------------------------------------
 
 generic
@@ -26,9 +26,9 @@ is
    -- up execution overall)
    type RID_Map_Record is
       record
-         Key_Array : Key_Array_Type := (others => 0);
+         Key_Array : Key_Array_Type := [others => 0];
          Value_Array : Value_Array_Type;
-         Used_Indices_Array : Used_Indices_Array_Type := (others => False);
+         Used_Indices_Array : Used_Indices_Array_Type := [others => False];
          Next_Free_Index : Num_Entries_Type := 0;
       end record;
 

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-generic_message_manager.ads
 -- SUBJECT: Specification of a package for message passing in CubedOS.
--- AUTHOR : (C) Copyright 2022 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 -- This package defines the core CubedOS mailbox system with associated types, etc. Each time
 -- this package is instantiated a new "domain" is created. In a distributed CubedOS system,
@@ -82,7 +82,7 @@ is
          Message_ID : Message_ID_Type := 0;
          Priority   : System.Priority := System.Default_Priority;
          Size       : Data_Size_Type  := 0;
-         Payload    : Data_Array      := (others => 0);
+         Payload    : Data_Array      := [others => 0];
       end record;
 
    -- Convenience constructor function for messages. This is used by encoding functions.

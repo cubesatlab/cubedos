@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- FILE   : cubedos-lib-crc.adb
 -- SUBJECT: Package for handling CRC calculations
--- AUTHOR : (C) Copyright 2016 by Vermont Technical College
+-- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
@@ -9,7 +9,7 @@ pragma SPARK_Mode(On);
 package body CubedOS.Lib.CRC is
 
    CRC_Table : constant array(Double_Octet range 0 .. 255) of Double_Octet :=
-     (16#0000#, 16#1021#, 16#2042#, 16#3063#, 16#4084#, 16#50a5#, 16#60c6#, 16#70e7#,
+     [16#0000#, 16#1021#, 16#2042#, 16#3063#, 16#4084#, 16#50a5#, 16#60c6#, 16#70e7#,
       16#8108#, 16#9129#, 16#a14a#, 16#b16b#, 16#c18c#, 16#d1ad#, 16#e1ce#, 16#f1ef#,
       16#1231#, 16#0120#, 16#3273#, 16#2252#, 16#52b5#, 16#4294#, 16#72f7#, 16#62d6#,
       16#9339#, 16#8318#, 16#b37b#, 16#a35a#, 16#d3bd#, 16#c39c#, 16#f3ff#, 16#e3de#,
@@ -40,7 +40,7 @@ package body CubedOS.Lib.CRC is
       16#fd2e#, 16#ed0f#, 16#dd6c#, 16#cd4d#, 16#bdaa#, 16#ad8b#, 16#9de8#, 16#8dc9#,
       16#7c26#, 16#6c07#, 16#5c64#, 16#4c45#, 16#3ca2#, 16#2c83#, 16#1ce0#, 16#0cc1#,
       16#ef1f#, 16#ff3e#, 16#cf5d#, 16#df7c#, 16#af9b#, 16#bfba#, 16#8fd9#, 16#9ff8#,
-      16#6e17#, 16#7e36#, 16#4e55#, 16#5e74#, 16#2e93#, 16#3eb2#, 16#0ed1#, 16#1ef0#);
+      16#6e17#, 16#7e36#, 16#4e55#, 16#5e74#, 16#2e93#, 16#3eb2#, 16#0ed1#, 16#1ef0#];
 
 
    function CRC_Calculation
