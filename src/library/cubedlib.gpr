@@ -24,11 +24,11 @@ project CubedLib is
    package Compiler is
       case Build is
          when "Release" =>
-            for Default_Switches ("ada") use ("-gnatwa", "-O");
+            for Default_Switches ("ada") use ("-gnat2022", "-gnatwa", "-gnatW8", "-O");
             for Switches ("c") use ("-O");
 
          when "Debug" =>
-            for Default_Switches ("ada") use ("-gnatwa", "-fstack-check", "-gnata", "-g", "-gnatW8");
+            for Default_Switches ("ada") use ("-gnat2022", "-gnatwa", "-gnatW8", "-fstack-check", "-gnata", "-g");
             for Switches ("c") use ("-g");
       end case;
    end Compiler;

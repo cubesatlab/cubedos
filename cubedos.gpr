@@ -14,7 +14,7 @@ project CubedOS is
    end Ide;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+      for Default_Switches ("ada") use ("-gnat2022", "-gnatW8", "-fstack-check", "-gnatwa", "-gnata", "-g");
    end Compiler;
 
    package Builder is
