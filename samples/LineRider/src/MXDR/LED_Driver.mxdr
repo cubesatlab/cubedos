@@ -1,0 +1,23 @@
+// FILE: LED_Driver.mxdr
+//
+// This is the interface to the STM32F4 LED subsystem. There are four LEDs with colors as
+// indicated below. The driver can be asked to turn these LEDs on or off. There are no reply
+// messages from this module.
+
+enum LED_Type { Green, Orange, Red, Blue };
+
+message struct -> On_Request {
+    LED_Type LED;
+};
+
+message struct -> Off_Request {
+    LED_Type LED;
+};
+
+message struct -> All_On_Request {
+    void;
+};
+
+message struct -> All_Off_Request {
+    void;
+};
