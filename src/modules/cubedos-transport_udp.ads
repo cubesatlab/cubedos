@@ -6,7 +6,9 @@
 --------------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+pragma Warnings(Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
+
 
 package CubedOS.Transport_UDP is
 

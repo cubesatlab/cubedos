@@ -18,7 +18,11 @@ project Networking is
    end case;
    
    package Compiler is
-	  for Default_Switches ("ada") use ("-gnat2020", "-fstack-check", "-gnatwa", "-gnata", "-g");
+	  for Default_Switches ("ada") use ("-gnat2020", "-gnatW8", "-fstack-check", "-gnatwa", "-gnata", "-g");
    end Compiler;
+
+   package Check is
+           for Default_Switches ("Ada") use ("-rules", "-from=../../cubedos-rules.txt");
+   end Check;
 
 end Networking;

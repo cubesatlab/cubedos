@@ -9,3 +9,10 @@ BSI
 *XDR*
 CubedOS_Check
 CubedLib_Suite
+DomainA_Client
+DomainB_Client
+DomainB_Server
+DomainA_Addr
+DomainB_Addr
+DomainA_Port
+DomainB_Port

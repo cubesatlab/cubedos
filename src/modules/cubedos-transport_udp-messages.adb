@@ -86,7 +86,7 @@ package body CubedOS.Transport_UDP.Messages is
       Buffer : Ada.Streams.Stream_Element_Array
         (0 .. Ada.Streams.Stream_Element_Offset (6 + Message_Manager.Data_Index_Type'Last));
       Message_Payload_Size : constant Integer := Message.Payload'Length;
-      Payload    : Message_Manager.Data_Array      := (others => 0);
+      Payload    : Message_Manager.Data_Array      := [others => 0];
       Position : Message_Manager.Data_Index_Type := 0;
       Last_XDR     : Message_Manager.Data_Index_Type;
    begin
