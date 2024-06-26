@@ -33,7 +33,7 @@ package body Last_Chance_Handler is
    -- Last_Chance_Handler --
    -------------------------
 
-   procedure Last_Chance_Handler(Msg : System.Address; Line : Integer) is
+   procedure Last_Chance_Handler(Msg : in System.Address; Line : in Integer) is
       pragma Unreferenced(Msg, Line);
    begin
       Off(Green);

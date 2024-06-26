@@ -37,13 +37,13 @@ package body LEDs is
      (Source => User_LED, Target => Word);
 
 
-   procedure On (This : User_LED) is
+   procedure On (This : in User_LED) is
    begin
       GPIOD.BSRR := As_Word (This);
    end On;
 
 
-   procedure Off (This : User_LED) is
+   procedure Off (This : in User_LED) is
    begin
       GPIOD.BSRR := Shift_Left (As_Word (This), 16);
    end Off;
@@ -85,6 +85,6 @@ package body LEDs is
    end Initialize;
 
 
-begin
+begin -- LEDs
    Initialize;
 end LEDs;

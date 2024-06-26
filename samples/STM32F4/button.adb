@@ -32,10 +32,10 @@ with STM32F4;       use STM32F4;
 with STM32F4.GPIO;  use STM32F4.GPIO;
 
 package body Button is
-   
+
    protected Button is
       pragma Interrupt_Priority;
-      
+
       entry Is_Button_Pressed;
 
    private
@@ -43,23 +43,23 @@ package body Button is
       pragma Attach_Handler
          (Interrupt_Handler,
           Ada.Interrupts.Names.EXTI0_Interrupt);
-      
+
       Last_Time : Time := Clock;
       Button_State : Boolean := False;
-   
+
    end Button;
 
    Debounce_Time : constant Time_Span := Milliseconds (500);
-   
+
    protected body Button is
-      
+
       -- Entry waits for the button to be pressed, sets the state back to false
       entry Is_Button_Pressed when Button_State is
       begin
          -- Sets the button state back to false
-         Button_State := False;         
+         Button_State := False;
       end Is_Button_Pressed;
-        
+
       procedure Interrupt_Handler is
          Now : constant Time := Clock;
       begin
@@ -68,24 +68,21 @@ package body Button is
 
          --  Debouncing
          if Now - Last_Time >= Debounce_Time then
-            
             Button_State := True;
-            
             Last_Time := Now;
-            
          end if;
-   
+
       end Interrupt_Handler;
-      
+
    end Button;
-   
+
    -- Function to inform other packages that the button has been pressec
    function Button_Pressed return Button_State_Type is
-   begin 
+   begin
       -- Executes on button press
       Button.Is_Button_Pressed;
       -- Return the button has been pressed
-      return Pressed;      
+      return Pressed;
    end Button_Pressed;
 
 
@@ -108,8 +105,6 @@ package body Button is
       EXTI.IMR (0) := 1;
    end Initialize;
 
-begin
+begin -- Button
    Initialize;
-end Button;   
-
-
+end Button;

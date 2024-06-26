@@ -15,10 +15,10 @@ package body LED_Driver.API is
    pragma Warnings (Off, "*may call Last_Chance_Handler");
 
    function On_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      LED            : LED_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      LED            : in LED_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -36,10 +36,10 @@ package body LED_Driver.API is
 
 
    function Off_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      LED            : LED_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      LED            : in LED_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -57,9 +57,9 @@ package body LED_Driver.API is
 
 
    function All_On_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -71,9 +71,9 @@ package body LED_Driver.API is
 
 
    function All_Off_Request_Encode
-     (Sender_Address : Message_Address;
-      Request_ID     : Request_ID_Type;
-      Priority       : System.Priority := System.Default_Priority) return Message_Record
+     (Sender_Address : in Message_Address;
+      Request_ID     : in Request_ID_Type;
+      Priority       : in System.Priority := System.Default_Priority) return Message_Record
    is
       Message : Message_Record :=
         Make_Empty_Message
@@ -150,6 +150,5 @@ package body LED_Driver.API is
    begin
       Decode_Status := Success;
    end All_Off_Request_Decode;
-
 
 end LED_Driver.API;
