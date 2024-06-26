@@ -20,7 +20,8 @@ package CubedOS.Log_Server.API is
    -- type Status_Type is (Success, Failure);
 
    -- The maximum size of a log message.
-   -- The other types here are for convenience, but notice that Log_Message_Type is always exactly 128 characters.
+   -- The other types here are for convenience,
+   -- but notice that Log_Message_Type is always exactly 128 characters.
    -- However, if a shorter string is sent to Log_Message, only that short string is encoded. The trailing
    -- characters of a Log_Message_Type are intended to be spaces.
    -- TODO: Use a Dynamic_Predicate to assert the condition about trailing spaces?

@@ -21,10 +21,8 @@ generic
 package CubedOS.Generic_Message_Manager
   with
     Abstract_State =>
-      ((Mailboxes
-        with External),
-      (Request_ID_Generator
-        with External)),
+      ((Mailboxes with External),
+      (Request_ID_Generator with External)),
     Initializes =>
       (Mailboxes, Request_ID_Generator)
 is

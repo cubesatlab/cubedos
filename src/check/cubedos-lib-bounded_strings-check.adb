@@ -25,9 +25,9 @@ package body CubedOS.Lib.Bounded_Strings.Check is
 
       Assert(B1.Text(1) = Nul, "Invalid content");
       Assert(B2.Text(1) = '1', "Invalid content");
-      Assert(B3.Text = (Nul, Nul, Nul, Nul, Nul, Nul, Nul, Nul), "Invalid content");
-      Assert(B4.Text = ('1', '2', '3', '4', Nul, Nul, Nul, Nul), "Invalid content");
-      Assert(B5.Text = ('1', '2', '3', '4', '5', '6', '7', '8'), "Invalid content");
+      Assert(B3.Text = [Nul, Nul, Nul, Nul, Nul, Nul, Nul, Nul], "Invalid content");
+      Assert(B4.Text = ['1', '2', '3', '4', Nul, Nul, Nul, Nul], "Invalid content");
+      Assert(B5.Text = ['1', '2', '3', '4', '5', '6', '7', '8'], "Invalid content");
    end Test_Make_1;
 
 
@@ -39,8 +39,8 @@ package body CubedOS.Lib.Bounded_Strings.Check is
       B3 : constant Bounded_String := Make(8, B2);
    begin
       Assert(B1.Text = ('1', '2', '3'), "Invalid content");
-      Assert(B2.Text = ('1', '2', '3', Nul, Nul, Nul, Nul, Nul), "Invalid content");
-      Assert(B3.Text = ('1', '2', '3', Nul, Nul, Nul, Nul, Nul), "Invalid content");
+      Assert(B2.Text = ['1', '2', '3', Nul, Nul, Nul, Nul, Nul], "Invalid content");
+      Assert(B3.Text = ['1', '2', '3', Nul, Nul, Nul, Nul, Nul], "Invalid content");
    end Test_Make_2;
 
 
@@ -52,7 +52,7 @@ package body CubedOS.Lib.Bounded_Strings.Check is
       B2 : constant Bounded_String := Make(8, '1');          -- Make taking character normal bound.
    begin
       Assert(B1.Text(1) = '1', "Invalid content");
-      Assert(B2.Text = ('1', Nul, Nul, Nul, Nul, Nul, Nul, Nul), "Invalid content");
+      Assert(B2.Text = ['1', Nul, Nul, Nul, Nul, Nul, Nul, Nul], "Invalid content");
    end Test_Make_3;
 
 
@@ -118,7 +118,7 @@ package body CubedOS.Lib.Bounded_Strings.Check is
       Append(B1, S1);
       Assert(B1.Text = ('1', '2', '3', '4'), "Invalid content");
       Append(B2, S2);
-      Assert(B2.Text = ('1', '2', '3', Nul, Nul, Nul, Nul, Nul), "Invalid content");
+      Assert(B2.Text = ['1', '2', '3', Nul, Nul, Nul, Nul, Nul], "Invalid content");
    end Test_Append_2;
 
 
@@ -133,7 +133,7 @@ package body CubedOS.Lib.Bounded_Strings.Check is
       Append(B1, C1);
       Assert(B1.Text = ('1', '2', '3', '4'), "Invalid content");
       Append(B2, C2);
-      Assert(B2.Text = ('1', Nul, Nul, Nul, Nul, Nul, Nul, Nul), "Invalid content");
+      Assert(B2.Text = ['1', Nul, Nul, Nul, Nul, Nul, Nul, Nul], "Invalid content");
    end Test_Append_3;
 
 
@@ -146,7 +146,7 @@ package body CubedOS.Lib.Bounded_Strings.Check is
       Clear(B1);
       Clear(B2);
       Assert(B1.Text(1) = Nul, "Invalid content");
-      Assert(B2.Text = (Nul, Nul, Nul, Nul, Nul, Nul, Nul, Nul), "Invalid content");
+      Assert(B2.Text = [Nul, Nul, Nul, Nul, Nul, Nul, Nul, Nul], "Invalid content");
    end Test_Clear;
 
 

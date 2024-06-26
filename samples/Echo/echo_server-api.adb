@@ -75,7 +75,6 @@ package body Echo_Server.API is
       Position := 0;
 
       XDR.Decode(Message.Payload, Position, Raw_Value, Last);
-      Position := Last + 1;
 
       if Raw_Value > Status_Type'Pos(Status_Type'Last) then
          Decode_Status := Malformed;

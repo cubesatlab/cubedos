@@ -63,9 +63,9 @@ package body CubedOS.Log_Server.API is
       Last          : Data_Index_Type;
       Raw_Log_Level : XDR.XDR_Unsigned;
       Raw_Size      : XDR.XDR_Unsigned;
-      Raw_Text      : Log_Message_Type := (others => ' ');
+      Raw_Text      : Log_Message_Type := [others => ' '];
    begin
-      Text := (others => ' ');
+      Text := [others => ' '];
       Position := 0;
       XDR.Decode(Message.Payload, Position, Raw_Log_Level, Last);
       Position := Last + 1;

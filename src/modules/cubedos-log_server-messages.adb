@@ -27,7 +27,7 @@ package body CubedOS.Log_Server.Messages is
       Status    : Message_Status_Type;
 
       Level_Strings : constant array(Log_Server.API.Log_Level_Type) of String(1 .. 4) :=
-        ("DBUG", "INFO", "NOTC", "WARN", "ERRO", "CRIT", "ALRT", "EMRG");
+        ["DBUG", "INFO", "NOTC", "WARN", "ERRO", "CRIT", "ALRT", "EMRG"];
 
       -- Note that the date/time we report is when we process the log message, not when it was sent.
       Now : Ada.Calendar.Time;

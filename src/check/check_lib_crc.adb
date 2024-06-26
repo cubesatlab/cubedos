@@ -20,7 +20,7 @@ package body Check_Lib_CRC is
       Test_Table_One : Octet_Array(1 .. 35539);
       Test_Table_Follow : Octet_Array(1 .. 30000);
       Test_Table_Two : constant Octet_Array(1 .. 10) :=
-        (16#11#, 16#15#, 16#C3#, 16#F0#, 16#00#, 16#05#, 16#20#, 16#DC#, 16#55#, 16#F5#);
+        [16#11#, 16#15#, 16#C3#, 16#F0#, 16#00#, 16#05#, 16#20#, 16#DC#, 16#55#, 16#F5#];
       CRC_Output : Double_Octet;
    begin
       -- Initializes Test_Table_One

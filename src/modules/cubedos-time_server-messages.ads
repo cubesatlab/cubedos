@@ -13,8 +13,7 @@ with Message_Manager;
 package CubedOS.Time_Server.Messages
   with
     Abstract_State =>
-      (Tick_Database
-        with External),
+      (Tick_Database with External),
     Initializes =>
       (Message_Loop, Tick_Database)
 is

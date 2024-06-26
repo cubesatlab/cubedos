@@ -32,7 +32,7 @@ package body Check_Lib_XDR is
       Octet_Value_4 : constant XDR_Octet := 16#78#;
 
    begin
-      Data_1 := (others => 0);
+      Data_1 := [others => 0];
       Encode(Value_1, Data_1, Position, Last);
       Encode(Value_2, Data_2, Position, Last);
       Assert(Data_1(Position + 0) = Octet_Value_1, "MSB Encoded incorrectly");
@@ -65,9 +65,9 @@ package body Check_Lib_XDR is
       Decoded_Value_1, Decoded_Value_2, Decoded_Value_3: XDR_Integer;
 
    begin
-      Data_1 := (others => 0);
-      Data_2 := (others => 0);
-      Data_3 := (others => 0);
+      Data_1 := [others => 0];
+      Data_2 := [others => 0];
+      Data_3 := [others => 0];
 
       Encode(Value_1, Data_1, Position, Last);
       Encode(Value_2, Data_2, Position, Last);
@@ -101,7 +101,7 @@ package body Check_Lib_XDR is
       Octet_Value_3 : constant XDR_Octet := 16#56#;
       Octet_Value_4 : constant XDR_Octet := 16#78#;
    begin
-      Data := (others => 0);
+      Data := [others => 0];
       Encode(Value, Data, Position, Last);
       Assert(Data(Position + 0) = Octet_Value_1, "MSB Encoded incorrectly");
       Assert(Data(Position + 1) = Octet_Value_2, "Encoded incorrectly");
@@ -129,7 +129,7 @@ package body Check_Lib_XDR is
       Octet_Value_1 : constant XDR_Octet := 0;
       Octet_Value_2 : constant XDR_Octet := 1;
    begin
-      Data := (others => 0);
+      Data := [others => 0];
       Encode(Value_1, Data, Position_1, Last);
       Encode(Value_2, Data, Position_2, Last);
       Assert(Data(Position_1 + 3) = Octet_Value_1, "'False' Encoded incorrectly");
@@ -160,7 +160,7 @@ package body Check_Lib_XDR is
       Octet_Value_7 : constant XDR_Octet := 16#32#;
       Octet_Value_8 : constant XDR_Octet := 16#10#;
    begin
-      Data := (others => 0);
+      Data := [others => 0];
       Encode(Value, Data, Position, Last);
       Assert(Data(Position) = Octet_Value_1, "MSB Encoded incorrectly");
       Assert(Data(Position + 1) = Octet_Value_2, "Encoded incorrectly");
@@ -189,9 +189,9 @@ package body Check_Lib_XDR is
       Last : XDR_Index_Type;
    begin
 
-      Data_1 := (others => 0);
-      Data_2 := (others => 0);
-      Data_3 := (others => 0);
+      Data_1 := [others => 0];
+      Data_2 := [others => 0];
+      Data_3 := [others => 0];
 
       Encode(Value_1, Data_1, Position, Last);
       Encode(Value_2, Data_2, Position, Last);
@@ -230,7 +230,7 @@ package body Check_Lib_XDR is
       Octet_Value_7 : constant XDR_Octet := 16#32#;
       Octet_Value_8 : constant XDR_Octet := 16#10#;
    begin
-      Data := (others => 0);
+      Data := [others => 0];
       Encode(Value, Data, Position, Last);
       Assert(Data(Position) = Octet_Value_1, "MSB Encoded incorrectly");
       Assert(Data(Position + 1) = Octet_Value_2, "Encoded incorrectly");
@@ -311,13 +311,13 @@ package body Check_Lib_XDR is
       pragma Unreferenced(T);
 
       Data : XDR_Array(0 .. Test_XDR_Size - 1);
-      Value_1 : constant Octet_Array(0 .. 5) := (others => 2);
-      Value_2 : constant Octet_Array(0 .. 7) := (others => 2);
+      Value_1 : constant Octet_Array(0 .. 5) := [others => 2];
+      Value_2 : constant Octet_Array(0 .. 7) := [others => 2];
       Decoded_Value_1 : Octet_Array(0 .. 5);
       Decoded_Value_2 : Octet_Array(0 .. 7);
       Last : XDR_Index_Type;
    begin
-      Data := (others => 1);
+      Data := [others => 1];
 
       -- Try encoding...
       Encode(Value_1, Data, 0, Last);
@@ -330,7 +330,7 @@ package body Check_Lib_XDR is
       Decode(Data, 0, Decoded_Value_1, Last);
       Assert(Decoded_Value_1 = Value_1, "Decoded incorrectly");
 
-      Data := (others => 1);
+      Data := [others => 1];
 
       -- Try encoding...
       Encode(Value_2, Data, 0, Last);
@@ -352,7 +352,7 @@ package body Check_Lib_XDR is
       Decoded_Value : String(1 .. 5);
       Position : constant XDR_Index_Type := 0;
    begin
-      Data := (others => 0);
+      Data := [others => 0];
       Encode(Value, Data, Position, Last);
       Assert(Data(Position + 0) = Character'Pos('H'), "Encoded incorrectly, received: "
              & XDR_Octet'Image(Data(Position + 4)) & " Expected :" & Integer'Image(Character'Pos('H')));

@@ -10,10 +10,8 @@ with System;
 
 package CubedOS.Publish_Subscribe_Server.Messages
   with
-    Abstract_State =>
-      Database,
-    Initializes =>
-      Database
+    Abstract_State => Database,
+    Initializes => Database
 is
 
    task type Message_Loop

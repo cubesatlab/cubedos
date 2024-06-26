@@ -79,7 +79,8 @@ package CubedOS.Lib.Space_Packets is
        Post =>
        ((Format_Primary_Header'Result(1) and 16#E0#) = 16#00#) and
         (Extract_Packet_Type(Format_Primary_Header'Result) = Packet_Type) and
-        (Extract_Secondary_Header_Flag(Format_Primary_Header'Result) = Secondary_Header_Flag) and
+         ((Extract_Secondary_Header_Flag(Format_Primary_Header'Result) and Secondary_Header_Flag)
+         or (not Extract_Secondary_Header_Flag(Format_Primary_Header'Result) and not Secondary_Header_Flag)) and
         (Extract_APID(Format_Primary_Header'Result) = APID) and
         (Extract_Segementation_Flags(Format_Primary_Header'Result) = Segementation_Flags) and
         (Extract_Sequence_Count(Format_Primary_Header'Result) = Sequence_Count);
