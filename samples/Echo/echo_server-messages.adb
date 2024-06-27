@@ -5,6 +5,7 @@
 --------------------------------------------------------------------------------
 with Echo_Server.API;
 with Name_Resolver;
+with CubedOS.Log_Server.API;
 
 package body Echo_Server.Messages is
    use Message_Manager;
@@ -43,8 +44,9 @@ package body Echo_Server.Messages is
       if Echo_Server.API.Is_Ping_Request(Message) then
          Handle_Ping_Request(Message);
       else
-         -- An unknown message type has been received. What should be done about that?
-         null;
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.Echo_Client,
+                                            CubedOS.Log_Server.API.Error,
+                                            "An unknown message type has been received!");
       end if;
    end Process;
 
