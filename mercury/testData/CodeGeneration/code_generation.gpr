@@ -1,0 +1,19 @@
+--with "../../../CubedOS/src/cubedos.gpr";
+
+project Code_Generation is
+
+   for Main use ("main.adb");
+   for Object_Dir use "build";
+   for Source_Dirs use (".", "../../../CubedOS/src");
+   for Languages use ("Ada");
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-fstack-check", "-gnatwa", "-gnata", "-g");
+   end Compiler;
+
+   package Prove is
+      for Switches use ("-j2", "--level=2");
+   end Prove;
+
+end Code_Generation;
+

@@ -1,0 +1,30 @@
+
+// Testing the Ada specific built-in types.
+
+// Using fully qualified names...
+typedef Ada.Real_Time.Time My_Time1;
+typedef Ada.Real_Time.Time_Span My_Time_Span1;
+
+struct S1FQ {
+  Ada.Real_Time.Time T1;
+  Ada.Real_Time.Time_Span T2;
+};
+
+struct S2FQ {
+  My_Time1 T1;
+  My_Time_Span1 T2;
+};
+
+// Using short names...
+typedef Time My_Time2;
+typedef Time_Span My_Time_Span2;
+
+struct S1S {
+  Time T1;
+  Time_Span T2;
+};
+
+struct S2S {
+  My_Time2 T1;
+  My_Time_Span2 T2;
+};

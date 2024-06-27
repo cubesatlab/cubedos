@@ -1,0 +1,81 @@
+
+/* This file contains various declaration forms as specified in RFC-4506. */
+// Basic types and declaration forms.
+
+typedef int          identifier;
+typedef unsigned int identifier;
+// See 0003.mxdr for enumeration syntax checks...
+typedef bool      identifier;
+typedef hyper     identifier;
+typedef unsigned hyper identifier;
+typedef float     identifier;
+typedef double    identifier;
+typedef quadruple identifier;
+typedef opaque    identifier[64];
+typedef opaque    identifier<64>;
+typedef opaque    identifier<>;
+typedef string    identifier<64>;
+typedef string    identifier<>;
+typedef int       identifier[64];
+typedef int       identifier<64>;
+typedef int       identifier<>;
+
+// Ordinary structure definitions are used to define record types.
+struct identifier {
+    int          identifier;
+    unsigned int identifier;
+    bool       identifier;
+    hyper      identifier;
+    unsigned hyper identifier;
+    float      identifier;
+    double     identifier;
+    quadruple  identifier;
+    opaque     identifier[64];
+    opaque     identifier<64>;
+    opaque     identifier<>;
+    string     identifier<64>;
+    string     identifier<>;
+    int        identifier[64];
+    int        identifier<64>;
+    int        identifier<>;
+};
+
+// Message structure definitions are used to define message parameters.
+message struct -> identifier {
+    int          identifier;
+    unsigned int identifier;
+    bool       identifier;
+    hyper      identifier;
+    unsigned hyper identifier;
+    float      identifier;
+    double     identifier;
+    quadruple  identifier;
+    opaque     identifier[64];
+    opaque     identifier<64>;
+    opaque     identifier<>;
+    string     identifier<64>;
+    string     identifier<>;
+    int        identifier[64];
+    int        identifier<64>;
+    int        identifier<>;
+};
+
+// Message structure definitions are used to define message parameters.
+message struct <- identifier {
+    int          identifier;
+    unsigned int identifier;
+    bool       identifier;
+    hyper      identifier;
+    unsigned hyper identifier;
+    float      identifier;
+    double     identifier;
+    quadruple  identifier;
+    opaque     identifier[64];
+    opaque     identifier<64>;
+    opaque     identifier<>;
+    string     identifier<64>;
+    string     identifier<>;
+    int        identifier[64];
+    int        identifier<64>;
+    int        identifier<>;
+};

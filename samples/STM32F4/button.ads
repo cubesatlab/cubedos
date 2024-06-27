@@ -30,9 +30,9 @@
 
 package Button is
    pragma Elaborate_Body;
-  
+
    type Button_State_Type is (Pressed, Released);
-      
+
    function Button_Pressed return Button_State_Type;
-   
-end Button; 
+
+end Button;

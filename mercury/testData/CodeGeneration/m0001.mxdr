@@ -1,0 +1,10 @@
+
+// A trivial case...
+
+message struct -> Trivial_Request {
+    int M1;
+};
+
+message struct <- Trivial_Reply {
+    int M1;
+};

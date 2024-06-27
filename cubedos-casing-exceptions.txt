@@ -7,6 +7,7 @@ BSI
 *RID*
 *TC*
 *XDR*
+*LED*
 CubedOS_Check
 CubedLib_Suite
 DomainA_Client

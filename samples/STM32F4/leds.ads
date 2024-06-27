@@ -42,8 +42,8 @@ package LEDs is
       Blue   => 16#8000#);
 
    --  As a result of the representation clause, avoid iterating directly over
-   --  the type since that will require an implicit lookup in the generated 
-   --  code of the loop.  Such usage seems unlikely so this direct 
+   --  the type since that will require an implicit lookup in the generated
+   --  code of the loop.  Such usage seems unlikely so this direct
    --  representation is reasonable, and efficient.
 
    for User_LED'Size use Word'Size;
@@ -55,8 +55,8 @@ package LEDs is
    LED5 : User_LED renames Red;
    LED6 : User_LED renames Blue;
 
-   procedure On  (This : User_LED) with Inline;
-   procedure Off (This : User_LED) with Inline;
+   procedure On  (This : in User_LED) with Inline;
+   procedure Off (This : in User_LED) with Inline;
 
    procedure All_Off with Inline;
    procedure All_On  with Inline;

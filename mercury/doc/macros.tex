@@ -1,0 +1,110 @@
+
+\newcommand{\newterm}[1]{\emph{#1}}    % For newly introduced terms.
+\newcommand{\code}[1]{\texttt{#1}}     % Used for bits of Ada inline.
+\newcommand{\filename}[1]{\texttt{#1}} % For file names.
+\newcommand{\SPARK}{\textsc{Spark}}    % For ease of small capping SPARK
+
+
+% Redefine the underscore command so latex will break words at underscores. Found this trick at
+% http://mrtextminer.wordpress.com/2009/02/26/break-a-long-word-containing-underscores-in-latex/
+%
+\let\underscore\_
+\newcommand{\breakingunderscore}{\renewcommand{\_}{\underscore\hspace{0pt}}}
+
+% Issue the changed underscore command to the whole document.
+\breakingunderscore
+
+
+% The \note macros are useful for creating easy to see notes.
+
+% Carl Brandon
+\long\def\car#1{\marginpar{CAR}{\small \ \ $\langle\langle\langle$\
+{#1}\
+    $\rangle\rangle\rangle$\ \ }} 
+
+% Peter Chapin
+\long\def\pet#1{\marginpar{PET}{\small \ \ $\langle\langle\langle$\
+{#1}\
+    $\rangle\rangle\rangle$\ \ }} 
+
+% Niels Huisman
+\long\def\nie#1{\marginpar{NIE}{\small \ \ $\langle\langle\langle$\
+{#1}\
+    $\rangle\rangle\rangle$\ \ }} 
+
+% Nicole Hurley
+\long\def\nic#1{\marginpar{NIC}{\small \ \ $\langle\langle\langle$\
+{#1}\
+    $\rangle\rangle\rangle$\ \ }} 
+
+
+%% The following are settings for the listings package. See the listings package documentation
+%% for more information.
+%%
+%\lstset{language=C,
+%        basicstyle=\small,
+%        stringstyle=\ttfamily,
+%        commentstyle=\ttfamily,
+%        xleftmargin=0.25in,
+%        showstringspaces=false}
+
+% Define listing parameters for Ada 2012. Base it on Ada 2005.
+\lstdefinelanguage{Ada2012}[2005]{Ada}
+{
+  morekeywords={some},
+  sensitive=false,
+  breaklines=false,
+  showstringspaces=false,
+  xleftmargin=0.25in,
+  basicstyle=\small\sffamily,
+  columns=flexible,
+}
+\lstset{language=Ada2012, showlines=true}
+
+% Wide equivalent of the listings package lstset. The parameter is the amount to indent the code
+% (may be negative).
+%
+\lstnewenvironment{widelisting}[1]
+   {\lstset{language=Ada2012,xleftmargin=#1}}
+   {}
+   
+% Wide listing from a file using the Listings package lstinputlisting. First parameter is
+% path name to file (can be relative). Second parameter is the amount to indent the code (may
+% be negative).
+%
+\newcommand{\wideinputlisting}[2]{%
+   \lstinputlisting[language=Ada2012,xleftmargin=#2]{#1}}
+
+
+% An environment for displaying use cases.
+%   This environment takes three parameters:
+%   \param #1: The name of the use case.
+%   \param #2: The actor who participates in the use case.
+%   \param #3: The context in which the use case executes.
+%
+%   The body of the environment is the action associated with the use case.
+\newsavebox{\UseCaseName}    % Create some boxes to hold the necessary text.
+\newsavebox{\UseCaseActor}   % We need to do this because we can't use the
+\newsavebox{\UseCaseContext} % environment parameters in the 'end' definition.
+\newsavebox{\UseCaseAction}
+\newenvironment{usecase}[3]
+ {
+  \sbox{\UseCaseName}{\bfseries #1}  % The name is easy.
+  \sbox{\UseCaseActor}{#2}           % The actor is easy.
+  \begin{lrbox}{\UseCaseContext}     % Format the context in a minipage.
+    \begin{minipage}{3.25in}
+    #3
+    \end{minipage}
+  \end{lrbox}
+  \begin{lrbox}{\UseCaseAction}      % The environment body becomes the action.
+  \begin{minipage}{3.25in}}
+ {\end{minipage}
+  \end{lrbox}
+\begin{center}   % Now spew forth the table using the information collected above.
+\begin{tabular}{|l||p{3.5in}|} \hline
+\multicolumn{2}{|c|}{\usebox{\UseCaseName}} \\ \hline
+Actor   & \usebox{\UseCaseActor}   \\ \hline
+Context & \usebox{\UseCaseContext} \\ \hline
+Action  & \usebox{\UseCaseAction}  \\ \hline
+\end{tabular}
+\end{center}}

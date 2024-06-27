@@ -1,0 +1,12 @@
+
+// Range constraints on type definitions.
+
+typedef int T1 range  1 .. 2;
+typedef int T2 range  1 .. T1'Last;
+typedef int T3 range -1 .. +1;
+
+// Merc currently doesn't support the use of 'First at the start of a range.
+// typedef int T4 range T1'First .. T1'Last;
+typedef int T5 is T1 range 1 .. 1;
+
+typedef int T6 is Natural range 0 .. 10;
