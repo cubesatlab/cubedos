@@ -1,0 +1,30 @@
+
+// Enumeration declarations
+
+// Introducing enumeration types using special syntax (no typedef).
+enum X1 { A, B, C };
+enum X2 { A };
+enum X3 { A =  1, B =  2, C =  3 };
+enum X4 { A = -1, B = -2, C = -3 };
+
+// Introducing enumeration types using typedef.
+typedef enum { A, B, C } X1;
+typedef enum { A } X2;
+typedef enum { A =  1, B =  2, C =  3 } X3;
+typedef enum { A = -1, B = -2, C = -3 } X4;
+
+// Declaration members using anonymous enumeration types.
+struct S1 {
+  enum { A, B, C } M1;
+  enum { A } M2;
+  enum { A =  1, B =  2, C =  3 } M3;
+  enum { A = -1, B = -2, C = -3 } M4;
+};
+
+// Using previously declaraed enumeration type names.
+struct S2 {
+  X1 M1;
+  X2 M2;
+  X3 M3;
+  X4 M4;
+};

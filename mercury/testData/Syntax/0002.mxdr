@@ -1,0 +1,11 @@
+
+// Constant declarations...
+
+const Minimum = -10;
+const Maximum =  10;
+const With_Sign = +10;
+
+// Currently Merc has no concept of constant expressions. Should it?
+//const X = 1 + 2;
+//const Y = X + 3;
+

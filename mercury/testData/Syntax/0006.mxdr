@@ -1,0 +1,48 @@
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 = M2;
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 /= M2;
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 <= M2;
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 >= M2;
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 < M2;
+
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant =>
+    M1 > M2;
+
+// Of course this makes no sense... it's just a syntax check!
+message struct -> M_Request {
+  int M1;
+  int M2;
+} with message_invariant => M1  = M2,
+  with message_invariant => M1 /= M2,
+  with message_invariant => M1 <= M2,
+  with message_invariant => M1 <  M2,
+  with message_invariant => M1 >= M2,
+  with message_invariant => M1 >  M2;
+

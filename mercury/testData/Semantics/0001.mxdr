@@ -1,0 +1,5 @@
+
+// Are double declarations detected?
+
+typedef int T1;
+typedef unsigned int T1;  // Error!

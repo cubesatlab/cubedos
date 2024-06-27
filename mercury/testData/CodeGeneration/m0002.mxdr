@@ -1,0 +1,71 @@
+enum {red, green, blue} Color;
+
+typedef unsigned int Hello range 1 .. 2;
+
+const gorilla = 2;
+
+const whatever = 1;
+
+typedef double arnold[10];
+
+typedef bool boo;
+
+typedef hyper hyp range 1 .. 200;
+
+typedef unsigned hyper hyp2 range 1 .. 200;
+
+typedef unsigned int Width_Type range 1 .. 100;
+
+typedef unsigned int horse is Width_Type range 1 .. 10;
+
+typedef unsigned int banana range 0 .. whatever;
+
+typedef unsigned int grape range 1 .. gorilla;
+
+typedef unsigned int seed range 0 .. grape'Last;
+
+typedef unsigned int stem is seed range 0 .. seed'Last;
+
+typedef stem branch[10000];
+
+struct bat {
+        Color h;
+        Width_Type j;
+        branch Tree_Limb;
+        };
+
+struct cat {
+        bat u;
+        double i;
+        unsigned int y;
+};
+
+struct sat {
+        int k;
+        cat led;
+        bat u;
+};
+
+typedef enum {yellow, orange, violet} Other_Colors;
+
+message struct -> Reddish {
+        Color i;
+        int y;
+        banana b;
+        boo bo;
+        hyp2 hypey2;
+};
+
+message struct <- Bluish {
+        Other_Colors r;
+        grape g;
+        arnold a;
+        float schwarz;
+        seed s;
+};
+
+message struct -> Example {
+        Width_Type thing;
+        sat        cube;
+        hyp        hypey;
+};

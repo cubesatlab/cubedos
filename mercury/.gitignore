@@ -1,0 +1,19 @@
+
+# IntelliJ files that should not be versioned.
+.idea
+build
+
+# Visual Studio Code files not be versioned.
+
+# SBT generated folders.
+target
+.bsp
+
+# LaTeX artifacts.
+main.aux
+main.bbl
+main.blg
+main.log
+main.out
+main.pdf
+main.toc

@@ -11,6 +11,8 @@ used for generating CubedOS API encoder/decoder subprograms. The subfolders are 
 
 + `doc`: The documentation of CubedOS.
 
++ `mercury`: The interface definition language compiler for CubedOS.
+
 + `samples`: This folder contains various sample programs that illustrate CubedOS in action.
 
 + `src`: The CubedOS source code repository.
@@ -61,13 +63,12 @@ The sample programs have their own project files. At this time there is no maste
 defined for all CubedOS components.
 
 
-Merc Helper Application
------------------------
+Mercury Helper Application
+---------------------------
 
-The program Merc, in a separate repository, is a Scala program for generating CubedOS API
+The program Mercury, in the `mercury` folder, is a Scala program for generating CubedOS API
 packages. It is possible to write these packages manually following, for example, the templates
 in the `template` folder (which are extensively commented). Merc makes the job much easier.
-Information about Merc, and how to build and use it, can be found in the Merc repository.
-*Current there is an issue with Merc that limits its usefulness. Most API packages in CubedOS
-have been manually written!*
-
+Information about Merc, and how to build and use it, can be found in the CubedOS documentation
+in the `doc` folder. *Current there is an issue with Merc that limits its usefulness. Most API
+packages in CubedOS have been manually written!*
