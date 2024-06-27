@@ -11,9 +11,12 @@ with System;
 
 with Echo_Client.Messages;
 with Echo_Server.Messages;
+with CubedOS.Log_Server.Messages;
 
 pragma Unreferenced(Echo_Client.Messages);
 pragma Unreferenced(Echo_Server.Messages);
+pragma Unreferenced(CubedOS.Log_Server.Messages);
+
 
 procedure Main is
 

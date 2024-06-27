@@ -13,5 +13,6 @@ package Name_Resolver is
     -- Application-Specific Modules
     Echo_Client             : constant Message_Address := (0,1);
     Echo_Server             : constant Message_Address := (0,2);
+    Log_Server              : constant Message_Address := (0,3);
 
 end Name_Resolver;
