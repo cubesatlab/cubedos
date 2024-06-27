@@ -1,6 +1,6 @@
 package edu.vermontstate.mercury
 
-import edu.vermontstate.merc.TypeRep.ComponentRep
+import edu.vermontstate.mercury.TypeRep.ComponentRep
 import TypeRep.ComponentRep
 
 class STPopulation(

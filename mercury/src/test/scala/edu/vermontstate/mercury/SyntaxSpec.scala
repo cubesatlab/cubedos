@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.*
 
 class SyntaxSpec extends UnitSpec {
 
-  "The MercParser" should "parse MXDR" in {
+  "The MercuryParser" should "parse MXDR" in {
     val fileNames =
       Array("0001.mxdr", "0002.mxdr", "0003.mxdr", "0004.mxdr", "0005.mxdr",
             "0006.mxdr")

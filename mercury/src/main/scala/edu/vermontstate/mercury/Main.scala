@@ -19,7 +19,7 @@ object Main {
     * @return None if there is an error in the command line; otherwise return a set of switches
     *         together with the source file name(s).
     */
-  private[merc] def analyzeCommandLine(args: Array[String]): Option[(Map[Char, String], String)] = {
+  private[mercury] def analyzeCommandLine(args: Array[String]): Option[(Map[Char, String], String)] = {
     if (args.length < 1) {
       None
     }

@@ -3,7 +3,7 @@ package edu.vermontstate.mercury
 import java.io.File
 
 import TypeRep.IntRep
-import edu.vermontstate.merc.MXDRParser.*
+import edu.vermontstate.mercury.MXDRParser.*
 
 class SpecificationGenerator(
   templateFolder : String,

@@ -19,7 +19,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % "test"
 
 Test / logBuffered := false
 
-lazy val merc = (project in file("."))
+lazy val mercury = (project in file("."))
   .settings(
     name := "Mercury",
 

@@ -1,6 +1,6 @@
 package edu.vermontstate.mercury
 
-class MercSpec extends UnitSpec {
+class MercurySpec extends UnitSpec {
 
   "Command line processing" should "behave as specified" in {
     val testCases: List[Array[String]] = List(
