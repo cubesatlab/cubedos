@@ -3,5 +3,7 @@
         "Merc",
         "messageable",
         "Ravenscar"
-    ]
+    ],
+    "rewrap.wrappingColumn": 96,
+    "latex-workshop.latex.autoBuild.run": "never"
 }

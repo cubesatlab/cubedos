@@ -1,13 +1,13 @@
-\chapter{Tutorial}
-\label{chapt-tutorial}
+\section{Tutorial}
+\label{sec:mercury-tutorial}
 
-Merc is a compiler that takes the definition of a CubedOS module interface, written in a
-suitable interface definition language (IDL), and outputs an API package for that module in
-SPARK. The intention is for the generated code to be provably free from runtime errors without
-any further intervention on the part of the developer. Thus Merc greatly simplifies the work
-involved in creating API packages for CubedOS modules.
+Mercury is a compiler that takes the definition of a CubedOS module interface, written in an
+interface definition language (IDL), and outputs an API package for that module in SPARK. The
+intention is for the generated code to be provably free from runtime errors without any further
+intervention on the part of the developer. Thus, Mercury greatly simplifies the work involved in
+creating API packages for CubedOS modules.
 
-The IDL used as input to Merc is an extension of the XDR language described in RFC-4506. The
+The IDL used as input to Mercury is an extension of the XDR language described in RFC-4506. The
 extended features allow expression of constraints on scalar types, as well as some additional
 features pertaining to the SPARK target language. We call this extended version of XDR
 ``modified XDR'' or MXDR. The central abstraction in MXDR is that of the message. Rather than
@@ -17,32 +17,30 @@ message implies three subprograms:
 
 \begin{enumerate}
 \item A function that takes the message contents as typed \texttt{in} parameters and encodes the
-  message into a raw octet array for transmission.
+message into a raw octet array for transmission.
 \item A procedure that decodes the message as a raw octet array back into typed \texttt{out}
-  parameters.
+parameters.
 \item A function that verifies that a given octet array contains a instance of a particular
-  message.
+message.
 \end{enumerate}
 
-The MXDR user only need to specify the structure of the message. Merc generates the three
+The MXDR user only need to specify the structure of the message. Mercury generates the three
 associated subprograms without any additional assistance. This message-centric focus is how MXDR
 differs from most interface definition languages, and is one of the main reasons we developed an
 entirely new tool for CubedOS.
 
-We choose to base Merc on XDR to simplify interoperability with other systems in the future. At
-the time of this writing, CubedOS only supports messages between modules in the same operating
-system process, all of which are written in SPARK. However, we anticipate extending the
-architecture to support message passing between processes, and even between machines. Using a
-standard wire protocol, such as XDR, may simplify that work. All of the extensions to XDR that
+We choose to base Mercury on XDR to simplify interoperability with other systems in the future.
+At the time of this writing, CubedOS only supports messages between modules in the same
+operating system process, all of which are written in SPARK. However, we anticipate extending
+the architecture to support message passing between processes, and even between machines. Using
+a standard wire protocol, such as XDR, may simplify that work. All of the extensions to XDR that
 we define are at the IDL source level only, and are used to guide the generation of provable
 SPARK. We specify no changes to the underlying XDR format.
 
-This section of the Merc documentation is a tutorial for Merc users. Here we describe how to set
-up Merc, writing MXDR files, and then use Merc to generate API packages. When you are
+This section of the Mercury documentation is a tutorial for Mercury users. When you are
 contemplating a new CubedOS module, you should first express the API to your module as a
 collection of messages it sends and received. Write an MXDR file that declares the structure of
-those messages, and then use Merc to generate the API package. You can then focus the bulk of
+those messages, and then use Mercury to generate the API package. You can then focus the bulk of
 your programming effort on the part of the module that implements the messages you defined
 without wasting time writing tedious and highly repetative message encoding and decoding
 subprograms.
-
