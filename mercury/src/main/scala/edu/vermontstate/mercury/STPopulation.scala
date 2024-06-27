@@ -1,4 +1,4 @@
-package edu.vermontstate.merc
+package edu.vermontstate.mercury
 
 import edu.vermontstate.merc.TypeRep.ComponentRep
 import TypeRep.ComponentRep

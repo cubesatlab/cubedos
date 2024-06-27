@@ -1,4 +1,4 @@
-package edu.vermontstate.merc
+package edu.vermontstate.mercury
 
 import java.io.File
 import org.antlr.v4.runtime.*

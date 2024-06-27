@@ -1,4 +1,4 @@
-package edu.vermontstate.merc
+package edu.vermontstate.mercury
 
 /**
  * An implementation of the Reporter trait that outputs messages to the console.

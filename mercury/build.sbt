@@ -21,10 +21,10 @@ Test / logBuffered := false
 
 lazy val merc = (project in file("."))
   .settings(
-    name := "Merc",
+    name := "Mercury",
 
     Antlr4 / antlr4Version     := "4.13.1",
-    Antlr4 / antlr4PackageName := Some("edu.vermontstate.merc"),
+    Antlr4 / antlr4PackageName := Some("edu.vermontstate.mercury"),
     Antlr4 / antlr4GenListener := true,
     Antlr4 / antlr4GenVisitor  := true
   )

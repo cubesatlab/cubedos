@@ -1,4 +1,4 @@
-package edu.vermontstate.merc
+package edu.vermontstate.mercury
 
 class SemanticAnalyzer(
   nameOfFile : String,
