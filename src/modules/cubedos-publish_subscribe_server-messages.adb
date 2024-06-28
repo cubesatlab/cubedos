@@ -10,6 +10,8 @@ with CubedOS.Lib;
 with CubedOS.Publish_Subscribe_Server.API;
 with Message_Manager;
 with Name_Resolver;
+with CubedOS.Log_Server.API;
+
 use  CubedOS.Publish_Subscribe_Server.API;
 
 package body CubedOS.Publish_Subscribe_Server.Messages
@@ -116,8 +118,9 @@ is
       elsif Is_Publish_Request(Message) then
          Handle_Publish_Request(Message);
       else
-         -- TODO: An unexpected message type has been received. What should be done about that?
-         null;
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.Publish_Subscribe_Server,
+                                            CubedOS.Log_Server.API.Error,
+                                            "An unexpected message type has been received!");
       end if;
    end Process;
 

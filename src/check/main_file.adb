@@ -15,6 +15,8 @@ with CubedOS.File_Server.Messages;
 pragma Unreferenced(CubedOS.File_Server.Messages);
 
 with Message_Manager;
+with CubedOS.Log_Server.API;
+with Name_Resolver;
 
 use Ada.Text_IO;
 use CubedOS;
@@ -86,7 +88,9 @@ begin
 
                when others =>
                   -- Should never happen. Let's just ignore this.
-                  null;
+                  CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Notice,
+                                            "Request ID is unrecognized");
             end case;
          end if;
 

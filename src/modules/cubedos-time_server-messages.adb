@@ -275,8 +275,9 @@ package body CubedOS.Time_Server.Messages
       elsif API.Is_Cancel_Request(Incoming_Message) then
          Process_Cancel_Request(Incoming_Message);
       else
-         --$ TODO: What should be done about malformed/unrecognized messages?
-         null;
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.Time_Server,
+                                            CubedOS.Log_Server.API.Critical,
+                                            "Message is malformed/unrecognized!");
       end if;
    end Process;
 

@@ -8,6 +8,7 @@ pragma SPARK_Mode(On);
 
 with CubedOS.Interpreter.API;  -- Needed so that the types in the API can be used here.
 with Name_Resolver;
+with CubedOS.Log_Server.API;
 
 package body CubedOS.Interpreter.Messages is
    use Message_Manager;
@@ -64,8 +65,9 @@ package body CubedOS.Interpreter.Messages is
       elsif CubedOS.Interpreter.API.Is_Add_Request(Message) then
          Handle_Add_Request(Message);
       else
-         -- An unknown message type has been received. What should be done about that?
-         null;
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.Interpreter,
+                                            CubedOS.Log_Server.API.Error,
+                                            "An unknown message type has been received!");
       end if;
       -- When this procedure returns the message loop will immediately try to receive the next
       -- message. Note that all CubedOS send operations are non-blocking so sending an outgoing

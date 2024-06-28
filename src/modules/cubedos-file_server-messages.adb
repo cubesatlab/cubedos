@@ -8,14 +8,12 @@ pragma SPARK_Mode(Off);
 
 -- For debugging...
 with Ada.Exceptions;
-with Ada.Text_IO;
 with Ada.Sequential_IO;
 
 with CubedOS.File_Server.API;
 with CubedOS.Lib;
 with Name_Resolver;
-
-use Ada.Text_IO;
+with CubedOS.Log_Server.API;
 
 package body CubedOS.File_Server.Messages is
    use Message_Manager;
@@ -120,7 +118,9 @@ package body CubedOS.File_Server.Messages is
                end loop;
             exception
                when Octet_IO.End_Error =>
-                  null;
+                  CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Error,
+                                            "Read request has not been decoded properly!");
             end;
             -- Send what we have (could be zero octets!).
             Message_Manager.Route_Message
@@ -144,7 +144,7 @@ package body CubedOS.File_Server.Messages is
       Size   : API.Read_Result_Size_Type;
       Data   : CubedOS.Lib.Octet_Array(0 .. API.Read_Size_Type'Last - 1);
    begin
-      -- If the read request doesn't decode properly we just don't send a reply at all?
+      -- If the write request doesn't decode properly we just don't send a reply at all?
       API.Write_Request_Decode(Incoming_Message, Handle, Amount, Data, Status);
       if Status = Success then
          if Octet_IO.Is_Open(Files(Handle).Underlying) then
@@ -157,7 +157,9 @@ package body CubedOS.File_Server.Messages is
                end loop;
             exception
                when Octet_IO.End_Error =>
-                  null;
+                  CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Error,
+                                            "Write request has not been decoded properly!");
             end;
             Message_Manager.Route_Message
               (API.Write_Reply_Encode
@@ -185,7 +187,6 @@ package body CubedOS.File_Server.Messages is
    end Process_Close_Request;
 
 
--- TODO --
    procedure Process(Incoming_Message : in Message_Record) is
    begin
       if API.Is_Open_Request(Incoming_Message) then
@@ -197,14 +198,19 @@ package body CubedOS.File_Server.Messages is
       elsif API.Is_Close_Request(Incoming_Message) then
          Process_Close_Request(Incoming_Message);
       else
-         -- TODO: What should be done about malformed/unrecognized messages?
-         null;
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Critical,
+                                            "Message is malformed/unrecognized!");
       end if;
 
    exception
       when Ex : others =>
-         Ada.Text_IO.Put_Line("Unhandled exception in File_Server message processor...");
-         Ada.Text_IO.Put_Line(Ada.Exceptions.Exception_Information(Ex));
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Error,
+                                            "Unhandled exception in File_Server message processor...");
+         CubedOS.Log_Server.API.Log_Message(Name_Resolver.File_Server,
+                                            CubedOS.Log_Server.API.Error,
+                                            Ada.Exceptions.Exception_Information(Ex));
    end Process;
 
 
