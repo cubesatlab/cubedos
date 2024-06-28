@@ -13,7 +13,11 @@ with Ada.Text_IO;
 with CubedOS.Time_Server;
 with CubedOS.Time_Server.API;
 with CubedOS.Time_Server.Messages;
+with CubedOS.Log_Server.Messages;
+
 pragma Unreferenced(CubedOS.Time_Server.Messages);
+pragma Unreferenced(CubedOS.Log_Server.Messages);
+
 with Message_Manager;
 with GNAT.Time_Stamp;
 

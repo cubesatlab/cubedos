@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 with GNAT.Sockets;   use GNAT.Sockets;
 with Ada.Streams;
-with Ada.Text_IO;
+with CubedOS.Log_Server.API;
 with Ada.Exceptions; use Ada.Exceptions;
 with Name_Resolver;
 with Network_Configuration;
@@ -65,16 +65,21 @@ package body CubedOS.Transport_UDP.Messages is
          begin
             GNAT.Sockets.Receive_Socket (Server, Data, Last, From);
             Message := Read_Stream_Message(Data, Last);
-            Ada.Text_IO.Put_Line ("from : " & Image (From.Addr));
+            CubedOS.Log_Server.API.Log_Message(Name_Resolver.Transport,
+                                      CubedOS.Log_Server.API.Informational,
+                                      "from : " & Image (From.Addr));
             if Message.Sender_Address.Domain_ID = Message_Manager.Domain_ID then
-               Ada.Text_IO.Put_Line ("This message was sent from this domain! Dropping Message");
+               CubedOS.Log_Server.API.Log_Message(Name_Resolver.Transport,
+                                      CubedOS.Log_Server.API.Notice,
+                                      "This message was sent from this domain! Dropping Message");
             else
                Message_Manager.Route_Message(Message);
             end if;
          exception
             when E : others =>
-               Ada.Text_IO.Put_Line
-                 (Exception_Name (E) & ": " & Exception_Message (E));
+               CubedOS.Log_Server.API.Log_Message(Name_Resolver.Transport,
+                                      CubedOS.Log_Server.API.Informational,
+                                      Exception_Name (E) & ": " & Exception_Message (E));
          end;
       end loop;
    end Server_Loop;

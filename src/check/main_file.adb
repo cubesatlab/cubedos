@@ -12,7 +12,10 @@ with Ada.Text_IO;
 with CubedOS.Lib;
 with CubedOS.File_Server.API;
 with CubedOS.File_Server.Messages;
+with CubedOS.Log_Server.Messages;
+
 pragma Unreferenced(CubedOS.File_Server.Messages);
+pragma Unreferenced(CubedOS.Log_Server.Messages);
 
 with Message_Manager;
 with CubedOS.Log_Server.API;

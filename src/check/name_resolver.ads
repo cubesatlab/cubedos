@@ -39,6 +39,7 @@ package Name_Resolver is
    File_Server              : constant Message_Address := (0, 7);
    -- Table_Server             : constant Message_Address := (0, 8);
    Interpreter              : constant Message_Address := (0, 9);
+   Transport                : constant Message_Address := (0, 10);
 
    -- Application-Specific Modules.
    -- Make up names as you see fit (typically the same as your module's top level package).
