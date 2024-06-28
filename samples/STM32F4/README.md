@@ -3,6 +3,8 @@ README
 ======
 
 This folder contains a demonstration of CubedOS running on an STM32F4-discovery board.
+*Currently, this program can't be compiled because the Log Server requires Ada.Calendar which is
+not supported by this platform*.
 
 Board Information
 -----------------
