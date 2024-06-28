@@ -9,6 +9,7 @@ pragma SPARK_Mode(On);
 with Name_Resolver;
 with CubedOS.Time_Server.API;
 use  CubedOS.Time_Server.API;
+with CubedOS.Log_Server.API;
 
 package body CubedOS.Time_Server.Messages
   with Refined_State => (Tick_Database => (Series_Database, Send_Tick_Messages)) is
