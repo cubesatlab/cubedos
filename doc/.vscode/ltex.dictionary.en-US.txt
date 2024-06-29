@@ -9,3 +9,5 @@ ONC
 XDR
 pragmas
 Jorvik
+autogenerate
+BasicLEO

@@ -15,70 +15,77 @@ However, the structure we describe here is appropriate for many modules. The Cub
 distribution includes a template module, with comments, that you can use as a starting point for
 your own modules.
 
-A module consists of a hierarchy of packages formed by a root package and (at least) three child
-packages. The root package can be used to hold module-wide declarations as appropriate. The most
-important such declaration is the module's ID number. However, module-wide type declarations, or
-API elements that are shared with the internals package (described below) would also be
-candidates for inclusion in the root package. In many cases the root package may not require a
-body, although module-wide subprograms might usefully be declared in the root package.
+A module consists of a hierarchy of packages formed by a root package and (at least) two child
+packages. The root package can be used to hold module-wide declarations as appropriate. In many
+cases the root package may not require a body, although module-wide subprograms might usefully
+be declared in the root package.
 
-For a module named |My_Module| we recommend the following three child packages:
+For a module named |My_Module| we recommend the following two or three child packages:
 
 \begin{itemize}
 \item |My_Module.Messages| is a public child package containing the server task that loops
-  infinitely reading the module mailbox and processing the messages it finds there. This loop
-  drives the activity of the module, processing exactly one message at a time. No other task in
-  the module, or indeed in the entire system, should read from the module mailbox. Furthermore,
-  the server task should receive a message in only one place in the program. This highly
-  stylized structure is conceptually simple and easy to analyze.
+infinitely reading the module mailbox and processing the messages it finds there. This loop
+drives the activity of the module, processing exactly one message at a time. No other task in
+the module, or indeed in the entire system, should read from the module's mailbox. Furthermore,
+the server task should receive a message in only one place in the program. This highly stylized
+structure is conceptually simple and easy to analyze.
 
 \item |My_Module.Internals| is a private child package that contains the bulk of the module's
-  processing logic. The message loop is intended to be minimal; it calls into the |Internals|
-  package as soon as it can. The code in this package is not accessible from outside the module,
-  and it can assume it is called by only one task (unless additional, internal tasks are created
-  by the module developer).
+processing logic. In simple cases, this package may not be necessary and all processing of
+messages can be in the |Messages| package. However, complex modules may find it useful to break
+out the bulk of the processing logic into |Internals| to separate that logic from the CubedOS
+infrastructure associated with message handling. The code in this package is not accessible from
+outside the module (since it is a private child package), and it can assume it is called by only
+one task unless additional, internal tasks are created by the module developer.
 
-\item |My_Module.API| is a public child package that contains helper functions for constructing
-  and parsing module-specific messages. These helper functions only manipulate message records.
-  They do no actual message processing. Consequently, they can be easily written as pure
-  functions and made task-safe. Other modules will call these functions to build messages sent
-  to and parse messages received from |My_Module|. The |API| package may also include type
-  definitions related to the module's public interface.
+In even more complex cases, it may make sense for there to be multiple private "internals"
+packages, or even a private internal package hierarchy. Organizing the internal logic of a
+module is ultimately at the discretion of the module developer.
+
+\item |My_Module.API| is a public child package that contains helper subprograms for
+constructing and parsing module messages. These helper functions only manipulate message
+records. They do no actual message processing. Other modules will call these subprograms to
+build messages sent to and parse messages received from |My_Module|. The |API| package may also
+include type definitions related to the module's public interface.
+
+A separate tool, Mercury, can be used to autogenerate the |API| package from an interface
+definition. Mercury is described in Chapter~\ref{chapt:mercury}.
 \end{itemize}
 
-Although this structure seems complex it has several advantageous features.
+Although this structure seems complex it has several advantages.
 
-First the bulk of the module's logic is in packages (both |Internals| and |API|) that have no
-tasking structures. At the time of this writing \SPARK\ does not yet support Ada tasking and so
-this allows |SPARK_Mode| to be on for the two packages that do most of the processing while
-remaining off for the relatively trivial package containing the message loop.
+The bulk of the module's logic is in packages (both |Internals| and |API|) that, in most cases,
+have no tasking structures. Typically, for modules with no internal tasks, all the code in the
+|Internals| package is executed by only one task, simplifying development. The |API| encoding
+and decoding subprograms might be called by multiple tasks, but they are relatively simple, with
+no global effects, and thus easy to make task-safe.
 
 Because the |Internals| package is a private child package, its resources cannot be directly
-accessed by the rest of the program. This ensures that no tasks unknown by the module author
-will be calling internal subprograms.
+accessed by the rest of the program.
 
 Using the module API is highly stylized and entails calling an API function to build a message
-that is then sent to the module's mailbox. For example:
+that is then sent to the module's mailbox. This is most conveniently done using |Route_Message|
+in the |Message_Manager| package:
 
 \begin{lstlisting}
-   Mailboxes(My_Module.ID).Send(My_Module.API.Operation_Message(1, 2, 3));
+   Route_Message(My_Module.API.Operation_Request(1, 2, 3));
 \end{lstlisting}
 
-Here |Operation_Message| creates a message causing |My_Module| to perform some operation. The
-name of the function should be reflective of the operation being done. Here ``operation'' is
-used as a placeholder for some more descriptive name. We recommend using the convention of
-adding ``Message'' as a suffix to the names of all message constructing functions.
+Here |Operation_Request| is a function that creates a message causing |My_Module| to perform
+some operation. The name of the function should be reflective of the operation being done. We
+recommend using the convention of adding ``Request'' as a suffix to the names of messages making
+requests sent to the module, and adding ``Reply'' as a suffix to the names of messages that are
+replies from the module. This aligns with the concept that modules are, in effect, servers that
+accept requests and return replies.
 
 The arguments to the function (1, 2, and 3 in this case) are arguments to the operation and are
-packed into a message using some module-specific means; module authors have total control over
-the formatting of their messages, so the message format need not be made public information.
-\pet{Currently, the message record type is not private, but it may be possible to use type
-extension to fix this (each module provides a private extension). That would reduce potential
-problems by prohibiting module users from editing the contents of messages.} The resulting
-message returned by |Operation_Message| is then sent to |My_Module|'s mailbox.
+packed into a message following XDR rules. The Mercury tool auto-generates |API| bodies that
+take care of this. Note that |Route_Message| handles looking up a module's ID in the name
+resolver package. In the case of a multi-domain application, |Route_Message| will automatically
+direct the message to some underlying message router, as needed.
 
-Finally, the architecture of modules is compatible with the Ravenscar restrictions. In
-particular: a module's server task is a single, library level task that runs infinitely, and all
+Finally, the architecture of modules is compatible with the Ravenscar or Jorvik restrictions. In
+particular, a module's server task is a single, library level task that runs infinitely, and all
 communication with a module is by way of a protected mailbox object with only one entry for
 receiving messages.
 
@@ -86,54 +93,101 @@ receiving messages.
 \label{sec:core-module-documentation}
 
 This section describes the core modules that are part of the CubedOS distribution. These modules
-are intended to be used by most CubedOS applications. They provide basic services that are
-common to all applications.
+are intended to be used by most CubedOS applications. They provide basic services. Additional
+information about a core module can be found in the comments in the module's top level package
+and |API| package specifications, or in the MXDR file used by Mercury to generate the modules
+|API| package.
 
 \subsection{Log Server}
 \label{sec:log-server}
 
-The log server is a core module that provides a simple logging facility. It is expected that
-every CubedOS application will define its own body for the messages package of the log server
-that defines how that application wants to log messages. At the time of this writing, the
-provided body simply prints messages to the console.
+The log server is a core module that provides a simple logging facility. The default log server
+outputs log messages to the console via Ada's standard library package |Ada.Text_IO|. For
+systems where that package is not available, developers can write their own body for package
+|CubedOS.Log_Server.Messages| that handles incoming messages in whatever way makes sense for
+their application.
 
-The API package provides a convenience procedure named |Log_Message| that takes care of the
-details of constructing a message record and sending it to the log server. It is expected that
-most uses of the Log Server will be by way of calling |Log_Message|. Currently, the Log Server
-does not send any reply messages. Logging is assumed to always be successful. This is an area
-for future improvement.
+Log messages are intended to be short strings of human-readable text. Each message has an
+associated log level, described below, and is automatically timestamped by the log server with a
+boot-relative time in seconds.
 
-Of particular interest is the |Log_Level| parameter to |Log_Message|. This parameter is an
-enumeration type that allows the caller to specify the severity of the message. The Log levels
-are intended to follow those used by the Unix syslog facility. The following log levels are
-defined:
+The log server's API package provides a convenience procedure named |Log_Message| that takes
+care of the details of constructing a message and sending it to the log server. It is expected
+that most uses of the Log Server will be by way of calling |Log_Message|. Currently, the Log
+Server does not send any reply messages. Logging is assumed to always be successful. This is an
+area for future improvement.
+
+Of particular interest is the |Log_Level| parameter to |Log_Message|. This parameter is used to
+indicate the severity of the log message. It is an enumeration type. The Log levels are intended
+to follow those used by the Unix syslog facility, both in name and meaning. The following log
+levels are defined:
 
 \begin{itemize}
 \item |Debug|: Messages that are only of interest to developers. These messages are typically
-  very detailed and are used to diagnose problems in the system. Debug messages are not
-  typically enabled in a production system.
+very detailed and are used to diagnose problems in the system. Debug messages are not typically
+enabled in a production system.
 
-\item |Informational|: Messages that are of interest to users. These messages are typically high-level
-  and are used to inform the user of the system's normal operation.
+\item |Informational|: Messages that are of interest to users. These messages are typically
+high-level and are used to inform the user of the system's normal operation.
 
 \item |Notice|: Like informational messages, notice messages occur during normal system
-  operation. However, they log particularly significant events that are meant to stand out
-  compared to ordinary informational messages.
+operation. However, they log particularly significant events that are meant to stand out
+compared to ordinary informational messages.
 
 \item |Warning|: Messages that indicate a potential problem. The system is still functioning
-  correctly, but the message indicates that something might be wrong.
+correctly, but the message indicates that something might be wrong.
 
-\item |Error|: Messages that indicate a problem has occurred. The system is still functioning,
-  but the message indicates that something unintended or unexpected has happened.
+\item |Error|: Messages that indicate that a problem has occurred. The system is still
+functioning, but the message indicates that something unintended or unexpected has happened.
 
 \item |Critical|: Critical messages are similar to error messages, except with more severity and
-  criticality. A critical message indicates that the system is in a bad state and that the
-  problem must be addressed soon.
+criticality. A critical message indicates that the system is in a bad state and that the problem
+should be addressed soon if the system is to continue functioning normally.
 
 \item |Alert|: Messages that indicate a problem that has occurred that is so severe that the
-  system cannot continue without corrective action. The system will likely fail soon after
-  sending an alert message.
+system cannot function normally without corrective action. The system will likely soon fail
+completely.
 
-\item |Emergency|: Emergency messages are the most severe. They indicate that the system is
-  unusable, or soon will be, and that immediate action is required.
+\item |Emergency|: Emergency messages are the most severe. They indicate that the system has
+failed, is unusable, or soon will be, and that immediate action is required.
+\end{itemize}
+
+The timestamps added to every log message show the time the message was processed by the log
+server relative to when the system started. Timestamps are in seconds. This time includes the
+overhead of passing the message from the sending module to the log server. Because multiple
+messages might be queued in the log server's mailbox, and because of task priority issues, the
+timestamp might indicate a time that is, potentially, significantly later than when the message
+was generated by the sending module.
+
+One area for future work in the log server would be for the sending module to generate a
+timestamp immediately before when the message is sent and pass that timestamp to the log server
+as part of the message. In that case, the timestamps would be a more accurate reflection of when
+the message was generated, being free from queuing and task priority effects. The convenience
+procedure |Log_Message| could take care of the timestamp management details, so the developer
+wouldn't need to do any extra work.
+
+Of course, many applications won't care about such precise timestamps. The current
+implementation will likely be sufficient for those applications. However, applications with very
+tight timing requirements might benefit from better debugging and monitoring that would be made
+possible by more accurate timestamps.
+
+An implementation that displayed timestamps using an absolute time was considered. However, such
+an implementation would need access to a real-time clock via, for example, package
+|Ada.Calendar|. While |Ada.Calendar| is supported under the Jorvik profile, some small embedded
+environments nevertheless do not support it. To keep CubedOS as widely applicable as possible,
+it was decided to avoid the use of |Ada.Calendar| and instead focus on only boot-relative
+timestamps.
+
+Other future enhancements to the log server include (but are not limited to) the following:
+\begin{itemize}
+\item There should be a way to specify the log level that is displayed. Under normal operation,
+users will not want to see Debug messages, for example. Furthermore, because such messages might
+be plentiful and could potentially consume significant resources to transmit in volume, the
+filtering of those messages should be done in |Log_Message| and not by the log server itself.
+That would avoid transmitting messages that are of no interest.
+
+\item As an extension of the idea above, it should be possible to control the log level based on
+the module ID of the sending module. The use-case for this ability is when the developer would
+like to log Debug messages from a particular module being debugged without having to see all
+Debug messages generated from all other modules too.
 \end{itemize}

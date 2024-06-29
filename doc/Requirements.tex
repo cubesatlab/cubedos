@@ -4,8 +4,8 @@
 
 In this chapter we detail the requirements of the various CubedOS core modules. These
 requirements are used to drive the architecture and design of the system. \pet{There are quite a
-  few design-ish aspects to the description here. It might be valuable to create a better
-  separation between requirements and design.}
+few design aspects to the description here. It might be valuable to create a better separation
+between requirements and design.}
 
 \section{Core Requirements}
 \label{sec:core-requirements}
@@ -46,32 +46,38 @@ The only way functionality in another module can be invoked is by sending that m
 
 In each module one task selected by the programmer, called the module's \newterm{server task},
 is distinguished. The server task is the \emph{only} task in a module that is allowed to receive
-messages for that module. However, messages can be sent by any task. In many modules the server
+messages for that module. However, messages can be sent by any task. In many modules, the server
 task is the only task. The following requirements apply:
 
 \begin{itemize}
+\item \textbf{Core.Ada2022}. The base language for CubedOS and CubedOS applications shall be Ada
+2022. Note that the Core.SPARK requirement still restrains what features from Ada 2022 can be
+used. However, any feature of the Ada 2022 standard that is supported by SPARK is explicitly
+allowed.
+
 \item \textbf{Core.SPARK}. The core system, including the core modules described in this
-  document, shall be written in \SPARK\ and proved free of information flow errors and execution
-  runtime errors.
-\item \textbf{Core.Ravenscar}. The core system, including the core modules described in this
-  document, shall be written to conform with the restrictions of the Ravenscar profile. \pet{We
-  might want to ``upgrade'' to the Jorvik profile. This gives us: relative delays, ``pure''
-  barrier expressions, and access to Ada.Calendar. It gives us other things that I think we are
-  less likely to need.}
+document, shall be written in \SPARK\ and proved free of information flow errors and execution
+runtime errors.
+
+\item \textbf{Core.Jorvik}. The core system, including the core modules described in this
+document, shall be written to conform with the restrictions of the Jorvik profile. Although the
+Jorvik profile puts more requirements on the runtime system than, for example, the Ravenscar
+profile, Jorvik also provides: relative delays, ``pure'' barrier expressions, and access to
+Ada.Calendar, to name a few things. These are features CubedOS applications can use to good
+effect.
+
 \item \textbf{Core.Static}. Modules shall be statically allocated. All modules the system will
-  ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
-    about on-the-fly software updates? Are we ruling that out, or is that outside the scope of
-    these requirements?}
+ever have shall exist at deployment time. There is no dynamic loading of modules. \pet{What
+about on-the-fly software updates? Are we ruling that out, or is that outside the scope of these
+requirements?}
+
 \item \textbf{Core.UniqueID}. Each active module shall have a unique ID number that is either
-  statically assigned by the application developer or dynamically assigned at system
-  initialization time by the Name Service. \pet{The Name Service is controversial. We might not
-    want it and instead require that module ID numbers all be statically assigned.} CubedOS core
-  modules (described below) shall have fixed, ``well known'' module ID numbers.
+statically assigned by the application developer or dynamically assigned at system
+initialization time by the Name Service. \pet{The Name Service is controversial. We might not
+want it and instead require that module ID numbers all be statically assigned.}
+
 \item \textbf{Core.IDNumbers}. Module ID numbers shall be small integers beginning at $1$ and
-  ranging up to the number of modules in the system. However, if a particular core module is not
-  used, its ID number is skipped (not reassigned). \pet{We probably don't really want to waste
-    module ID number space like this. Reassigning core module ID numbers for core modules that
-    are not used seems like a desirable optimization that we should allow developers.}
+ranging up to the number of modules in the system.
 \end{itemize}
 
 \section{Runtime Library}
@@ -82,20 +88,27 @@ interest to many CubedOS applications. Unlike the Ada standard library and many 
 libraries, the CubedOS runtime library is written in \SPARK. The following requirements apply:
 
 \begin{itemize}
+\item \textbf{Lib.Ada2022}. The base language for the CubedOS library shall be Ada 2022. Note
+that the Core.SPARK requirement still restrains what features from Ada 2022 can be used.
+However, any feature of the Ada 2022 standard that is supported by SPARK is explicitly allowed.
+  
 \item \textbf{Lib.SPARK}. The runtime library shall be written in \SPARK\ and proved free of
-  information flow and execution runtime errors.
+information flow and execution runtime errors.
+
 \item \textbf{Lib.Tests}. Unit tests shall be provided for all library components with an
-  emphasis on sections that may not yet be fully proved.
+emphasis on sections that may not yet be fully proved.
+
 \item \textbf{Lib.TaskSafety}. All library components shall be task safe in the sense that they
-  can be called simultaneously from multiple tasks without error. This is needed because library
-  packages are shared among the modules.
+can be called simultaneously from multiple tasks without error. This is needed because library
+packages are shared among the modules.
+
 \item \textbf{Lib.PackageDeployment}. Only the packages actually used by an application shall
-  become part of the application's executable. This means the library can contain a rich
-  collection of packages without burdening applications that don't require them.
+become part of the application's executable. This means the library can contain a rich
+collection of packages without burdening applications that don't require them.
 \end{itemize}
 
-The precise library components provided is not specified here but is intended to be an open
-ended set of components found useful in CubedOS applications. Examples of such components
+The precise library components provided is not specified here but is intended to be an
+open-ended set of components found useful in CubedOS applications. Examples of such components
 include, but are not limited to:
 
 \begin{itemize}
@@ -113,27 +126,25 @@ include, but are not limited to:
 What distinguishes runtime library material from active CubedOS modules is that none of the
 runtime library components contain tasks or perform blocking operations (such as delays).
 Notice, however, that some library components may wish to send messages to other active
-components, such as the file server. In that case the library cannot directly receive the reply
-(only a module can receive from a mailbox), but instead must rely on the module using the
-library to forward replies into the library as appropriate. This unusual organization also
-distinguishes the CubedOS runtime library from most other libraries. \pet{Probably it would be
-better for library components to never send messages. Maybe we should make that another aspect
-of our CubedOS coding conventions.}
+components, such as the file server. In that case the library cannot directly receive the reply.
+Only a module can receive from a mailbox. Instead, the library code must rely on the module
+using the library to forward replies into the library as appropriate. This unusual organization
+also distinguishes the CubedOS runtime library from most other libraries. \pet{Probably it would
+be better for library components to never send messages. Maybe we should make that another
+aspect of our CubedOS coding conventions.}
 
 \section{Core Modules}
 \label{sec:core-modules}
 
-Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. They always
-exist and have fixed, well-known module ID numbers. Note that it is possible that some core
-modules will not be required by all applications. However, their module ID numbers remain
-reserved. \pet{The motivation for using well-known ID numbers is to facilitate third party
-module development.} In this section we describe these core modules.
+Any CubedOS based system shall contain certain \newterm{core modules} as a minimum. Note that it
+is possible that some core modules will not be required by some applications. In this section we
+describe these core modules.
 
 \subsection{Message Manager}
 \label{sec:message-manager}
 
 The message manager is not a proper CubedOS module but rather forms the CubedOS kernel. It thus
-does not have a module ID number. Instead the message manager holds mailboxes used to facilitate
+does not have a module ID number. Instead, the message manager holds mailboxes used to facilitate
 communication between the other active modules in the system. The following requirements apply:
 
 \begin{itemize}
@@ -177,22 +188,22 @@ messages is needed. If a synchronous request/reply is required, an explicit repl
 be sent. This means a module may have to field other, unrelated messages while it waits for a
 reply from an earlier request. This impacts the implementation of modules since they must
 remember the status of all pending requests. \pet{The CubedOS library should provide some
-  assistance with this.} However, it also promotes a high degree of concurrency since, in
-effect, no requests are ever blocking.
+assistance with this.} However, it also promotes a high degree of concurrency since, in effect,
+no requests are ever blocking.
 
 \subsection{Time Service}
 \label{sec:time-service}
 
 The Time Server module provides real-time clock services. However, due to the latency and
 overhead of message passing, modules that require high speed, real-time timing services may need
-to use internal tasks instead. The time server is suitable for slow speed or non-critical timing
+to use internal tasks instead. The timeserver is suitable for slow speed or non-critical timing
 services. \pet{This needs to be investigated further. What can be specifically said about the
   timing of the message passing service?} The following requirements apply:
 
 \begin{itemize}
-\item \textbf{Tick.RealTime}. The time server shall use a real time clock as the basis of its
+\item \textbf{Tick.RealTime}. The timeserver shall use a real time clock as the basis of its
   timing. Such a clock is monotonic and tracks time independently of any software activity.
-\item \textbf{Tick.Periodic}. The time server shall provide a service whereby a module can
+\item \textbf{Tick.Periodic}. The timeserver shall provide a service whereby a module can
   request the delivery of periodic \newterm{tick messages} with a period ranging from 1 ms to 1
   hour (3,600,000 ms). The total set of tick messages generated in response to such a request is
   called a \newterm{periodic series}.
@@ -304,41 +315,46 @@ elsewhere.
 \subsection{Log Service}
 \label{sec:log-service}
 
-The Log Server module is used to log messages from other modules. \pet{Library components
+The Log Server module is used to log messages from other modules. \footnote{Library components
 shouldn't attempt to log messages directly. They should return appropriate status indications to
 the calling module and that module can then log an appropriate message if necessary.} Here we
-use ``log'' expansively to include telemetry messages. The log can be stored on non-volatile
-storage, printed on a console (if one is available), or gathered in a data structure for later
-transmission to a ground station. Unlike telemetry ``data'' which might be in an unreadable
-binary form, telemetry messages are expected to be human-readable. The following requirements
-apply:
+use ``log'' expansively to include telemetry messages as well as traditional log messages and
+debug messages.
+
+The log can be stored on non-volatile storage, printed on a console (if one is available), or
+gathered in a data structure for later transmission to a ground station. Unlike telemetry
+``data'' which might be in an unreadable binary form, telemetry messages are expected to be
+human-readable. The following requirements apply:
 
 \begin{itemize}
-  \item \textbf{Log.MessageSize}. Log messages are intended to be relatively short and should be
-    limited to only 128 characters at most. This effectively creates a lower bound on the size
-    of CubedOS messages at 128 octets since log messages are transmitted to the Log Server via
-    the usual CubedOS message system. Restricting log messages to 128 characters, however, means
-    that all useful instantiations of the generic Message Manager will be able to pass log
-    messages without issue. The Log Server will not impose a large message size on applications
-    that don't need it.
+  \item \textbf{Log.MessageSize}. Log messages are intended to be short and shall be limited to
+    only 128 characters at most. This effectively creates a lower bound on the size of CubedOS
+    messages at 128 octets since log messages are transmitted to the log server via the usual
+    CubedOS message system. Restricting log messages to 128 characters, however, means that all
+    useful instantiations of the generic Message Manager will be able to pass log messages
+    without issue. The log server should not impose a large message size on applications that
+    don't need it.
   \item \textbf{Log.CharacterSet}. Log messages shall use only printable ASCII characters, free
     from all control characters (including tabs, carriage return, or line feed). This will
     minimize problems with processing the messages later.
   \item \textbf{Log.Language}. Log messages shall be written in (American) English using, as
     much as possible, standard English spelling and punctuation. Log messages are intended to be
     human-readable.
-  \item \textbf{Log.Level}. The Log Server shall allow messages to be marked with different
+  \item \textbf{Log.Level}. The log server shall allow messages to be marked with different
     ``levels'' including (but not limited to): debug, informational, warning, error, and
     critical levels. This can be used to classify each message with respect to its criticality.
-  \item \textbf{Log.Source}. The Log Server shall automatically prefix log messages with an
+  \item \textbf{Log.Filtering}. The log server shall provide a runtime way to filter out
+    messages based on their source mode and log level. For example, it should be possible to
+    only log messages at a certain log level and above (to ignore debugging messages), and to do
+    so on a module-by-module bases. 
+  \item \textbf{Log.Source}. The log server shall automatically prefix log messages with an
     indication of which module sent the message (domain ID and module ID).
-  \item \textbf{Log.Timestamp}. The Log Server shall automatically record a timestamp for each
+  \item \textbf{Log.Timestamp}. The log server shall automatically record a timestamp for each
     log message that it receives and prefix the message with the timestamp. The timestamp shall
-    have the format: YYYY-MM-DD HH:MM:SS.SSS (i.e., one millisecond resolution) based on the
-    system clock running on the spacecraft. It is outside the scope of the Log Server's
-    requirements to define how that clock is set and how its time is maintained. Those details
-    are likely to be mission-specific.
-  \item \textbf{Log.Storage}. The Log Server shall store a certain number of log messages and
+    be the number of seconds since the system started and be displayed in at least millisecond
+    precision. The timestamp shall reflect the time the message was generated by the sending
+    module and not, for example, the time it was processed by the log server.
+  \item \textbf{Log.Storage}. The log server shall store a certain number of log messages and
     make them available for later transmission as telemetry messages. \pet{How many messages
       should it store? Should that be configurable?}
 \end{itemize}
