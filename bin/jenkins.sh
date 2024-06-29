@@ -60,10 +60,9 @@ echo -e "\nPub/Sub Server"
 echo      "--------------"
 gprbuild -P samples/PubSub/pubsub.gpr samples/PubSub/main.adb
 
-# This sample can't be compiled because the Log Server requires Ada.Calendar.
-#echo -e "\nSTM32F4"
-#echo      "-------"
-#gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
+echo -e "\nSTM32F4"
+echo      "-------"
+gprbuild -P samples/STM32F4/stmdemo.gpr samples/STM32F4/main.adb
 
 echo -e "\nStyle Checking"
 echo      "=============="
