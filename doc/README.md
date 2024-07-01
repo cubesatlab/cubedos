@@ -23,5 +23,5 @@ Finally, issue the following commands:
     > pdflatex CubedOS
     > pdflatex CubedOS
     
-It is necessary to run the `pdflatex` command multiple times to ensure that all crossreferences
+It is necessary to run the `pdflatex` command multiple times to ensure that all cross references
 are resolved properly. The resulting documentation will be in `CubedOS.pdf`.

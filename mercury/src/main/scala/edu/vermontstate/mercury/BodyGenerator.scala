@@ -4310,6 +4310,12 @@ class BodyGenerator(
       val ts = if (ctx.declaration(i).children.contains(ctx.declaration(i).type_specifier)) {
         ctx.declaration(i).type_specifier.getText
       }
+      else {
+        // This is a hack. If child i does not contain a type specifier, the use of ts below
+        // does not really make sense. Using an empty string in that case, allows type checking
+        // of _ == ts, but better handling could be imagined!
+        ""
+      }
       if (symbolTable.getTypeNames.exists(_ == ts)) {
         out.println(idd + " : out " + ts + ";")
       }

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This script is intended to be run in the root folder of the project.
+# TODO: Add a test to check the above condition.
+
+cd scripter/parser
+../../bin/antlr4 -Dlanguage=Python3 MXDR.g4 -visitor
