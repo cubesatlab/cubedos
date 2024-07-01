@@ -5,7 +5,7 @@ project Line_Rider is
    for Target use "arm-eabi";
 
    for Main use ("line_rider-main.adb");
-   for Source_Dirs use ("src", "../../src", "../../src/modules", "../../src/library");
+   for Source_Dirs use ("src", "../../src/modules", "../../src/library");
    for Object_Dir use "build";
 
    package Builder is
@@ -22,7 +22,7 @@ project Line_Rider is
    end Ide;
 
    package Check is
-      for Default_Switches ("Ada") use ("-rules", "-from=../../cubedos-rules.txt");
+      for Default_Switches ("Ada") use ("-rules", "-from=../../src/cubedos-rules.txt");
    end Check;
 
 end Line_Rider;

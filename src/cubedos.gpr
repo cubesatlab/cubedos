@@ -1,12 +1,12 @@
 with "aunit.gpr";
-with "src/library/cubedlib.gpr";        
+with "library/cubedlib.gpr";        
         
 project CubedOS is
 
    for Main use ("main.adb", "main_message_manager.adb", "main_file.adb", "main_time.adb",
 "cubedos_check.adb");
-   for Object_Dir use "src/check/build";
-   for Source_Dirs use ("src/check", "src/modules");
+   for Object_Dir use "check/build";
+   for Source_Dirs use ("check", "modules");
    for Languages use ("ada");
 
    package Ide is

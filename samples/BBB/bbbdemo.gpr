@@ -5,7 +5,7 @@ project BBBdemo is
    for Target use "arm-linux-gnueabihf";
 
    for Main use ("main.adb");
-   for Source_Dirs use (".", "../../src", "../../src/modules", "../../src/library");
+   for Source_Dirs use (".", "../../src/modules", "../../src/library");
    for Object_Dir use "build";  
        
    package Builder is   
@@ -13,13 +13,18 @@ project BBBdemo is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("Ada") use ("-g", "-gnatwa");
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-g", "-gnatwa");
    end Compiler;
 
    -- package Ide is
+   --    for Connection_Tool use "st-util";
    --    for Program_Host use "localhost:4242";
    --    for Communication_Protocol use "remote";
    -- end Ide;
+
+   package Check is
+           for Default_Switches ("Ada") use ("-rules", "-from=../../src/cubedos-rules.txt");
+   end Check;
 
 end BBBdemo;
 

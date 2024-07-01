@@ -5,8 +5,8 @@
 # This causes Jenkins to fail the build unless the style is *perfect*, which is unreasonable.
 # This script runs gnatcheck but always returns a success status code.
 
-codepeer-gnatcheck -P cubedos.gpr src/library/*.ads src/library/*.adb
-codepeer-gnatcheck -P cubedos.gpr src/modules/*.ads src/modules/*.adb
-codepeer-gnatcheck -P cubedos.gpr src/check/*.ads src/check/*.adb
+codepeer-gnatcheck -P src/cubedos.gpr src/library/*.ads src/library/*.adb
+codepeer-gnatcheck -P src/cubedos.gpr src/modules/*.ads src/modules/*.adb
+codepeer-gnatcheck -P src/cubedos.gpr src/check/*.ads src/check/*.adb
 
 exit 0  # Success!

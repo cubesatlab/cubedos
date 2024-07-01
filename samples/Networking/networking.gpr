@@ -7,13 +7,13 @@ project Networking is
       when "DomainA" => 
          for Main use ("main.adb");
          for Object_Dir use "build/DomainA";
-         for Source_Dirs use ("DomainA", "Common", "../../src", "../../src/modules", "../../src/library");
+         for Source_Dirs use ("DomainA", "Common", "../../src/modules", "../../src/library");
          for Languages use ("Ada");
          
       when "DomainB" => 
          for Main use ("main.adb");
          for Object_Dir use "build/DomainB";
-         for Source_Dirs use ("DomainB", "Common", "../../src", "../../src/modules", "../../src/library");
+         for Source_Dirs use ("DomainB", "Common", "../../src/modules", "../../src/library");
          for Languages use ("Ada");   
    end case;
    
@@ -22,7 +22,7 @@ project Networking is
    end Compiler;
 
    package Check is
-           for Default_Switches ("Ada") use ("-rules", "-from=../../cubedos-rules.txt");
+           for Default_Switches ("Ada") use ("-rules", "-from=../../src/cubedos-rules.txt");
    end Check;
 
 end Networking;

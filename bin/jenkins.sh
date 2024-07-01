@@ -23,7 +23,7 @@ cd ..
 
 echo -e "\nBuild & Run Unit Test Program"
 echo      "============================="
-gprbuild -P cubedos.gpr src/check/cubedos_check.adb
+gprbuild -P src/cubedos.gpr src/check/cubedos_check.adb
 src/check/build/cubedos_check
 
 echo -e "\nBuild Test Programs"
@@ -31,19 +31,19 @@ echo      "=================="
 # We can't run them right now because they are infinite loops, but we can at least build them.
 echo -e "\nAll-Modules"
 echo      "-----------"
-gprbuild -P cubedos.gpr src/check/main.adb
+gprbuild -P src/cubedos.gpr src/check/main.adb
 
 echo -e "\nFile Server"
 echo      "-----------"
-gprbuild -P cubedos.gpr src/check/main_file.adb
+gprbuild -P src/cubedos.gpr src/check/main_file.adb
 
 echo -e "\nMessage Manager"
 echo      "---------------"
-gprbuild -P cubedos.gpr src/check/main_message_manager.adb
+gprbuild -P src/cubedos.gpr src/check/main_message_manager.adb
 
 echo -e "\nTime Server"
 echo      "-----------"
-gprbuild -P cubedos.gpr src/check/main_time.adb
+gprbuild -P src/cubedos.gpr src/check/main_time.adb
 
 echo -e "\nBuild Sample Programs"
 echo      "====================="
@@ -73,7 +73,7 @@ bin/run-gnatcheck.sh
 echo -e "\nAPI Documentation"
 echo      "================="
 # This has to be done after a successful build.
-gnatdoc -P cubedos.gpr
+gnatdoc -P src/cubedos.gpr
 
 echo -e "\nLaTeX Documentation"
 echo      "==================="
@@ -86,11 +86,11 @@ cd ..
 
 echo -e "\nSPARK Analysis"
 echo      "=============="
-gnatprove -P cubedos.gpr --level=2 --mode=silver -j2
+gnatprove -P src/cubedos.gpr --level=2 --mode=silver -j2
 
 echo -e "\nCodePeer Analysis"
 echo      "================="
-gnatsas analyze -P cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
-gnatsas report text -P cubedos.gpr --quiet -j2 --mode=deep
+gnatsas analyze -P src/cubedos.gpr --quiet -j2 --mode=deep --no-gnat -- inspector -quiet
+gnatsas report text -P src/cubedos.gpr --quiet -j2 --mode=deep
 
 # TODO: Copy documentation to the web site for public review.
