@@ -57,7 +57,7 @@ object Main {
               "   -t : Specifies the folder where package templates are located")
       System.exit(1)
     }
-    val Some((switchMap, sourceName)) = commandOption
+    val Some((switchMap, sourceName)) = commandOption: @unchecked
     val templateFolder = switchMap.getOrElse('t', ".")
 
     // Create a stream that reads from the specified file.

@@ -3,16 +3,14 @@ enablePlugins(Antlr4Plugin)
 
 ThisBuild / organization  := "edu.vermontstate"
 ThisBuild / version       := "0.1.0-SNAPSHOT"
-ThisBuild / scalaVersion  := "2.13.12"
+//ThisBuild / scalaVersion  := "2.13.12"
+ThisBuild / scalaVersion  := "3.4.2"
 ThisBuild / scalacOptions :=
   Seq("-encoding", "UTF-8", // Encoding of the source files.
       "-feature",
-      "-deprecation",    // Tell us about deprecated things.
+      "-deprecation",       // Tell us about deprecated things.
       "-unchecked",
-      "-Wunused:nowarn", // Warn if the nowarn annotation doesn't actually suppress a warning.
-      "-Xsource:3",      // Help migrate to Scala 3 by forbidding some things and allowing others.
-      "-Ywarn-dead-code",
-      "-Ywarn-value-discard")
+      "-Wunused:nowarn")    // Warn if the nowarn annotation doesn't actually suppress a warning.
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.17"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % "test"
