@@ -4,18 +4,15 @@
 -- AUTHOR : (C) Copyright 2024 by Vermont State University
 --
 --------------------------------------------------------------------------------
-with Ada.Text_IO;
 with Ada.Real_Time;
 with Name_Resolver;
 with DomainB_Server.API;
+with CubedOS.Log_Server.API;
 
 package body DomainA_Client.Messages is
    use Message_Manager;
    use type Ada.Real_Time.Time;
    use type DomainB_Server.API.Status_Type;
-
-   package Duration_IO is new Ada.Text_IO.Fixed_IO(Duration);
-   package Request_IO  is new Ada.Text_IO.Modular_IO(Request_ID_Type);
 
    Send_Time        : Ada.Real_Time.Time;
    Receive_Time     : Ada.Real_Time.Time;
@@ -49,17 +46,21 @@ package body DomainA_Client.Messages is
       Round_Trip_Time := Receive_Time - Send_Time;
 
       if Decode_Status /= Success then
-         Ada.Text_IO.Put_Line("ERROR: Unable to decode a Ping_Reply message!");
+          CubedOS.Log_Server.API.Log_Message(Name_Resolver.DomainA_Client,
+                                            CubedOS.Log_Server.API.Error,
+                                            "Unable to decode a Ping_Reply message!");
       elsif Status /= DomainB_Server.API.Success then
-         Ada.Text_IO.Put_Line("ERROR: Networking server reported a ping failure!");
+          CubedOS.Log_Server.API.Log_Message(Name_Resolver.DomainA_Client,
+                                            CubedOS.Log_Server.API.Error,
+                                            "Networking server reported a ping failure!");
       else
-         Ada.Text_IO.Put("+++ Reply #");
-         Request_IO.Put(Message.Request_ID);
-         Ada.Text_IO.Put(" (RTT = ");
-         Duration_IO.Put(Ada.Real_Time.To_Duration(Round_Trip_Time));
-         Ada.Text_IO.Put("s)");
-         Ada.Text_IO.New_Line;
-
+          CubedOS.Log_Server.API.Log_Message(Name_Resolver.DomainA_Client,
+                                            CubedOS.Log_Server.API.Informational,
+                                             "+++ Reply #" &
+                                               Request_ID_Type'Image(Message.Request_ID) &
+                                               " (RTT = " &
+                                               Duration'Image(Ada.Real_Time.To_Duration(Round_Trip_Time)) &
+                                               "s)");
          delay 2.0;  -- Delay so the human can read the above messages.
          Request_Number := Request_Number + 1;
 

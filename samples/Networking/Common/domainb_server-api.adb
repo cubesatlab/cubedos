@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 with CubedOS.Lib.XDR;
 use  CubedOS.Lib;
-with Ada.Text_IO;
+with CubedOS.Log_Server.API;
 
 package body DomainB_Server.API is
    use type XDR.XDR_Unsigned;
@@ -76,10 +76,11 @@ package body DomainB_Server.API is
       Position := 0;
 
       XDR.Decode(Message.Payload, Position, Raw_Value, Last);
-      Position := Last + 1;
 
       if Raw_Value > Status_Type'Pos(Status_Type'Last) then
-         Ada.Text_IO.Put_Line("Malformed Message");
+          CubedOS.Log_Server.API.Log_Message(Name_Resolver.DomainB_Server,
+                                            CubedOS.Log_Server.API.Critical,
+                                            "Malformed Message");
          Decode_Status := Malformed;
       else
          Status := Status_Type'Val(Raw_Value);

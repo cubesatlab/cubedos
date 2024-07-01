@@ -16,4 +16,7 @@ package Name_Resolver is
    DomainA_Client : constant Message_Address  := (1, 3);
    DomainB_Server : constant Message_Address  := (2, 3);
 
+   Log_Server     : constant Message_Address  := (0, 3);
+   Transport      : constant Message_Address  := (0, 4);
+
 end Name_Resolver;
