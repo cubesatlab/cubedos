@@ -14,12 +14,3 @@ target
 # when it imports changes to the SBT file. I'm unclear if this is normal or some sort of issue.
 # In any case, since it is auto-generated, I'm ignoring it here (pchapin)
 project/project
-
-# LaTeX artifacts.
-main.aux
-main.bbl
-main.blg
-main.log
-main.out
-main.pdf
-main.toc

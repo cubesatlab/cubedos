@@ -3,6 +3,9 @@
 		{
 			"path": "src"
 		},
+                {
+                        "path": "samples"
+                },
 		{
 			"name": "aunit",
 			"path": "../../../../AdaCore/gnat/include/aunit"
