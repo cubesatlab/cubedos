@@ -3,7 +3,6 @@ enablePlugins(Antlr4Plugin)
 
 ThisBuild / organization  := "edu.vermontstate"
 ThisBuild / version       := "0.1.0-SNAPSHOT"
-//ThisBuild / scalaVersion  := "2.13.12"
 ThisBuild / scalaVersion  := "3.4.2"
 ThisBuild / scalacOptions :=
   Seq("-encoding", "UTF-8", // Encoding of the source files.

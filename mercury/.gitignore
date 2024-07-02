@@ -3,11 +3,17 @@
 .idea
 build
 
-# Visual Studio Code files not be versioned.
+# Visual Studio Code files that should not be versioned.
+.bloop
+.metals
 
 # SBT generated folders.
 target
 .bsp
+# There is a weird thing where Metals creates a deeply nested collection of project folders
+# when it imports changes to the SBT file. I'm unclear if this is normal or some sort of issue.
+# In any case, since it is auto-generated, I'm ignoring it here (pchapin)
+project/project
 
 # LaTeX artifacts.
 main.aux
