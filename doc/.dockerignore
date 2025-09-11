@@ -1,0 +1,19 @@
+# Build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+build.log
+
+# VS Code
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Keep Figure PDFs but exclude generated document PDFs
+CubedOS.pdf
+main.pdf
