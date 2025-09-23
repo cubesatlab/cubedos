@@ -7,3 +7,9 @@ maintainers = ["Sevo <sgolnaza@gmail.com>"]
 maintainers-logins = ["sevanbadal"]
 
 executables = ["echo"]
+
+[[depends-on]]
+gnat_external = "^15.0.0"
+
+[[build-switches]]
+"*".ada_version = "ada2022"
