@@ -5,7 +5,7 @@
 - Run `CubeSatSetup.sh`
 	- **NOTE:** this requires credentials to the CubeSat resources on lemuria
     - Recommend running somewhere like a `Downloads` folder, where you don't mind having all the files it downloads dumped.
-	- Copy (or preserve by some other method) the paths displayed at the end of the script, as you will need them for environmet configuration.
+	- Copy (or preserve by some other method) the paths displayed at the end of the script, as you will need them for environment configuration.
 - Path/Environment Setup (will depend on what shell you use):
 	- bash (add lines to the tail end of your `.bashrc`)
 		- `export PATH=/paths/to/install/dirs:/separated/by/colons:$PATH`
@@ -28,7 +28,7 @@ Once the installation above has been completed, you can simply call `gnatstudio 
 
 ## VS Code Path/Env configuration
 - Open the appropriate `settings.json` file
-	- `Ctrl + Shift + p` opens the command pallete
+	- `Ctrl + Shift + p` opens the command palette
 		- `Preferences: Open User Settings (JSON)` will edit your overall settings
 		- `Preferences: Open Workspace Settings (JSON)` will edit settings for the current workspace (This is probably less desirable, as these settings are stored in the workspace, potentially tracked in git, and the options we're configuring may vary from setup to setup)
 - Using the Path/Directory info output by `CubeSatSetup.sh`, fill out the following template and add it to the `settings.json` file.
@@ -53,7 +53,7 @@ There is a section in the VS Code documentation on creating [build tasks](https:
 
 ### Known Issues
 
-- Automatic detection/configuration of build paths is very tempermental
+- Automatic detection/configuration of build paths is very temperamental
 	- `Run` or `Debug` buttons may not populate above Main procedures
 	- Sometimes, the buttons will populate, but using them will give an error along the lines of: `gprbuild: "src/check/main.adb" was not found in the sources of any project`
 		- This issue seems to be an issue with the automatic path population generating bad relative paths based on the workspace.

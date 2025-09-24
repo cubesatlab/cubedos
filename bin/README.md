@@ -9,11 +9,11 @@ for example, a personal `bin` directory to run Mercury conveniently from anywher
 The script assumes Mercury has already been built via:
 
     $ sbt assembly
-    
+
 from inside the `mercury` folder.
 
 The `jenkins.sh` script is used by Jenkins-CI to build and test the CubedOS system and its
 various components, test & sample programs, and documentation. It builds Mercury as well, since
 Mercury is a prerequisite for the CubedOS build.
 
-See the comments in `run-gnatcheck.sh` for an explaination of what it does and why it exists.
+See the comments in `run-gnatcheck.sh` for an explanation of what it does and why it exists.
