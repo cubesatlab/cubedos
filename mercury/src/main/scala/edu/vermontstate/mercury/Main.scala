@@ -117,7 +117,7 @@ object Main {
         myBodyGenerator.visit(tree)
       }
 
-      
+
 
       specificationFile.close()
       bodyFile.close()

@@ -8,5 +8,5 @@ pragma Warnings (Off, "unit ""Message_Manager"" is not referenced");
 with Message_Manager;
 
 package Echo_Server is
-   
+
 end Echo_Server;

@@ -31,12 +31,12 @@ on AdaCore's site. The (highly) abbreviated version of that tutorial is as follo
 
 + Install the `stlink` tools for your development platform. These tools allows software on your
   development station to communicate with the board, e. g., for flashing and debugging purposes.
-  
+
 + Run GPS on the project file in this folder. Use GPS to build the program.
 
 + Run the `st-util` tool from the `stlink` tools package. This is a debug server to which GPS
   will connect. The debug server will find and interact with your board.
-  
+
 + You can use GPS to flash the board with your executable and to debug the program on the board.
 
 Enjoy!

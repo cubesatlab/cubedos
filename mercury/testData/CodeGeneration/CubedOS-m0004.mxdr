@@ -25,7 +25,7 @@ typedef b b1[2];
 
 int int_var[2];
 
-struct { 
+struct {
         f2 fs1;
         f4 fs2;
         f6 fs3;

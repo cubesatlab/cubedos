@@ -56,21 +56,21 @@ package CubedOS.m0002.API is
 
    type branch is array (0 .. 10000) of stem;
 
-   type bat is 
+   type bat is
       record
          h : Color;
          j : Width_Type;
          Tree_Limb : branch;
       end record;
 
-   type cat is 
+   type cat is
       record
          u : bat;
          i : Double;
          y : Lib.Quadruple_Octet;
       end record;
 
-   type sat is 
+   type sat is
       record
          k : Integer;
          led : cat;

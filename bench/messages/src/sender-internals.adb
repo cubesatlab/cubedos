@@ -27,4 +27,3 @@ package body Sender.Internals is
    end Process_Message;
 
 end Sender.Internals;
-

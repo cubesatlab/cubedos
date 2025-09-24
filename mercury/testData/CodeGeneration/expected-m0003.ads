@@ -86,12 +86,12 @@ package CubedOS.m0003.API is
       blue,
       green);
 
-   type v26 is 
+   type v26 is
          (red,
          blue,
          green);
 
-   type v27 is 
+   type v27 is
          (red,
          blue,
          green);
@@ -102,7 +102,7 @@ package CubedOS.m0003.API is
          sv1 : Integer;
       end record;
 
-   type v29 is 
+   type v29 is
       record
          sv1 : Integer;
       end record;
@@ -137,7 +137,7 @@ package CubedOS.m0003.API is
          sv2 : v30;
       end record;
 
-   type v32 is 
+   type v32 is
       record
          sv1 : Lib.Quadruple_Octet;
          sv2 : Integer;
@@ -161,7 +161,7 @@ package CubedOS.m0003.API is
          sv20 : v99;
       end record;
 
-   type v33 is 
+   type v33 is
       record
          sv1 : v32;
          sv2 : v32;

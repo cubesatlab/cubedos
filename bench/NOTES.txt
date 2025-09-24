@@ -23,4 +23,3 @@ Measured time to pass 1,000,000 messages from a trivial sender to a trivial rece
     ...            ...
     256            31.8       11.2 = 8*1.4
       (The behavior is now linear in the size of the message)
-

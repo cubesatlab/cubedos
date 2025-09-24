@@ -7,9 +7,9 @@
 with Message_Manager;
 
 private package Sensor_Driver.Internals is
-   
+
    procedure Initialize;
-   
+
    procedure Process_Message(Incoming_Message : in Message_Manager.Message_Record);
 
 end Sensor_Driver.Internals;

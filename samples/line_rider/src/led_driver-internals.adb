@@ -102,4 +102,3 @@ package body LED_Driver.Internals is
    end Initialize;
 
 end LED_Driver.Internals;
-

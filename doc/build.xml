@@ -18,7 +18,7 @@
           output="${system.dir}/build.log">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${system.dir}"
           executable="bibtex"
           failonerror="true"
@@ -26,7 +26,7 @@
           append="true">
       <arg line="main"/>
     </exec>
-    
+
     <exec dir="${system.dir}"
           executable="pdflatex"
           failonerror="true"
@@ -34,7 +34,7 @@
           append="true">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${system.dir}"
           executable="pdflatex"
           failonerror="true"
@@ -44,7 +44,7 @@
     </exec>
   </target>
 
-  
+
   <target name="compile-iac2015" depends="init">
     <exec dir="${iac2015.dir}"
           executable="pdflatex"
@@ -52,7 +52,7 @@
           output="${iac2015.dir}/build.log">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${iac2015.dir}"
           executable="bibtex"
           failonerror="true"
@@ -60,7 +60,7 @@
           append="true">
       <arg line="main"/>
     </exec>
-    
+
     <exec dir="${iac2015.dir}"
           executable="pdflatex"
           failonerror="true"
@@ -68,7 +68,7 @@
           append="true">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${iac2015.dir}"
           executable="pdflatex"
           failonerror="true"
@@ -78,7 +78,7 @@
     </exec>
   </target>
 
-  
+
   <target name="compile-iac2017" depends="init">
     <exec dir="${iac2017.dir}"
           executable="pdflatex"
@@ -86,7 +86,7 @@
           output="${iac2017.dir}/build.log">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${iac2017.dir}"
           executable="bibtex"
           failonerror="true"
@@ -94,7 +94,7 @@
           append="true">
       <arg line="main"/>
     </exec>
-    
+
     <exec dir="${iac2017.dir}"
           executable="pdflatex"
           failonerror="true"
@@ -102,7 +102,7 @@
           append="true">
       <arg line="-halt-on-error main.tex"/>
     </exec>
-    
+
     <exec dir="${iac2017.dir}"
           executable="pdflatex"
           failonerror="true"

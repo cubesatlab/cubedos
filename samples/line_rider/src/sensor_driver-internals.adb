@@ -11,12 +11,12 @@ package body Sensor_Driver.Internals is
    begin
       null;
    end Initialize;
-   
-   
+
+
    procedure Process_Message(Incoming_Message : in Message_Manager.Message_Record) is
    begin
       null;
    end Process_Message;
-   
+
 
 end Sensor_Driver.Internals;

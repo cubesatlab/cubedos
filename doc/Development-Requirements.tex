@@ -91,7 +91,7 @@ libraries, the CubedOS runtime library is written in \SPARK. The following requi
 \item \textbf{Lib.Ada2022}. The base language for the CubedOS library shall be Ada 2022. Note
 that the Core.SPARK requirement still restrains what features from Ada 2022 can be used.
 However, any feature of the Ada 2022 standard that is supported by SPARK is explicitly allowed.
-  
+
 \item \textbf{Lib.SPARK}. The runtime library shall be written in \SPARK\ and proved free of
 information flow and execution runtime errors.
 
@@ -346,7 +346,7 @@ human-readable. The following requirements apply:
   \item \textbf{Log.Filtering}. The log server shall provide a runtime way to filter out
     messages based on their source mode and log level. For example, it should be possible to
     only log messages at a certain log level and above (to ignore debugging messages), and to do
-    so on a module-by-module bases. 
+    so on a module-by-module bases.
   \item \textbf{Log.Source}. The log server shall automatically prefix log messages with an
     indication of which module sent the message (domain ID and module ID).
   \item \textbf{Log.Timestamp}. The log server shall automatically record a timestamp for each

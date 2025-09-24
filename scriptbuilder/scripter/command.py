@@ -30,7 +30,7 @@ class Command:
             time (CubedOSTime): The new time to run the message
         """
         pass
-    
+
     def change_address(self, address: Address):
         """Changes the address that the command will be sent to
 
@@ -89,5 +89,3 @@ class Command:
             bool: If the two Commands are equal
         """
         pass
-
-    

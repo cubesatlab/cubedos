@@ -8,4 +8,3 @@ const With_Sign = +10;
 // Currently Merc has no concept of constant expressions. Should it?
 //const X = 1 + 2;
 //const Y = X + 3;
-

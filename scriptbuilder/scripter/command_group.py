@@ -9,7 +9,7 @@ class CommandGroup:
     commands = []
 
     def __init__(self, filename:str):
-        """Creates a new CommandGroup object. 
+        """Creates a new CommandGroup object.
 
         Args:
             filename (str): An existing file path and file name for a CommandGroup to be stored in.
@@ -54,7 +54,7 @@ class CommandGroup:
         if command in self.commands:
             self.commands.remove(command)
         pass
-    
+
     def remove_command_location(self, location: int):
         """removes a Command by location.
 
@@ -69,12 +69,12 @@ class CommandGroup:
     def write_to_file(self):
         """This saves the CommandGroup to disk in a form that is readable to the [module name].
         """
-        
+
         with open(self.fName, "wb") as f:
             for i in self.commands:
                 f.write(hex(i))
         pass
-    
+
     def __iadd__(self, x: Command):
         """this functions identically to the add function.
 
@@ -98,7 +98,7 @@ class CommandGroup:
             x (Int or Command): same as removeCommandLocation or removeCommandMatch, depending on argument type
         """
         self = self - x
-    
+
     def __sub__(self, x: int):
         """functions the same as removeCommandLocation or removeCommandMatch, depending on argument type
 
@@ -108,7 +108,7 @@ class CommandGroup:
         pass
 
     def __str__(self) -> str:
-        """creates a string representation of the CommandGroup, good for visualizations. 
+        """creates a string representation of the CommandGroup, good for visualizations.
         CAUTION: this is not the machine-readable output. sending this to a CubedOS device will result in
         unexpected behaviour
         """

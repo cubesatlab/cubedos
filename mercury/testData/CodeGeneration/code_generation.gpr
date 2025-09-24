@@ -16,4 +16,3 @@ project Code_Generation is
    end Prove;
 
 end Code_Generation;
-
