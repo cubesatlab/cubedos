@@ -8,7 +8,9 @@ for example, a personal `bin` directory to run Mercury conveniently from anywher
 
 The script assumes Mercury has already been built via:
 
-    $ sbt assembly
+```bash
+sbt assembly
+```
 
 from inside the `mercury` folder.
 
