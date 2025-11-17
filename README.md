@@ -2,10 +2,6 @@
 CubedOS
 =======
 
-*The CubeSat Project at Vermont State University (formerly Vermont Technical College) has ended.
-This repository is retained only for archival purposes. No further work on it is expected. No
-pull requests will be accepted.*
-
 A flight software framework for CubeSat spacecraft written in SPARK/Ada.
 
 This folder contains the CubedOS system. It also contains two supporting applications: Mercury,
