@@ -13,21 +13,21 @@ how it can be used.
 
 This section describes the Echo Sample that can be found in the \filename{samples/echo} folder.
 This sample exemplifies a simple message/reply demo. These messages take place as simple pings
-back and forth between a Client module and a Server module. 
+back and forth between a Client module and a Server module.
 
 The main.adb of this program has several with clauses to include |Echo_Client.Messages| and
 |Echo_Server.Messages|. It also uses |Log_Server.Messages| in order for the modules to be
 capable of logging various errors or informational output. This main file contains a single
 procedure of first priority with a single loop that has a small delay. This loop spends most of
 its time sleeping, and the real work is done inside the Client and Server modules which are
-unreferenced in the main itself. 
+unreferenced in the main itself.
 
 Both |Echo_Client.ads| and |Echo_Server.ads| have with clauses for |Message_Manager|. These are
 of course unreferenced, but are very important. The package |Message_Manager| creates a new
 instance with a domain number, module count, mailbox size, and maximum message size. This sets
 the environment for all future message sending. This file also elaborates
 |CubedOS.Generic_Message_Manager|, which contains all necessary functions and procedures for
-managing messages. 
+managing messages.
 
 |Echo_Client.Messages.adb| implements the main part of its module. At its core, this component
 sends an initial request message to the server, and continues to send messages each time it gets
@@ -42,7 +42,7 @@ receives a message, it processes that message and sends another.
 |Echo_Server.Messages.adb| Has a similar |Message_Loop|. This task does not send an initial
 message, but instead, has just a loop. The loop waits for a message right away. When one is
 received, it processes it and sends a reply message using |Echo_Server.API|. Then, it starts the
-Message loop over again. 
+Message loop over again.
 
 This goes on infinitely. The log server logs information every time a reply is received by the
 Client. It also logs errors when a message goes wrong. This is to show the user the basic

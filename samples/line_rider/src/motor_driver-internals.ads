@@ -7,9 +7,9 @@
 with Message_Manager;
 
 private package Motor_Driver.Internals is
-   
+
    procedure Initialize;
-   
+
    procedure Process_Message(Incoming_Message : in Message_Manager.Message_Record);
 
 end Motor_Driver.Internals;

@@ -44,7 +44,7 @@ tool that appropriate encoding/decoding subprograms need to be generated.
 
 The contents of a message struct are the parameters of the message. They are mapped to the
 parameters of encoding and decoding subprograms as described in
-Section~\ref{sec:code-generation}. 
+Section~\ref{sec:code-generation}.
 
 Message structs are sensitive to the direction of message flow. Messages that are intended to be
 sent by a module are treated differently than messages that are intended to be received by a
@@ -103,4 +103,3 @@ code can only produce messages that meet the invariant.
 % Merc does not necessarily initialize the decided values in accordance with the invariant so
 % if a decoding fails, SPARK may not be able to prove the generated code. Solving this problem
 % will be difficult.
-

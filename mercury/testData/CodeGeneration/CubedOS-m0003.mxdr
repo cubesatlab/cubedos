@@ -304,7 +304,7 @@ message struct -> v79 {
         v98 sv92;
         v99 sv93;
         };
-        
+
 message struct <- v80 {
         av1 msav1;
         v1 sv1;
@@ -393,6 +393,3 @@ message struct <- v80 {
         v98 sv92;
         v99 sv93;
         };
-
-
-

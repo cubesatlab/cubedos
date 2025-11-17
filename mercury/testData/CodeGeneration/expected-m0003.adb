@@ -164,7 +164,7 @@ package body CubedOS.m0003.API is
          Request_ID   => Request_ID,
          Message_ID => Message_Type'Pos(v79),
          Priority   => Priority);
-      
+
       Ada.Real_Time.Split(sv85, Seconds, Fraction);
 
       Position := 0;
@@ -4638,7 +4638,7 @@ package body CubedOS.m0003.API is
       Seconds  : Ada.Real_Time.Seconds_Count;
       Fraction : Ada.Real_Time.Time_Span;
    begin
-      
+
       Ada.Real_Time.Split(sv85, Seconds, Fraction);
 
       Position := 0;

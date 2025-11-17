@@ -1,6 +1,6 @@
 with "aunit.gpr";
-with "library/cubedlib.gpr";        
-        
+with "library/cubedlib.gpr";
+
 project CubedOS is
 
    for Main use ("main.adb", "main_message_manager.adb", "main_file.adb", "main_time.adb",
@@ -20,7 +20,7 @@ project CubedOS is
    package Builder is
    end Builder;
 
-   package Documentation is     
+   package Documentation is
       for Ignored_Subprojects use ("aunit");
    end Documentation;
 
@@ -35,4 +35,3 @@ project CubedOS is
    end Check;
 
 end CubedOS;
-

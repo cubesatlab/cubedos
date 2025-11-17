@@ -17,4 +17,3 @@ forward as we design and implement the ion drive demonstration system.
   failures. Ideally some kind of estimate should be done of minimum useful life of an SD card
   based on write activity and that life should be compared to the expected duration of the
   mission.
-

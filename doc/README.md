@@ -1,12 +1,10 @@
 
-README
-======
+# README
 
 This folder contains the official documentation set for CubedOS. The master document is
 CubedOS.tex. That document includes, directly or indirectly, all the other document components.
 
-Building the Documentation
---------------------------
+## Building the Documentation
 
 ### Docker/Podman Method (Recommended)
 
@@ -19,6 +17,7 @@ make
 This will build the PDF using a containerized LaTeX environment and place the result in `output/CubedOS.pdf`. No local LaTeX installation is required.
 
 Additional make targets:
+
 - `make clean` - Remove the output directory
 - `make rebuild` - Clean and rebuild from scratch
 - `make help` - Show available targets
@@ -45,8 +44,7 @@ pdflatex CubedOS
 It is necessary to run the `pdflatex` command multiple times to ensure that all cross references
 are resolved properly. The resulting documentation will be in `CubedOS.pdf`.
 
-LaTeX Resources
----------------
+## LaTeX Resources
 
 For a quick primer on LaTeX see the [LaTeX at
 VTSU](https://www.pchapin.org/VTSU/LaTeX/LaTeX.zip) document. The [Not So Short Introduction to

@@ -26,4 +26,3 @@ message struct -> All_On_Request {
 message struct -> All_Off_Request {
     void;
 };
-

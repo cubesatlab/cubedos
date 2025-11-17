@@ -59,7 +59,7 @@ int main (int argc, char**argv)
     int i;
     for(i = 0; i < sizeof(test_table); i++) {
         test_table[i] = 0x10;
-    }		
+    }
     unsigned char *p = test_table;
     U16 temp = 0xFFFF;
     U16 output = tc_fec_sdlc_s(temp, test_table, 65539);

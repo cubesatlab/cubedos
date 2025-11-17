@@ -5,7 +5,7 @@
 %%
 %% (C) Kristoffer Nyborg Gregertsen 2011
 %% Adapted by Luis Miguel Pinho (2012)
-%% Experimental 
+%% Experimental
 
 \NeedsTeXFormat{LaTeX2e}
 
@@ -21,7 +21,7 @@
         \stepcounter{auths}%
         \theauths}
 
-%% Define the accumulator for the authors 
+%% Define the accumulator for the authors
 \newcommand{\authorsd}{}
 %% Add a new author to the accumulator. Currently adds a number
 %% indexing each set of authors, by the institution where they belong to
@@ -39,7 +39,7 @@
 %% This New Command here checks If the title Is too Long To be On the headings. If so, prints the short title instead, If Not keeps the original title
 \newsavebox{\@justcentbox}
 \newcommand{\titleorshort}{%
-  \sbox \@justcentbox{\@title}% 
+  \sbox \@justcentbox{\@title}%
   \ifdim \wd \@justcentbox >21pc \ifthenelse{\equal{\ShortTitle}{}}{Define short title plese}{\ShortTitle}%
   \else \@title \fi
   }

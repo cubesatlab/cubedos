@@ -73,7 +73,7 @@ Section 1
 The sentence "For example, CubedOS makes use of Ada tasking without directly invoking the
 underlying system’s support for threads" requires further explanation.
 
-A figure with the CubedOS architecture would help to understand the contents of this section. 
+A figure with the CubedOS architecture would help to understand the contents of this section.
 
 
 Section 2
@@ -94,7 +94,7 @@ disadvantages can not be alleviated anyway.
 
 Section 3
 
-It would be worthy a reference about Scala and the reason for choosing that language. 
+It would be worthy a reference about Scala and the reason for choosing that language.
 
 
 Section 4
@@ -144,10 +144,9 @@ The paper is well-written and easy to follow. I could only detect two minor typo
 - The same happens in the last two sentences of the 3rd paragraph in page 9
 
 
-I also have a couple of final notes, orthogonal to the contents of the paper: 
+I also have a couple of final notes, orthogonal to the contents of the paper:
 
 - I find strange that this seems to be (at least partly) student work, but there are no student
   authors or acknowledgements.
 - I hope the recent changes to ITAR do not cause a heavy impact in the release of open software,
   either in this case or others.
-

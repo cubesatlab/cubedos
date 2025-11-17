@@ -155,7 +155,7 @@ devices. Specifically:
   from the Earth.
 
   % \item A Thruster module will simulate maneuvering thrusters that can adjust the orbit and
-  % orientation of the CubeSat. 
+  % orientation of the CubeSat.
 
   \item A Controller module that will server as the main control logic for the mission. It will
   coordinate the action of the other modules to fulfill the mission objectives.
@@ -170,7 +170,7 @@ we recommend that you do \emph{not} include it there. Instead, create a folder s
 your system for your application.
 
 It is often useful to use an existing application as a starting point for new work. The Echo
-sample in the CubedOS repository is a good reference. You may wish to look try running this sample 
+sample in the CubedOS repository is a good reference. You may wish to look try running this sample
 and look back at it while developing the Moonshot tutorial. First, create a \filename{build} and
 \filename{src} folder in your application folder. Also, create a folder \filename{src/mxdr} as a
 placeholder for the MXDR files you will create later. The precise folder structure you use isn't
@@ -254,7 +254,7 @@ Here is a suitable instantiation of the generic message manager for the Moonshot
 \begin{verbatim}
   with CubedOS.Generic_Message_Manager;
   pragma Elaborate_All(CubedOS.Generic_Message_Manager);
-  
+
   package Message_Manager is
     new CubedOS.Generic_Message_Manager
       (Domain_Number =>  1,
@@ -408,7 +408,7 @@ pragma SPARK_Mode(On);
 
 package Controller is
   -- Empty
-end Controller;  
+end Controller;
 \end{verbatim}
 
 This package only serves to form the root of the module's package hierarchy, and thus does not
@@ -634,10 +634,10 @@ six subprograms:
 \end{verbatim}
 
 You may notice that there is no |Take_Image_Request_Decode|. This is because, as you may
-remember, the request messages have no parameters. Thus, there is nothing to decode. Mercury 
+remember, the request messages have no parameters. Thus, there is nothing to decode. Mercury
 can detect this and will make no decode function. There is however, an encode function. This
 is because, even though there is no XDR encoding of parameters, an empty message still must be
-constructed with the correct sender address and request ID. 
+constructed with the correct sender address and request ID.
 
 For clarity, the details of the subprogram parameters are left out. However, all CubedOS
 messages include a |Request_ID| parameter that the sender can use to mark messages with An
@@ -667,25 +667,25 @@ typedef unsigned int File_Handle_Type
     range 0 .. 64;
 typedef File_Handle_Type Valid_File_Handle_Type
     range 1 .. File_Handle_Type'Last;
-  
+
 // Types to count the number of octets read/written.
 const Maximum_Read_Size  = 256;
 typedef unsigned int Read_Result_Size_Type
     range 0 .. Maximum_Read_Size;
 typedef unsigned int Read_Size_Type
     range 1 .. Read_Result_Size_Type'Last;
-  
+
 // Open the named file in the given mode.
 message struct -> Open_Request {
     Mode_Type Mode;
     string    Name<>;
 };
-  
+
 // Returns the invalid handle if the open operation failed.
 message struct <- Open_Reply {
     File_Handle_Type Handle;
 };
-  
+
 // Request that Amount octets be read from the indicated file.
 message struct -> Read_Request {
     Valid_File_Handle_Type Handle;
@@ -775,17 +775,17 @@ your Moonshot application.
 \begin{verbatim}
 # Adjust to reflect Mercury's location.
 MERCURY=../../../../bin/mercury.sh
-  
+
 # List of generated specification files.
 all:	camera-api.ads
-  
+
 .PHONY: clean
-  
+
 clean:
         rm -f *.ads *.adb
-  
+
 camera-api.ads:	Camera.mxdr
-        $(MERCURY) $^  
+        $(MERCURY) $^
 \end{verbatim}
 
 This file only describes how to build the Ada specifications; the body files are ignored. Since
@@ -834,14 +834,14 @@ enough for our purposes. We repeat it here for convenience:
   message struct -> Take_Image_Request {
       void;
   };
-  
+
   message struct <- Take_Image_Reply {
       string File_Name<128>;
   };
 \end{verbatim}
 
 \subsubsection{Radio Module}
-  
+
 \todo{Finish Me!}
 
 % \subsubsection{Thruster Module}
@@ -888,7 +888,7 @@ still need to encode the reply using a suitable encoder from the API package gen
 Mercury.
 
 \subsubsection{Radio Module}
-  
+
 \todo{Finish Me!}
 
 % \subsubsection{Thruster Module}
@@ -942,19 +942,19 @@ Table~\ref{tbl:controller-message-actions} shows the Controller's responses to v
         \hline
         \textbf{Message} & \textbf{Action} \\
         \hline \hline
-        Tick message from the time server. & 
-        
+        Tick message from the time server. &
+
         The time server is trying to wake us up, so we can do something. As the Camera to take a
         picture. \\
         \hline
         Camera replies with image file name. &
-        
+
         Ordinarily the Camera might alternatively reply with an error, but in this simple
         application that will never happen. Send a message to the file server to open the image
         file. \\
         \hline
         File server replies to open request. &
-        
+
         If the open request failed, log the error. Otherwise, prepare a space packet with a data
         size of 512 octets and APID of 42 (an arbitrary value selected by us). Ask the file
         server to read the first 256 octets of file data. \\

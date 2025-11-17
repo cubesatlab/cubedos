@@ -1,0 +1,7 @@
+default: true
+MD013: false  # Line length
+MD024: false  # Multiple headers with the same content
+MD029: false  # Ordered list item prefix
+MD033: false  # Allow inline HTML for README.md
+MD034: false  # Bare URL used
+MD041: false  # First line in file should be a top level heading
