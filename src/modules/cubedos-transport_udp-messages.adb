@@ -111,8 +111,9 @@ package body CubedOS.Transport_UDP.Messages is
       Buffer (4) := Ada.Streams.Stream_Element (Message.Request_ID); -- Request ID
       Buffer (5) := Ada.Streams.Stream_Element (Message.Message_ID); -- Message ID
 
-      for I in 6 .. Message.Payload'Length loop
-         Buffer (Ada.Streams.Stream_Element_Offset(I)) := Ada.Streams.Stream_Element(Message.Payload(I - 6));
+      for I in Message.Payload'Range loop
+         Buffer (Ada.Streams.Stream_Element_Offset (I + 6)) :=
+           Ada.Streams.Stream_Element (Message.Payload (I));
       end loop;
 
       Send_Socket (Socket, Buffer, Last, Address);
